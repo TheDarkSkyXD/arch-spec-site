@@ -1,0 +1,5 @@
+- The frontend uses pnpm package manager
+- The backend uses uv as the package manager
+  - The IDE uses PowerShell terminals
+  - No need to manually activate virtual environment
+- Ensure centralized types and interfaces
