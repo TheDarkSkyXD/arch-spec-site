@@ -1,8 +1,9 @@
-import { Check } from "lucide-react";
+import { CheckCircle } from "lucide-react";
 
 interface Step {
   id: string;
   name: string;
+  icon?: React.ReactNode;
 }
 
 interface ProgressBarProps {
@@ -15,9 +16,9 @@ const ProgressBar = ({ steps, currentStep, onStepClick }: ProgressBarProps) => {
   const currentStepIndex = steps.findIndex((step) => step.id === currentStep);
 
   return (
-    <div className="w-full py-6">
+    <div className="w-full py-4">
       <nav aria-label="Progress">
-        <ol className="flex items-center">
+        <ol className="flex items-center flex-wrap justify-center md:justify-start">
           {steps.map((step, index) => {
             const isActive = step.id === currentStep;
             const isCompleted = index < currentStepIndex;
@@ -25,64 +26,52 @@ const ProgressBar = ({ steps, currentStep, onStepClick }: ProgressBarProps) => {
               onStepClick && (isCompleted || index === currentStepIndex + 1);
 
             return (
-              <li
-                key={step.id}
-                className={`relative ${index !== 0 ? "flex-1" : ""}`}
-              >
-                {index !== 0 && (
-                  <div
-                    className="absolute inset-0 flex items-center"
-                    aria-hidden="true"
-                  >
-                    <div
-                      className={`h-0.5 w-full ${
-                        index <= currentStepIndex
-                          ? "bg-primary-600"
-                          : "bg-gray-200"
-                      }`}
-                    />
-                  </div>
-                )}
-
+              <li key={step.id} className="flex items-center">
                 <div
-                  className={`relative flex items-center justify-center ${
-                    isClickable ? "cursor-pointer group" : ""
-                  }`}
+                  className={`flex items-center ${
+                    isClickable ? "cursor-pointer hover:opacity-90" : ""
+                  } ${
+                    currentStepIndex >= index
+                      ? "text-primary-600"
+                      : "text-slate-400"
+                  } transition-colors duration-200`}
                   onClick={isClickable ? () => onStepClick(step.id) : undefined}
                 >
-                  {isCompleted ? (
-                    <span className="h-8 w-8 rounded-full bg-primary-600 flex items-center justify-center">
-                      <Check
-                        className="h-5 w-5 text-white"
-                        aria-hidden="true"
-                      />
-                    </span>
-                  ) : isActive ? (
-                    <span className="h-8 w-8 rounded-full border-2 border-primary-600 bg-white flex items-center justify-center">
-                      <span className="h-2.5 w-2.5 rounded-full bg-primary-600" />
-                    </span>
-                  ) : (
-                    <span
-                      className={`h-8 w-8 rounded-full border-2 border-gray-300 bg-white flex items-center justify-center ${
-                        isClickable ? "group-hover:border-gray-400" : ""
-                      }`}
-                    >
-                      <span className="h-2.5 w-2.5 rounded-full bg-transparent" />
-                    </span>
-                  )}
-
-                  <span
-                    className={`ml-2 text-sm font-medium ${
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center mr-2 ${
                       isActive
-                        ? "text-primary-600"
+                        ? "bg-primary-100 border-2 border-primary-600"
                         : isCompleted
-                        ? "text-gray-900"
-                        : "text-gray-500"
-                    } ${isClickable ? "group-hover:text-gray-700" : ""}`}
+                        ? "bg-primary-600 text-white"
+                        : "bg-slate-100"
+                    }`}
+                  >
+                    {isCompleted ? (
+                      <CheckCircle size={16} />
+                    ) : (
+                      <span className="text-sm font-medium">{index + 1}</span>
+                    )}
+                  </div>
+                  <span
+                    className={`text-sm font-medium ${
+                      isActive || isCompleted
+                        ? "text-primary-600"
+                        : "text-slate-400"
+                    }`}
                   >
                     {step.name}
                   </span>
                 </div>
+
+                {index < steps.length - 1 && (
+                  <div
+                    className={`w-10 h-0.5 mx-2 ${
+                      index < currentStepIndex
+                        ? "bg-primary-600"
+                        : "bg-slate-200"
+                    }`}
+                  ></div>
+                )}
               </li>
             );
           })}

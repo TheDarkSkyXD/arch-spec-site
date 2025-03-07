@@ -1,6 +1,15 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, FileText, Code, Database, Box } from "lucide-react";
+import {
+  ArrowLeft,
+  FileText,
+  Code,
+  Database,
+  Box,
+  CheckCircle,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import MainLayout from "../layouts/MainLayout";
 import ProgressBar from "../components/common/ProgressBar";
 import ProjectBasicsForm from "../components/forms/ProjectBasicsForm";
@@ -13,7 +22,7 @@ const steps = [
   { id: "tech-stack", name: "Tech Stack", icon: <Code size={16} /> },
   { id: "features", name: "Features", icon: <Database size={16} /> },
   { id: "data-model", name: "Data Model", icon: <Database size={16} /> },
-  { id: "review", name: "Review", icon: <Box size={16} /> },
+  { id: "review", name: "Review", icon: <CheckCircle size={16} /> },
 ];
 
 const NewProject = () => {
@@ -131,37 +140,85 @@ const NewProject = () => {
     }
   };
 
+  // Determine current step index
+  const currentStepIndex = steps.findIndex((step) => step.id === currentStep);
+  const isFirstStep = currentStepIndex === 0;
+  const isLastStep = currentStepIndex === steps.length - 1;
+
+  const submitCurrentForm = () => {
+    const formElement = document.querySelector("form");
+    if (formElement) {
+      const submitEvent = new Event("submit", {
+        bubbles: true,
+        cancelable: true,
+      });
+      formElement.dispatchEvent(submitEvent);
+    }
+  };
+
   return (
     <MainLayout showSidebar={false}>
-      <div className="w-full h-full">
+      <div className="max-w-4xl mx-auto">
         {/* Header with back button */}
-        <div className="flex items-center mb-6">
+        <div className="mb-6">
           <button
             onClick={() => navigate("/")}
-            className="mr-4 p-2 rounded-full hover:bg-slate-100 text-slate-500"
+            className="flex items-center text-slate-500 hover:text-slate-700 mb-2 text-sm font-medium"
           >
-            <ArrowLeft size={20} />
+            <ArrowLeft size={16} className="mr-1" />
+            Back to Dashboard
           </button>
-          <div>
-            <h1 className="text-2xl font-bold text-slate-800 font-heading">
-              Create New Project
-            </h1>
-            <p className="text-slate-500 mt-1">
-              Define your project specifications to generate an architecture
-              plan
-            </p>
-          </div>
+          <h1 className="text-2xl font-bold text-slate-800 font-heading">
+            Create New Project
+          </h1>
+          <p className="text-slate-500 mt-1">
+            Define your project specifications to generate an architecture plan
+          </p>
         </div>
 
-        {/* Main content */}
-        <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-          <ProgressBar
-            steps={steps}
-            currentStep={currentStep}
-            onStepClick={handleStepClick}
-          />
+        {/* Main content card */}
+        <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+          {/* Steps indicator */}
+          <div className="p-6 border-b border-slate-100">
+            <ProgressBar
+              steps={steps}
+              currentStep={currentStep}
+              onStepClick={handleStepClick}
+            />
+          </div>
 
-          <div className="mt-8">{renderStepContent()}</div>
+          {/* Form content */}
+          <div className="p-6">{renderStepContent()}</div>
+
+          {/* Footer with navigation buttons */}
+          <div className="p-6 bg-slate-50 border-t border-slate-100 flex justify-between">
+            <button
+              onClick={() => {
+                if (!isFirstStep) {
+                  const prevStepId = steps[currentStepIndex - 1].id;
+                  setCurrentStep(prevStepId);
+                } else {
+                  navigate("/");
+                }
+              }}
+              className="flex items-center px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-100"
+            >
+              <ChevronLeft size={16} className="mr-1" />
+              {isFirstStep ? "Cancel" : "Previous"}
+            </button>
+
+            <button
+              onClick={() => {
+                if (currentStep === "basics" || currentStep === "tech-stack") {
+                  submitCurrentForm();
+                }
+              }}
+              className="flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg"
+            >
+              {isLastStep ? "Create Project" : "Continue"}
+              <ChevronRight size={16} className="ml-1" />
+            </button>
+          </div>
         </div>
       </div>
     </MainLayout>
