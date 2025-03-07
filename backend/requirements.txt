@@ -1,0 +1,9 @@
+fastapi>=0.110.0
+uvicorn>=0.27.1
+# For Motor, we need the latest version for Python 3.12 compatibility
+motor>=3.3.0
+pydantic>=2.6.1
+pydantic-settings>=2.2.1
+anthropic>=0.21.3
+python-dotenv>=1.0.1
+python-multipart>=0.0.9 
