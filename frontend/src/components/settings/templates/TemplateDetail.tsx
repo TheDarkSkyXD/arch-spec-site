@@ -1,5 +1,7 @@
-import { Edit, Info, Plus } from "lucide-react";
+import { Edit, Info, Plus, ChevronDown, ChevronUp } from "lucide-react";
 import { ProjectTemplate } from "../../../types";
+import { useState, useEffect } from "react";
+import JsonEditor from "../../common/JsonEditor";
 
 interface TemplateDetailProps {
   selectedTemplate: ProjectTemplate | null;
@@ -13,11 +15,20 @@ interface TemplateDetailProps {
 const TemplateDetail = ({
   selectedTemplate,
   isCreating,
-  isEditing,
+  isEditing: _isEditing, // Prefix with _ to avoid linter warnings
   onEdit,
   onCreateNew,
-  onCancel,
+  onCancel: _onCancel, // Prefix with _ to avoid linter warnings
 }: TemplateDetailProps) => {
+  const [isJsonExpanded, setIsJsonExpanded] = useState(false);
+
+  // Remove unused state variables - note these are referenced in the linter warnings
+  // const [temporaryTemplate, setTemporaryTemplate] = useState<ProjectTemplate | null>(selectedTemplate);
+
+  // useEffect(() => {
+  //   setTemporaryTemplate(selectedTemplate);
+  // }, [selectedTemplate]);
+
   // No template selected and not creating a new one
   if (!selectedTemplate && !isCreating) {
     return (
@@ -43,13 +54,13 @@ const TemplateDetail = ({
     );
   }
 
-  // View template details
-  if (selectedTemplate && !isEditing && !isCreating) {
+  // Template is selected - show detail view
+  if (selectedTemplate) {
     return (
       <div className="p-6 bg-white rounded-lg shadow-sm border border-slate-200">
         <div className="flex justify-between items-start mb-6">
           <h2 className="text-xl font-semibold">{selectedTemplate.name}</h2>
-          <div className="space-x-2">
+          <div className="flex space-x-3">
             <button
               onClick={onEdit}
               className="px-3 py-1.5 text-sm bg-primary-600 text-white rounded-md hover:bg-primary-700 flex items-center"
@@ -60,6 +71,7 @@ const TemplateDetail = ({
           </div>
         </div>
 
+        {/* Main template summary view */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div>
             <h3 className="text-sm font-medium text-slate-500 mb-1">
@@ -77,13 +89,6 @@ const TemplateDetail = ({
           <h3 className="text-sm font-medium text-slate-700 mb-3">
             Template Structure
           </h3>
-
-          <div className="bg-blue-50 border border-blue-200 rounded-md p-4 mb-4">
-            <p className="text-sm text-blue-700">
-              In the future, this section will allow editing the full template
-              structure, including tech stack, features, pages, and more.
-            </p>
-          </div>
 
           <div className="space-y-4">
             <div>
@@ -135,7 +140,7 @@ const TemplateDetail = ({
                 Features
               </h4>
               <div className="bg-slate-50 p-3 rounded-md">
-                {selectedTemplate?.features?.coreModules &&
+                {selectedTemplate.features?.coreModules &&
                 selectedTemplate.features.coreModules.length > 0 ? (
                   <div className="grid grid-cols-1 gap-2">
                     {selectedTemplate.features.coreModules
@@ -171,6 +176,41 @@ const TemplateDetail = ({
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Collapsible JSON Editor section */}
+        <div className="mt-8 border-t border-slate-200 pt-4">
+          <button
+            onClick={() => setIsJsonExpanded(!isJsonExpanded)}
+            className="w-full flex items-center justify-between text-sm font-medium text-slate-700 hover:text-primary-600 transition-colors"
+          >
+            <span className="flex items-center">
+              <span className="mr-2">View JSON Data</span>
+              <span className="text-xs bg-slate-100 px-2 py-0.5 rounded text-slate-600">
+                Developer
+              </span>
+            </span>
+            {isJsonExpanded ? (
+              <ChevronUp className="w-4 h-4" />
+            ) : (
+              <ChevronDown className="w-4 h-4" />
+            )}
+          </button>
+
+          {isJsonExpanded && (
+            <div className="mt-4 animate-slideDown overflow-hidden">
+              <JsonEditor
+                data={selectedTemplate as unknown as Record<string, unknown>}
+                readOnly={true}
+              />
+              <div className="mt-4 bg-blue-50 border border-blue-200 rounded-md p-4">
+                <p className="text-sm text-blue-700">
+                  <strong>Note:</strong> This is a read-only view of the
+                  template data. To make changes, click the Edit button above.
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     );
