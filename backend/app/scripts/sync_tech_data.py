@@ -9,16 +9,13 @@ technology references are valid.
 import logging
 import sys
 import os
-from typing import Dict, List, Set, Any, Tuple
+from typing import Dict, List, Set, Tuple
 
 # Add parent directory to path to allow imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from app.seed.tech_registry import (
-    TECH_REGISTRY, 
-    ALL_TECHNOLOGIES, 
-    is_valid_tech,
-    get_category_for_tech
+    ALL_TECHNOLOGIES
 )
 from app.seed.tech_stack import TECH_STACK_DATA
 from app.seed.templates import PROJECT_TEMPLATES

@@ -10,7 +10,7 @@ import logging
 import sys
 import os
 import json
-from typing import Dict, List, Set, Any, Tuple, Optional
+from typing import Dict, List, Optional
 import difflib
 from pathlib import Path
 
@@ -18,16 +18,12 @@ from pathlib import Path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from app.seed.tech_registry import (
-    TECH_REGISTRY, 
     ALL_TECHNOLOGIES, 
-    is_valid_tech,
-    get_category_for_tech
+    is_valid_tech
 )
 from app.seed.tech_stack import TECH_STACK_DATA
 from app.seed.templates import PROJECT_TEMPLATES
 from app.scripts.sync_tech_data import (
-    extract_tech_from_tech_stack,
-    extract_tech_from_templates,
     find_inconsistencies
 )
 

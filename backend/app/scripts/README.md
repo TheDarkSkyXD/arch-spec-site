@@ -18,6 +18,7 @@ This script analyzes inconsistencies between the tech registry, tech stack compa
 #### Usage
 
 ```bash
+cd backend
 python -m app.scripts.sync_tech_data
 ```
 
@@ -45,6 +46,7 @@ This script automatically corrects inconsistencies in tech stack and template da
 #### Usage
 
 ```bash
+cd backend
 python -m app.scripts.correct_tech_data
 ```
 
