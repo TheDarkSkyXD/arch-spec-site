@@ -66,7 +66,7 @@ flowchart TB
 | Component | Purpose | Technology | Description |
 |-----------|---------|------------|-------------|
 | User Interface | Provides user interaction | React, TypeScript | Wizard-based UI for specification creation |
-| State Management | Manages application state | Redux Toolkit | Centralized state management with slices for different domains |
+| State Management | Manages application state | TanStack Query | Data fetching and state management with automatic caching and synchronization |
 | API Client | Handles API communication | Axios | Wrapper for HTTP requests with interceptors for auth |
 | API Layer | Exposes backend functionality | FastAPI | RESTful API endpoints for all system operations |
 | AI Processing Engine | Processes and generates specs | LangChain + OpenAI | Orchestrates AI operations for specification generation |
@@ -676,9 +676,12 @@ graph TD
     /ai               # AI interaction components
     /export           # Export functionality components
     /settings         # User settings components
-  /redux              # Redux state management
-    /slices           # Redux slices for different domains
-    /middleware       # Redux middleware
+  /queries            # TanStack Query related files
+    /auth             # Authentication queries and mutations
+    /projects         # Project-related queries and mutations
+    /specifications   # Specification-related queries and mutations
+    /artifacts        # Artifact-related queries and mutations
+    /ai               # AI service-related queries and mutations
   /services           # API client services
   /types              # TypeScript type definitions
   /utils              # Utility functions
@@ -690,64 +693,120 @@ graph TD
 
 ### 4.3 State Management
 
-#### 4.3.1 Redux Store Structure
+#### 4.3.1 TanStack Query Data Management
 
 ```typescript
-interface RootState {
-  auth: {
-    user: User | null;
-    token: string | null;
-    isLoading: boolean;
-    error: string | null;
-  };
-  projects: {
-    list: Project[];
-    currentProject: ProjectDetail | null;
-    isLoading: boolean;
-    error: string | null;
-  };
-  specifications: {
-    current: Specification | null;
-    sections: {
-      [sectionId: string]: SectionData;
-    };
-    isLoading: boolean;
-    error: string | null;
-  };
-  artifacts: {
-    list: ArtifactSummary[];
-    currentArtifact: Artifact | null;
-    isLoading: boolean;
-    error: string | null;
-  };
-  ai: {
-    requests: {
-      [requestId: string]: {
-        status: 'queued' | 'processing' | 'completed' | 'failed';
-        progress: number;
-        result: any;
-      };
-    };
-  };
-  ui: {
-    theme: 'light' | 'dark';
-    sidebar: {
-      isOpen: boolean;
-    };
-    notifications: Notification[];
-  };
+// QueryClient configuration
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60000, // 1 minute
+      cacheTime: 900000, // 15 minutes
+      refetchOnWindowFocus: false,
+      retry: 1
+    },
+    mutations: {
+      retry: 1
+    }
+  }
+});
+
+// Example query hook for fetching a project
+export function useProject(projectId: string) {
+  return useQuery({
+    queryKey: ['project', projectId],
+    queryFn: () => api.getProject(projectId),
+    enabled: !!projectId
+  });
+}
+
+// Example mutation hook for updating a project
+export function useUpdateProject() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: (data: UpdateProjectDto) => api.updateProject(data),
+    onSuccess: (result, variables) => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: ['project', variables.projectId] });
+      // Optimistic update for projects list
+      queryClient.setQueryData(['projects'], (old: Project[] | undefined) =>
+        old?.map(p => p.id === result.id ? result : p)
+      );
+    }
+  });
 }
 ```
 
-#### 4.3.2 Key Redux Slices
+#### 4.3.2 Key Query Categories
 
-| Slice | Purpose | Actions | Selectors |
-|-------|---------|---------|-----------|
-| `authSlice` | Manage auth state | `login`, `register`, `logout` | `selectUser`, `selectIsAuthenticated` |
-| `projectsSlice` | Manage projects | `fetchProjects`, `createProject`, `updateProject` | `selectProjects`, `selectCurrentProject` |
-| `specificationsSlice` | Manage specifications | `fetchSpecification`, `updateSection`, `saveSection` | `selectCurrentSpec`, `selectSection` |
-| `artifactsSlice` | Manage artifacts | `fetchArtifacts`, `viewArtifact`, `generateArtifact` | `selectArtifacts`, `selectCurrentArtifact` |
-| `aiSlice` | Track AI operations | `startAIRequest`, `checkRequestStatus` | `selectRequestStatus` |
+| Category | Purpose | Examples |
+|----------|---------|----------|
+| `Auth Queries` | Authentication state | `useUser`, `useLogin`, `useRegister` |
+| `Project Queries` | Project management | `useProjects`, `useProject`, `useCreateProject` |
+| `Specification Queries` | Specification data | `useSpecification`, `useSpecificationSection`, `useSaveSection` |
+| `Artifact Queries` | Artifact management | `useArtifacts`, `useArtifact`, `useGenerateArtifact` |
+| `AI Queries` | AI operations | `useGenerateContent`, `useRequestStatus` |
+| `UI State` | Local UI state | `useThemePreference`, `useSidebarState` |
+
+#### 4.3.3 Global State Management
+
+For global UI state that doesn't fit the query/mutation model, a simple React Context is used:
+
+```typescript
+// UIContext.tsx
+import React, { createContext, useContext, useState } from 'react';
+
+interface UIContextType {
+  theme: 'light' | 'dark';
+  setTheme: (theme: 'light' | 'dark') => void;
+  sidebarOpen: boolean;
+  toggleSidebar: () => void;
+  notifications: Notification[];
+  addNotification: (notification: Notification) => void;
+  clearNotification: (id: string) => void;
+}
+
+const UIContext = createContext<UIContextType | undefined>(undefined);
+
+export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  
+  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+  
+  const addNotification = (notification: Notification) => {
+    setNotifications([...notifications, notification]);
+  };
+  
+  const clearNotification = (id: string) => {
+    setNotifications(notifications.filter(n => n.id !== id));
+  };
+  
+  return (
+    <UIContext.Provider value={{
+      theme,
+      setTheme,
+      sidebarOpen,
+      toggleSidebar,
+      notifications,
+      addNotification,
+      clearNotification
+    }}>
+      {children}
+    </UIContext.Provider>
+  );
+};
+
+export const useUI = () => {
+  const context = useContext(UIContext);
+  if (context === undefined) {
+    throw new Error('useUI must be used within a UIProvider');
+  }
+  return context;
+};
+```
 
 ### 4.4 Key Components
 
@@ -1358,29 +1417,63 @@ describe('SpecificationSection', () => {
 });
 ```
 
-#### 8.2.2 Redux Tests
+#### 8.2.2 TanStack Query Tests
 
 ```typescript
-// Example test for specifications slice
-describe('specificationsSlice', () => {
-  describe('reducers', () => {
-    it('should handle initial state', () => {
-      // Test implementation
+// Example test for project query hooks
+describe('projectQueries', () => {
+  it('useProject returns project data on successful fetch', async () => {
+    // Mock server response
+    server.use(
+      rest.get('/api/v1/projects/123', (req, res, ctx) => {
+        return res(ctx.json({ id: '123', name: 'Test Project' }));
+      })
+    );
+    
+    // Render hook
+    const { result, waitFor } = renderHook(() => useProject('123'), {
+      wrapper: QueryClientProvider,
+      initialProps: {
+        client: new QueryClient({
+          defaultOptions: { queries: { retry: false } }
+        })
+      }
     });
     
-    it('should handle updateSection', () => {
-      // Test implementation
-    });
+    // Wait for query to complete
+    await waitFor(() => result.current.isSuccess);
+    
+    // Assertions
+    expect(result.current.data).toEqual({ id: '123', name: 'Test Project' });
   });
   
-  describe('async thunks', () => {
-    it('should handle fetchSpecification', async () => {
-      // Test implementation
+  it('useUpdateProject mutates and updates cache', async () => {
+    // Setup test cache with initial data
+    const queryClient = new QueryClient();
+    queryClient.setQueryData(['projects'], [{ id: '123', name: 'Old Name' }]);
+    
+    // Render mutation hook
+    const { result, waitFor } = renderHook(() => useUpdateProject(), {
+      wrapper: QueryClientProvider,
+      initialProps: { client: queryClient }
     });
     
-    it('should handle saveSection', async () => {
-      // Test implementation
-    });
+    // Setup mock response
+    server.use(
+      rest.put('/api/v1/projects/123', (req, res, ctx) => {
+        return res(ctx.json({ id: '123', name: 'New Name' }));
+      })
+    );
+    
+    // Execute mutation
+    result.current.mutate({ projectId: '123', name: 'New Name' });
+    
+    // Wait for mutation to complete
+    await waitFor(() => result.current.isSuccess);
+    
+    // Verify cache was updated
+    const cachedData = queryClient.getQueryData(['projects']);
+    expect(cachedData[0].name).toBe('New Name');
   });
 });
 ```
