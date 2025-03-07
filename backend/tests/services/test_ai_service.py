@@ -31,8 +31,9 @@ def test_anthropic_client_init(mock_anthropic):
     assert isinstance(client.temperature, float)
 
 
+@pytest.mark.asyncio
 @patch.object(AnthropicClient, "generate_response")
-def test_process_specification(mock_generate_response):
+async def test_process_specification(mock_generate_response):
     """Test processing a specification."""
     # Setup mock
     mock_generate_response.return_value = """
@@ -86,7 +87,7 @@ def test_process_specification(mock_generate_response):
     }
     
     # Process specification
-    result = client.process_specification(spec)
+    result = await client.process_specification(spec)
     
     # Check result
     assert "architecture" in result

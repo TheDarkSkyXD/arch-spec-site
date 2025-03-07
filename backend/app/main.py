@@ -7,6 +7,7 @@ import logging
 import os
 import sys
 from typing import List
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -31,11 +32,36 @@ except Exception as e:
     logger.error(f"Error importing API router: {str(e)}")
     HAS_API_ROUTER = False
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Lifespan context manager for startup and shutdown events."""
+    # Startup logic
+    if db.client is not None:
+        try:
+            logger.info("Connecting to MongoDB...")
+            await db.connect_to_mongodb()
+            logger.info("MongoDB connection established")
+        except Exception as e:
+            logger.error(f"Error during MongoDB initialization: {str(e)}")
+    
+    # Yield control back to FastAPI
+    yield
+    
+    # Shutdown logic
+    if db.client is not None:
+        try:
+            logger.info("Closing MongoDB connection...")
+            await db.close_mongodb_connection()
+            logger.info("MongoDB connection closed")
+        except Exception as e:
+            logger.error(f"Error during MongoDB shutdown: {str(e)}")
+
 # Create FastAPI app
 app = FastAPI(
     title=settings.app_name,
     version=settings.version,
     description=settings.description,
+    lifespan=lifespan,
 )
 
 # Add CORS middleware
@@ -97,24 +123,6 @@ async def health_check():
         "api_router": api_status,
         "anthropic": "configured" if settings.anthropic.api_key else "not_configured"
     }
-
-# Only register these if they might work
-if db.client is not None:
-    @app.on_event("startup")
-    async def startup_db_client():
-        """Initialize MongoDB on startup."""
-        try:
-            await db.connect_to_mongodb()
-        except Exception as e:
-            logger.error(f"Error during MongoDB initialization: {str(e)}")
-
-    @app.on_event("shutdown")
-    async def shutdown_db_client():
-        """Close MongoDB connection on shutdown."""
-        try:
-            await db.close_mongodb_connection()
-        except Exception as e:
-            logger.error(f"Error during MongoDB shutdown: {str(e)}")
 
 # Global error handler
 @app.exception_handler(Exception)
