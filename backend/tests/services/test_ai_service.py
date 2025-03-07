@@ -128,4 +128,92 @@ def test_generate_prompt():
     assert "Test non-functional requirement" in prompt
     assert "React" in prompt
     assert "FastAPI" in prompt
-    assert "MongoDB" in prompt 
+    assert "MongoDB" in prompt
+
+
+@patch("anthropic.Anthropic")
+def test_get_tool_use_response_with_tool_use(mock_anthropic):
+    """Test the _get_tool_use_response method with tool use content blocks."""
+    # Set up mock response with tool_use content block
+    mock_client = MagicMock()
+    mock_anthropic.return_value = mock_client
+    
+    mock_content_block = MagicMock()
+    mock_content_block.type = "tool_use"
+    mock_content_block.input = {"key": "value"}
+    
+    mock_response = MagicMock()
+    mock_response.content = [mock_content_block]
+    mock_client.messages.create.return_value = mock_response
+    
+    # Create client and test parameters
+    client = AnthropicClient()
+    system_prompt = "Test system prompt"
+    tools = [{"type": "function", "function": {"name": "test_function"}}]
+    messages = [{"role": "user", "content": "Test message"}]
+    
+    # Call the method
+    result = client._get_tool_use_response(system_prompt, tools, messages)
+    
+    # Check that the client was called with the right parameters
+    mock_client.messages.create.assert_called_once_with(
+        model=client.model,
+        max_tokens=client.max_tokens,
+        temperature=client.temperature,
+        system=system_prompt,
+        tools=tools,
+        messages=messages
+    )
+    
+    # Check the result
+    assert result == {"key": "value"}
+
+
+@patch("anthropic.Anthropic")
+def test_get_tool_use_response_fallback_to_json(mock_anthropic):
+    """Test the _get_tool_use_response method falling back to JSON extraction."""
+    # Set up mock response with text content block containing JSON
+    mock_client = MagicMock()
+    mock_anthropic.return_value = mock_client
+    
+    mock_text_block = MagicMock()
+    mock_text_block.type = "text"
+    mock_text_block.text = "Here is the result: {\"key\": \"value\"}"
+    
+    mock_response = MagicMock()
+    mock_response.content = [mock_text_block]
+    mock_client.messages.create.return_value = mock_response
+    
+    # Create client and test parameters
+    client = AnthropicClient()
+    system_prompt = "Test system prompt"
+    tools = [{"type": "function", "function": {"name": "test_function"}}]
+    messages = [{"role": "user", "content": "Test message"}]
+    
+    # Call the method
+    result = client._get_tool_use_response(system_prompt, tools, messages)
+    
+    # Check the result
+    assert result == {"key": "value"}
+
+
+@patch("anthropic.Anthropic")
+def test_get_tool_use_response_error_handling(mock_anthropic):
+    """Test the _get_tool_use_response method handling errors."""
+    # Set up mock to raise an exception
+    mock_client = MagicMock()
+    mock_anthropic.return_value = mock_client
+    mock_client.messages.create.side_effect = Exception("Test error")
+    
+    # Create client and test parameters
+    client = AnthropicClient()
+    system_prompt = "Test system prompt"
+    tools = [{"type": "function", "function": {"name": "test_function"}}]
+    messages = [{"role": "user", "content": "Test message"}]
+    
+    # Call the method
+    result = client._get_tool_use_response(system_prompt, tools, messages)
+    
+    # Check the result
+    assert "error" in result
+    assert "Test error" in result["error"] 

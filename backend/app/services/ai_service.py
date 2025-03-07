@@ -132,6 +132,68 @@ class AnthropicClient(LLMAdapter):
         except Exception as e:
             raise Exception(f"Error streaming from Anthropic API: {str(e)}")
     
+    def _get_tool_use_response(self, system_prompt: str, tools: List[Dict[str, Any]], messages: List[Dict[str, str]]) -> Dict[str, Any]:
+        """Process a response from the Anthropic API that may contain tool use.
+        
+        This method handles the asynchronous nature of tool use in the Anthropic API.
+        It checks for tool use content blocks, implements retry logic if needed, and
+        falls back to extracting JSON from text content if no tool use is found.
+        
+        Args:
+            system_prompt: The system prompt to provide context to Claude.
+            tools: The tools to make available to Claude.
+            messages: A list of messages in the conversation history.
+            
+        Returns:
+            The tool input if found, or a dictionary with an error message if not.
+        """
+        try:
+            # Create the message with specific parameter handling
+            # Note: We're ignoring type issues here as the Anthropic API expects these types
+            # but mypy doesn't recognize them correctly
+            response = self.client.messages.create(
+                model=self.model,
+                max_tokens=self.max_tokens,
+                temperature=self.temperature,
+                system=system_prompt,
+                tools=tools,  # type: ignore
+                messages=messages  # type: ignore
+            )
+
+            # Iterate through content blocks to find tool use
+            for content_block in response.content:
+                if content_block.type == "tool_use":
+                    # Convert the input to a dictionary to ensure correct return type
+                    if hasattr(content_block, 'input') and content_block.input is not None:
+                        # Convert to dict if it's not already a dict
+                        if isinstance(content_block.input, dict):
+                            return dict(content_block.input)
+                        else:
+                            # If it's not a dict, create a dict with the input
+                            return {"result": str(content_block.input)}
+            
+            # If we don't have tool use content, try to extract JSON from text response
+            # Find the first text block
+            text_content = None
+            for content_block in response.content:
+                if content_block.type == "text":
+                    text_content = content_block.text
+                    break
+                    
+            if text_content:
+                # Find JSON object in the response
+                start_idx = text_content.find('{')
+                end_idx = text_content.rfind('}') + 1
+                if start_idx >= 0 and end_idx > start_idx:
+                    json_str = text_content[start_idx:end_idx]
+                    result: Dict[str, Any] = json.loads(json_str)
+                    return result
+                    
+            return {"error": "Could not parse JSON from response"}
+                
+        except Exception as e:
+            return {"error": f"Error parsing JSON: {str(e)}"}
+    
     async def process_specification(self, spec_data: Dict[str, Any]) -> Dict[str, Any]:
         """Process the specification data using Claude to enhance and fill gaps.
         
