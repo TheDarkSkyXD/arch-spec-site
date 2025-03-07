@@ -1,22 +1,52 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Filter, Package, Grid3X3, List, Star } from "lucide-react";
+import {
+  Search,
+  Filter,
+  Package,
+  Grid3X3,
+  List,
+  Star,
+  Loader2,
+} from "lucide-react";
 import MainLayout from "../layouts/MainLayout";
-import { mockTemplates } from "../data/mockData";
+import { ProjectTemplate } from "../types";
+import { templatesService } from "../services/templatesService";
 
 const Templates = () => {
   const navigate = useNavigate();
-  const [templates] = useState(mockTemplates);
+  const [templates, setTemplates] = useState<ProjectTemplate[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchTemplates = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const templatesData = await templatesService.getTemplates();
+        setTemplates(templatesData);
+      } catch (err) {
+        console.error("Failed to fetch templates:", err);
+        setError("Failed to load templates. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTemplates();
+  }, []);
 
   const filteredTemplates = templates.filter(
     (template) =>
       template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       template.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      template.tags.some((tag) =>
-        tag.toLowerCase().includes(searchQuery.toLowerCase())
-      )
+      (template.tags &&
+        template.tags.some((tag) =>
+          tag.toLowerCase().includes(searchQuery.toLowerCase())
+        ))
   );
 
   const handleTemplateSelect = (templateId: string) => {
@@ -82,8 +112,36 @@ const Templates = () => {
           </div>
         </div>
 
+        {/* Loading state */}
+        {loading && (
+          <div className="text-center py-16 bg-white rounded-lg shadow-sm border border-slate-200">
+            <div className="mx-auto w-16 h-16 flex items-center justify-center mb-4">
+              <Loader2 size={32} className="text-primary-600 animate-spin" />
+            </div>
+            <h3 className="text-xl font-semibold text-slate-800 mb-2">
+              Loading templates
+            </h3>
+            <p className="text-slate-500 max-w-md mx-auto">
+              Please wait while we fetch available templates
+            </p>
+          </div>
+        )}
+
+        {/* Error state */}
+        {!loading && error && (
+          <div className="text-center py-16 bg-white rounded-lg shadow-sm border border-slate-200">
+            <div className="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+              <Package size={24} className="text-red-500" />
+            </div>
+            <h3 className="text-xl font-semibold text-slate-800 mb-2">
+              Error loading templates
+            </h3>
+            <p className="text-slate-500 max-w-md mx-auto">{error}</p>
+          </div>
+        )}
+
         {/* Templates grid */}
-        {filteredTemplates.length > 0 ? (
+        {!loading && !error && filteredTemplates.length > 0 ? (
           <div
             className={
               viewMode === "grid"
@@ -94,7 +152,7 @@ const Templates = () => {
             {filteredTemplates.map((template) =>
               viewMode === "grid" ? (
                 <div
-                  key={template.id}
+                  key={template.name}
                   className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow duration-200"
                 >
                   <div className="h-32 bg-gradient-to-r from-primary-100 to-blue-100 flex items-center justify-center relative">
@@ -116,18 +174,28 @@ const Templates = () => {
                     <p className="text-slate-500 text-sm line-clamp-2 mb-3">
                       {template.description}
                     </p>
+                    {/* Development mode debugging info - remove in production */}
+                    {import.meta.env.DEV && (
+                      <div className="mb-2 text-xs text-slate-400">
+                        <p>ID: {template.id || "Not set"}</p>
+                        <p>Version: {template.version}</p>
+                      </div>
+                    )}
                     <div className="flex flex-wrap gap-1 mb-4">
-                      {template.tags.map((tag, index) => (
-                        <span
-                          key={index}
-                          className="inline-flex px-2 py-1 rounded-full bg-slate-100 text-slate-600 text-xs"
-                        >
-                          {tag}
-                        </span>
-                      ))}
+                      {template.tags &&
+                        template.tags.map((tag, index) => (
+                          <span
+                            key={index}
+                            className="inline-flex px-2 py-1 rounded-full bg-slate-100 text-slate-600 text-xs"
+                          >
+                            {tag}
+                          </span>
+                        ))}
                     </div>
                     <button
-                      onClick={() => handleTemplateSelect(template.id)}
+                      onClick={() =>
+                        handleTemplateSelect(template.id || template.version)
+                      }
                       className="w-full bg-primary-600 hover:bg-primary-700 text-white py-2 rounded-lg"
                     >
                       Use This Template
@@ -136,7 +204,7 @@ const Templates = () => {
                 </div>
               ) : (
                 <div
-                  key={template.id}
+                  key={template.name}
                   className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow duration-200 p-4"
                 >
                   <div className="flex items-start gap-4">
@@ -159,18 +227,28 @@ const Templates = () => {
                       <p className="text-slate-500 text-sm mb-3">
                         {template.description}
                       </p>
+                      {/* Development mode debugging info - remove in production */}
+                      {import.meta.env.DEV && (
+                        <div className="mb-2 text-xs text-slate-400">
+                          <p>ID: {template.id || "Not set"}</p>
+                          <p>Version: {template.version}</p>
+                        </div>
+                      )}
                       <div className="flex flex-wrap gap-1 mb-3">
-                        {template.tags.map((tag, index) => (
-                          <span
-                            key={index}
-                            className="inline-flex px-2 py-1 rounded-full bg-slate-100 text-slate-600 text-xs"
-                          >
-                            {tag}
-                          </span>
-                        ))}
+                        {template.tags &&
+                          template.tags.map((tag, index) => (
+                            <span
+                              key={index}
+                              className="inline-flex px-2 py-1 rounded-full bg-slate-100 text-slate-600 text-xs"
+                            >
+                              {tag}
+                            </span>
+                          ))}
                       </div>
                       <button
-                        onClick={() => handleTemplateSelect(template.id)}
+                        onClick={() =>
+                          handleTemplateSelect(template.id || template.version)
+                        }
                         className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg"
                       >
                         Use This Template
@@ -181,7 +259,7 @@ const Templates = () => {
               )
             )}
           </div>
-        ) : (
+        ) : !loading && !error ? (
           <div className="text-center py-16 bg-white rounded-lg shadow-sm border border-slate-200">
             <div className="mx-auto w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
               <Package size={24} className="text-slate-400" />
@@ -193,7 +271,7 @@ const Templates = () => {
               Try adjusting your search criteria
             </p>
           </div>
-        )}
+        ) : null}
       </div>
     </MainLayout>
   );

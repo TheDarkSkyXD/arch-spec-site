@@ -60,7 +60,13 @@ export const templatesService = {
       // Map and validate templates
       return response.data.templates
         .filter((item) => item && item.template)
-        .map((item) => item.template)
+        .map((item) => {
+          // Include the id from the API response in the template object
+          return {
+            ...item.template,
+            id: item.id,
+          };
+        })
         .filter((template) => isValidTemplate(template));
     } catch (error) {
       console.error("Error fetching templates:", error);
@@ -92,7 +98,11 @@ export const templatesService = {
         return null;
       }
 
-      return response.data.template;
+      // Include the id from the API response in the template object
+      return {
+        ...response.data.template,
+        id: response.data.id,
+      };
     } catch (error) {
       console.error(`Error fetching template ${id}:`, error);
       return null;

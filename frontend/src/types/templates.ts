@@ -173,9 +173,11 @@ export interface Documentation {
 }
 
 export interface ProjectTemplate {
+  id?: string;
   name: string;
   version: string;
   description: string;
+  tags?: string[];
   projectDefaults: ProjectDefaults;
   techStack: TechStack;
   features: Features;

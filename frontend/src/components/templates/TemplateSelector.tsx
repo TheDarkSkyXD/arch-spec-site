@@ -137,11 +137,16 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
           // Set selected template if ID is provided
           if (selectedTemplateId) {
             const template = templatesData.find(
-              (t) => t.name === selectedTemplateId
+              (t) =>
+                t.id === selectedTemplateId ||
+                t.version === selectedTemplateId ||
+                t.name === selectedTemplateId
             );
             if (template) {
               setSelectedTemplate(template);
               onTemplateSelect(template);
+            } else {
+              console.warn(`Template with ID ${selectedTemplateId} not found`);
             }
           }
         } else {

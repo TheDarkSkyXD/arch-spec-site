@@ -18,6 +18,7 @@ import { useProjectStore } from "../store/projectStore";
 import { ProjectTemplate } from "../types";
 import TemplateSelector from "../components/templates/TemplateSelector";
 import TemplateDetails from "../components/templates/TemplateDetails";
+import { templatesService } from "../services/templatesService";
 
 const steps = [
   { id: "template", name: "Template", icon: <LayoutTemplate size={16} /> },
@@ -47,6 +48,8 @@ const NewProject = () => {
   const [currentStep, setCurrentStep] = useState("template");
   const [selectedTemplate, setSelectedTemplate] =
     useState<ProjectTemplate | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     basics: {
       name: "",
@@ -67,6 +70,44 @@ const NewProject = () => {
       auth_methods: "",
     },
   });
+
+  // Load template from API if templateId is provided
+  useEffect(() => {
+    const loadTemplateFromApi = async () => {
+      if (templateId) {
+        try {
+          setLoading(true);
+          setError(null);
+          console.log(`Attempting to load template with ID: ${templateId}`);
+
+          const template = await templatesService.getTemplateById(templateId);
+
+          if (template) {
+            console.log(
+              `Successfully loaded template: ${template.name} (${template.version})`
+            );
+            setSelectedTemplate(template);
+          } else {
+            console.error(
+              `Template with ID ${templateId} not found in API response`
+            );
+            setError(
+              `Template with ID ${templateId} not found. Please try browsing all templates.`
+            );
+          }
+        } catch (err) {
+          console.error("Error loading template:", err);
+          setError(
+            "Failed to load the selected template. Please try again later."
+          );
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadTemplateFromApi();
+  }, [templateId]);
 
   // When a template is selected, update form data
   useEffect(() => {
@@ -175,6 +216,64 @@ const NewProject = () => {
   const renderStepContent = () => {
     switch (currentStep) {
       case "template":
+        // Show loading state when fetching template
+        if (loading) {
+          return (
+            <div className="py-10 text-center">
+              <div className="animate-pulse inline-block h-8 w-8 rounded-full bg-primary-200"></div>
+              <p className="mt-4 text-slate-600">Loading template...</p>
+            </div>
+          );
+        }
+
+        // Show error state
+        if (error) {
+          return (
+            <div className="py-10 text-center">
+              <div className="text-red-600 mb-4">
+                <p>{error}</p>
+              </div>
+              <div className="flex justify-center gap-4">
+                <button
+                  className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700"
+                  onClick={() => navigate("/templates")}
+                >
+                  Browse all templates
+                </button>
+              </div>
+
+              {/* Debug section for development - can be removed in production */}
+              <div className="mt-8 p-4 border border-slate-300 rounded-md bg-slate-50 text-left max-w-2xl mx-auto">
+                <h3 className="font-semibold text-slate-700 mb-2">
+                  Debug Information
+                </h3>
+                <p className="text-sm text-slate-600 mb-2">
+                  Template ID from URL:{" "}
+                  <code className="bg-slate-200 px-1 rounded">
+                    {templateId}
+                  </code>
+                </p>
+                <div className="text-sm text-slate-600">
+                  <p className="mb-1">Try these options:</p>
+                  <ol className="list-decimal pl-5 space-y-1">
+                    <li>
+                      Check that the template ID in the URL matches an actual
+                      template ID from the API
+                    </li>
+                    <li>
+                      Verify that the template API endpoint is working correctly
+                    </li>
+                    <li>
+                      Check the browser console for more detailed error
+                      information
+                    </li>
+                  </ol>
+                </div>
+              </div>
+            </div>
+          );
+        }
+
         return (
           <div>
             <TemplateSelector

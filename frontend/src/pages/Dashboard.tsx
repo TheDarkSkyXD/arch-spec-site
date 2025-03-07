@@ -13,16 +13,37 @@ import {
 } from "lucide-react";
 import MainLayout from "../layouts/MainLayout";
 import { useProjectStore } from "../store/projectStore";
-import { mockTemplates } from "../data/mockData";
+import { ProjectTemplate } from "../types";
+import { templatesService } from "../services/templatesService";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { projects, fetchProjects, isLoading } = useProjectStore();
-  const [templates] = useState(mockTemplates);
+  const [templates, setTemplates] = useState<ProjectTemplate[]>([]);
+  const [templatesLoading, setTemplatesLoading] = useState<boolean>(true);
+  const [templatesError, setTemplatesError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchProjects();
   }, [fetchProjects]);
+
+  useEffect(() => {
+    const fetchTemplates = async () => {
+      try {
+        setTemplatesLoading(true);
+        setTemplatesError(null);
+        const templatesData = await templatesService.getTemplates();
+        setTemplates(templatesData);
+      } catch (err) {
+        console.error("Failed to fetch templates:", err);
+        setTemplatesError("Failed to load templates");
+      } finally {
+        setTemplatesLoading(false);
+      }
+    };
+
+    fetchTemplates();
+  }, []);
 
   const handleTemplateSelect = (templateId: string) => {
     navigate(`/new-project?template=${templateId}`);
@@ -97,12 +118,25 @@ const Dashboard = () => {
                 <Package size={16} className="text-blue-600" />
               </div>
             </div>
-            <div className="text-2xl font-bold text-slate-900 mb-1">
-              {templates.length}
-            </div>
-            <p className="text-slate-500 text-sm">
-              Available project templates
-            </p>
+            {templatesLoading ? (
+              <div className="flex items-center gap-2">
+                <Loader className="animate-spin h-4 w-4 text-blue-600" />
+                <span className="text-slate-500 text-sm">Loading...</span>
+              </div>
+            ) : templatesError ? (
+              <div className="text-red-500 text-sm">
+                Error loading templates
+              </div>
+            ) : (
+              <>
+                <div className="text-2xl font-bold text-slate-900 mb-1">
+                  {templates.length}
+                </div>
+                <p className="text-slate-500 text-sm">
+                  Available project templates
+                </p>
+              </>
+            )}
             <div className="mt-3 pt-3 border-t border-slate-100">
               <button
                 onClick={() => navigate("/templates")}
@@ -141,9 +175,7 @@ const Dashboard = () => {
         {/* Templates section */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-slate-800">
-              Popular Templates
-            </h2>
+            <h2 className="text-xl font-semibold text-slate-800">Templates</h2>
             <button
               onClick={() => navigate("/templates")}
               className="text-primary-600 hover:text-primary-700 font-medium text-sm flex items-center gap-1"
@@ -153,44 +185,76 @@ const Dashboard = () => {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {templates.slice(0, 3).map((template) => (
-              <div
-                key={template.id}
-                className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow duration-200"
+          {templatesLoading ? (
+            <div className="flex justify-center items-center py-12 bg-white rounded-lg shadow-sm border border-slate-200">
+              <Loader className="animate-spin h-8 w-8 text-primary-600 mr-3" />
+              <span className="text-slate-600 font-medium">
+                Loading templates...
+              </span>
+            </div>
+          ) : templatesError ? (
+            <div className="text-center py-8 bg-white rounded-lg shadow-sm border border-slate-200">
+              <p className="text-red-600 mb-2">{templatesError}</p>
+              <button
+                onClick={() => navigate("/templates")}
+                className="text-primary-600 hover:text-primary-700 font-medium"
               >
-                <div className="h-32 bg-gradient-to-r from-primary-100 to-blue-100 flex items-center justify-center">
-                  <div className="bg-white rounded-lg p-3">
-                    <Package size={24} className="text-primary-600" />
+                Browse all templates
+              </button>
+            </div>
+          ) : templates.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {templates.slice(0, 3).map((template) => (
+                <div
+                  key={template.name}
+                  className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow duration-200"
+                >
+                  <div className="h-32 bg-gradient-to-r from-primary-100 to-blue-100 flex items-center justify-center">
+                    <div className="bg-white rounded-lg p-3">
+                      <Package size={24} className="text-primary-600" />
+                    </div>
+                  </div>
+                  <div className="p-4">
+                    <h3 className="text-lg font-semibold text-slate-800 mb-1">
+                      {template.name}
+                    </h3>
+                    <p className="text-slate-500 text-sm line-clamp-2 mb-3">
+                      {template.description}
+                    </p>
+                    <div className="flex flex-wrap gap-1 mb-4">
+                      {template.tags &&
+                        template.tags.map((tag, index) => (
+                          <span
+                            key={index}
+                            className="inline-flex px-2 py-1 rounded-full bg-slate-100 text-slate-600 text-xs"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                    </div>
+                    <button
+                      onClick={() =>
+                        handleTemplateSelect(template.id || template.version)
+                      }
+                      className="w-full bg-primary-600 hover:bg-primary-700 text-white py-2 rounded-lg"
+                    >
+                      Use This Template
+                    </button>
                   </div>
                 </div>
-                <div className="p-4">
-                  <h3 className="text-lg font-semibold text-slate-800 mb-1">
-                    {template.name}
-                  </h3>
-                  <p className="text-slate-500 text-sm line-clamp-2 mb-3">
-                    {template.description}
-                  </p>
-                  <div className="flex flex-wrap gap-1 mb-4">
-                    {template.tags.map((tag, index) => (
-                      <span
-                        key={index}
-                        className="inline-flex px-2 py-1 rounded-full bg-slate-100 text-slate-600 text-xs"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                  <button
-                    onClick={() => handleTemplateSelect(template.id)}
-                    className="w-full bg-primary-600 hover:bg-primary-700 text-white py-2 rounded-lg"
-                  >
-                    Use This Template
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 bg-white rounded-lg shadow-sm border border-slate-200">
+              <p className="text-slate-600 mb-2">No templates available</p>
+              <button
+                onClick={() => navigate("/new-project")}
+                className="text-primary-600 hover:text-primary-700 font-medium"
+              >
+                Create a project from scratch
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Recent projects section */}
