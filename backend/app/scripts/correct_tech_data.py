@@ -63,6 +63,7 @@ def find_closest_match(tech_name: str, threshold: float = 0.8) -> Optional[str]:
     if matches:
         return matches[0]
     
+    logger.warning(f"Manual correction needed: {tech_name} not found in tech registry")
     return None
 
 
