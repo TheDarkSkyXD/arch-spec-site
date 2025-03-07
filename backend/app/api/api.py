@@ -44,6 +44,13 @@ try:
     except Exception as e:
         logger.error(f"Failed to load tech stack router: {str(e)}")
     
+    try:
+        from .routes import templates
+        api_router.include_router(templates.router, prefix="/templates", tags=["templates"])
+        logger.info("Templates router loaded successfully")
+    except Exception as e:
+        logger.error(f"Failed to load templates router: {str(e)}")
+    
     logger.info("API routes imported successfully")
 except Exception as e:
     logger.error(f"Failed to import API routes: {str(e)}") 

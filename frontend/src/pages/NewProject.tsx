@@ -8,15 +8,19 @@ import {
   CheckCircle,
   ChevronLeft,
   ChevronRight,
+  LayoutTemplate,
 } from "lucide-react";
 import MainLayout from "../layouts/MainLayout";
 import ProgressBar from "../components/common/ProgressBar";
 import ProjectBasicsForm from "../components/forms/ProjectBasicsForm";
 import TechStackForm from "../components/forms/TechStackForm";
 import { useProjectStore } from "../store/projectStore";
-import { mockTemplates } from "../data/mockData";
+import { ProjectTemplate } from "../types";
+import TemplateSelector from "../components/templates/TemplateSelector";
+import TemplateDetails from "../components/templates/TemplateDetails";
 
 const steps = [
+  { id: "template", name: "Template", icon: <LayoutTemplate size={16} /> },
   { id: "basics", name: "Project Basics", icon: <FileText size={16} /> },
   { id: "tech-stack", name: "Tech Stack", icon: <Code size={16} /> },
   { id: "features", name: "Features", icon: <Database size={16} /> },
@@ -24,13 +28,25 @@ const steps = [
   { id: "review", name: "Review", icon: <CheckCircle size={16} /> },
 ];
 
+// Define a more specific type for project metadata
+interface ProjectMetadata {
+  version: string;
+  author: string;
+  template?: {
+    name: string;
+    version: string;
+  };
+}
+
 const NewProject = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const templateId = searchParams.get("template");
 
   const { createProject } = useProjectStore();
-  const [currentStep, setCurrentStep] = useState("basics");
+  const [currentStep, setCurrentStep] = useState("template");
+  const [selectedTemplate, setSelectedTemplate] =
+    useState<ProjectTemplate | null>(null);
   const [formData, setFormData] = useState({
     basics: {
       name: "",
@@ -42,6 +58,7 @@ const NewProject = () => {
       frontend: "",
       frontend_language: "",
       ui_library: "",
+      state_management: "",
       backend: "",
       backend_provider: "",
       database: "",
@@ -51,23 +68,44 @@ const NewProject = () => {
     },
   });
 
-  // If a template is selected, pre-fill the form data
+  // When a template is selected, update form data
   useEffect(() => {
-    if (templateId) {
-      const template = mockTemplates.find((t) => t.id === templateId);
-      if (template) {
-        setFormData((prev) => ({
-          ...prev,
-          techStack: {
-            ...prev.techStack,
-            frontend: template.tech_stack?.frontend || "",
-            backend: template.tech_stack?.backend || "",
-            database: template.tech_stack?.database || "",
-          },
-        }));
-      }
+    if (selectedTemplate) {
+      setFormData({
+        basics: {
+          name: selectedTemplate.projectDefaults.name || "",
+          description: selectedTemplate.projectDefaults.description || "",
+          business_goals:
+            selectedTemplate.projectDefaults.businessGoals.join(", ") || "",
+          target_users:
+            selectedTemplate.projectDefaults.targetUsers.join(", ") || "",
+        },
+        techStack: {
+          frontend: selectedTemplate.techStack.frontend.framework || "",
+          frontend_language: selectedTemplate.techStack.frontend.language || "",
+          ui_library: selectedTemplate.techStack.frontend.uiLibrary || "",
+          state_management:
+            selectedTemplate.techStack.frontend.stateManagement || "",
+          backend: selectedTemplate.techStack.backend.type || "",
+          backend_provider: selectedTemplate.techStack.backend.provider || "",
+          database: selectedTemplate.techStack.database.type || "",
+          database_provider: selectedTemplate.techStack.database.provider || "",
+          auth_provider:
+            selectedTemplate.techStack.authentication.provider || "",
+          auth_methods:
+            selectedTemplate.techStack.authentication.methods.join(", ") || "",
+        },
+      });
     }
-  }, [templateId]);
+  }, [selectedTemplate]);
+
+  const handleTemplateSelect = (template: ProjectTemplate | null) => {
+    setSelectedTemplate(template);
+    if (template) {
+      // After selecting a template, automatically move to the next step
+      setCurrentStep("basics");
+    }
+  };
 
   const handleBasicsSubmit = (data: Record<string, unknown>) => {
     setFormData((prev) => ({
@@ -83,22 +121,32 @@ const NewProject = () => {
       techStack: data as typeof prev.techStack,
     }));
 
-    // In a real app, we would continue to the next step
     // For now, let's create the project and navigate to the dashboard
+    // In a real implementation, we would continue to the next steps
     handleCreateProject();
   };
 
   const handleCreateProject = async () => {
     try {
+      const metadata: ProjectMetadata = {
+        version: "0.1",
+        author: "User",
+      };
+
+      // If template was selected, include template information in metadata
+      if (selectedTemplate) {
+        metadata.template = {
+          name: selectedTemplate.name,
+          version: selectedTemplate.version,
+        };
+      }
+
       await createProject({
         name: formData.basics.name,
         description: formData.basics.description,
-        template_type: "web_app",
+        template_type: selectedTemplate?.name || "custom",
         status: "draft",
-        metadata: {
-          version: "0.1",
-          author: "User",
-        },
+        metadata,
       });
 
       navigate("/");
@@ -119,6 +167,21 @@ const NewProject = () => {
 
   const renderStepContent = () => {
     switch (currentStep) {
+      case "template":
+        return (
+          <div>
+            <TemplateSelector
+              onTemplateSelect={handleTemplateSelect}
+              selectedTemplateId={templateId || undefined}
+            />
+
+            {selectedTemplate && (
+              <div className="mt-8 border-t border-slate-200 pt-6">
+                <TemplateDetails template={selectedTemplate} />
+              </div>
+            )}
+          </div>
+        );
       case "basics":
         return (
           <ProjectBasicsForm
@@ -145,6 +208,12 @@ const NewProject = () => {
   const isLastStep = currentStepIndex === steps.length - 1;
 
   const submitCurrentForm = () => {
+    if (currentStep === "template" && selectedTemplate) {
+      // If template is selected, move to next step
+      setCurrentStep("basics");
+      return;
+    }
+
     const formElement = document.querySelector("form");
     if (formElement) {
       const submitEvent = new Event("submit", {
@@ -207,12 +276,13 @@ const NewProject = () => {
             </button>
 
             <button
-              onClick={() => {
-                if (currentStep === "basics" || currentStep === "tech-stack") {
-                  submitCurrentForm();
-                }
-              }}
-              className="flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg"
+              onClick={submitCurrentForm}
+              className={`flex items-center px-4 py-2 rounded-lg ${
+                currentStep === "template" && !selectedTemplate
+                  ? "bg-slate-300 text-slate-500 cursor-not-allowed"
+                  : "bg-primary-600 hover:bg-primary-700 text-white"
+              }`}
+              disabled={currentStep === "template" && !selectedTemplate}
             >
               {isLastStep ? "Create Project" : "Continue"}
               <ChevronRight size={16} className="ml-1" />

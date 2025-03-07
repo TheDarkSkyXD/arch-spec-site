@@ -6,7 +6,7 @@ This module provides the main FastAPI application.
 import logging
 import os
 import sys
-from typing import List
+from typing import List, Any, Dict
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
@@ -24,37 +24,51 @@ logger = logging.getLogger(__name__)
 from .core.config import settings
 from .db.base import db
 
-# Import API router
-try:
-    from .api.api import api_router
-    HAS_API_ROUTER = True
-except Exception as e:
-    logger.error(f"Error importing API router: {str(e)}")
-    HAS_API_ROUTER = False
+# Import API router and seed data modules
+from .api.api import api_router
+from .seed.templates import seed_templates
+
+HAS_API_ROUTER = True
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Lifespan context manager for startup and shutdown events."""
-    # Startup logic
-    if db.client is not None:
+    """
+    Application lifespan context manager.
+    
+    This handles setup and teardown for the application.
+    """
+    # Setup
+    try:
+        # Connect to MongoDB
+        logger.info("Connecting to MongoDB...")
         try:
-            logger.info("Connecting to MongoDB...")
             await db.connect_to_mongodb()
             logger.info("MongoDB connection established")
+            
+            # Seed database with sample data if needed
+            database = db.get_db()
+            if database is not None:
+                # Seed template data
+                await seed_templates(database)
         except Exception as e:
             logger.error(f"Error during MongoDB initialization: {str(e)}")
+        
+        logger.info("Application startup complete")
+    except Exception as e:
+        logger.error(f"Error during startup: {str(e)}")
     
-    # Yield control back to FastAPI
     yield
     
-    # Shutdown logic
-    if db.client is not None:
-        try:
-            logger.info("Closing MongoDB connection...")
-            await db.close_mongodb_connection()
-            logger.info("MongoDB connection closed")
-        except Exception as e:
-            logger.error(f"Error during MongoDB shutdown: {str(e)}")
+    # Teardown
+    try:
+        # Close MongoDB connection
+        logger.info("Closing MongoDB connection...")
+        await db.close_mongodb_connection()
+        logger.info("MongoDB connection closed")
+    except Exception as e:
+        logger.error(f"Error during shutdown: {str(e)}")
+    
+    logger.info("Application shutdown complete")
 
 # Create FastAPI app
 app = FastAPI(
@@ -64,10 +78,17 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Add CORS middleware
+# Setup CORS
+origins = [
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "https://localhost:3000",
+    "https://localhost:5173",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origins,
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -81,48 +102,19 @@ else:
     logger.warning("API router not available - only basic endpoints will work")
 
 # Debug endpoints
-@app.get("/")
-async def root():
-    """Root endpoint."""
+@app.get("/", tags=["debug"])
+async def root() -> Dict[str, Any]:
+    """Root endpoint for debugging."""
     return {
-        "message": "Welcome to ArchSpec API",
+        "message": "ArchSpec API is running",
         "version": settings.version,
-        "api_router_loaded": HAS_API_ROUTER
+        "environment": settings.environment
     }
 
-@app.get("/debug")
-async def debug_info():
-    """Debug information endpoint."""
-    return {
-        "python_version": sys.version,
-        "working_directory": os.getcwd(),
-        "env_vars": {
-            "MONGODB_URI": os.getenv("MONGODB_URI", "Not set"),
-            "MONGODB_DB_NAME": os.getenv("MONGODB_DB_NAME", "Not set"),
-            "ANTHROPIC_API_KEY": bool(os.getenv("ANTHROPIC_API_KEY")),
-            "ANTHROPIC_MODEL": os.getenv("ANTHROPIC_MODEL", "Not set"),
-        },
-        "settings": {
-            "app_name": settings.app_name,
-            "version": settings.version,
-            "mongo_uri": settings.mongo.uri,
-            "has_anthropic_key": bool(settings.anthropic.api_key),
-        }
-    }
-
-@app.get("/health")
-async def health_check():
+@app.get("/health", tags=["debug"])
+async def health() -> Dict[str, str]:
     """Health check endpoint."""
-    mongo_status = "available" if db.client is not None else "unavailable"
-    api_status = "available" if HAS_API_ROUTER else "unavailable"
-    
-    return {
-        "status": "healthy",
-        "version": settings.version,
-        "mongo": mongo_status,
-        "api_router": api_status,
-        "anthropic": "configured" if settings.anthropic.api_key else "not_configured"
-    }
+    return {"status": "healthy"}
 
 # Global error handler
 @app.exception_handler(Exception)
