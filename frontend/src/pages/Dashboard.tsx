@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Plus,
@@ -13,37 +13,20 @@ import {
 } from "lucide-react";
 import MainLayout from "../layouts/MainLayout";
 import { useProjectStore } from "../store/projectStore";
-import { ProjectTemplate } from "../types";
-import { templatesService } from "../services/templatesService";
+import { useTemplates } from "../hooks/useDataQueries";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { projects, fetchProjects, isLoading } = useProjectStore();
-  const [templates, setTemplates] = useState<ProjectTemplate[]>([]);
-  const [templatesLoading, setTemplatesLoading] = useState<boolean>(true);
-  const [templatesError, setTemplatesError] = useState<string | null>(null);
+  const {
+    data: templates = [],
+    isLoading: templatesLoading,
+    error: queryError,
+  } = useTemplates();
 
   useEffect(() => {
     fetchProjects();
   }, [fetchProjects]);
-
-  useEffect(() => {
-    const fetchTemplates = async () => {
-      try {
-        setTemplatesLoading(true);
-        setTemplatesError(null);
-        const templatesData = await templatesService.getTemplates();
-        setTemplates(templatesData);
-      } catch (err) {
-        console.error("Failed to fetch templates:", err);
-        setTemplatesError("Failed to load templates");
-      } finally {
-        setTemplatesLoading(false);
-      }
-    };
-
-    fetchTemplates();
-  }, []);
 
   const handleTemplateSelect = (templateId: string) => {
     navigate(`/new-project?template=${templateId}`);
@@ -123,7 +106,7 @@ const Dashboard = () => {
                 <Loader className="animate-spin h-4 w-4 text-blue-600" />
                 <span className="text-slate-500 text-sm">Loading...</span>
               </div>
-            ) : templatesError ? (
+            ) : queryError ? (
               <div className="text-red-500 text-sm">
                 Error loading templates
               </div>
@@ -192,9 +175,11 @@ const Dashboard = () => {
                 Loading templates...
               </span>
             </div>
-          ) : templatesError ? (
+          ) : queryError ? (
             <div className="text-center py-8 bg-white rounded-lg shadow-sm border border-slate-200">
-              <p className="text-red-600 mb-2">{templatesError}</p>
+              <p className="text-red-600 mb-2">
+                {queryError.message || String(queryError)}
+              </p>
               <button
                 onClick={() => navigate("/templates")}
                 className="text-primary-600 hover:text-primary-700 font-medium"
