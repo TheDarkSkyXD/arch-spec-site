@@ -37,6 +37,13 @@ try:
     except Exception as e:
         logger.error(f"Failed to load export router: {str(e)}")
     
+    try:
+        from .routes import tech_stack
+        api_router.include_router(tech_stack.router, prefix="/tech-stack", tags=["tech-stack"])
+        logger.info("Tech Stack router loaded successfully")
+    except Exception as e:
+        logger.error(f"Failed to load tech stack router: {str(e)}")
+    
     logger.info("API routes imported successfully")
 except Exception as e:
     logger.error(f"Failed to import API routes: {str(e)}") 

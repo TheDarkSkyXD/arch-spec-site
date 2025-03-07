@@ -3,6 +3,7 @@ import Dashboard from "./pages/Dashboard";
 import NewProject from "./pages/NewProject";
 import Projects from "./pages/Projects";
 import Templates from "./pages/Templates";
+import TechStackCompatibilityPage from "./pages/TechStackCompatibilityPage";
 
 const router = createBrowserRouter([
   {
@@ -20,6 +21,10 @@ const router = createBrowserRouter([
   {
     path: "/templates",
     element: <Templates />,
+  },
+  {
+    path: "/tech-stack",
+    element: <TechStackCompatibilityPage />,
   },
   // Other routes will be added as we implement them
 ]);
