@@ -41,7 +41,7 @@ TECH_REGISTRY = {
             "JavaScript", "TypeScript"
         ],
         "stateManagement": [
-            "Redux", "MobX", "Zustand", "Recoil", "Context API", "React Context API",  # React
+            "Redux", "MobX", "Zustand", "Recoil", "Context API",  # React
             "Pinia", "Vuex",  # Vue
             "NgRx", "Akita", "NGXS",  # Angular
             "Jotai", "Valtio",  # React/others

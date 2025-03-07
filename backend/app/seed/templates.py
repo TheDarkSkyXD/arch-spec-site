@@ -44,7 +44,7 @@ PROJECT_TEMPLATES = [
                 "frontend": {
                     "framework": "React",
                     "language": "TypeScript",
-                    "stateManagement": "React Context API",
+                    "stateManagement": "Context API",
                     "uiLibrary": "Tailwind CSS",
                     "formHandling": "React Hook Form",
                     "routing": "React Router",
