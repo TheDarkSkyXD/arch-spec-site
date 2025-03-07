@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ProjectTemplate } from "../../types";
-import { templatesService } from "../../services/templatesService";
+import { useTemplates } from "../../hooks/useDataQueries";
 // Create inline version of TemplateCard component as a temporary solution
 // Import will be fixed automatically when TypeScript environment is correctly set up
 
@@ -107,7 +107,7 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
 };
 
 interface TemplateSelectorProps {
-  onTemplateSelect: (template: ProjectTemplate | null) => void;
+  onTemplateSelect: (template: ProjectTemplate) => void;
   selectedTemplateId?: string;
 }
 
@@ -115,60 +115,52 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
   onTemplateSelect,
   selectedTemplateId,
 }) => {
-  const [templates, setTemplates] = useState<ProjectTemplate[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: templates = [], isLoading, error: queryError } = useTemplates();
+
   const [selectedTemplate, setSelectedTemplate] =
     useState<ProjectTemplate | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  // Fetch templates on component mount
+  // Set error message if query fails
   useEffect(() => {
-    const fetchTemplates = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+    if (queryError) {
+      console.error("Error fetching templates:", queryError);
+      setError("Failed to load templates. Please try again later.");
+    }
+  }, [queryError]);
 
-        // Try to fetch templates
-        const templatesData = await templatesService.getTemplates();
-
-        if (templatesData && templatesData.length > 0) {
-          setTemplates(templatesData);
-
-          // Set selected template if ID is provided
-          if (selectedTemplateId) {
-            const template = templatesData.find(
-              (t) =>
-                t.id === selectedTemplateId ||
-                t.version === selectedTemplateId ||
-                t.name === selectedTemplateId
-            );
-            if (template) {
-              setSelectedTemplate(template);
-              onTemplateSelect(template);
-            } else {
-              console.warn(`Template with ID ${selectedTemplateId} not found`);
-            }
-          }
-        } else {
-          // Handle empty templates case
-          setError("No templates found. Please try again later.");
-          console.warn("No templates were returned from the API");
-        }
-      } catch (err) {
-        // Handle error case
-        console.error("Error fetching templates:", err);
-        setError("Failed to load templates. Please try again later.");
-      } finally {
-        setLoading(false);
+  // Set selected template when templates are loaded or selectedTemplateId changes
+  useEffect(() => {
+    if (templates && templates.length > 0 && selectedTemplateId) {
+      const template = templates.find(
+        (t) =>
+          t.id === selectedTemplateId ||
+          t.version === selectedTemplateId ||
+          t.name === selectedTemplateId
+      );
+      if (template) {
+        setSelectedTemplate(template);
+        onTemplateSelect(template);
+      } else {
+        console.warn(`Template with ID ${selectedTemplateId} not found`);
       }
-    };
+    }
+  }, [templates, selectedTemplateId, onTemplateSelect]);
 
-    fetchTemplates();
-  }, [selectedTemplateId, onTemplateSelect]);
+  const handleTemplateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const templateId = e.target.value;
+    if (!templateId) {
+      setSelectedTemplate(null);
+      return;
+    }
 
-  const handleTemplateSelect = (template: ProjectTemplate) => {
-    setSelectedTemplate(template);
-    onTemplateSelect(template);
+    const template = templates.find(
+      (t) => t.id === templateId || t.version === templateId
+    );
+    if (template) {
+      setSelectedTemplate(template);
+      onTemplateSelect(template);
+    }
   };
 
   const handleCustomProject = () => {
@@ -176,7 +168,7 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
     onTemplateSelect(null);
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="py-10 text-center">
         <div className="animate-pulse inline-block h-8 w-8 rounded-full bg-primary-200"></div>
@@ -258,7 +250,7 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
             key={template.name}
             template={template}
             isSelected={selectedTemplate?.name === template.name}
-            onSelect={() => handleTemplateSelect(template)}
+            onSelect={() => setSelectedTemplate(template)}
           />
         ))}
       </div>

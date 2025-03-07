@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Search,
@@ -10,34 +10,21 @@ import {
   Loader2,
 } from "lucide-react";
 import MainLayout from "../layouts/MainLayout";
-import { ProjectTemplate } from "../types";
-import { templatesService } from "../services/templatesService";
+import { useTemplates } from "../hooks/useDataQueries";
 
 const Templates = () => {
   const navigate = useNavigate();
-  const [templates, setTemplates] = useState<ProjectTemplate[]>([]);
+  const { data: templates = [], isLoading, error: queryError } = useTemplates();
+
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchTemplates = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const templatesData = await templatesService.getTemplates();
-        setTemplates(templatesData);
-      } catch (err) {
-        console.error("Failed to fetch templates:", err);
-        setError("Failed to load templates. Please try again later.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTemplates();
-  }, []);
+  // Set error if query fails
+  if (queryError && !error) {
+    console.error("Failed to fetch templates:", queryError);
+    setError("Failed to load templates. Please try again later.");
+  }
 
   const filteredTemplates = templates.filter(
     (template) =>
@@ -113,7 +100,7 @@ const Templates = () => {
         </div>
 
         {/* Loading state */}
-        {loading && (
+        {isLoading && (
           <div className="text-center py-16 bg-white rounded-lg shadow-sm border border-slate-200">
             <div className="mx-auto w-16 h-16 flex items-center justify-center mb-4">
               <Loader2 size={32} className="text-primary-600 animate-spin" />
@@ -128,7 +115,7 @@ const Templates = () => {
         )}
 
         {/* Error state */}
-        {!loading && error && (
+        {!isLoading && error && (
           <div className="text-center py-16 bg-white rounded-lg shadow-sm border border-slate-200">
             <div className="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
               <Package size={24} className="text-red-500" />
@@ -141,7 +128,7 @@ const Templates = () => {
         )}
 
         {/* Templates grid */}
-        {!loading && !error && filteredTemplates.length > 0 ? (
+        {!isLoading && !error && filteredTemplates.length > 0 ? (
           <div
             className={
               viewMode === "grid"
@@ -249,7 +236,7 @@ const Templates = () => {
                         onClick={() =>
                           handleTemplateSelect(template.id || template.version)
                         }
-                        className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg"
+                        className="inline-flex px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg"
                       >
                         Use This Template
                       </button>
@@ -259,16 +246,20 @@ const Templates = () => {
               )
             )}
           </div>
-        ) : !loading && !error ? (
+        ) : !isLoading && !error ? (
           <div className="text-center py-16 bg-white rounded-lg shadow-sm border border-slate-200">
             <div className="mx-auto w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
-              <Package size={24} className="text-slate-400" />
+              <Package size={24} className="text-slate-500" />
             </div>
             <h3 className="text-xl font-semibold text-slate-800 mb-2">
-              No templates found
+              {searchQuery
+                ? `No templates matching "${searchQuery}"`
+                : "No templates available"}
             </h3>
             <p className="text-slate-500 max-w-md mx-auto">
-              Try adjusting your search criteria
+              {searchQuery
+                ? "Try using different search terms"
+                : "Check back later for new templates"}
             </p>
           </div>
         ) : null}

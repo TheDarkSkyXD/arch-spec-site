@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Loader, RefreshCw, Download, Save } from "lucide-react";
 import axios from "axios";
 import JsonEditor from "../common/JsonEditor";
+import { useTechStack, useRefreshTechStack } from "../../hooks/useDataQueries";
 
 interface TechStackData {
   techStackOptions: {
@@ -15,96 +16,92 @@ interface TechStackData {
       [key: string]: unknown;
     };
   };
+  [key: string]: unknown;
 }
 
 const TechStackView = () => {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    data: apiTechStackData,
+    isLoading,
+    error: queryError,
+  } = useTechStack();
+  const { refreshTechStack } = useRefreshTechStack();
+
   const [techStackData, setTechStackData] = useState<TechStackData | null>(
     null
   );
+  const [originalData, setOriginalData] = useState<TechStackData | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
+  // Update state when data is fetched
   useEffect(() => {
-    fetchTechStackData();
-  }, []);
-
-  const fetchTechStackData = async () => {
-    try {
-      setLoading(true);
+    if (apiTechStackData) {
+      setTechStackData(apiTechStackData);
+      setOriginalData(JSON.parse(JSON.stringify(apiTechStackData)));
       setError(null);
+    }
+  }, [apiTechStackData]);
 
-      const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
-      const response = await axios.get(`${API_URL}/api/tech-stack/options`);
-
-      setTechStackData(response.data);
-      setHasChanges(false);
-    } catch (err) {
-      console.error("Failed to fetch tech stack data:", err);
+  // Set error message if query fails
+  useEffect(() => {
+    if (queryError) {
+      console.error("Failed to fetch tech stack data:", queryError);
       setError("Failed to load tech stack data. Please try again later.");
-    } finally {
-      setLoading(false);
+    }
+  }, [queryError]);
+
+  const handleJsonEdit = (edit: { updated_src: TechStackData }) => {
+    setTechStackData(edit.updated_src);
+    // Detect if there are any changes compared to the original data
+    setHasChanges(
+      JSON.stringify(edit.updated_src) !== JSON.stringify(originalData)
+    );
+  };
+
+  const handleSaveChanges = async () => {
+    if (!techStackData) return;
+
+    try {
+      await axios.put("/api/tech-stack", techStackData);
+      // Update the original data reference after saving
+      setOriginalData(JSON.parse(JSON.stringify(techStackData)));
+      setHasChanges(false);
+      // Refresh the data to sync with the backend
+      refreshTechStack();
+    } catch (err) {
+      console.error("Error saving tech stack data:", err);
+      setError("Failed to save changes. Please try again.");
     }
   };
 
   const handleDownloadJson = () => {
     if (!techStackData) return;
 
-    const dataStr = JSON.stringify(techStackData, null, 2);
-    const dataUri =
-      "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
-
-    const downloadAnchorNode = document.createElement("a");
-    downloadAnchorNode.setAttribute("href", dataUri);
-    downloadAnchorNode.setAttribute("download", "tech-stack-data.json");
-    document.body.appendChild(downloadAnchorNode);
-    downloadAnchorNode.click();
-    downloadAnchorNode.remove();
+    try {
+      const jsonStr = JSON.stringify(techStackData, null, 2);
+      const dataStr =
+        "data:text/json;charset=utf-8," + encodeURIComponent(jsonStr);
+      const downloadAnchorNode = document.createElement("a");
+      downloadAnchorNode.setAttribute("href", dataStr);
+      downloadAnchorNode.setAttribute("download", "tech_stack.json");
+      document.body.appendChild(downloadAnchorNode);
+      downloadAnchorNode.click();
+      downloadAnchorNode.remove();
+    } catch (err) {
+      console.error("Error exporting JSON:", err);
+      setError("Failed to export JSON data");
+    }
   };
 
-  const handleJsonEdit = (edit: { updated_src: TechStackData }) => {
-    setTechStackData(edit.updated_src);
-    setHasChanges(true);
+  const fetchTechStackData = () => {
+    // Use React Query's invalidation to refresh data
+    refreshTechStack();
   };
-
-  const handleSaveChanges = () => {
-    // This is a placeholder for the actual API call
-    // In a real implementation, you would send the updated data to the server
-    alert(
-      "This feature is coming soon! Changes will be saved to the backend in the future."
-    );
-    setHasChanges(false);
-  };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center p-12">
-        <Loader className="w-8 h-8 text-primary-500 animate-spin mr-3" />
-        <span className="text-lg text-slate-600">
-          Loading tech stack data...
-        </span>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="text-center py-12">
-        <div className="text-red-500 mb-4">{error}</div>
-        <button
-          onClick={fetchTechStackData}
-          className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 flex items-center mx-auto"
-        >
-          <RefreshCw className="w-4 h-4 mr-2" />
-          Retry
-        </button>
-      </div>
-    );
-  }
 
   return (
-    <div>
-      <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6 mb-6">
+    <div className="bg-white rounded-lg shadow-sm border border-slate-200">
+      <div className="p-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Tech Stack Data</h2>
           <div className="flex space-x-3">
@@ -146,22 +143,28 @@ const TechStackView = () => {
         </div>
       </div>
 
-      {techStackData && (
-        <JsonEditor<TechStackData>
-          data={techStackData}
-          onEdit={handleJsonEdit}
-          readOnly={false}
-        />
+      {error && (
+        <div className="p-4 bg-red-50 text-red-800 mx-6 mb-6 rounded-md border border-red-200">
+          {error}
+        </div>
       )}
 
-      <div className="mt-6 bg-blue-50 border border-blue-200 rounded-md p-4">
-        <p className="text-sm text-blue-700">
-          <strong>Note:</strong> In a production environment, saving changes
-          would update the tech stack configuration in the database. This
-          feature is currently in preview mode and changes will not persist
-          after refreshing.
-        </p>
-      </div>
+      {isLoading ? (
+        <div className="p-10 text-center">
+          <Loader className="w-8 h-8 animate-spin mx-auto text-primary-500" />
+          <p className="mt-2">Loading tech stack data...</p>
+        </div>
+      ) : (
+        <div className="p-6 pt-0">
+          {techStackData && (
+            <JsonEditor<TechStackData>
+              data={techStackData}
+              onEdit={handleJsonEdit}
+              readOnly={false}
+            />
+          )}
+        </div>
+      )}
     </div>
   );
 };

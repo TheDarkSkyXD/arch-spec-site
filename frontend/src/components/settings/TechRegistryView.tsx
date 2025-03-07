@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { techRegistryApi, TechRegistry } from "../../api/techRegistryApi";
+import { TechRegistry } from "../../api/techRegistryApi";
+import {
+  useTechRegistry,
+  useRefreshTechRegistry,
+} from "../../hooks/useDataQueries";
 
 const TechRegistryView: React.FC = () => {
+  // Use React Query for data fetching and caching
+  const { data: response, isLoading, error: queryError } = useTechRegistry();
+  const { refreshTechRegistry } = useRefreshTechRegistry();
+
   const [registryData, setRegistryData] = useState<TechRegistry | null>(null);
   const [source, setSource] = useState<string>("unknown");
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
@@ -13,9 +20,22 @@ const TechRegistryView: React.FC = () => {
   );
   const [activeTab, setActiveTab] = useState("browse");
 
+  // Update component state when data is fetched
   useEffect(() => {
-    fetchRegistryData();
-  }, []);
+    if (response) {
+      setRegistryData(response.data);
+      setSource(response.source || "unknown");
+      setError(null);
+    }
+  }, [response]);
+
+  // Set error if query fails
+  useEffect(() => {
+    if (queryError) {
+      console.error("Failed to fetch registry data:", queryError);
+      setError("Failed to load tech registry. Please try again later.");
+    }
+  }, [queryError]);
 
   // Filter technologies when search query or selected category changes
   useEffect(() => {
@@ -66,23 +86,9 @@ const TechRegistryView: React.FC = () => {
     }
   }, [registryData, searchQuery, selectedCategory]);
 
-  const fetchRegistryData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await techRegistryApi.getTechRegistry();
-      setRegistryData(response.data);
-      setSource(response.source || "unknown");
-      setLoading(false);
-    } catch (err) {
-      console.error("Failed to fetch registry data:", err);
-      setError("Failed to load tech registry. Please try again later.");
-      setLoading(false);
-    }
-  };
-
   const handleRefresh = () => {
-    fetchRegistryData();
+    // Use React Query's invalidation to refresh data
+    refreshTechRegistry();
   };
 
   const handleDownloadJson = () => {
@@ -353,7 +359,7 @@ const TechRegistryView: React.FC = () => {
         </div>
       )}
 
-      {loading ? (
+      {isLoading ? (
         <div className="p-10 text-center">
           <div
             className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"

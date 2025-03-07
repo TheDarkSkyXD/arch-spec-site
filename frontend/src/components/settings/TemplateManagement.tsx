@@ -1,6 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Plus } from "lucide-react";
-import { templatesService } from "../../services/templatesService";
 import { ProjectTemplate } from "../../types";
 import {
   TemplateList,
@@ -8,33 +7,23 @@ import {
   TemplateEditForm,
   TemplateCreateForm,
 } from "./templates";
+import { useTemplates, useRefreshTemplates } from "../../hooks/useDataQueries";
 
 const TemplateManagement = () => {
-  const [templates, setTemplates] = useState<ProjectTemplate[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: templates = [], isLoading, error: queryError } = useTemplates();
+  const { refreshTemplates } = useRefreshTemplates();
+
   const [error, setError] = useState<string | null>(null);
   const [selectedTemplate, setSelectedTemplate] =
     useState<ProjectTemplate | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
 
-  useEffect(() => {
-    fetchTemplates();
-  }, []);
-
-  const fetchTemplates = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const templatesData = await templatesService.getTemplates();
-      setTemplates(templatesData);
-    } catch (err) {
-      console.error("Failed to fetch templates:", err);
-      setError("Failed to load templates. Please try again later.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Set error message if query fails
+  if (queryError && !error) {
+    console.error("Failed to fetch templates:", queryError);
+    setError("Failed to load templates. Please try again later.");
+  }
 
   const handleSelectTemplate = (template: ProjectTemplate) => {
     setSelectedTemplate(template);
@@ -61,77 +50,31 @@ const TemplateManagement = () => {
     setIsCreating(false);
   };
 
-  const handleSaveEdit = () => {
-    alert("Template edit feature is coming soon!");
-    setIsEditing(false);
-    fetchTemplates();
-  };
-
-  const handleSaveCreate = () => {
-    alert("Template creation feature is coming soon!");
-    setIsCreating(false);
-    fetchTemplates();
-  };
-
   const handleTemplateUpdated = () => {
-    fetchTemplates();
-    if (selectedTemplate?.id) {
-      templatesService
-        .getTemplateById(selectedTemplate.id)
-        .then((updatedTemplate) => {
-          if (updatedTemplate) {
-            setSelectedTemplate(updatedTemplate);
-          }
-        });
-    }
-  };
-
-  const renderMainContent = () => {
-    if (isCreating) {
-      return (
-        <TemplateCreateForm onCancel={handleCancel} onSave={handleSaveCreate} />
-      );
-    }
-
-    if (isEditing && selectedTemplate) {
-      return (
-        <TemplateEditForm
-          template={selectedTemplate}
-          onCancel={handleCancel}
-          onSave={handleSaveEdit}
-        />
-      );
-    }
-
-    return (
-      <TemplateDetail
-        selectedTemplate={selectedTemplate}
-        isCreating={isCreating}
-        isEditing={isEditing}
-        onEdit={() => handleEditTemplate()}
-        onCreateNew={handleCreateNew}
-        onCancel={handleCancel}
-        onTemplateUpdated={handleTemplateUpdated}
-      />
-    );
+    // Use React Query's invalidation to refresh data
+    refreshTemplates();
+    setIsEditing(false);
+    setIsCreating(false);
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <div className="lg:col-span-1 bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
-        <div className="p-4 border-b border-slate-200 flex justify-between items-center">
-          <h2 className="font-medium text-slate-800">Templates</h2>
-          <button
-            onClick={handleCreateNew}
-            className="p-1.5 rounded-md text-slate-600 hover:text-primary-600 hover:bg-primary-50"
-          >
-            <Plus className="w-4 h-4" />
-          </button>
-        </div>
-        <div className="max-h-[calc(100vh-12rem)] overflow-y-auto">
+    <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-xl font-semibold">Project Templates</h2>
+        <button
+          onClick={handleCreateNew}
+          className="px-3 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 flex items-center text-sm"
+        >
+          <Plus className="w-4 h-4 mr-1.5" />
+          New Template
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-1">
           <TemplateList
             templates={templates}
-            loading={loading}
+            loading={isLoading}
             error={error}
             selectedTemplate={selectedTemplate}
             onSelectTemplate={handleSelectTemplate}
@@ -139,8 +82,31 @@ const TemplateManagement = () => {
             onEditTemplate={handleEditTemplate}
           />
         </div>
+        <div className="lg:col-span-2">
+          {isCreating ? (
+            <TemplateCreateForm
+              onCancel={handleCancel}
+              onTemplateCreated={handleTemplateUpdated}
+            />
+          ) : isEditing && selectedTemplate ? (
+            <TemplateEditForm
+              template={selectedTemplate}
+              onCancel={handleCancel}
+              onSave={handleTemplateUpdated}
+            />
+          ) : (
+            <TemplateDetail
+              selectedTemplate={selectedTemplate}
+              isCreating={isCreating}
+              isEditing={isEditing}
+              onEdit={() => handleEditTemplate(selectedTemplate)}
+              onCreateNew={handleCreateNew}
+              onCancel={handleCancel}
+              onTemplateUpdated={handleTemplateUpdated}
+            />
+          )}
+        </div>
       </div>
-      <div className="lg:col-span-2">{renderMainContent()}</div>
     </div>
   );
 };
