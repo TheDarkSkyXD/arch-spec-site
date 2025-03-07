@@ -1,13 +1,17 @@
 import { Link, useLocation } from "react-router-dom";
 import {
-  LayoutDashboard,
   FileCode,
-  Settings,
   Package,
   FileOutput,
   Sliders,
   Users,
   Database,
+  PlusCircle,
+  BookOpen,
+  ChevronRight,
+  Home,
+  Settings,
+  HelpCircle,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -22,136 +26,167 @@ const Sidebar = ({ projectId }: SidebarProps) => {
   };
 
   return (
-    <aside className="w-64 bg-white border-r border-gray-200 h-[calc(100vh-4rem)] flex flex-col">
-      <div className="p-4">
-        <h2 className="text-lg font-semibold text-gray-800">
-          Project Management
-        </h2>
-      </div>
+    <aside className="hidden md:block w-64 bg-white border-r border-slate-200 h-[calc(100vh-4rem)] fixed left-0 top-16 z-10">
+      <div className="h-full flex flex-col overflow-y-auto">
+        <nav className="flex-1 p-3 space-y-6 pt-4">
+          <div className="space-y-1">
+            <Link
+              to="/"
+              className={`flex items-center px-3 py-2 text-sm rounded-md transition-all duration-200 ${
+                isActive("/")
+                  ? "bg-slate-100 text-primary-600 font-medium"
+                  : "text-slate-600 hover:bg-slate-50 hover:text-primary-600"
+              }`}
+            >
+              <Home className="h-4 w-4 mr-3" />
+              Dashboard
+            </Link>
 
-      <nav className="flex-1 overflow-y-auto">
-        <div className="px-2 space-y-1">
-          <Link
-            to="/"
-            className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
-              isActive("/")
-                ? "bg-primary-50 text-primary-700"
-                : "text-gray-700 hover:bg-gray-100"
-            }`}
-          >
-            <LayoutDashboard className="mr-3 h-5 w-5" />
-            Dashboard
-          </Link>
+            <Link
+              to="/projects"
+              className={`flex items-center px-3 py-2 text-sm rounded-md transition-all duration-200 ${
+                isActive("/projects")
+                  ? "bg-slate-100 text-primary-600 font-medium"
+                  : "text-slate-600 hover:bg-slate-50 hover:text-primary-600"
+              }`}
+            >
+              <FileCode className="h-4 w-4 mr-3" />
+              Projects
+            </Link>
 
-          <Link
-            to="/projects"
-            className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
-              isActive("/projects")
-                ? "bg-primary-50 text-primary-700"
-                : "text-gray-700 hover:bg-gray-100"
-            }`}
-          >
-            <FileCode className="mr-3 h-5 w-5" />
-            Projects
-          </Link>
+            <Link
+              to="/templates"
+              className={`flex items-center px-3 py-2 text-sm rounded-md transition-all duration-200 ${
+                isActive("/templates")
+                  ? "bg-slate-100 text-primary-600 font-medium"
+                  : "text-slate-600 hover:bg-slate-50 hover:text-primary-600"
+              }`}
+            >
+              <Package className="h-4 w-4 mr-3" />
+              Templates
+            </Link>
 
-          <Link
-            to="/templates"
-            className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
-              isActive("/templates")
-                ? "bg-primary-50 text-primary-700"
-                : "text-gray-700 hover:bg-gray-100"
-            }`}
-          >
-            <Package className="mr-3 h-5 w-5" />
-            Templates
-          </Link>
+            <Link
+              to="/export"
+              className={`flex items-center px-3 py-2 text-sm rounded-md transition-all duration-200 ${
+                isActive("/export")
+                  ? "bg-slate-100 text-primary-600 font-medium"
+                  : "text-slate-600 hover:bg-slate-50 hover:text-primary-600"
+              }`}
+            >
+              <FileOutput className="h-4 w-4 mr-3" />
+              Export
+            </Link>
 
-          <Link
-            to="/export"
-            className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
-              isActive("/export")
-                ? "bg-primary-50 text-primary-700"
-                : "text-gray-700 hover:bg-gray-100"
-            }`}
-          >
-            <FileOutput className="mr-3 h-5 w-5" />
-            Export
-          </Link>
-        </div>
+            <Link
+              to="/docs"
+              className={`flex items-center px-3 py-2 text-sm rounded-md transition-all duration-200 ${
+                isActive("/docs")
+                  ? "bg-slate-100 text-primary-600 font-medium"
+                  : "text-slate-600 hover:bg-slate-50 hover:text-primary-600"
+              }`}
+            >
+              <BookOpen className="h-4 w-4 mr-3" />
+              Documentation
+            </Link>
+          </div>
 
-        {projectId && (
-          <>
-            <div className="mt-8 px-4">
-              <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+          {projectId && (
+            <div>
+              <p className="text-xs font-medium text-slate-400 uppercase tracking-wider px-3 mb-2">
                 Current Project
-              </h3>
-              <div className="mt-2 px-2 space-y-1">
+              </p>
+              <div className="bg-slate-50 rounded-md p-2">
                 <Link
                   to={`/projects/${projectId}/basics`}
-                  className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                  className={`flex items-center px-3 py-2 text-sm rounded-md transition-all duration-200 ${
                     isActive(`/projects/${projectId}/basics`)
-                      ? "bg-primary-50 text-primary-700"
-                      : "text-gray-700 hover:bg-gray-100"
+                      ? "bg-white text-primary-600 shadow-sm font-medium"
+                      : "text-slate-600 hover:bg-white hover:text-primary-600"
                   }`}
                 >
-                  <Sliders className="mr-3 h-5 w-5" />
-                  Project Basics
+                  <Sliders className="h-4 w-4 mr-3" />
+                  <span>Project Basics</span>
+                  {isActive(`/projects/${projectId}/basics`) && (
+                    <ChevronRight className="ml-auto h-4 w-4 text-primary-500" />
+                  )}
                 </Link>
 
                 <Link
                   to={`/projects/${projectId}/tech-stack`}
-                  className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                  className={`flex items-center px-3 py-2 text-sm rounded-md transition-all duration-200 ${
                     isActive(`/projects/${projectId}/tech-stack`)
-                      ? "bg-primary-50 text-primary-700"
-                      : "text-gray-700 hover:bg-gray-100"
+                      ? "bg-white text-primary-600 shadow-sm font-medium"
+                      : "text-slate-600 hover:bg-white hover:text-primary-600"
                   }`}
                 >
-                  <Package className="mr-3 h-5 w-5" />
-                  Tech Stack
+                  <Package className="h-4 w-4 mr-3" />
+                  <span>Tech Stack</span>
+                  {isActive(`/projects/${projectId}/tech-stack`) && (
+                    <ChevronRight className="ml-auto h-4 w-4 text-primary-500" />
+                  )}
                 </Link>
 
                 <Link
                   to={`/projects/${projectId}/features`}
-                  className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                  className={`flex items-center px-3 py-2 text-sm rounded-md transition-all duration-200 ${
                     isActive(`/projects/${projectId}/features`)
-                      ? "bg-primary-50 text-primary-700"
-                      : "text-gray-700 hover:bg-gray-100"
+                      ? "bg-white text-primary-600 shadow-sm font-medium"
+                      : "text-slate-600 hover:bg-white hover:text-primary-600"
                   }`}
                 >
-                  <Users className="mr-3 h-5 w-5" />
-                  Features
+                  <Users className="h-4 w-4 mr-3" />
+                  <span>Features</span>
+                  {isActive(`/projects/${projectId}/features`) && (
+                    <ChevronRight className="ml-auto h-4 w-4 text-primary-500" />
+                  )}
                 </Link>
 
                 <Link
                   to={`/projects/${projectId}/data-model`}
-                  className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                  className={`flex items-center px-3 py-2 text-sm rounded-md transition-all duration-200 ${
                     isActive(`/projects/${projectId}/data-model`)
-                      ? "bg-primary-50 text-primary-700"
-                      : "text-gray-700 hover:bg-gray-100"
+                      ? "bg-white text-primary-600 shadow-sm font-medium"
+                      : "text-slate-600 hover:bg-white hover:text-primary-600"
                   }`}
                 >
-                  <Database className="mr-3 h-5 w-5" />
-                  Data Model
+                  <Database className="h-4 w-4 mr-3" />
+                  <span>Data Model</span>
+                  {isActive(`/projects/${projectId}/data-model`) && (
+                    <ChevronRight className="ml-auto h-4 w-4 text-primary-500" />
+                  )}
                 </Link>
               </div>
             </div>
-          </>
-        )}
-      </nav>
+          )}
 
-      <div className="p-4 border-t border-gray-200">
-        <Link
-          to="/settings"
-          className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
-            isActive("/settings")
-              ? "bg-primary-50 text-primary-700"
-              : "text-gray-700 hover:bg-gray-100"
-          }`}
-        >
-          <Settings className="mr-3 h-5 w-5" />
-          Settings
-        </Link>
+          <div className="space-y-1">
+            <Link
+              to="/settings"
+              className="flex items-center px-3 py-2 text-sm rounded-md transition-all duration-200 text-slate-600 hover:bg-slate-50 hover:text-primary-600"
+            >
+              <Settings className="h-4 w-4 mr-3" />
+              Settings
+            </Link>
+            <Link
+              to="/help"
+              className="flex items-center px-3 py-2 text-sm rounded-md transition-all duration-200 text-slate-600 hover:bg-slate-50 hover:text-primary-600"
+            >
+              <HelpCircle className="h-4 w-4 mr-3" />
+              Help & Resources
+            </Link>
+          </div>
+        </nav>
+
+        <div className="p-4 border-t border-slate-100">
+          <Link
+            to="/new-project"
+            className="bg-primary-600 hover:bg-primary-700 text-white rounded-md py-2 px-4 w-full flex items-center justify-center"
+          >
+            <PlusCircle className="h-4 w-4 mr-2" />
+            <span>New Project</span>
+          </Link>
+        </div>
       </div>
     </aside>
   );

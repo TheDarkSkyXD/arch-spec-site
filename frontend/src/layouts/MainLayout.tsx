@@ -14,14 +14,14 @@ const MainLayout = ({
   projectId,
 }: MainLayoutProps) => {
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
+    <div className="flex flex-col min-h-screen bg-slate-50">
       <Navbar />
 
-      <div className="flex flex-1">
+      <div className="pt-16 flex-1">
         {showSidebar && <Sidebar projectId={projectId} />}
 
-        <main className={`flex-1 p-6 ${showSidebar ? "ml-0" : ""}`}>
-          {children}
+        <main className={`${showSidebar ? "md:ml-64" : ""}`}>
+          <div className="p-5 md:p-8 h-full">{children}</div>
         </main>
       </div>
     </div>

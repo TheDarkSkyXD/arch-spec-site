@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { ArrowLeft, FileText, Code, Database, Box } from "lucide-react";
 import MainLayout from "../layouts/MainLayout";
 import ProgressBar from "../components/common/ProgressBar";
 import ProjectBasicsForm from "../components/forms/ProjectBasicsForm";
@@ -8,11 +9,11 @@ import { useProjectStore } from "../store/projectStore";
 import { mockTemplates } from "../data/mockData";
 
 const steps = [
-  { id: "basics", name: "Project Basics" },
-  { id: "tech-stack", name: "Tech Stack" },
-  { id: "features", name: "Features" },
-  { id: "data-model", name: "Data Model" },
-  { id: "review", name: "Review" },
+  { id: "basics", name: "Project Basics", icon: <FileText size={16} /> },
+  { id: "tech-stack", name: "Tech Stack", icon: <Code size={16} /> },
+  { id: "features", name: "Features", icon: <Database size={16} /> },
+  { id: "data-model", name: "Data Model", icon: <Database size={16} /> },
+  { id: "review", name: "Review", icon: <Box size={16} /> },
 ];
 
 const NewProject = () => {
@@ -20,7 +21,7 @@ const NewProject = () => {
   const [searchParams] = useSearchParams();
   const templateId = searchParams.get("template");
 
-  const { createProject, isLoading } = useProjectStore();
+  const { createProject } = useProjectStore();
   const [currentStep, setCurrentStep] = useState("basics");
   const [formData, setFormData] = useState({
     basics: {
@@ -51,27 +52,27 @@ const NewProject = () => {
           ...prev,
           techStack: {
             ...prev.techStack,
-            frontend: template.tech_stack.frontend,
-            backend: template.tech_stack.backend,
-            database: template.tech_stack.database,
+            frontend: template.tech_stack?.frontend || "",
+            backend: template.tech_stack?.backend || "",
+            database: template.tech_stack?.database || "",
           },
         }));
       }
     }
   }, [templateId]);
 
-  const handleBasicsSubmit = (data: any) => {
+  const handleBasicsSubmit = (data: Record<string, unknown>) => {
     setFormData((prev) => ({
       ...prev,
-      basics: data,
+      basics: data as typeof prev.basics,
     }));
     setCurrentStep("tech-stack");
   };
 
-  const handleTechStackSubmit = (data: any) => {
+  const handleTechStackSubmit = (data: Record<string, unknown>) => {
     setFormData((prev) => ({
       ...prev,
-      techStack: data,
+      techStack: data as typeof prev.techStack,
     }));
 
     // In a real app, we would continue to the next step
@@ -132,18 +133,28 @@ const NewProject = () => {
 
   return (
     <MainLayout showSidebar={false}>
-      <div className="max-w-3xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Create New Project
-          </h1>
-          <p className="mt-2 text-lg text-gray-600">
-            Define your project specifications to generate a detailed
-            implementation plan
-          </p>
+      <div className="w-full h-full">
+        {/* Header with back button */}
+        <div className="flex items-center mb-6">
+          <button
+            onClick={() => navigate("/")}
+            className="mr-4 p-2 rounded-full hover:bg-slate-100 text-slate-500"
+          >
+            <ArrowLeft size={20} />
+          </button>
+          <div>
+            <h1 className="text-2xl font-bold text-slate-800 font-heading">
+              Create New Project
+            </h1>
+            <p className="text-slate-500 mt-1">
+              Define your project specifications to generate an architecture
+              plan
+            </p>
+          </div>
         </div>
 
-        <div className="bg-white shadow-sm rounded-lg border border-gray-200 p-6">
+        {/* Main content */}
+        <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
           <ProgressBar
             steps={steps}
             currentStep={currentStep}
