@@ -332,11 +332,11 @@ graph TD
 │   │   ├── pages/
 │   │   ├── services/
 │   │   ├── utils/
-│   │   ├── App.js
-│   │   ├── index.js
-│   │   └── router.js
+│   │   ├── App.tsx
+│   │   ├── index.tsx
+│   │   └── router.ts
 │   ├── package.json
-│   └── vite.config.js
+│   └── vite.config.ts
 ├── backend/
 │   ├── app/
 │   │   ├── api/
@@ -363,9 +363,7 @@ graph TD
 │   ├── tests/
 │   │   ├── api/
 │   │   └── services/
-│   ├── requirements.txt
-│   └── Dockerfile
-├── docker-compose.yml
+│   └── requirements.txt
 └── README.md
 ```
 
@@ -373,7 +371,7 @@ graph TD
 
 #### 6.2.1 Frontend Implementation
 
-**App.js**
+**App.tsx**
 
 ```javascript
 import React from "react";
@@ -397,7 +395,7 @@ function App() {
 export default App;
 ```
 
-**services/api.js**
+**services/api.ts**
 
 ```javascript
 import axios from "axios";
@@ -438,7 +436,7 @@ export const exportService = {
 };
 ```
 
-**components/review/DiagramViewer.js**
+**components/review/DiagramViewer.tsx**
 
 ```javascript
 import React, { useEffect, useRef } from "react";
@@ -834,7 +832,7 @@ async def test_generate_artifacts(generator_service, sample_specification):
 
 ### 7.2 Frontend Tests
 
-**src/components/common/Navbar.test.js**
+**src/components/common/Navbar.test.ts**
 
 ```javascript
 import React from "react";
@@ -865,7 +863,7 @@ test("renders navigation links", () => {
 });
 ```
 
-**src/pages/Dashboard.test.js**
+**src/pages/Dashboard.test.ts**
 
 ```javascript
 import React from "react";
@@ -919,9 +917,8 @@ test("renders projects when loaded", async () => {
 
 ### 8.1 Prerequisites
 
-- Node.js 18.x or higher
-- Python 3.9 or higher
-- Docker and Docker Compose (optional)
+- Node.js 22.x or higher
+- Python 3.12 or higher
 
 ### 8.2 Frontend Setup
 
@@ -955,16 +952,6 @@ export OPENAI_API_KEY=your_openai_api_key  # On Windows: set OPENAI_API_KEY=your
 
 # Start the development server
 uvicorn app.main:app --reload
-```
-
-### 8.4 Docker Setup
-
-```bash
-# Start both frontend and backend
-docker-compose up -d
-
-# View logs
-docker-compose logs -f
 ```
 
 ## 9. Roadmap for Incremental Development
