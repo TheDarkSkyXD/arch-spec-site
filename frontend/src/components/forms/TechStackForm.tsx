@@ -50,19 +50,19 @@ const TechStackForm = ({
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
       {/* Frontend Section */}
       <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Frontend</h3>
+        <h3 className="text-lg font-medium text-slate-800 mb-4">Frontend</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div>
             <label
               htmlFor="frontend"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-slate-700"
             >
               Framework
             </label>
             <select
               id="frontend"
               {...register("frontend")}
-              className={`mt-1 input ${
+              className={`mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm ${
                 errors.frontend ? "border-red-500 focus:ring-red-500" : ""
               }`}
             >
@@ -83,14 +83,14 @@ const TechStackForm = ({
           <div>
             <label
               htmlFor="frontend_language"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-slate-700"
             >
               Language
             </label>
             <select
               id="frontend_language"
               {...register("frontend_language")}
-              className={`mt-1 input ${
+              className={`mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm ${
                 errors.frontend_language
                   ? "border-red-500 focus:ring-red-500"
                   : ""
@@ -110,14 +110,14 @@ const TechStackForm = ({
           <div>
             <label
               htmlFor="ui_library"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-slate-700"
             >
               UI Library
             </label>
             <select
               id="ui_library"
               {...register("ui_library")}
-              className="mt-1 input"
+              className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm"
             >
               <option value="">Select UI Library</option>
               <option value="Tailwind CSS">Tailwind CSS</option>
@@ -132,19 +132,19 @@ const TechStackForm = ({
 
       {/* Backend Section */}
       <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Backend</h3>
+        <h3 className="text-lg font-medium text-slate-800 mb-4">Backend</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label
               htmlFor="backend"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-slate-700"
             >
               Type
             </label>
             <select
               id="backend"
               {...register("backend")}
-              className={`mt-1 input ${
+              className={`mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm ${
                 errors.backend ? "border-red-500 focus:ring-red-500" : ""
               }`}
             >
@@ -165,14 +165,14 @@ const TechStackForm = ({
           <div>
             <label
               htmlFor="backend_provider"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-slate-700"
             >
               Provider (if applicable)
             </label>
             <select
               id="backend_provider"
               {...register("backend_provider")}
-              className="mt-1 input"
+              className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm"
             >
               <option value="">Select Provider</option>
               <option value="AWS Lambda">AWS Lambda</option>
@@ -188,19 +188,19 @@ const TechStackForm = ({
 
       {/* Database Section */}
       <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Database</h3>
+        <h3 className="text-lg font-medium text-slate-800 mb-4">Database</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label
               htmlFor="database"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-slate-700"
             >
               Type
             </label>
             <select
               id="database"
               {...register("database")}
-              className={`mt-1 input ${
+              className={`mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm ${
                 errors.database ? "border-red-500 focus:ring-red-500" : ""
               }`}
             >
@@ -222,14 +222,14 @@ const TechStackForm = ({
           <div>
             <label
               htmlFor="database_provider"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-slate-700"
             >
               Provider (if applicable)
             </label>
             <select
               id="database_provider"
               {...register("database_provider")}
-              className="mt-1 input"
+              className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm"
             >
               <option value="">Select Provider</option>
               <option value="AWS RDS">AWS RDS</option>
@@ -244,62 +244,55 @@ const TechStackForm = ({
 
       {/* Authentication Section */}
       <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-4">
+        <h3 className="text-lg font-medium text-slate-800 mb-4">
           Authentication
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label
               htmlFor="auth_provider"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-slate-700"
             >
               Provider
             </label>
             <select
               id="auth_provider"
               {...register("auth_provider")}
-              className="mt-1 input"
+              className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm"
             >
               <option value="">Select Auth Provider</option>
-              <option value="Custom">Custom</option>
               <option value="Firebase Auth">Firebase Auth</option>
               <option value="Auth0">Auth0</option>
+              <option value="Cognito">AWS Cognito</option>
               <option value="Supabase Auth">Supabase Auth</option>
-              <option value="Clerk">Clerk</option>
-              <option value="NextAuth">NextAuth</option>
+              <option value="Custom">Custom Implementation</option>
+              <option value="None">None</option>
             </select>
           </div>
 
           <div>
             <label
               htmlFor="auth_methods"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-slate-700"
             >
               Methods
             </label>
-            <input
+            <select
               id="auth_methods"
-              type="text"
-              placeholder="e.g. Email/Password, Google, GitHub"
               {...register("auth_methods")}
-              className="mt-1 input"
-            />
+              className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm"
+            >
+              <option value="">Select Auth Methods</option>
+              <option value="Email/Password">Email/Password</option>
+              <option value="Social">Social Logins</option>
+              <option value="Email/Password + Social">
+                Email/Password + Social
+              </option>
+              <option value="SSO">SSO</option>
+              <option value="Multi-factor">Multi-factor Authentication</option>
+            </select>
           </div>
         </div>
-      </div>
-
-      <div className="flex justify-end space-x-4 pt-4">
-        <button type="button" onClick={onBack} className="btn btn-secondary">
-          Back
-        </button>
-
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="btn btn-primary"
-        >
-          {isSubmitting ? "Saving..." : "Next"}
-        </button>
       </div>
     </form>
   );

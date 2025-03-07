@@ -5,7 +5,6 @@ import {
   FileText,
   Code,
   Database,
-  Box,
   CheckCircle,
   ChevronLeft,
   ChevronRight,
