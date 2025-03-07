@@ -1,0 +1,202 @@
+{
+  "templateId": "general-web-application",
+  "templateName": "Web Application",
+  "templateDescription": "Standard web application template with customizable frontend, backend, and database options",
+  "templateThumbnail": "web-app-template.png",
+  "projectInformation": {
+    "name": "",
+    "description": "",
+    "businessObjectives": [],
+    "targetPlatforms": ["web"],
+    "targetAudience": "",
+    "developmentTimeline": "",
+    "businessConstraints": []
+  },
+  "technologyStack": {
+    "frontend": {
+      "framework": {
+        "options": ["react", "angular", "vue", "svelte", "vanilla"],
+        "selected": "",
+        "version": ""
+      },
+      "stateManagement": {
+        "options": {
+          "react": ["redux", "context-api", "mobx", "zustand", "recoil"],
+          "angular": ["ngrx", "rxjs", "akita"],
+          "vue": ["vuex", "pinia"],
+          "svelte": ["svelte-store"],
+          "vanilla": ["custom"]
+        },
+        "selected": ""
+      },
+      "styling": {
+        "options": ["css", "sass", "tailwind", "styled-components", "material-ui", "bootstrap", "chakra-ui"],
+        "selected": ""
+      },
+      "routing": {
+        "options": {
+          "react": ["react-router"],
+          "angular": ["angular-router"],
+          "vue": ["vue-router"],
+          "svelte": ["svelte-routing"],
+          "vanilla": ["custom"]
+        },
+        "selected": ""
+      }
+    },
+    "backend": {
+      "type": {
+        "options": ["custom", "baas", "serverless"],
+        "selected": ""
+      },
+      "language": {
+        "options": ["javascript", "typescript", "python", "java", "c#", "go", "ruby"],
+        "selected": ""
+      },
+      "framework": {
+        "options": {
+          "javascript": ["express", "koa", "nest", "hapi"],
+          "typescript": ["nest", "express", "koa", "hapi"],
+          "python": ["django", "flask", "fastapi"],
+          "java": ["spring-boot", "quarkus", "micronaut"],
+          "c#": ["asp-net-core", "minimal-api"],
+          "go": ["gin", "echo", "fiber"],
+          "ruby": ["rails", "sinatra"]
+        },
+        "selected": ""
+      },
+      "baas": {
+        "options": ["firebase", "supabase", "appwrite", "amplify", "backendless"],
+        "selected": ""
+      },
+      "serverless": {
+        "options": ["aws-lambda", "azure-functions", "gcp-functions", "cloudflare-workers", "vercel-serverless"],
+        "selected": ""
+      }
+    },
+    "database": {
+      "type": {
+        "options": ["relational", "document", "graph", "key-value", "time-series", "baas"],
+        "selected": ""
+      },
+      "relational": {
+        "options": ["postgresql", "mysql", "mariadb", "sqlite", "oracle", "sqlserver"],
+        "selected": ""
+      },
+      "document": {
+        "options": ["mongodb", "couchdb", "firestore"],
+        "selected": ""
+      },
+      "graph": {
+        "options": ["neo4j", "arangodb", "janusgraph"],
+        "selected": ""
+      },
+      "keyValue": {
+        "options": ["redis", "dynamodb", "etcd"],
+        "selected": ""
+      },
+      "timesSeries": {
+        "options": ["influxdb", "timescaledb", "prometheus"],
+        "selected": ""
+      },
+      "orm": {
+        "options": {
+          "javascript": ["sequelize", "prisma", "typeorm", "mongoose"],
+          "typescript": ["prisma", "typeorm", "sequelize", "mongoose"],
+          "python": ["sqlalchemy", "django-orm", "peewee"],
+          "java": ["hibernate", "jpa"],
+          "c#": ["entity-framework", "dapper"],
+          "go": ["gorm", "sqlx"],
+          "ruby": ["active-record"]
+        },
+        "selected": ""
+      }
+    },
+    "authentication": {
+      "provider": {
+        "options": ["custom-jwt", "oauth2", "oidc", "firebase-auth", "supabase-auth", "auth0", "cognito", "clerk"],
+        "selected": ""
+      },
+      "methods": {
+        "options": ["email-password", "google", "facebook", "github", "apple", "twitter", "linkedin", "phone", "magic-link", "saml"],
+        "selected": []
+      }
+    },
+    "hosting": {
+      "frontend": {
+        "options": ["vercel", "netlify", "github-pages", "firebase-hosting", "aws-amplify", "azure-static-web-apps", "cloudflare-pages"],
+        "selected": ""
+      },
+      "backend": {
+        "options": ["heroku", "aws", "gcp", "azure", "digital-ocean", "render", "railway", "fly.io"],
+        "selected": ""
+      },
+      "database": {
+        "options": ["managed-service", "self-hosted", "baas-provided"],
+        "selected": ""
+      }
+    },
+    "devOps": {
+      "cicd": {
+        "options": ["github-actions", "gitlab-ci", "jenkins", "circleci", "travis-ci", "azure-devops"],
+        "selected": ""
+      },
+      "containerization": {
+        "options": ["docker", "podman", "none"],
+        "selected": ""
+      },
+      "orchestration": {
+        "options": ["kubernetes", "docker-swarm", "nomad", "none"],
+        "selected": ""
+      }
+    }
+  },
+  "authentication": {
+    "userRoles": [],
+    "permissions": [],
+    "userProfileFields": [],
+    "sessionManagement": {
+      "type": "",
+      "refreshToken": false,
+      "sessionDuration": 0
+    },
+    "passwordPolicy": {
+      "minLength": 8,
+      "requireUppercase": true,
+      "requireLowercase": true,
+      "requireNumbers": true,
+      "requireSpecialChars": true
+    }
+  },
+  "dataModels": {
+    "entities": []
+  },
+  "features": {
+    "core": [],
+    "additional": []
+  },
+  "uiComponents": {
+    "pages": [],
+    "commonComponents": []
+  },
+  "apiEndpoints": {
+    "groups": []
+  },
+  "testingStrategy": {
+    "unitTests": [],
+    "integrationTests": [],
+    "e2eTests": [],
+    "coverageTargets": {
+      "statements": 0,
+      "branches": 0,
+      "functions": 0,
+      "lines": 0
+    }
+  },
+  "deploymentConfiguration": {
+    "environments": ["development", "staging", "production"],
+    "environmentVariables": [],
+    "deploymentSteps": [],
+    "rollbackStrategy": ""
+  }
+}

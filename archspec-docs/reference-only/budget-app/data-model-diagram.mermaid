@@ -1,0 +1,48 @@
+erDiagram
+    USERS {
+        uuid id PK
+        string email
+        string full_name
+        string avatar_url
+        timestamp created_at
+        string role
+    }
+    
+    CATEGORIES {
+        uuid id PK
+        string name
+        string color
+        string icon
+        uuid user_id FK
+        boolean is_expense
+        timestamp created_at
+    }
+    
+    TRANSACTIONS {
+        uuid id PK
+        uuid user_id FK
+        uuid category_id FK
+        float amount
+        string description
+        timestamp date
+        boolean is_recurring
+        string recurrence_pattern
+        timestamp created_at
+    }
+    
+    BUDGETS {
+        uuid id PK
+        uuid user_id FK
+        uuid category_id FK
+        float amount
+        date start_date
+        date end_date
+        string period
+        timestamp created_at
+    }
+    
+    USERS ||--o{ CATEGORIES : creates
+    USERS ||--o{ TRANSACTIONS : makes
+    USERS ||--o{ BUDGETS : sets
+    CATEGORIES ||--o{ TRANSACTIONS : categorizes
+    CATEGORIES ||--o{ BUDGETS : limits
