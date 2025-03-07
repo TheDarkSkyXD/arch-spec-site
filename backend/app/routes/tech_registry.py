@@ -36,7 +36,7 @@ async def get_tech_registry():
     Tries to get it from the database first, falls back to in-memory data.
     """
     database = get_db()
-    if database:
+    if database is not None:
         # Try to get from database first
         registry = await get_registry_from_db(database)
         if registry:
@@ -60,7 +60,7 @@ async def get_tech_registry_from_db_endpoint():
     Get the technology registry from the database.
     """
     database = get_db()
-    if not database:
+    if database is None:
         raise HTTPException(status_code=503, detail="Database not available")
     
     registry = await get_registry_from_db(database)
@@ -78,7 +78,7 @@ async def get_tech_categories():
     Tries to get from database first, falls back to in-memory data.
     """
     database = get_db()
-    if database:
+    if database is not None:
         registry = await get_registry_from_db(database)
         if registry and "categories" in registry:
             categories = [cat["name"] for cat in registry["categories"]]
@@ -98,7 +98,7 @@ async def get_tech_subcategories(category: str):
         category: The technology category (e.g., 'frontend', 'backend')
     """
     database = get_db()
-    if database:
+    if database is not None:
         registry = await get_registry_from_db(database)
         if registry and "categories" in registry:
             for cat in registry["categories"]:
@@ -128,7 +128,7 @@ async def get_technologies(
     """
     # Try to get from database first
     database = get_db()
-    if database:
+    if database is not None:
         registry = await get_registry_from_db(database)
         if registry and "categories" in registry:
             if category is None:
@@ -193,7 +193,7 @@ async def validate_technology(tech_name: str):
     """
     # Try to validate against database first
     database = get_db()
-    if database:
+    if database is not None:
         registry = await get_registry_from_db(database)
         if registry and "all_technologies" in registry:
             valid_in_db = tech_name in registry["all_technologies"]
