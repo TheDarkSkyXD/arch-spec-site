@@ -19,14 +19,16 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 /**
  * Check if a template has the minimum required structure
  */
-const isValidTemplate = (template: any): boolean => {
+const isValidTemplate = (template: unknown): boolean => {
   return (
-    template &&
+    template !== null &&
+    template !== undefined &&
     typeof template === "object" &&
-    template.name &&
-    template.version &&
-    template.description &&
-    template.techStack
+    template !== null &&
+    "name" in template &&
+    "version" in template &&
+    "description" in template &&
+    "techStack" in template
   );
 };
 

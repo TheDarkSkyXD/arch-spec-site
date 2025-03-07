@@ -73,27 +73,34 @@ const NewProject = () => {
     if (selectedTemplate) {
       setFormData({
         basics: {
-          name: selectedTemplate.projectDefaults.name || "",
-          description: selectedTemplate.projectDefaults.description || "",
-          business_goals:
-            selectedTemplate.projectDefaults.businessGoals.join(", ") || "",
-          target_users:
-            selectedTemplate.projectDefaults.targetUsers.join(", ") || "",
+          name: selectedTemplate.projectDefaults?.name || "",
+          description: selectedTemplate.projectDefaults?.description || "",
+          business_goals: selectedTemplate.projectDefaults?.businessGoals
+            ?.length
+            ? selectedTemplate.projectDefaults.businessGoals.join(", ")
+            : "",
+          target_users: selectedTemplate.projectDefaults?.targetUsers?.length
+            ? selectedTemplate.projectDefaults.targetUsers.join(", ")
+            : "",
         },
         techStack: {
-          frontend: selectedTemplate.techStack.frontend.framework || "",
-          frontend_language: selectedTemplate.techStack.frontend.language || "",
-          ui_library: selectedTemplate.techStack.frontend.uiLibrary || "",
+          frontend: selectedTemplate.techStack?.frontend?.framework || "",
+          frontend_language:
+            selectedTemplate.techStack?.frontend?.language || "",
+          ui_library: selectedTemplate.techStack?.frontend?.uiLibrary || "",
           state_management:
-            selectedTemplate.techStack.frontend.stateManagement || "",
-          backend: selectedTemplate.techStack.backend.type || "",
-          backend_provider: selectedTemplate.techStack.backend.provider || "",
-          database: selectedTemplate.techStack.database.type || "",
-          database_provider: selectedTemplate.techStack.database.provider || "",
+            selectedTemplate.techStack?.frontend?.stateManagement || "",
+          backend: selectedTemplate.techStack?.backend?.type || "",
+          backend_provider: selectedTemplate.techStack?.backend?.provider || "",
+          database: selectedTemplate.techStack?.database?.type || "",
+          database_provider:
+            selectedTemplate.techStack?.database?.provider || "",
           auth_provider:
-            selectedTemplate.techStack.authentication.provider || "",
-          auth_methods:
-            selectedTemplate.techStack.authentication.methods.join(", ") || "",
+            selectedTemplate.techStack?.authentication?.provider || "",
+          auth_methods: selectedTemplate.techStack?.authentication?.methods
+            ?.length
+            ? selectedTemplate.techStack.authentication.methods.join(", ")
+            : "",
         },
       });
     }
