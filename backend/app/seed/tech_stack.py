@@ -372,7 +372,7 @@ def check_compatibility(tech_choice: Dict[str, str]) -> Dict[str, Any]:
     
     return results
 
-def get_compatible_options(category: str, technology: str) -> List[str]:
+def get_compatible_options(category: str, technology: str) -> Dict[str, List[str]]:
     """
     Get a list of compatible options for a given technology in a specific category.
     
@@ -381,7 +381,7 @@ def get_compatible_options(category: str, technology: str) -> List[str]:
         technology: The specific technology name
     
     Returns:
-        List of compatible options
+        Dictionary of compatible options with categories as keys and lists of options as values
     """
     if category == "frontend_framework":
         for fw in TECH_STACK_DATA["techStackOptions"]["frontend"]["frameworks"]:
@@ -413,4 +413,5 @@ def get_compatible_options(category: str, technology: str) -> List[str]:
                         "hosting": db["compatibility"].get("hosting", [])
                     }
     
-    return []
+    # Return an empty dictionary instead of an empty list
+    return {}
