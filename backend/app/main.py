@@ -20,6 +20,10 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Set logging level to DEBUG for our app modules
+for logger_name in ["app.seed.tech_registry_db", "app.seed.templates"]:
+    logging.getLogger(logger_name).setLevel(logging.DEBUG)
+
 # Import configuration and database
 from .core.config import settings
 from .db.base import db
@@ -27,6 +31,7 @@ from .db.base import db
 # Import API router and seed data modules
 from .api.api import api_router
 from .seed.templates import seed_templates
+from .seed.tech_registry_db import seed_tech_registry
 
 HAS_API_ROUTER = True
 
@@ -36,6 +41,17 @@ async def lifespan(app: FastAPI):
     Application lifespan context manager.
     
     This handles setup and teardown for the application.
+    
+    During startup, it:
+    1. Connects to MongoDB
+    2. Seeds the tech registry to the database (creates or updates)
+       - The tech registry is the central source of truth for all technology names
+       - See /app/seed/README.md for more information
+    3. Seeds project templates to the database (creates, updates, or marks deprecated)
+       - Templates are validated against the tech registry for consistency
+    
+    During shutdown, it:
+    1. Closes MongoDB connection
     """
     # Setup
     try:
@@ -48,8 +64,18 @@ async def lifespan(app: FastAPI):
             # Seed database with sample data if needed
             database = db.get_db()
             if database is not None:
+                print("Database connection available, proceeding with seeding")
+                # Seed tech registry data
+                print("Starting tech registry seeding...")
+                await seed_tech_registry(database)
+                print("Tech registry seeding complete")
+                
                 # Seed template data
+                print("Starting template seeding...")
                 await seed_templates(database)
+                print("Template seeding complete")
+            else:
+                print("Database connection not available, skipping seeding")
         except Exception as e:
             logger.error(f"Error during MongoDB initialization: {str(e)}")
         

@@ -6,6 +6,13 @@ This module provides functions to check compatibility between different technolo
 import logging
 from typing import Dict, List, Optional, Any, Set, Tuple, Union
 
+from app.seed.tech_registry import (
+    is_valid_tech, 
+    get_category_for_tech,
+    get_technologies_in_category,
+    TECH_REGISTRY
+)
+
 logger = logging.getLogger(__name__)
 
 # Tech stack data from the JSON file
@@ -287,6 +294,16 @@ def check_compatibility(tech_choice: Dict[str, str]) -> Dict[str, Any]:
                 "compatible_options": Dict[str, List[str]]
             }
     """
+    # First validate that all technology choices exist in the registry
+    for key, value in tech_choice.items():
+        if not is_valid_tech(value):
+            return {
+                "is_compatible": False,
+                "compatibility_issues": [f"Unknown technology: {value}"],
+                "compatible_options": {}
+            }
+    
+    # Now continue with compatibility checking as before
     results = {
         "is_compatible": True,
         "compatibility_issues": [],

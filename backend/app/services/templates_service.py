@@ -5,7 +5,12 @@ import logging
 from typing import List, Dict, Optional, Any
 from bson import ObjectId
 from ..db.base import db
-from ..seed.templates import get_templates, get_template_by_id
+from ..seed.templates import (
+    get_templates, 
+    get_template_by_id, 
+    get_templates_from_db,
+    get_template_by_id_from_db
+)
 
 logger = logging.getLogger(__name__)
 
@@ -21,21 +26,19 @@ class TemplatesService:
             List of project templates
         """
         try:
-            # Try fetching from database first
+            # Try fetching from database using our new function
             database = db.get_db()
             if database is not None:
-                templates_collection = database.get_collection("templates")
-                cursor = templates_collection.find({})
-                templates = await cursor.to_list(length=100)
+                templates = await get_templates_from_db(database)
                 
                 if templates and len(templates) > 0:
-                    # Convert ObjectIds to strings for JSON serialization
-                    # And ensure each template is in the correct format with id and template fields
+                    # Format the templates for the API response
                     formatted_templates = []
                     for template in templates:
-                        template_id = str(template.pop("_id")) if "_id" in template else template.get("id", "unknown")
+                        # Extract the id
+                        template_id = template.get("id", str(template.get("_id", "unknown")))
                         # Ensure the template has all required fields
-                        complete_template = TemplatesService._ensure_complete_template(template)
+                        complete_template = TemplatesService._ensure_complete_template(template.get("template", template))
                         # Ensure each template in the response has id and template fields
                         formatted_templates.append({
                             "id": template_id,
@@ -82,41 +85,21 @@ class TemplatesService:
             Project template or None if not found
         """
         try:
-            # Try fetching from database first
+            # Try fetching from database using our new function
             database = db.get_db()
             if database is not None:
-                templates_collection = database.get_collection("templates")
+                template = await get_template_by_id_from_db(database, template_id)
                 
-                # Try to convert string ID to ObjectId (if it's a valid ObjectId)
-                try:
-                    obj_id = ObjectId(template_id)
-                    template = await templates_collection.find_one({"_id": obj_id})
-                    
-                    if template:
-                        # Convert ObjectId to string
-                        template_id = str(template.pop("_id")) if "_id" in template else template.get("id", template_id)
-                        # Ensure the template has all required fields
-                        complete_template = TemplatesService._ensure_complete_template(template)
-                        # Return in the expected format with id and template fields
-                        return {
-                            "id": template_id,
-                            "template": complete_template
-                        }
-                        
-                except Exception:
-                    # If not a valid ObjectId, search by string ID
-                    template = await templates_collection.find_one({"id": template_id})
-                    if template:
-                        if "_id" in template:
-                            # Convert ObjectId to string and remove from template
-                            mongo_id = str(template.pop("_id"))
-                        # Ensure the template has all required fields
-                        complete_template = TemplatesService._ensure_complete_template(template)
-                        # Return in the expected format with id and template fields
-                        return {
-                            "id": template.get("id", template_id),
-                            "template": complete_template
-                        }
+                if template:
+                    # Format the template for API response
+                    template_id = template.get("id", str(template.get("_id", template_id)))
+                    # Ensure the template has all required fields
+                    complete_template = TemplatesService._ensure_complete_template(template.get("template", template))
+                    # Return in the expected format with id and template fields
+                    return {
+                        "id": template_id,
+                        "template": complete_template
+                    }
             
             # Fallback to seed data if database is not available or template not found
             logger.info(f"Template {template_id} not found in database, checking seed data")
