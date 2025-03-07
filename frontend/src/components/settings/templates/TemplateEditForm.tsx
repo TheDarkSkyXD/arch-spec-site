@@ -16,10 +16,11 @@ const TemplateEditForm = ({
       <h2 className="text-xl font-semibold mb-6">Edit Template</h2>
       <div className="bg-blue-50 border border-blue-200 rounded-md p-4 mb-6">
         <p className="text-sm text-blue-700">
-          Template editing feature is coming soon. This UI demonstrates how it will work.
+          To edit the actual template, use the JSON editor (Cancel or Save to
+          exit edit mode).
         </p>
       </div>
-      
+
       <div className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-1">

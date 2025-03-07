@@ -62,13 +62,28 @@ const TemplateManagement = () => {
   };
 
   const handleSaveEdit = () => {
-    alert("This feature is coming soon!");
+    alert("Template edit feature is coming soon!");
     setIsEditing(false);
+    fetchTemplates();
   };
 
   const handleSaveCreate = () => {
-    alert("This feature is coming soon!");
+    alert("Template creation feature is coming soon!");
     setIsCreating(false);
+    fetchTemplates();
+  };
+
+  const handleTemplateUpdated = () => {
+    fetchTemplates();
+    if (selectedTemplate?.id) {
+      templatesService
+        .getTemplateById(selectedTemplate.id)
+        .then((updatedTemplate) => {
+          if (updatedTemplate) {
+            setSelectedTemplate(updatedTemplate);
+          }
+        });
+    }
   };
 
   const renderMainContent = () => {
@@ -96,6 +111,7 @@ const TemplateManagement = () => {
         onEdit={() => handleEditTemplate()}
         onCreateNew={handleCreateNew}
         onCancel={handleCancel}
+        onTemplateUpdated={handleTemplateUpdated}
       />
     );
   };

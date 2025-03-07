@@ -108,4 +108,43 @@ export const templatesService = {
       return null;
     }
   },
+
+  /**
+   * Update a project template by ID.
+   *
+   * @param id - Template ID
+   * @param templateData - Updated template data
+   * @returns Promise containing the updated project template
+   */
+  async updateTemplate(
+    id: string,
+    templateData: Partial<ProjectTemplate>
+  ): Promise<ProjectTemplate | null> {
+    try {
+      const response = await axios.put<TemplateResponse>(
+        `${API_URL}/api/templates/${id}`,
+        templateData
+      );
+
+      if (
+        !response.data ||
+        !response.data.template ||
+        !isValidTemplate(response.data.template)
+      ) {
+        console.error(
+          "Invalid template structure in API response:",
+          response.data
+        );
+        return null;
+      }
+
+      return {
+        ...response.data.template,
+        id: response.data.id,
+      };
+    } catch (error) {
+      console.error(`Error updating template ${id}:`, error);
+      return null;
+    }
+  },
 };

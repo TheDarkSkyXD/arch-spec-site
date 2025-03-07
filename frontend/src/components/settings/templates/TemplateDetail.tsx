@@ -1,7 +1,16 @@
-import { Edit, Info, Plus, ChevronDown, ChevronUp } from "lucide-react";
+import {
+  Edit,
+  Info,
+  Plus,
+  ChevronDown,
+  ChevronUp,
+  Save,
+  X,
+} from "lucide-react";
 import { ProjectTemplate } from "../../../types";
 import { useState, useEffect } from "react";
 import JsonEditor from "../../common/JsonEditor";
+import { templatesService } from "../../../services/templatesService";
 
 interface TemplateDetailProps {
   selectedTemplate: ProjectTemplate | null;
@@ -10,6 +19,7 @@ interface TemplateDetailProps {
   onEdit: () => void;
   onCreateNew: () => void;
   onCancel: () => void;
+  onTemplateUpdated?: () => void;
 }
 
 const TemplateDetail = ({
@@ -19,15 +29,22 @@ const TemplateDetail = ({
   onEdit,
   onCreateNew,
   onCancel: _onCancel, // Prefix with _ to avoid linter warnings
+  onTemplateUpdated,
 }: TemplateDetailProps) => {
   const [isJsonExpanded, setIsJsonExpanded] = useState(false);
+  const [isJsonEditing, setIsJsonEditing] = useState(false);
+  const [editedTemplate, setEditedTemplate] = useState<ProjectTemplate | null>(
+    null
+  );
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
-  // Remove unused state variables - note these are referenced in the linter warnings
-  // const [temporaryTemplate, setTemporaryTemplate] = useState<ProjectTemplate | null>(selectedTemplate);
-
-  // useEffect(() => {
-  //   setTemporaryTemplate(selectedTemplate);
-  // }, [selectedTemplate]);
+  // Update editedTemplate when selectedTemplate changes
+  useEffect(() => {
+    setEditedTemplate(selectedTemplate);
+    setIsJsonEditing(false);
+    setSaveError(null);
+  }, [selectedTemplate]);
 
   // No template selected and not creating a new one
   if (!selectedTemplate && !isCreating) {
@@ -53,6 +70,46 @@ const TemplateDetail = ({
       </div>
     );
   }
+
+  // Handle JSON edit action
+  const handleJsonEdit = (edit: { updated_src: Record<string, unknown> }) => {
+    setEditedTemplate(edit.updated_src as unknown as ProjectTemplate);
+  };
+
+  // Handle save action for template edited in JSON view
+  const handleSaveTemplateJson = async () => {
+    if (!editedTemplate || !selectedTemplate?.id) return;
+
+    try {
+      setIsSaving(true);
+      setSaveError(null);
+
+      const result = await templatesService.updateTemplate(
+        selectedTemplate.id,
+        editedTemplate
+      );
+
+      if (result) {
+        // Success - update view state
+        setIsJsonEditing(false);
+        // Notify parent component that template was updated
+        if (onTemplateUpdated) {
+          onTemplateUpdated();
+        }
+      } else {
+        setSaveError("Failed to save template. See console for details.");
+      }
+    } catch (error) {
+      console.error("Error saving template:", error);
+      setSaveError(
+        `Error saving template: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   // Template is selected - show detail view
   if (selectedTemplate) {
@@ -185,10 +242,15 @@ const TemplateDetail = ({
             className="w-full flex items-center justify-between text-sm font-medium text-slate-700 hover:text-primary-600 transition-colors"
           >
             <span className="flex items-center">
-              <span className="mr-2">View JSON Data</span>
+              <span className="mr-2">View/Edit JSON Data</span>
               <span className="text-xs bg-slate-100 px-2 py-0.5 rounded text-slate-600">
                 Developer
               </span>
+              {isJsonEditing && (
+                <span className="ml-2 text-xs bg-yellow-100 px-2 py-0.5 rounded text-yellow-700">
+                  Editing
+                </span>
+              )}
             </span>
             {isJsonExpanded ? (
               <ChevronUp className="w-4 h-4" />
@@ -199,14 +261,83 @@ const TemplateDetail = ({
 
           {isJsonExpanded && (
             <div className="mt-4 animate-slideDown overflow-hidden">
+              {/* JSON Editor and controls */}
+              <div className="flex justify-between items-center mb-4">
+                <div className="flex items-center">
+                  <h4 className="text-sm font-medium text-slate-700">
+                    Template JSON
+                  </h4>
+                  {!isJsonEditing && (
+                    <button
+                      onClick={() => setIsJsonEditing(true)}
+                      className="ml-4 px-3 py-1 text-xs border border-slate-300 text-slate-700 rounded-md hover:bg-slate-50 flex items-center"
+                    >
+                      <Edit className="w-3.5 h-3.5 mr-1" />
+                      Edit JSON
+                    </button>
+                  )}
+                </div>
+
+                {isJsonEditing && (
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => {
+                        setIsJsonEditing(false);
+                        setEditedTemplate(selectedTemplate); // Reset to original
+                        setSaveError(null);
+                      }}
+                      className="px-3 py-1.5 text-sm border border-slate-300 text-slate-700 rounded-md hover:bg-slate-50 flex items-center"
+                      disabled={isSaving}
+                    >
+                      <X className="w-4 h-4 mr-1.5" />
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleSaveTemplateJson}
+                      className="px-3 py-1.5 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 flex items-center"
+                      disabled={isSaving}
+                    >
+                      {isSaving ? (
+                        <>
+                          <span className="animate-spin h-4 w-4 mr-1.5 border-2 border-white border-t-transparent rounded-full"></span>
+                          Saving...
+                        </>
+                      ) : (
+                        <>
+                          <Save className="w-4 h-4 mr-1.5" />
+                          Save Changes
+                        </>
+                      )}
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {saveError && (
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-600 text-sm">
+                  {saveError}
+                </div>
+              )}
+
               <JsonEditor
-                data={selectedTemplate as unknown as Record<string, unknown>}
-                readOnly={true}
+                data={
+                  editedTemplate ||
+                  (selectedTemplate as unknown as Record<string, unknown>)
+                }
+                onEdit={isJsonEditing ? handleJsonEdit : undefined}
+                readOnly={!isJsonEditing}
               />
+
               <div className="mt-4 bg-blue-50 border border-blue-200 rounded-md p-4">
                 <p className="text-sm text-blue-700">
-                  <strong>Note:</strong> This is a read-only view of the
-                  template data. To make changes, click the Edit button above.
+                  {isJsonEditing ? (
+                    <strong>Warning:</strong>
+                  ) : (
+                    <strong>Note:</strong>
+                  )}{" "}
+                  {isJsonEditing
+                    ? "Editing the JSON directly can modify the template structure. Make sure to maintain valid data formats."
+                    : "This is a read-only view of the template data. Click Edit JSON to make changes."}
                 </p>
               </div>
             </div>

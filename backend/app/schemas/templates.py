@@ -5,18 +5,24 @@ class ProjectDefaults(BaseModel):
     """Project default information."""
     name: str = ""
     description: str = ""
-    business_goals: List[str] = Field(default_factory=list)
-    target_users: List[str] = Field(default_factory=list)
+    business_goals: List[str] = Field(default_factory=list, alias="businessGoals")
+    target_users: List[str] = Field(default_factory=list, alias="targetUsers")
+
+    class Config:
+        allow_population_by_field_name = True
 
 class TechStackFrontend(BaseModel):
     """Frontend tech stack configuration."""
     framework: str
     language: str
-    state_management: Optional[str] = None
-    ui_library: Optional[str] = None
-    form_handling: Optional[str] = None
+    state_management: Optional[str] = Field(None, alias="stateManagement")
+    ui_library: Optional[str] = Field(None, alias="uiLibrary")
+    form_handling: Optional[str] = Field(None, alias="formHandling")
     routing: Optional[str] = None
     options: List[str] = Field(default_factory=list)
+
+    class Config:
+        allow_population_by_field_name = True
 
 class TechStackBackend(BaseModel):
     """Backend tech stack configuration."""
@@ -60,7 +66,10 @@ class FeatureModule(BaseModel):
 
 class Features(BaseModel):
     """Features configuration."""
-    core_modules: List[FeatureModule] = Field(default_factory=list)
+    core_modules: List[FeatureModule] = Field(default_factory=list, alias="coreModules")
+
+    class Config:
+        allow_population_by_field_name = True
 
 class PageComponent(BaseModel):
     """Page component."""
@@ -99,6 +108,9 @@ class Relationship(BaseModel):
     from_entity: str = Field(alias="from")
     to: str
     field: str
+    
+    class Config:
+        allow_population_by_field_name = True
 
 class DataModel(BaseModel):
     """Application data model."""
@@ -189,6 +201,6 @@ class ProjectTemplateResponse(BaseModel):
     id: str
     template: ProjectTemplate
 
-class ProjectTemplateListResponse(BaseModel):
+class ProjectTemplateList(BaseModel):
     """Response schema for a list of project templates."""
     templates: List[ProjectTemplateResponse] = Field(default_factory=list) 
