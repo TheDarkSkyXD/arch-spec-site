@@ -5,8 +5,10 @@ import logging
 from fastapi import APIRouter, HTTPException, Path, Body
 from typing import Dict, List, Any
 
-from ...schemas.templates import ProjectTemplateResponse, ProjectTemplateList
+from ...schemas.templates import ProjectTemplateResponse, ProjectTemplateList, ProjectTemplate
+from ...schemas.tech_stack import TechStackData
 from ...services.templates_service import TemplatesService
+from ...seed.tech_registry import validate_template_tech_stack
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -64,6 +66,27 @@ async def update_template(
     This endpoint allows for bulk updating of the entire template document.
     """
     try:
+        # Validate tech stack if present
+        if "techStack" in template_data:
+            try:
+                # Convert to TechStackData model for validation
+                tech_stack = TechStackData(**template_data["techStack"])
+                # Validate technologies
+                validate_result = validate_template_tech_stack(tech_stack)
+                if not validate_result["is_valid"]:
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"Invalid technologies in tech stack: {validate_result['invalid_technologies']}"
+                    )
+            except Exception as e:
+                if isinstance(e, HTTPException):
+                    raise
+                logger.error(f"Error validating tech stack: {str(e)}")
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Invalid tech stack format: {str(e)}"
+                )
+                
         updated_template = await TemplatesService.update_template(template_id, template_data)
         if not updated_template:
             raise HTTPException(

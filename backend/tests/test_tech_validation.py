@@ -13,17 +13,30 @@ class TestTechValidation(unittest.TestCase):
     
     def test_validate_project_tech_stack(self):
         """Test the validate_project_tech_stack function."""
-        # Test a valid tech stack without template
+        # Test a valid tech stack without template, using the new TechStackData format
         valid_tech_stack = {
             "frontend": {
-                "framework": "React",
-                "language": "TypeScript",
-                "stateManagement": "Redux",
-                "uiLibrary": "Material UI"
+                "frameworks": [
+                    {
+                        "name": "React",
+                        "description": "A JavaScript library for building user interfaces",
+                        "language": "TypeScript",
+                        "compatibility": {
+                            "stateManagement": ["Redux"],
+                            "uiLibraries": ["Material UI"]
+                        }
+                    }
+                ]
             },
             "backend": {
-                "framework": "Express.js",
-                "language": "TypeScript"
+                "frameworks": [
+                    {
+                        "name": "Express.js",
+                        "description": "Fast, unopinionated, minimalist web framework for Node.js",
+                        "language": "TypeScript",
+                        "compatibility": {}
+                    }
+                ]
             }
         }
         
@@ -31,33 +44,59 @@ class TestTechValidation(unittest.TestCase):
         self.assertTrue(validation_result["is_valid"])
         self.assertEqual(len(validation_result["invalid_technologies"]), 0)
         
-        # Test validation against a template
+        # Test validation against a template with the new format
         template_tech_stack = {
             "frontend": {
-                "framework": "React",
-                "language": "TypeScript",
-                "stateManagement": "Context API",
-                "uiLibrary": "Tailwind CSS",
-                "options": ["Redux", "MUI", "Styled Components"]
+                "frameworks": [
+                    {
+                        "name": "React",
+                        "description": "A JavaScript library for building user interfaces",
+                        "language": "TypeScript",
+                        "compatibility": {
+                            "stateManagement": ["Context API", "Redux", "MobX"],
+                            "uiLibraries": ["Tailwind CSS", "MUI", "Styled Components"]
+                        }
+                    }
+                ]
             },
             "backend": {
-                "type": "Serverless",
-                "provider": "Supabase",
-                "options": ["Firebase", "Custom Express", "NestJS"]
+                "frameworks": [],
+                "baas": [
+                    {
+                        "name": "Supabase",
+                        "description": "Open source Firebase alternative",
+                        "compatibility": {
+                            "options": ["Firebase", "Custom Express", "NestJS"]
+                        }
+                    }
+                ]
             }
         }
         
         # Compatible tech stack (using template defaults)
         compatible_tech_stack = {
             "frontend": {
-                "framework": "React",
-                "language": "TypeScript",
-                "stateManagement": "Context API",
-                "uiLibrary": "Tailwind CSS"
+                "frameworks": [
+                    {
+                        "name": "React",
+                        "description": "A JavaScript library for building user interfaces",
+                        "language": "TypeScript",
+                        "compatibility": {
+                            "stateManagement": ["Context API"],
+                            "uiLibraries": ["Tailwind CSS"]
+                        }
+                    }
+                ]
             },
             "backend": {
-                "type": "Serverless",
-                "provider": "Supabase"
+                "frameworks": [],
+                "baas": [
+                    {
+                        "name": "Supabase",
+                        "description": "Open source Firebase alternative",
+                        "compatibility": {}
+                    }
+                ]
             }
         }
         
@@ -68,14 +107,27 @@ class TestTechValidation(unittest.TestCase):
         # Compatible tech stack (using template options)
         compatible_options_tech_stack = {
             "frontend": {
-                "framework": "React",
-                "language": "TypeScript",
-                "stateManagement": "Redux",  # From options
-                "uiLibrary": "Tailwind CSS"
+                "frameworks": [
+                    {
+                        "name": "React",
+                        "description": "A JavaScript library for building user interfaces",
+                        "language": "TypeScript",
+                        "compatibility": {
+                            "stateManagement": ["Redux"],  # From options
+                            "uiLibraries": ["Tailwind CSS"]
+                        }
+                    }
+                ]
             },
             "backend": {
-                "type": "Serverless",
-                "provider": "Firebase"  # From options
+                "frameworks": [],
+                "baas": [
+                    {
+                        "name": "Firebase",  # From options
+                        "description": "Platform developed by Google for mobile and web applications",
+                        "compatibility": {}
+                    }
+                ]
             }
         }
         
@@ -86,14 +138,27 @@ class TestTechValidation(unittest.TestCase):
         # Incompatible tech stack
         incompatible_tech_stack = {
             "frontend": {
-                "framework": "React",
-                "language": "TypeScript",
-                "stateManagement": "MobX",  # Not in default or options
-                "uiLibrary": "Tailwind CSS"
+                "frameworks": [
+                    {
+                        "name": "React",
+                        "description": "A JavaScript library for building user interfaces",
+                        "language": "TypeScript",
+                        "compatibility": {
+                            "stateManagement": ["Zustand"],  # Not in default or options
+                            "uiLibraries": ["Tailwind CSS"]
+                        }
+                    }
+                ]
             },
             "backend": {
-                "type": "Serverless",
-                "provider": "Supabase"
+                "frameworks": [],
+                "baas": [
+                    {
+                        "name": "Supabase",
+                        "description": "Open source Firebase alternative",
+                        "compatibility": {}
+                    }
+                ]
             }
         }
         
@@ -103,11 +168,17 @@ class TestTechValidation(unittest.TestCase):
         self.assertEqual(len(validation_result["template_compatibility"]["incompatibilities"]), 1)
     
     def test_get_tech_suggestions(self):
-        """Test the get_tech_suggestions function."""
+        """Test the get_tech_suggestions function with the new schema format."""
         # Test suggestions for React frontend
         react_partial_stack = {
             "frontend": {
-                "framework": "React"
+                "frameworks": [
+                    {
+                        "name": "React",
+                        "description": "A JavaScript library for building user interfaces",
+                        "compatibility": {}
+                    }
+                ]
             }
         }
         
@@ -126,7 +197,13 @@ class TestTechValidation(unittest.TestCase):
         # Test suggestions for Vue frontend
         vue_partial_stack = {
             "frontend": {
-                "framework": "Vue.js"
+                "frameworks": [
+                    {
+                        "name": "Vue.js",
+                        "description": "The Progressive JavaScript Framework",
+                        "compatibility": {}
+                    }
+                ]
             }
         }
         
@@ -139,7 +216,13 @@ class TestTechValidation(unittest.TestCase):
         # Test suggestions for backend
         backend_partial_stack = {
             "backend": {
-                "framework": "Express.js"
+                "frameworks": [
+                    {
+                        "name": "Express.js",
+                        "description": "Fast, unopinionated, minimalist web framework for Node.js",
+                        "compatibility": {}
+                    }
+                ]
             }
         }
         
@@ -151,7 +234,13 @@ class TestTechValidation(unittest.TestCase):
         # Test invalid framework
         invalid_partial_stack = {
             "frontend": {
-                "framework": "InvalidFramework"
+                "frameworks": [
+                    {
+                        "name": "InvalidFramework",
+                        "description": "Non-existent framework",
+                        "compatibility": {}
+                    }
+                ]
             }
         }
         

@@ -15,11 +15,9 @@ All technologies referenced in templates should exist in the tech_registry.py fi
 
 See /app/seed/README.md for more detailed documentation.
 """
-import json
 import logging
-import os
 import datetime
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional
 from bson import ObjectId
 
 from ..seed.tech_registry import validate_template_tech_stack

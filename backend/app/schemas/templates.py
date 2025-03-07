@@ -1,6 +1,8 @@
 from pydantic import BaseModel, Field
 from typing import Dict, List, Optional, Any, Union
 
+from .tech_stack import TechStackData
+
 class ProjectDefaults(BaseModel):
     """Project default information."""
     name: str = ""
@@ -10,51 +12,6 @@ class ProjectDefaults(BaseModel):
 
     class Config:
         allow_population_by_field_name = True
-
-class TechStackFrontend(BaseModel):
-    """Frontend tech stack configuration."""
-    framework: str
-    language: str
-    state_management: Optional[str] = Field(None, alias="stateManagement")
-    ui_library: Optional[str] = Field(None, alias="uiLibrary")
-    form_handling: Optional[str] = Field(None, alias="formHandling")
-    routing: Optional[str] = None
-    options: List[str] = Field(default_factory=list)
-
-    class Config:
-        allow_population_by_field_name = True
-
-class TechStackBackend(BaseModel):
-    """Backend tech stack configuration."""
-    type: str
-    provider: Optional[str] = None
-    options: List[str] = Field(default_factory=list)
-
-class TechStackDatabase(BaseModel):
-    """Database tech stack configuration."""
-    type: str
-    provider: Optional[str] = None
-    options: List[str] = Field(default_factory=list)
-
-class TechStackAuthentication(BaseModel):
-    """Authentication configuration."""
-    provider: str
-    methods: List[str] = Field(default_factory=list)
-    options: List[str] = Field(default_factory=list)
-
-class TechStackHosting(BaseModel):
-    """Hosting configuration."""
-    frontend: Optional[str] = None
-    backend: Optional[str] = None
-    options: List[str] = Field(default_factory=list)
-
-class TechStack(BaseModel):
-    """Tech stack configuration."""
-    frontend: TechStackFrontend
-    backend: TechStackBackend
-    database: TechStackDatabase
-    authentication: TechStackAuthentication
-    hosting: TechStackHosting
 
 class FeatureModule(BaseModel):
     """Feature module configuration."""
@@ -108,7 +65,7 @@ class Relationship(BaseModel):
     from_entity: str = Field(alias="from")
     to: str
     field: str
-    
+
     class Config:
         allow_population_by_field_name = True
 
@@ -116,7 +73,7 @@ class DataModel(BaseModel):
     """Application data model."""
     entities: List[Entity] = Field(default_factory=list)
     relationships: List[Relationship] = Field(default_factory=list)
-    
+
     class Config:
         allow_population_by_field_name = True
 
@@ -149,7 +106,7 @@ class Testing(BaseModel):
 class ProjectStructure(BaseModel):
     """Project structure configuration."""
     frontend: Dict[str, List[str]]
-    
+
 class DeploymentEnvironment(BaseModel):
     """Deployment environment configuration."""
     name: str
@@ -183,7 +140,7 @@ class ProjectTemplate(BaseModel):
     version: str
     description: str
     project_defaults: ProjectDefaults = Field(alias="projectDefaults")
-    tech_stack: TechStack = Field(alias="techStack")
+    tech_stack: TechStackData = Field(alias="techStack")  # Using TechStackData directly
     features: Features
     pages: Pages
     data_model: DataModel = Field(alias="dataModel")
@@ -192,7 +149,7 @@ class ProjectTemplate(BaseModel):
     project_structure: ProjectStructure = Field(alias="projectStructure")
     deployment: Deployment
     documentation: Documentation
-    
+
     class Config:
         allow_population_by_field_name = True
 

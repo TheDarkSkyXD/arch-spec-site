@@ -19,7 +19,6 @@ See /app/seed/README.md for more detailed documentation.
 """
 import logging
 import datetime
-from typing import Dict, List, Any, Set
 
 from .tech_registry import TECH_REGISTRY, ALL_TECHNOLOGIES
 

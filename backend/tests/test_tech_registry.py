@@ -78,21 +78,39 @@ class TestTechRegistry(unittest.TestCase):
     
     def test_validate_template_tech_stack(self):
         """Test the validate_template_tech_stack function."""
-        # Test a valid tech stack
+        # Test a valid tech stack with the new structure
         valid_tech_stack = {
             "frontend": {
-                "framework": "React",
-                "language": "TypeScript",
-                "stateManagement": "Redux",
-                "uiLibrary": "Material UI"
+                "frameworks": [
+                    {
+                        "name": "React",
+                        "description": "A JavaScript library for building user interfaces",
+                        "language": "TypeScript",
+                        "compatibility": {
+                            "stateManagement": ["Redux"],
+                            "uiLibraries": ["Material UI"]
+                        }
+                    }
+                ]
             },
             "backend": {
-                "framework": "Express.js",
-                "language": "TypeScript"
+                "frameworks": [
+                    {
+                        "name": "Express.js",
+                        "description": "Fast, unopinionated, minimalist web framework for Node.js",
+                        "language": "TypeScript",
+                        "compatibility": {}
+                    }
+                ]
             },
             "database": {
-                "type": "PostgreSQL",
-                "provider": "Supabase"
+                "sql": [
+                    {
+                        "name": "PostgreSQL",
+                        "description": "Advanced open source relational database",
+                        "compatibility": {}
+                    }
+                ]
             }
         }
         
@@ -100,33 +118,76 @@ class TestTechRegistry(unittest.TestCase):
         self.assertTrue(validation_result["is_valid"])
         self.assertEqual(len(validation_result["invalid_technologies"]), 0)
         
-        # Test an invalid tech stack
-        invalid_tech_stack = {
+        # Test a tech stack with invalid framework
+        invalid_framework_stack = {
             "frontend": {
-                "framework": "React",
-                "language": "NotARealLanguage",  # Invalid
-                "stateManagement": "Redux"
-            },
-            "backend": {
-                "framework": "FakeFramework"  # Invalid
+                "frameworks": [
+                    {
+                        "name": "FakeFramework",  # Invalid
+                        "description": "Not a real framework",
+                        "compatibility": {}
+                    }
+                ]
             }
         }
         
-        validation_result = validate_template_tech_stack(invalid_tech_stack)
-        self.assertFalse(validation_result["is_valid"])
-        self.assertEqual(len(validation_result["invalid_technologies"]), 2)
+        # First, make sure FakeFramework is not in ALL_TECHNOLOGIES
+        self.assertFalse(is_valid_tech("FakeFramework"))
         
-        # Validate tech options list
-        tech_with_options = {
-            "frontend": {
-                "framework": "React",
-                "options": ["Redux", "Material UI", "FakeTech"]  # One invalid option
-            }
-        }
-        
-        validation_result = validate_template_tech_stack(tech_with_options)
+        validation_result = validate_template_tech_stack(invalid_framework_stack)
         self.assertFalse(validation_result["is_valid"])
         self.assertEqual(len(validation_result["invalid_technologies"]), 1)
+        
+        # Test a tech stack with invalid compatibility option
+        invalid_compatibility_stack = {
+            "frontend": {
+                "frameworks": [
+                    {
+                        "name": "React",
+                        "description": "A JavaScript library for building user interfaces",
+                        "compatibility": {
+                            "stateManagement": ["NonExistentStateManager"]  # Invalid
+                        }
+                    }
+                ]
+            }
+        }
+        
+        # Make sure NonExistentStateManager is not in ALL_TECHNOLOGIES
+        self.assertFalse(is_valid_tech("NonExistentStateManager"))
+        
+        validation_result = validate_template_tech_stack(invalid_compatibility_stack)
+        print(f"Debug - validation_result: {validation_result}")
+        self.assertFalse(validation_result["is_valid"])
+        self.assertEqual(len(validation_result["invalid_technologies"]), 1)
+        
+        # Test a tech stack with multiple invalid technologies
+        multiple_invalid_stack = {
+            "frontend": {
+                "frameworks": [
+                    {
+                        "name": "React",
+                        "description": "A JavaScript library for building user interfaces",
+                        "compatibility": {
+                            "stateManagement": ["NonExistentStateManager"]  # Invalid
+                        }
+                    }
+                ]
+            },
+            "backend": {
+                "frameworks": [
+                    {
+                        "name": "FakeFramework",  # Invalid
+                        "description": "Not a real framework",
+                        "compatibility": {}
+                    }
+                ]
+            }
+        }
+        
+        validation_result = validate_template_tech_stack(multiple_invalid_stack)
+        self.assertFalse(validation_result["is_valid"])
+        self.assertEqual(len(validation_result["invalid_technologies"]), 2)
 
 
 if __name__ == "__main__":

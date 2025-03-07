@@ -9,7 +9,8 @@ from ...schemas.tech_stack import (
     TechStackSelection, 
     CompatibilityResult, 
     CompatibleOptionsRequest,
-    CompatibleOptionsResponse
+    CompatibleOptionsResponse,
+    AllTechOptionsResponse
 )
 from ...services.tech_stack_service import TechStackService
 
@@ -51,7 +52,7 @@ async def get_compatible_options(request: CompatibleOptionsRequest):
         )
 
 
-@router.get("/options", response_model=Dict[str, Any])
+@router.get("/options", response_model=AllTechOptionsResponse)
 async def get_all_technology_options():
     """
     Get all available technology options.

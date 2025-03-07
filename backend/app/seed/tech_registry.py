@@ -17,6 +17,8 @@ See /app/seed/README.md for more detailed documentation.
 import logging
 from typing import Dict, List, Set, Optional, Any, Union
 
+from ..schemas.tech_stack import TechStackData
+
 logger = logging.getLogger(__name__)
 
 # The master registry of all technologies organized by category
@@ -219,12 +221,13 @@ def get_technologies_in_category(category: str, subcategory: Optional[str] = Non
     return TECH_REGISTRY[category][subcategory]
 
 
-def validate_template_tech_stack(template_tech_stack: Dict[str, Any]) -> Dict[str, Any]:
+def validate_template_tech_stack(template_tech_stack: Union[Dict[str, Any], TechStackData]) -> Dict[str, Any]:
     """
     Validate that all technologies in a template's tech stack exist in the registry.
     
     Args:
         template_tech_stack: The tech stack section of a project template
+                            Can be a Dict or a TechStackData pydantic model
         
     Returns:
         Dict with validation results:
@@ -238,51 +241,183 @@ def validate_template_tech_stack(template_tech_stack: Dict[str, Any]) -> Dict[st
         "invalid_technologies": []
     }
     
-    # Helper function to check all technology values
-    def validate_tech_section(section: Dict[str, Any], section_name: str):
-        for key, value in section.items():
-            # Skip certain keys that aren't technology names
-            if key in ["options", "type", "methods"]:
-                # If it's a list of technologies, check each one
-                if isinstance(value, list):
-                    for tech in value:
-                        if not is_valid_tech(tech):
-                            results["is_valid"] = False
-                            results["invalid_technologies"].append({
-                                "section": section_name,
-                                "key": key,
-                                "technology": tech
-                            })
-            elif isinstance(value, str) and not is_valid_tech(value):
-                results["is_valid"] = False
-                results["invalid_technologies"].append({
-                    "section": section_name,
-                    "key": key,
-                    "technology": value
-                })
+    # Convert TechStackData to dict if needed
+    tech_stack_dict = template_tech_stack
+    if isinstance(template_tech_stack, TechStackData):
+        tech_stack_dict = template_tech_stack.dict()
+    
+    # Debug print for technology registry
+    logger.debug(f"Technology registry contains {len(ALL_TECHNOLOGIES)} technologies")
     
     # Check frontend technologies
-    if "frontend" in template_tech_stack:
-        validate_tech_section(template_tech_stack["frontend"], "frontend")
+    if "frontend" in tech_stack_dict:
+        frontend = tech_stack_dict["frontend"]
+        if "frameworks" in frontend:
+            for fw in frontend["frameworks"]:
+                name = fw.get("name", "")
+                if name and not is_valid_tech(name):
+                    results["is_valid"] = False
+                    results["invalid_technologies"].append({
+                        "section": "frontend",
+                        "key": "frameworks",
+                        "technology": name
+                    })
+                
+                # Check compatibility options
+                if "compatibility" in fw:
+                    comp = fw["compatibility"]
+                    for key, value_list in comp.items():
+                        if isinstance(value_list, list):
+                            for tech in value_list:
+                                if tech and not is_valid_tech(tech):
+                                    results["is_valid"] = False
+                                    results["invalid_technologies"].append({
+                                        "section": "frontend.compatibility",
+                                        "key": key,
+                                        "technology": tech
+                                    })
     
     # Check backend technologies
-    if "backend" in template_tech_stack:
-        validate_tech_section(template_tech_stack["backend"], "backend")
+    if "backend" in tech_stack_dict:
+        backend = tech_stack_dict["backend"]
+        # Check frameworks
+        if "frameworks" in backend:
+            for fw in backend["frameworks"]:
+                name = fw.get("name", "")
+                if name and not is_valid_tech(name):
+                    results["is_valid"] = False
+                    results["invalid_technologies"].append({
+                        "section": "backend",
+                        "key": "frameworks",
+                        "technology": name
+                    })
+                
+                # Check compatibility options
+                if "compatibility" in fw:
+                    comp = fw["compatibility"]
+                    for key, value_list in comp.items():
+                        if isinstance(value_list, list):
+                            for tech in value_list:
+                                if tech and not is_valid_tech(tech):
+                                    results["is_valid"] = False
+                                    results["invalid_technologies"].append({
+                                        "section": "backend.compatibility",
+                                        "key": key,
+                                        "technology": tech
+                                    })
+        
+        # Check backend as a service
+        if "baas" in backend:
+            for baas in backend["baas"]:
+                name = baas.get("name", "")
+                if name and not is_valid_tech(name):
+                    results["is_valid"] = False
+                    results["invalid_technologies"].append({
+                        "section": "backend",
+                        "key": "baas",
+                        "technology": name
+                    })
+                
+                # Check compatibility options
+                if "compatibility" in baas:
+                    comp = baas["compatibility"]
+                    for key, value_list in comp.items():
+                        if isinstance(value_list, list):
+                            for tech in value_list:
+                                if tech and not is_valid_tech(tech):
+                                    results["is_valid"] = False
+                                    results["invalid_technologies"].append({
+                                        "section": "backend.baas.compatibility",
+                                        "key": key,
+                                        "technology": tech
+                                    })
     
     # Check database technologies
-    if "database" in template_tech_stack:
-        validate_tech_section(template_tech_stack["database"], "database")
+    if "database" in tech_stack_dict:
+        database = tech_stack_dict["database"]
+        # Check SQL databases
+        if "sql" in database:
+            for db in database["sql"]:
+                name = db.get("name", "")
+                if name and not is_valid_tech(name):
+                    results["is_valid"] = False
+                    results["invalid_technologies"].append({
+                        "section": "database",
+                        "key": "sql",
+                        "technology": name
+                    })
+                
+                # Check compatibility options
+                if "compatibility" in db:
+                    comp = db["compatibility"]
+                    for key, value_list in comp.items():
+                        if isinstance(value_list, list):
+                            for tech in value_list:
+                                if tech and not is_valid_tech(tech):
+                                    results["is_valid"] = False
+                                    results["invalid_technologies"].append({
+                                        "section": "database.sql.compatibility",
+                                        "key": key,
+                                        "technology": tech
+                                    })
+        
+        # Check NoSQL databases
+        if "nosql" in database:
+            for db in database["nosql"]:
+                name = db.get("name", "")
+                if name and not is_valid_tech(name):
+                    results["is_valid"] = False
+                    results["invalid_technologies"].append({
+                        "section": "database",
+                        "key": "nosql",
+                        "technology": name
+                    })
+                
+                # Check compatibility options
+                if "compatibility" in db:
+                    comp = db["compatibility"]
+                    for key, value_list in comp.items():
+                        if isinstance(value_list, list):
+                            for tech in value_list:
+                                if tech and not is_valid_tech(tech):
+                                    results["is_valid"] = False
+                                    results["invalid_technologies"].append({
+                                        "section": "database.nosql.compatibility",
+                                        "key": key,
+                                        "technology": tech
+                                    })
     
-    # Check authentication technologies
-    if "authentication" in template_tech_stack:
-        validate_tech_section(template_tech_stack["authentication"], "authentication")
+    # Check hosting options
+    if "hosting" in tech_stack_dict:
+        hosting = tech_stack_dict["hosting"]
+        for key, value_list in hosting.items():
+            if isinstance(value_list, list):
+                for tech in value_list:
+                    if tech and not is_valid_tech(tech):
+                        results["is_valid"] = False
+                        results["invalid_technologies"].append({
+                            "section": "hosting",
+                            "key": key,
+                            "technology": tech
+                        })
     
-    # Check deployment technologies
-    if "deployment" in template_tech_stack:
-        validate_tech_section(template_tech_stack["deployment"], "deployment")
+    # Check authentication options
+    if "authentication" in tech_stack_dict:
+        auth = tech_stack_dict["authentication"]
+        for key, value_list in auth.items():
+            if isinstance(value_list, list):
+                for tech in value_list:
+                    if tech and not is_valid_tech(tech):
+                        results["is_valid"] = False
+                        results["invalid_technologies"].append({
+                            "section": "authentication",
+                            "key": key,
+                            "technology": tech
+                        })
     
-    # Check testing technologies
-    if "testing" in template_tech_stack:
-        validate_tech_section(template_tech_stack["testing"], "testing")
+    # Debug output
+    logger.debug(f"Validation result: {results}")
+    if not results['is_valid']:
+        logger.debug(f"Found invalid technologies: {results['invalid_technologies']}")
     
     return results 

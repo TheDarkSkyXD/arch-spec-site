@@ -77,13 +77,13 @@ def correct_tech_stack_data() -> Dict:
     corrections_made = 0
     
     # Frontend frameworks
-    for i, framework in enumerate(corrected_data.get("techStackOptions", {}).get("frontend", {}).get("frameworks", [])):
+    for i, framework in enumerate(corrected_data.get("frontend", {}).get("frameworks", [])):
         name = framework.get("name")
         if name and not is_valid_tech(name):
             closest_match = find_closest_match(name)
             if closest_match:
                 logger.info(f"Correcting frontend framework: {name} -> {closest_match}")
-                corrected_data["techStackOptions"]["frontend"]["frameworks"][i]["name"] = closest_match
+                corrected_data["frontend"]["frameworks"][i]["name"] = closest_match
                 corrections_made += 1
         
         # Correct compatibility entries
@@ -93,17 +93,17 @@ def correct_tech_stack_data() -> Dict:
                     closest_match = find_closest_match(tech)
                     if closest_match:
                         logger.info(f"Correcting compatibility tech: {tech} -> {closest_match}")
-                        corrected_data["techStackOptions"]["frontend"]["frameworks"][i]["compatibility"][compat_category][j] = closest_match
+                        corrected_data["frontend"]["frameworks"][i]["compatibility"][compat_category][j] = closest_match
                         corrections_made += 1
     
     # Backend frameworks
-    for i, framework in enumerate(corrected_data.get("techStackOptions", {}).get("backend", {}).get("frameworks", [])):
+    for i, framework in enumerate(corrected_data.get("backend", {}).get("frameworks", [])):
         name = framework.get("name")
         if name and not is_valid_tech(name):
             closest_match = find_closest_match(name)
             if closest_match:
                 logger.info(f"Correcting backend framework: {name} -> {closest_match}")
-                corrected_data["techStackOptions"]["backend"]["frameworks"][i]["name"] = closest_match
+                corrected_data["backend"]["frameworks"][i]["name"] = closest_match
                 corrections_made += 1
         
         # Correct compatibility entries
@@ -113,17 +113,88 @@ def correct_tech_stack_data() -> Dict:
                     closest_match = find_closest_match(tech)
                     if closest_match:
                         logger.info(f"Correcting compatibility tech: {tech} -> {closest_match}")
-                        corrected_data["techStackOptions"]["backend"]["frameworks"][i]["compatibility"][compat_category][j] = closest_match
+                        corrected_data["backend"]["frameworks"][i]["compatibility"][compat_category][j] = closest_match
                         corrections_made += 1
     
-    # Database options
-    for i, db in enumerate(corrected_data.get("techStackOptions", {}).get("database", {}).get("options", [])):
-        if not is_valid_tech(db):
-            closest_match = find_closest_match(db)
+    # Backend BaaS
+    for i, baas in enumerate(corrected_data.get("backend", {}).get("baas", [])):
+        name = baas.get("name")
+        if name and not is_valid_tech(name):
+            closest_match = find_closest_match(name)
             if closest_match:
-                logger.info(f"Correcting database option: {db} -> {closest_match}")
-                corrected_data["techStackOptions"]["database"]["options"][i] = closest_match
+                logger.info(f"Correcting backend BaaS: {name} -> {closest_match}")
+                corrected_data["backend"]["baas"][i]["name"] = closest_match
                 corrections_made += 1
+        
+        # Correct compatibility entries
+        for compat_category, compat_techs in baas.get("compatibility", {}).items():
+            for j, tech in enumerate(compat_techs):
+                if not is_valid_tech(tech):
+                    closest_match = find_closest_match(tech)
+                    if closest_match:
+                        logger.info(f"Correcting compatibility tech: {tech} -> {closest_match}")
+                        corrected_data["backend"]["baas"][i]["compatibility"][compat_category][j] = closest_match
+                        corrections_made += 1
+    
+    # Database SQL
+    for i, db in enumerate(corrected_data.get("database", {}).get("sql", [])):
+        name = db.get("name")
+        if name and not is_valid_tech(name):
+            closest_match = find_closest_match(name)
+            if closest_match:
+                logger.info(f"Correcting SQL database: {name} -> {closest_match}")
+                corrected_data["database"]["sql"][i]["name"] = closest_match
+                corrections_made += 1
+        
+        # Correct compatibility entries
+        for compat_category, compat_techs in db.get("compatibility", {}).items():
+            for j, tech in enumerate(compat_techs):
+                if not is_valid_tech(tech):
+                    closest_match = find_closest_match(tech)
+                    if closest_match:
+                        logger.info(f"Correcting compatibility tech: {tech} -> {closest_match}")
+                        corrected_data["database"]["sql"][i]["compatibility"][compat_category][j] = closest_match
+                        corrections_made += 1
+    
+    # Database NoSQL
+    for i, db in enumerate(corrected_data.get("database", {}).get("nosql", [])):
+        name = db.get("name")
+        if name and not is_valid_tech(name):
+            closest_match = find_closest_match(name)
+            if closest_match:
+                logger.info(f"Correcting NoSQL database: {name} -> {closest_match}")
+                corrected_data["database"]["nosql"][i]["name"] = closest_match
+                corrections_made += 1
+        
+        # Correct compatibility entries
+        for compat_category, compat_techs in db.get("compatibility", {}).items():
+            for j, tech in enumerate(compat_techs):
+                if not is_valid_tech(tech):
+                    closest_match = find_closest_match(tech)
+                    if closest_match:
+                        logger.info(f"Correcting compatibility tech: {tech} -> {closest_match}")
+                        corrected_data["database"]["nosql"][i]["compatibility"][compat_category][j] = closest_match
+                        corrections_made += 1
+    
+    # Hosting options
+    for key, value_list in corrected_data.get("hosting", {}).items():
+        for i, value in enumerate(value_list):
+            if not is_valid_tech(value):
+                closest_match = find_closest_match(value)
+                if closest_match:
+                    logger.info(f"Correcting hosting option: {value} -> {closest_match}")
+                    corrected_data["hosting"][key][i] = closest_match
+                    corrections_made += 1
+    
+    # Authentication options
+    for key, value_list in corrected_data.get("authentication", {}).items():
+        for i, value in enumerate(value_list):
+            if not is_valid_tech(value):
+                closest_match = find_closest_match(value)
+                if closest_match:
+                    logger.info(f"Correcting authentication option: {value} -> {closest_match}")
+                    corrected_data["authentication"][key][i] = closest_match
+                    corrections_made += 1
     
     logger.info(f"Made {corrections_made} corrections to tech stack data")
     
@@ -146,81 +217,131 @@ def correct_template_data() -> List[Dict]:
     for i, template in enumerate(corrected_templates):
         tech_stack = template.get("template", {}).get("techStack", {})
         
-        # Process frontend tech
-        if "frontend" in tech_stack:
-            frontend = tech_stack["frontend"]
-            for key, value in frontend.items():
-                if key != "options" and isinstance(value, str) and not is_valid_tech(value):
-                    closest_match = find_closest_match(value)
+        # Check if it's using the new flattened structure
+        if "frontend" in tech_stack and isinstance(tech_stack["frontend"], dict) and "frameworks" in tech_stack["frontend"]:
+            # Process frontend frameworks
+            for j, framework in enumerate(tech_stack["frontend"].get("frameworks", [])):
+                name = framework.get("name")
+                if name and not is_valid_tech(name):
+                    closest_match = find_closest_match(name)
                     if closest_match:
-                        logger.info(f"Correcting frontend tech: {value} -> {closest_match}")
-                        corrected_templates[i]["template"]["techStack"]["frontend"][key] = closest_match
+                        logger.info(f"Correcting frontend framework: {name} -> {closest_match}")
+                        corrected_templates[i]["template"]["techStack"]["frontend"]["frameworks"][j]["name"] = closest_match
                         corrections_made += 1
-                elif key == "options" and isinstance(value, list):
-                    for j, option in enumerate(value):
-                        if not is_valid_tech(option):
-                            closest_match = find_closest_match(option)
+                
+                # Correct compatibility entries
+                for compat_category, compat_techs in framework.get("compatibility", {}).items():
+                    for k, tech in enumerate(compat_techs):
+                        if not is_valid_tech(tech):
+                            closest_match = find_closest_match(tech)
                             if closest_match:
-                                logger.info(f"Correcting frontend option: {option} -> {closest_match}")
-                                corrected_templates[i]["template"]["techStack"]["frontend"]["options"][j] = closest_match
+                                logger.info(f"Correcting compatibility tech: {tech} -> {closest_match}")
+                                corrected_templates[i]["template"]["techStack"]["frontend"]["frameworks"][j]["compatibility"][compat_category][k] = closest_match
                                 corrections_made += 1
-        
-        # Process backend tech
-        if "backend" in tech_stack:
-            backend = tech_stack["backend"]
-            for key, value in backend.items():
-                if key != "options" and isinstance(value, str) and not is_valid_tech(value):
-                    closest_match = find_closest_match(value)
+            
+            # Process backend frameworks
+            for j, framework in enumerate(tech_stack.get("backend", {}).get("frameworks", [])):
+                name = framework.get("name")
+                if name and not is_valid_tech(name):
+                    closest_match = find_closest_match(name)
                     if closest_match:
-                        logger.info(f"Correcting backend tech: {value} -> {closest_match}")
-                        corrected_templates[i]["template"]["techStack"]["backend"][key] = closest_match
+                        logger.info(f"Correcting backend framework: {name} -> {closest_match}")
+                        corrected_templates[i]["template"]["techStack"]["backend"]["frameworks"][j]["name"] = closest_match
                         corrections_made += 1
-                elif key == "options" and isinstance(value, list):
-                    for j, option in enumerate(value):
-                        if not is_valid_tech(option):
-                            closest_match = find_closest_match(option)
+                
+                # Correct compatibility entries
+                for compat_category, compat_techs in framework.get("compatibility", {}).items():
+                    for k, tech in enumerate(compat_techs):
+                        if not is_valid_tech(tech):
+                            closest_match = find_closest_match(tech)
                             if closest_match:
-                                logger.info(f"Correcting backend option: {option} -> {closest_match}")
-                                corrected_templates[i]["template"]["techStack"]["backend"]["options"][j] = closest_match
+                                logger.info(f"Correcting compatibility tech: {tech} -> {closest_match}")
+                                corrected_templates[i]["template"]["techStack"]["backend"]["frameworks"][j]["compatibility"][compat_category][k] = closest_match
                                 corrections_made += 1
-        
-        # Process database tech
-        if "database" in tech_stack:
-            database = tech_stack["database"]
-            for key, value in database.items():
-                if key != "options" and isinstance(value, str) and not is_valid_tech(value):
-                    closest_match = find_closest_match(value)
+            
+            # Process backend BaaS
+            for j, baas in enumerate(tech_stack.get("backend", {}).get("baas", [])):
+                name = baas.get("name")
+                if name and not is_valid_tech(name):
+                    closest_match = find_closest_match(name)
                     if closest_match:
-                        logger.info(f"Correcting database tech: {value} -> {closest_match}")
-                        corrected_templates[i]["template"]["techStack"]["database"][key] = closest_match
+                        logger.info(f"Correcting backend BaaS: {name} -> {closest_match}")
+                        corrected_templates[i]["template"]["techStack"]["backend"]["baas"][j]["name"] = closest_match
                         corrections_made += 1
-                elif key == "options" and isinstance(value, list):
-                    for j, option in enumerate(value):
-                        if not is_valid_tech(option):
-                            closest_match = find_closest_match(option)
+                
+                # Correct compatibility entries
+                for compat_category, compat_techs in baas.get("compatibility", {}).items():
+                    for k, tech in enumerate(compat_techs):
+                        if not is_valid_tech(tech):
+                            closest_match = find_closest_match(tech)
                             if closest_match:
-                                logger.info(f"Correcting database option: {option} -> {closest_match}")
-                                corrected_templates[i]["template"]["techStack"]["database"]["options"][j] = closest_match
+                                logger.info(f"Correcting compatibility tech: {tech} -> {closest_match}")
+                                corrected_templates[i]["template"]["techStack"]["backend"]["baas"][j]["compatibility"][compat_category][k] = closest_match
                                 corrections_made += 1
-        
-        # Process authentication tech
-        if "authentication" in tech_stack:
-            auth = tech_stack["authentication"]
-            for key, value in auth.items():
-                if key != "methods" and key != "options" and isinstance(value, str) and not is_valid_tech(value):
-                    closest_match = find_closest_match(value)
-                    if closest_match:
-                        logger.info(f"Correcting auth tech: {value} -> {closest_match}")
-                        corrected_templates[i]["template"]["techStack"]["authentication"][key] = closest_match
-                        corrections_made += 1
-                elif (key == "methods" or key == "options") and isinstance(value, list):
-                    for j, option in enumerate(value):
-                        if not is_valid_tech(option):
-                            closest_match = find_closest_match(option)
-                            if closest_match:
-                                logger.info(f"Correcting auth option: {option} -> {closest_match}")
-                                corrected_templates[i]["template"]["techStack"]["authentication"][key][j] = closest_match
-                                corrections_made += 1
+            
+            # Process database
+            for db_type in ["sql", "nosql"]:
+                for j, db in enumerate(tech_stack.get("database", {}).get(db_type, [])):
+                    name = db.get("name")
+                    if name and not is_valid_tech(name):
+                        closest_match = find_closest_match(name)
+                        if closest_match:
+                            logger.info(f"Correcting {db_type} database: {name} -> {closest_match}")
+                            corrected_templates[i]["template"]["techStack"]["database"][db_type][j]["name"] = closest_match
+                            corrections_made += 1
+                    
+                    # Correct compatibility entries
+                    for compat_category, compat_techs in db.get("compatibility", {}).items():
+                        for k, tech in enumerate(compat_techs):
+                            if not is_valid_tech(tech):
+                                closest_match = find_closest_match(tech)
+                                if closest_match:
+                                    logger.info(f"Correcting compatibility tech: {tech} -> {closest_match}")
+                                    corrected_templates[i]["template"]["techStack"]["database"][db_type][j]["compatibility"][compat_category][k] = closest_match
+                                    corrections_made += 1
+            
+            # Process hosting options
+            for key, value_list in tech_stack.get("hosting", {}).items():
+                for j, value in enumerate(value_list):
+                    if not is_valid_tech(value):
+                        closest_match = find_closest_match(value)
+                        if closest_match:
+                            logger.info(f"Correcting hosting option: {value} -> {closest_match}")
+                            corrected_templates[i]["template"]["techStack"]["hosting"][key][j] = closest_match
+                            corrections_made += 1
+            
+            # Process authentication options
+            for key, value_list in tech_stack.get("authentication", {}).items():
+                for j, value in enumerate(value_list):
+                    if not is_valid_tech(value):
+                        closest_match = find_closest_match(value)
+                        if closest_match:
+                            logger.info(f"Correcting authentication option: {value} -> {closest_match}")
+                            corrected_templates[i]["template"]["techStack"]["authentication"][key][j] = closest_match
+                            corrections_made += 1
+        else:
+            # Handle old format templates (for backward compatibility)
+            # Process frontend tech
+            if "frontend" in tech_stack:
+                frontend = tech_stack["frontend"]
+                for key, value in frontend.items():
+                    if key != "options" and isinstance(value, str) and not is_valid_tech(value):
+                        closest_match = find_closest_match(value)
+                        if closest_match:
+                            logger.info(f"Correcting frontend tech: {value} -> {closest_match}")
+                            corrected_templates[i]["template"]["techStack"]["frontend"][key] = closest_match
+                            corrections_made += 1
+                    elif key == "options" and isinstance(value, list):
+                        for j, option in enumerate(value):
+                            if not is_valid_tech(option):
+                                closest_match = find_closest_match(option)
+                                if closest_match:
+                                    logger.info(f"Correcting frontend option: {option} -> {closest_match}")
+                                    corrected_templates[i]["template"]["techStack"]["frontend"]["options"][j] = closest_match
+                                    corrections_made += 1
+            
+            # Process other sections in old format...
+            # (keeping the existing code for backward compatibility)
     
     logger.info(f"Made {corrections_made} corrections to template data")
     

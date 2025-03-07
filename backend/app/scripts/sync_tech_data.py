@@ -37,7 +37,7 @@ def extract_tech_from_tech_stack() -> Set[str]:
     tech_names = set()
     
     # Extract frontend framework names
-    for framework in TECH_STACK_DATA.get("techStackOptions", {}).get("frontend", {}).get("frameworks", []):
+    for framework in TECH_STACK_DATA.get("frontend", {}).get("frameworks", []):
         name = framework.get("name")
         if name:
             tech_names.add(name)
@@ -48,7 +48,7 @@ def extract_tech_from_tech_stack() -> Set[str]:
                 tech_names.add(tech)
     
     # Extract backend framework names
-    for framework in TECH_STACK_DATA.get("techStackOptions", {}).get("backend", {}).get("frameworks", []):
+    for framework in TECH_STACK_DATA.get("backend", {}).get("frameworks", []):
         name = framework.get("name")
         if name:
             tech_names.add(name)
@@ -58,11 +58,38 @@ def extract_tech_from_tech_stack() -> Set[str]:
             for tech in compat_techs:
                 tech_names.add(tech)
     
-    # Extract database names
-    for db in TECH_STACK_DATA.get("techStackOptions", {}).get("database", {}).get("options", []):
-        tech_names.add(db)
+    # Extract backend BaaS names
+    for baas in TECH_STACK_DATA.get("backend", {}).get("baas", []):
+        name = baas.get("name")
+        if name:
+            tech_names.add(name)
+            
+        # Extract compatible technologies
+        for compat_category, compat_techs in baas.get("compatibility", {}).items():
+            for tech in compat_techs:
+                tech_names.add(tech)
     
-    # Add other categories as needed
+    # Extract database names
+    for db_type in ["sql", "nosql"]:
+        for db in TECH_STACK_DATA.get("database", {}).get(db_type, []):
+            name = db.get("name")
+            if name:
+                tech_names.add(name)
+                
+            # Extract compatible technologies
+            for compat_category, compat_techs in db.get("compatibility", {}).items():
+                for tech in compat_techs:
+                    tech_names.add(tech)
+    
+    # Extract hosting technologies
+    for key, techs in TECH_STACK_DATA.get("hosting", {}).items():
+        for tech in techs:
+            tech_names.add(tech)
+    
+    # Extract authentication technologies
+    for key, techs in TECH_STACK_DATA.get("authentication", {}).items():
+        for tech in techs:
+            tech_names.add(tech)
     
     return tech_names
 
@@ -79,41 +106,108 @@ def extract_tech_from_templates() -> Set[str]:
     for template in PROJECT_TEMPLATES:
         tech_stack = template.get("template", {}).get("techStack", {})
         
-        # Process frontend tech
-        if "frontend" in tech_stack:
-            frontend = tech_stack["frontend"]
-            for key, value in frontend.items():
-                if key != "options" and isinstance(value, str):
+        # Check if it's using the new flattened structure
+        if "frontend" in tech_stack and isinstance(tech_stack["frontend"], dict) and "frameworks" in tech_stack["frontend"]:
+            # Process frontend frameworks
+            for framework in tech_stack["frontend"].get("frameworks", []):
+                name = framework.get("name")
+                if name:
+                    tech_names.add(name)
+                
+                # Extract compatibility entries
+                for compat_category, compat_techs in framework.get("compatibility", {}).items():
+                    for tech in compat_techs:
+                        tech_names.add(tech)
+            
+            # Process backend frameworks
+            for framework in tech_stack.get("backend", {}).get("frameworks", []):
+                name = framework.get("name")
+                if name:
+                    tech_names.add(name)
+                
+                # Extract compatibility entries
+                for compat_category, compat_techs in framework.get("compatibility", {}).items():
+                    for tech in compat_techs:
+                        tech_names.add(tech)
+            
+            # Process backend BaaS
+            for baas in tech_stack.get("backend", {}).get("baas", []):
+                name = baas.get("name")
+                if name:
+                    tech_names.add(name)
+                
+                # Extract compatibility entries
+                for compat_category, compat_techs in baas.get("compatibility", {}).items():
+                    for tech in compat_techs:
+                        tech_names.add(tech)
+            
+            # Process database
+            for db_type in ["sql", "nosql"]:
+                for db in tech_stack.get("database", {}).get(db_type, []):
+                    name = db.get("name")
+                    if name:
+                        tech_names.add(name)
+                    
+                    # Extract compatibility entries
+                    for compat_category, compat_techs in db.get("compatibility", {}).items():
+                        for tech in compat_techs:
+                            tech_names.add(tech)
+            
+            # Process hosting options
+            for key, value_list in tech_stack.get("hosting", {}).items():
+                for value in value_list:
                     tech_names.add(value)
-                elif key == "options" and isinstance(value, list):
-                    tech_names.update(value)
-        
-        # Process backend tech
-        if "backend" in tech_stack:
-            backend = tech_stack["backend"]
-            for key, value in backend.items():
-                if key != "options" and isinstance(value, str):
+            
+            # Process authentication options
+            for key, value_list in tech_stack.get("authentication", {}).items():
+                for value in value_list:
                     tech_names.add(value)
-                elif key == "options" and isinstance(value, list):
-                    tech_names.update(value)
-        
-        # Process database tech
-        if "database" in tech_stack:
-            database = tech_stack["database"]
-            for key, value in database.items():
-                if key != "options" and isinstance(value, str):
-                    tech_names.add(value)
-                elif key == "options" and isinstance(value, list):
-                    tech_names.update(value)
-        
-        # Process authentication tech
-        if "authentication" in tech_stack:
-            auth = tech_stack["authentication"]
-            for key, value in auth.items():
-                if key != "methods" and isinstance(value, str):
-                    tech_names.add(value)
-                elif key in ["methods", "options"] and isinstance(value, list):
-                    tech_names.update(value)
+        else:
+            # Handle old format templates (for backward compatibility)
+            # Process frontend tech
+            if "frontend" in tech_stack:
+                frontend = tech_stack["frontend"]
+                for key, value in frontend.items():
+                    if key != "options" and isinstance(value, str):
+                        tech_names.add(value)
+                    elif key == "options" and isinstance(value, list):
+                        tech_names.update(value)
+            
+            # Process backend tech
+            if "backend" in tech_stack:
+                backend = tech_stack["backend"]
+                for key, value in backend.items():
+                    if key != "options" and isinstance(value, str):
+                        tech_names.add(value)
+                    elif key == "options" and isinstance(value, list):
+                        tech_names.update(value)
+            
+            # Process database tech
+            if "database" in tech_stack:
+                database = tech_stack["database"]
+                for key, value in database.items():
+                    if key != "options" and isinstance(value, str):
+                        tech_names.add(value)
+                    elif key == "options" and isinstance(value, list):
+                        tech_names.update(value)
+            
+            # Process authentication tech
+            if "authentication" in tech_stack:
+                auth = tech_stack["authentication"]
+                for key, value in auth.items():
+                    if key != "methods" and key != "options" and isinstance(value, str):
+                        tech_names.add(value)
+                    elif (key == "methods" or key == "options") and isinstance(value, list):
+                        tech_names.update(value)
+            
+            # Process hosting tech
+            if "hosting" in tech_stack:
+                hosting = tech_stack["hosting"]
+                for key, value in hosting.items():
+                    if isinstance(value, str):
+                        tech_names.add(value)
+                    elif isinstance(value, list):
+                        tech_names.update(value)
     
     return tech_names
 

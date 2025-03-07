@@ -5,3 +5,4 @@
 - The IDE uses PowerShell terminals
 - No need to manually activate virtual environment
 - Ensure centralized types and interfaces
+- This project is in active development, a green project. So there's no need to worry about backward compatibility with old data or code. Update everything if needed.

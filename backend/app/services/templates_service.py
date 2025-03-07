@@ -2,7 +2,7 @@
 Service for project templates.
 """
 import logging
-from typing import List, Dict, Optional, Any
+from typing import List, Dict, Optional, Any, Union, cast
 from bson import ObjectId
 from ..db.base import db
 from ..seed.templates import (
@@ -11,6 +11,12 @@ from ..seed.templates import (
     get_templates_from_db,
     get_template_by_id_from_db
 )
+from ..schemas.templates import (
+    ProjectTemplate,
+    ProjectTemplateResponse
+)
+from ..schemas.tech_stack import TechStackData
+from ..seed.tech_registry import validate_template_tech_stack
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +45,19 @@ class TemplatesService:
                         template_id = template.get("id", str(template.get("_id", "unknown")))
                         # Ensure the template has all required fields
                         complete_template = TemplatesService._ensure_complete_template(template.get("template", template))
+                        
+                        # Validate and enrich tech stack data if present
+                        if "techStack" in complete_template:
+                            try:
+                                # Convert to TechStackData model for validation
+                                tech_stack = TechStackData(**complete_template["techStack"])
+                                # Validate technologies
+                                validate_result = validate_template_tech_stack(tech_stack)
+                                if not validate_result["is_valid"]:
+                                    logger.warning(f"Template {template_id} contains invalid technologies: {validate_result['invalid_technologies']}")
+                            except Exception as e:
+                                logger.warning(f"Error validating tech stack for template {template_id}: {str(e)}")
+                        
                         # Ensure each template in the response has id and template fields
                         formatted_templates.append({
                             "id": template_id,
@@ -52,10 +71,22 @@ class TemplatesService:
             logger.info("Fetching templates from seed data")
             seed_templates = get_templates()
             
-            # Ensure seed templates have all required fields
+            # Ensure seed templates have all required fields and validate tech stack
             for template_data in seed_templates:
                 if "template" in template_data:
                     template_data["template"] = TemplatesService._ensure_complete_template(template_data["template"])
+                    
+                    # Validate and enrich tech stack data if present
+                    if "techStack" in template_data["template"]:
+                        try:
+                            # Convert to TechStackData model for validation
+                            tech_stack = TechStackData(**template_data["template"]["techStack"])
+                            # Validate technologies
+                            validate_result = validate_template_tech_stack(tech_stack)
+                            if not validate_result["is_valid"]:
+                                logger.warning(f"Template {template_data.get('id')} contains invalid technologies: {validate_result['invalid_technologies']}")
+                        except Exception as e:
+                            logger.warning(f"Error validating tech stack for template {template_data.get('id')}: {str(e)}")
             
             return seed_templates
             
@@ -203,31 +234,105 @@ class TemplatesService:
                 "targetUsers": []
             }
         
-        # Ensure techStack is present
+        # Ensure techStack is present with the new schema format
         if "techStack" not in template:
             template["techStack"] = {
                 "frontend": {
-                    "framework": "",
-                    "language": "",
-                    "options": []
+                    "frameworks": []
                 },
                 "backend": {
-                    "type": "",
-                    "options": []
+                    "frameworks": [],
+                    "baas": []
                 },
                 "database": {
-                    "type": "",
-                    "options": []
+                    "sql": [],
+                    "nosql": []
                 },
-                "authentication": {
-                    "provider": "",
-                    "methods": [],
-                    "options": []
-                },
-                "hosting": {
-                    "options": []
-                }
+                "hosting": {},
+                "authentication": {}
             }
+        
+        # Convert old tech stack format to new format if needed
+        elif "frontend" in template["techStack"] and "frameworks" not in template["techStack"]["frontend"]:
+            old_tech_stack = template["techStack"]
+            
+            # Create a new tech stack with the proper format
+            new_tech_stack = {
+                "frontend": {
+                    "frameworks": []
+                },
+                "backend": {
+                    "frameworks": [],
+                    "baas": []
+                },
+                "database": {
+                    "sql": [],
+                    "nosql": []
+                },
+                "hosting": {},
+                "authentication": {}
+            }
+            
+            # Handle frontend conversion if present
+            if "frontend" in old_tech_stack:
+                frontend = old_tech_stack["frontend"]
+                if "framework" in frontend and frontend["framework"]:
+                    framework_data = {
+                        "name": frontend["framework"],
+                        "description": f"{frontend['framework']} with {frontend.get('language', 'JavaScript')}",
+                        "language": frontend.get("language", "JavaScript"),
+                        "compatibility": {
+                            "stateManagement": [frontend.get("state_management")] if frontend.get("state_management") else [],
+                            "uiLibraries": [frontend.get("ui_library")] if frontend.get("ui_library") else [],
+                            "formHandling": [frontend.get("form_handling")] if frontend.get("form_handling") else [],
+                            "routing": [frontend.get("routing")] if frontend.get("routing") else []
+                        }
+                    }
+                    new_tech_stack["frontend"]["frameworks"].append(framework_data)
+            
+            # Handle backend conversion if present
+            if "backend" in old_tech_stack:
+                backend = old_tech_stack["backend"]
+                if "type" in backend and backend["type"]:
+                    backend_data = {
+                        "name": backend.get("provider") or backend["type"],
+                        "description": f"{backend.get('provider') or backend['type']} backend",
+                        "compatibility": {}
+                    }
+                    new_tech_stack["backend"]["frameworks"].append(backend_data)
+            
+            # Handle database conversion if present
+            if "database" in old_tech_stack:
+                database = old_tech_stack["database"]
+                if "type" in database and database["type"]:
+                    db_data = {
+                        "name": database.get("provider") or database["type"],
+                        "description": f"{database.get('provider') or database['type']} database",
+                        "compatibility": {}
+                    }
+                    if database["type"].lower() == "sql":
+                        new_tech_stack["database"]["sql"].append(db_data)
+                    else:
+                        new_tech_stack["database"]["nosql"].append(db_data)
+            
+            # Handle hosting conversion if present
+            if "hosting" in old_tech_stack:
+                hosting = old_tech_stack["hosting"]
+                if hosting.get("frontend"):
+                    new_tech_stack["hosting"]["frontend"] = [hosting["frontend"]]
+                if hosting.get("backend"):
+                    new_tech_stack["hosting"]["backend"] = [hosting["backend"]]
+            
+            # Handle authentication conversion if present
+            if "authentication" in old_tech_stack:
+                auth = old_tech_stack["authentication"]
+                if "provider" in auth and auth["provider"]:
+                    new_tech_stack["authentication"]["providers"] = [auth["provider"]]
+                if "methods" in auth and auth["methods"]:
+                    new_tech_stack["authentication"]["methods"] = auth["methods"]
+            
+            # Replace the old tech stack with the new one
+            template["techStack"] = new_tech_stack
         
         # Ensure features is present
         if "features" not in template:

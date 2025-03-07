@@ -28,4 +28,58 @@ class CompatibleOptionsRequest(BaseModel):
 
 class CompatibleOptionsResponse(BaseModel):
     """Schema for compatible options response."""
-    options: Dict[str, List[str]] = Field(default_factory=dict) 
+    options: Dict[str, List[str]] = Field(default_factory=dict)
+
+# New schemas for more detailed tech stack data validation
+
+class TechnologyCompatibility(BaseModel):
+    """Schema for technology compatibility options."""
+    stateManagement: Optional[List[str]] = Field(default_factory=list)
+    uiLibraries: Optional[List[str]] = Field(default_factory=list)
+    formHandling: Optional[List[str]] = Field(default_factory=list)
+    routing: Optional[List[str]] = Field(default_factory=list)
+    apiClients: Optional[List[str]] = Field(default_factory=list)
+    metaFrameworks: Optional[List[str]] = Field(default_factory=list)
+    databases: Optional[List[str]] = Field(default_factory=list)
+    orms: Optional[List[str]] = Field(default_factory=list)
+    auth: Optional[List[str]] = Field(default_factory=list)
+    hosting: Optional[List[str]] = Field(default_factory=list)
+    storage: Optional[List[str]] = Field(default_factory=list)
+    functions: Optional[List[str]] = Field(default_factory=list)
+
+class Technology(BaseModel):
+    """Schema for technology entry."""
+    name: str
+    description: str
+    language: Optional[str] = None
+    compatibility: TechnologyCompatibility
+
+class FrontendOptions(BaseModel):
+    """Schema for frontend technology options."""
+    frameworks: List[Technology] = Field(default_factory=list)
+
+class BackendOptions(BaseModel):
+    """Schema for backend technology options."""
+    frameworks: List[Technology] = Field(default_factory=list)
+    baas: List[Technology] = Field(default_factory=list)
+
+class DatabaseType(BaseModel):
+    """Schema for database type (SQL/NoSQL) options."""
+    sql: List[Technology] = Field(default_factory=list)
+    nosql: List[Technology] = Field(default_factory=list)
+
+class TechStackData(BaseModel):
+    """Schema for the complete tech stack data."""
+    frontend: FrontendOptions = Field(default_factory=FrontendOptions)
+    backend: BackendOptions = Field(default_factory=BackendOptions)
+    database: DatabaseType = Field(default_factory=DatabaseType)
+    hosting: Dict[str, List[str]] = Field(default_factory=dict)
+    authentication: Dict[str, List[str]] = Field(default_factory=dict)
+
+class AllTechOptionsResponse(BaseModel):
+    """Schema for the response of getting all technology options."""
+    frontend: Dict[str, Any]
+    backend: Dict[str, Any]
+    database: Dict[str, Any]
+    hosting: Dict[str, Any]
+    authentication: Dict[str, Any]
