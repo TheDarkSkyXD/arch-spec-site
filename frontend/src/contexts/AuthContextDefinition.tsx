@@ -10,8 +10,6 @@ export const AuthContext = createContext<AuthContextType>({
   signUp: async () => {},
   signOut: async () => {},
   sendPasswordResetEmail: async () => {},
-  bypassAuthInDev: () => {}, // Default implementation
-  isDevBypass: false, // Default value
 });
 
 // Create a hook for using the auth context

@@ -1,12 +1,20 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Mail, Lock, User, AlertCircle, Eye, EyeOff, CheckCircle } from "lucide-react";
+import {
+  Mail,
+  Lock,
+  User,
+  AlertCircle,
+  Eye,
+  EyeOff,
+  CheckCircle,
+} from "lucide-react";
 import AuthLayout from "../../layouts/AuthLayout";
-import { useAuth } from "../../contexts/AuthContext";
+import { useAuth } from "../../contexts/AuthContextDefinition";
 
 const Register = () => {
   const navigate = useNavigate();
-  const { signUp } = useAuth();
+  const { signUp, signInWithGoogle } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,7 +26,7 @@ const Register = () => {
   // Simple password strength checker
   const getPasswordStrength = (password: string) => {
     if (!password) return 0;
-    
+
     let strength = 0;
     // Length check
     if (password.length > 7) strength += 1;
@@ -28,12 +36,12 @@ const Register = () => {
     if (/[!@#$%^&*]/.test(password)) strength += 1;
     // Contains uppercase and lowercase
     if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength += 1;
-    
+
     return strength;
   };
 
   const passwordStrength = getPasswordStrength(password);
-  
+
   const getStrengthColor = (strength: number) => {
     if (strength === 0) return "bg-slate-200";
     if (strength === 1) return "bg-red-500";
@@ -45,7 +53,7 @@ const Register = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    
+
     if (!name || !email || !password || !confirmPassword) {
       setError("Please fill in all fields");
       return;
@@ -63,18 +71,32 @@ const Register = () => {
 
     try {
       setLoading(true);
+      // Register the user
       await signUp(email, password);
-      // Note: The name is not being saved in this version of the auth system
-      
+
+      // Get the current user from Firebase Auth
+      const { getAuth, updateProfile } = await import("firebase/auth");
+      const currentUser = getAuth().currentUser;
+
+      // Update the display name if we have a user
+      if (currentUser) {
+        await updateProfile(currentUser, { displayName: name });
+        console.log("Display name updated successfully");
+      }
+
       // Navigate to login after successful registration
-      navigate("/login", { 
-        state: { 
-          message: "Account created successfully! Please sign in."
-        } 
+      navigate("/login", {
+        state: {
+          message: "Account created successfully! Please sign in.",
+        },
       });
     } catch (err) {
       console.error("Registration error:", err);
-      setError("Registration failed. Please try again.");
+      if (err instanceof Error) {
+        setError(err.message || "Registration failed. Please try again.");
+      } else {
+        setError("Registration failed. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -136,7 +158,7 @@ const Register = () => {
                 />
               </div>
             </div>
-            
+
             <div>
               <label
                 htmlFor="email"
@@ -198,14 +220,16 @@ const Register = () => {
                   </button>
                 </div>
               </div>
-              
+
               {/* Password strength meter */}
               {password && (
                 <div className="mt-2">
                   <div className="flex items-center mb-1">
                     <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
-                      <div 
-                        className={`h-full ${getStrengthColor(passwordStrength)} transition-all`} 
+                      <div
+                        className={`h-full ${getStrengthColor(
+                          passwordStrength
+                        )} transition-all`}
                         style={{ width: `${(passwordStrength / 4) * 100}%` }}
                       ></div>
                     </div>
@@ -217,7 +241,7 @@ const Register = () => {
                       {passwordStrength === 4 && "Very strong"}
                     </span>
                   </div>
-                  
+
                   <ul className="text-xs text-slate-500 dark:text-slate-400 space-y-1">
                     <li className="flex items-center">
                       {password.length > 7 ? (
@@ -255,7 +279,7 @@ const Register = () => {
                 </div>
               )}
             </div>
-            
+
             <div>
               <label
                 htmlFor="confirm-password"
@@ -289,14 +313,25 @@ const Register = () => {
               >
                 {loading ? (
                   <span className="flex items-center">
-                    <svg 
-                      className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" 
-                      xmlns="http://www.w3.org/2000/svg" 
-                      fill="none" 
+                    <svg
+                      className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
                       viewBox="0 0 24 24"
                     >
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
                     </svg>
                     Creating account...
                   </span>
@@ -322,20 +357,48 @@ const Register = () => {
             <div className="mt-6 grid grid-cols-2 gap-3">
               <button
                 type="button"
-                className="w-full inline-flex justify-center py-2 px-4 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm bg-white dark:bg-slate-700 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 dark:focus:ring-offset-slate-800"
+                onClick={async () => {
+                  try {
+                    setLoading(true);
+                    setError(null);
+                    await signInWithGoogle();
+                    // Google sign-in automatically creates an account if it doesn't exist
+                    navigate("/", { replace: true });
+                  } catch (err) {
+                    console.error("Google sign-up error:", err);
+                    setError("Failed to sign up with Google");
+                  } finally {
+                    setLoading(false);
+                  }
+                }}
+                disabled={loading}
+                className="w-full inline-flex justify-center py-2 px-4 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm bg-white dark:bg-slate-700 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 dark:focus:ring-offset-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <span className="sr-only">Sign up with Google</span>
-                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                <svg
+                  className="h-5 w-5"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   <path d="M12.24 10.285V14.4h6.806c-.275 1.765-2.056 5.174-6.806 5.174-4.095 0-7.439-3.389-7.439-7.574s3.345-7.574 7.439-7.574c2.33 0 3.891.989 4.785 1.849l3.254-3.138C18.189 1.186 15.479 0 12.24 0c-6.635 0-12 5.365-12 12s5.365 12 12 12c6.926 0 11.52-4.869 11.52-11.726 0-.788-.085-1.39-.189-1.989H12.24z" />
                 </svg>
               </button>
 
               <button
                 type="button"
-                className="w-full inline-flex justify-center py-2 px-4 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm bg-white dark:bg-slate-700 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 dark:focus:ring-offset-slate-800"
+                onClick={() => {
+                  // GitHub sign-in is not implemented yet
+                  alert("GitHub sign-up is not implemented yet");
+                }}
+                disabled={loading}
+                className="w-full inline-flex justify-center py-2 px-4 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm bg-white dark:bg-slate-700 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 dark:focus:ring-offset-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <span className="sr-only">Sign up with GitHub</span>
-                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                <svg
+                  className="h-5 w-5"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
                   <path
                     fillRule="evenodd"
                     d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z"

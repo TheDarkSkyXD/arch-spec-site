@@ -19,6 +19,4 @@ export interface AuthContextType {
   signUp: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   sendPasswordResetEmail: (email: string) => Promise<void>;
-  bypassAuthInDev: () => void; // For development bypass
-  isDevBypass: boolean; // Flag to indicate if dev bypass is active
 }

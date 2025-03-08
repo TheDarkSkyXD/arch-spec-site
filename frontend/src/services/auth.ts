@@ -1,19 +1,15 @@
-import { 
-  getAuth, 
-  signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword, 
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
   signOut as firebaseSignOut,
   onAuthStateChanged,
   User as FirebaseUser,
   GoogleAuthProvider,
   signInWithPopup,
   sendPasswordResetEmail,
-  AuthError
-} from 'firebase/auth';
-import { app } from '../firebase/config';
-
-// Initialize Firebase Auth
-const auth = getAuth(app);
+  AuthError,
+} from "firebase/auth";
+import { app, auth } from "../firebase/config";
 
 // User type definition
 export interface User {
@@ -32,31 +28,45 @@ const mapFirebaseUser = async (firebaseUser: FirebaseUser): Promise<User> => {
     email: firebaseUser.email,
     displayName: firebaseUser.displayName,
     photoURL: firebaseUser.photoURL,
-    token
+    token,
   };
 };
 
 // Sign in with email and password
-export const signInWithEmail = async (email: string, password: string): Promise<User> => {
+export const signInWithEmail = async (
+  email: string,
+  password: string
+): Promise<User> => {
   try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const userCredential = await signInWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
     return await mapFirebaseUser(userCredential.user);
   } catch (error) {
     const authError = error as AuthError;
-    console.error('Error signing in with email and password:', authError);
-    throw new Error(authError.message || 'Failed to sign in');
+    console.error("Error signing in with email and password:", authError);
+    throw new Error(authError.message || "Failed to sign in");
   }
 };
 
 // Sign up with email and password
-export const signUpWithEmail = async (email: string, password: string): Promise<User> => {
+export const signUpWithEmail = async (
+  email: string,
+  password: string
+): Promise<User> => {
   try {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
     return await mapFirebaseUser(userCredential.user);
   } catch (error) {
     const authError = error as AuthError;
-    console.error('Error signing up with email and password:', authError);
-    throw new Error(authError.message || 'Failed to sign up');
+    console.error("Error signing up with email and password:", authError);
+    throw new Error(authError.message || "Failed to sign up");
   }
 };
 
@@ -68,8 +78,8 @@ export const signInWithGoogle = async (): Promise<User> => {
     return await mapFirebaseUser(userCredential.user);
   } catch (error) {
     const authError = error as AuthError;
-    console.error('Error signing in with Google:', authError);
-    throw new Error(authError.message || 'Failed to sign in with Google');
+    console.error("Error signing in with Google:", authError);
+    throw new Error(authError.message || "Failed to sign in with Google");
   }
 };
 
@@ -79,8 +89,8 @@ export const signOut = async (): Promise<void> => {
     await firebaseSignOut(auth);
   } catch (error) {
     const authError = error as AuthError;
-    console.error('Error signing out:', authError);
-    throw new Error(authError.message || 'Failed to sign out');
+    console.error("Error signing out:", authError);
+    throw new Error(authError.message || "Failed to sign out");
   }
 };
 
@@ -90,13 +100,15 @@ export const resetPassword = async (email: string): Promise<void> => {
     await sendPasswordResetEmail(auth, email);
   } catch (error) {
     const authError = error as AuthError;
-    console.error('Error resetting password:', authError);
-    throw new Error(authError.message || 'Failed to reset password');
+    console.error("Error resetting password:", authError);
+    throw new Error(authError.message || "Failed to reset password");
   }
 };
 
 // Listen to auth state changes
-export const onAuthStateChange = (callback: (user: User | null) => void): (() => void) => {
+export const onAuthStateChange = (
+  callback: (user: User | null) => void
+): (() => void) => {
   return onAuthStateChanged(auth, async (firebaseUser) => {
     if (firebaseUser) {
       const user = await mapFirebaseUser(firebaseUser);
@@ -126,11 +138,11 @@ export const getCurrentUser = async (): Promise<User | null> => {
 export const getAuthToken = async (): Promise<string | null> => {
   const user = auth.currentUser;
   if (!user) return null;
-  
+
   try {
     return await user.getIdToken();
   } catch (error) {
-    console.error('Error getting auth token:', error);
+    console.error("Error getting auth token:", error);
     return null;
   }
 };

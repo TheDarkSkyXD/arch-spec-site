@@ -22,8 +22,6 @@ interface AuthContextType {
   signUp: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   sendPasswordResetEmail: (email: string) => Promise<void>;
-  bypassAuthInDev: () => void; // For development bypass
-  isDevBypass: boolean; // Flag to indicate if dev bypass is active
 }
 
 // Create the context with default values
@@ -35,8 +33,6 @@ export const AuthContext = createContext<AuthContextType>({
   signUp: async () => {},
   signOut: async () => {},
   sendPasswordResetEmail: async () => {},
-  bypassAuthInDev: () => {}, // Default implementation
-  isDevBypass: false, // Default value
 });
 
 // Create a hook for using the auth context
@@ -51,7 +47,6 @@ interface AuthProviderProps {
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isDevBypass, setIsDevBypass] = useState(false);
 
   // Load user profile from backend
   const loadUserProfile = async (user: User) => {
@@ -66,14 +61,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   // Set up Firebase auth state listener
   useEffect(() => {
-    // Check if dev bypass was previously enabled
-    const devBypassEnabled = localStorage.getItem("devBypassEnabled");
-    if (devBypassEnabled === "true") {
-      setIsDevBypass(true);
-      setLoading(false);
-      return;
-    }
-
     // Set up auth state listener
     const unsubscribe = authService.onAuthStateChange(async (user) => {
       if (user) {
@@ -91,38 +78,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return () => unsubscribe();
   }, []);
 
-  // Development bypass function
-  const bypassAuthInDev = () => {
-    if (import.meta.env.MODE !== "production") {
-      // Create a mock user for development
-      const mockUser: User = {
-        uid: "dev-bypass-user",
-        email: "dev@example.com",
-        displayName: "Development User",
-        photoURL: null,
-        profile: {
-          _id: "dev-bypass-user",
-          email: "dev@example.com",
-          display_name: "Development User",
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          settings: {}
-        }
-      };
-      
-      // Set the user in state
-      setCurrentUser(mockUser);
-      
-      // Set the bypass flag
-      setIsDevBypass(true);
-      localStorage.setItem("devBypassEnabled", "true");
-      
-      console.log("🔓 Development authentication bypass enabled");
-    } else {
-      console.warn("Auth bypass attempted in production mode - not allowed");
-    }
-  };
-
   // Sign in with email and password
   const signIn = async (email: string, password: string) => {
     setLoading(true);
@@ -132,12 +87,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       await authService.signInWithEmail(email, password);
       
       // Auth state listener will handle setting the user
-      
-      // Disable dev bypass mode if it was active
-      if (isDevBypass) {
-        setIsDevBypass(false);
-        localStorage.removeItem("devBypassEnabled");
-      }
     } catch (error) {
       setLoading(false);
       throw error;
@@ -153,12 +102,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       await authService.signInWithGoogle();
       
       // Auth state listener will handle setting the user
-      
-      // Disable dev bypass mode if it was active
-      if (isDevBypass) {
-        setIsDevBypass(false);
-        localStorage.removeItem("devBypassEnabled");
-      }
     } catch (error) {
       setLoading(false);
       throw error;
@@ -189,12 +132,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       await authService.signOut();
       
       // Auth state listener will handle clearing the user
-      
-      // Also clear dev bypass if active
-      if (isDevBypass) {
-        setIsDevBypass(false);
-        localStorage.removeItem("devBypassEnabled");
-      }
     } catch (error) {
       setLoading(false);
       throw error;
@@ -214,9 +151,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     signInWithGoogle,
     signUp,
     signOut,
-    sendPasswordResetEmail,
-    bypassAuthInDev,
-    isDevBypass
+    sendPasswordResetEmail
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
