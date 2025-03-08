@@ -55,17 +55,17 @@ export default function FeaturesForm({
     <form onSubmit={handleSubmit}>
       <div className="space-y-6">
         <div>
-          <h2 className="text-xl font-semibold text-slate-800 mb-4">
+          <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-4">
             Features & Modules
           </h2>
-          <p className="text-slate-600 mb-6">
+          <p className="text-slate-600 dark:text-slate-400 mb-6">
             Select which features and modules to include in your project.
           </p>
         </div>
 
         {coreModules.length === 0 ? (
-          <div className="p-6 bg-slate-50 border border-slate-200 rounded-lg text-center">
-            <p className="text-slate-600">
+          <div className="p-6 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-center">
+            <p className="text-slate-600 dark:text-slate-400">
               No features available for this template.
             </p>
           </div>
@@ -74,14 +74,14 @@ export default function FeaturesForm({
             {coreModules.map((module, index) => (
               <div
                 key={index}
-                className="p-4 border border-slate-200 rounded-lg"
+                className="p-4 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800"
               >
                 <div className="flex justify-between items-start mb-2">
                   <div>
-                    <h3 className="font-medium text-slate-800">
+                    <h3 className="font-medium text-slate-800 dark:text-slate-100">
                       {module.name}
                     </h3>
-                    <p className="text-sm text-slate-600 mt-1">
+                    <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
                       {module.description}
                     </p>
                   </div>
@@ -91,7 +91,7 @@ export default function FeaturesForm({
                     disabled={!module.optional}
                     className={`p-1 ${
                       !module.optional
-                        ? "cursor-not-allowed text-slate-400"
+                        ? "cursor-not-allowed text-slate-400 dark:text-slate-600"
                         : "cursor-pointer"
                     }`}
                     title={
@@ -103,21 +103,24 @@ export default function FeaturesForm({
                     {module.enabled ? (
                       <ToggleRight size={24} className="text-primary-600" />
                     ) : (
-                      <ToggleLeft size={24} className="text-slate-400" />
+                      <ToggleLeft
+                        size={24}
+                        className="text-slate-400 dark:text-slate-500"
+                      />
                     )}
                   </button>
                 </div>
 
                 {!module.optional && (
-                  <div className="flex items-center gap-2 text-xs text-slate-500 mb-3">
+                  <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mb-3">
                     <Info size={12} />
                     <span>This feature is required for this project type</span>
                   </div>
                 )}
 
                 {module.enabled && module.providers.length > 0 && (
-                  <div className="mt-3 pt-3 border-t border-slate-100">
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                  <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                       Provider
                     </label>
                     <select
@@ -125,7 +128,7 @@ export default function FeaturesForm({
                       onChange={(e) =>
                         handleProviderChange(index, e.target.value)
                       }
-                      className="w-full p-2 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      className="w-full p-2 border border-slate-300 dark:border-slate-600 rounded focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                     >
                       <option value="">Select provider...</option>
                       <option value="aws">AWS</option>
@@ -140,22 +143,6 @@ export default function FeaturesForm({
             ))}
           </div>
         )}
-      </div>
-
-      <div className="flex justify-between mt-8 pt-6 border-t border-slate-200">
-        <button
-          type="button"
-          onClick={onBack}
-          className="px-4 py-2 border border-slate-300 rounded text-slate-700 hover:bg-slate-50"
-        >
-          Back
-        </button>
-        <button
-          type="submit"
-          className="px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700"
-        >
-          Continue
-        </button>
       </div>
     </form>
   );

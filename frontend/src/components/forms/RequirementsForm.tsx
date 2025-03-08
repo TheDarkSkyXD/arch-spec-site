@@ -236,23 +236,6 @@ export default function RequirementsForm({
             </button>
           </div>
         </div>
-
-        {/* Form Actions */}
-        <div className="flex justify-between mt-8 pt-4 border-t border-slate-200 dark:border-slate-700">
-          <button
-            type="button"
-            onClick={onBack}
-            className="px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-md text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
-          >
-            Back
-          </button>
-          <button
-            type="submit"
-            className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 text-sm font-medium"
-          >
-            Continue
-          </button>
-        </div>
       </div>
     </form>
   );

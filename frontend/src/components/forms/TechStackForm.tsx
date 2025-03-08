@@ -573,23 +573,6 @@ const TechStackForm = ({
         </div>
       </div>
 
-      {/* Submit Button */}
-      <div className="flex justify-end space-x-4">
-        <button
-          type="button"
-          onClick={onBack}
-          className="px-4 py-2 border border-slate-300 rounded-md text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50"
-        >
-          Back
-        </button>
-        <button
-          type="submit"
-          className="px-4 py-2 bg-primary-600 rounded-md text-sm font-medium text-white hover:bg-primary-700"
-        >
-          {isSubmitting ? "Saving..." : "Continue"}
-        </button>
-      </div>
-
       {/* Display compatibility status */}
       {(frontend || backend || database) && (
         <div
