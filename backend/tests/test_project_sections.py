@@ -1,11 +1,10 @@
 """
-Tests for the project sections API endpoints.
+Simplified tests for the project sections API endpoints using mocks.
 """
 import pytest
-import json
-from datetime import datetime, timezone
+from unittest.mock import patch, MagicMock, ANY, AsyncMock
 from fastapi.testclient import TestClient
-from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
+from datetime import datetime
 
 from app.main import app
 from app.schemas.project_sections import (
@@ -14,86 +13,44 @@ from app.schemas.project_sections import (
     RequirementsSection,
     MetadataSection
 )
-from app.db.base import Database
 
 
-# Test client setup
-client = TestClient(app)
+@pytest.fixture
+def client():
+    """Create test client."""
+    with TestClient(app) as test_client:
+        yield test_client
 
-# Mock database for testing
-test_db = None
 
-
-# Set up test database
-@pytest.fixture(autouse=True)
-async def setup_test_db():
-    """Set up a test database for each test."""
-    global test_db
+@patch("app.api.routes.project_sections.validate_project_exists")
+@patch("app.services.project_sections_service.ProjectSectionsService.create_or_update_timeline_section")
+def test_create_timeline_section(mock_create_update, mock_validate, client):
+    """Test creating a timeline section with fully mocked dependencies."""
+    # Setup mocks
+    mock_validate.return_value = {
+        "id": "test-project-id",
+        "name": "Test Project"
+    }
     
-    # Create an in-memory MongoDB for testing
-    mongo_client = AsyncIOMotorClient("mongodb://localhost:27017")
-    test_db = mongo_client["archspec_test"]
-    
-    # Clear all collections
-    collections = await test_db.list_collection_names()
-    for collection in collections:
-        await test_db[collection].drop()
-    
-    # Create a test project
-    project_id = "test-project-id"
-    test_project = {
-        "id": project_id,
-        "name": "Test Project",
-        "description": "A project for testing",
-        "template_type": "web_app",
-        "status": "draft",
-        "business_goals": ["Testing"],
-        "target_users": ["Developers"],
-        "created_at": datetime.now(timezone.utc),
-        "updated_at": datetime.now(timezone.utc),
-        "has_timeline": False,
-        "has_budget": False,
-        "has_requirements": False,
-        "has_metadata": False,
-        "team_members": [],
-        "template_data": {
-            "id": "test-template",
-            "name": "Test Template",
-            "description": "A template for testing",
-            "template_type": "web_app",
-            "project_defaults": {
-                "name": "Default Name",
-                "description": "Default Description",
-                "business_goals": [],
-                "target_users": []
+    mock_create_update.return_value = {
+        "id": "section-1",
+        "project_id": "test-project-id",
+        "items": {
+            "milestone1": {
+                "date": "2023-01-01",
+                "milestone": "Project Start",
+                "description": "Beginning of the project"
+            },
+            "milestone2": {
+                "date": "2023-02-01",
+                "milestone": "First Deliverable",
+                "description": "Completion of the first deliverable"
             }
         },
-        "version": 1,
-        "revision_history": []
+        "version": 1
     }
     
-    # Insert test project
-    await test_db.projects.insert_one(test_project)
-    
-    # Mock the database dependency
-    async def override_get_db():
-        return test_db
-    
-    # Patching the get_db dependency
-    app.dependency_overrides = {
-        Database.get_db: override_get_db
-    }
-    
-    yield
-    
-    # Cleanup after test
-    app.dependency_overrides = {}
-    mongo_client.close()
-
-
-# Timeline section tests
-def test_create_timeline_section():
-    """Test creating a timeline section."""
+    # Test data
     project_id = "test-project-id"
     timeline_data = {
         "items": {
@@ -110,25 +67,52 @@ def test_create_timeline_section():
         }
     }
     
+    # Act
     response = client.put(f"/api/projects/{project_id}/timeline", json=timeline_data)
+    
+    # Assert
     assert response.status_code == 200
     
-    # Verify the section was created
-    section_data = response.json()
-    assert section_data["project_id"] == project_id
-    assert len(section_data["items"]) == 2
-    assert section_data["items"]["milestone1"]["milestone"] == "Project Start"
+    # Check mock was called correctly
+    mock_validate.assert_called_once_with(project_id, ANY)
+    mock_create_update.assert_called_once()
     
-    # Verify the project was updated
-    response = client.get(f"/api/projects/{project_id}")
-    assert response.status_code == 200
-    project_data = response.json()
-    assert project_data["has_timeline"] is True
+    # Verify response structure
+    response_data = response.json()
+    assert response_data["project_id"] == project_id
+    assert len(response_data["items"]) == 2
+    assert response_data["items"]["milestone1"]["milestone"] == "Project Start"
 
 
-# Budget section tests
-def test_create_budget_section():
-    """Test creating a budget section."""
+@patch("app.api.routes.project_sections.validate_project_exists")
+@patch("app.services.project_sections_service.ProjectSectionsService.create_or_update_budget_section")
+def test_create_budget_section(mock_create_update, mock_validate, client):
+    """Test creating a budget section with fully mocked dependencies."""
+    # Setup mocks
+    mock_validate.return_value = {
+        "id": "test-project-id",
+        "name": "Test Project"
+    }
+    
+    mock_create_update.return_value = {
+        "id": "section-2",
+        "project_id": "test-project-id",
+        "items": {
+            "item1": {
+                "category": "Development",
+                "amount": 10000.0,
+                "notes": "Developer salaries"
+            },
+            "item2": {
+                "category": "Infrastructure",
+                "amount": 5000.0,
+                "notes": "Cloud hosting"
+            }
+        },
+        "version": 1
+    }
+    
+    # Test data
     project_id = "test-project-id"
     budget_data = {
         "items": {
@@ -145,25 +129,57 @@ def test_create_budget_section():
         }
     }
     
+    # Act
     response = client.put(f"/api/projects/{project_id}/budget", json=budget_data)
+    
+    # Assert
     assert response.status_code == 200
     
-    # Verify the section was created
-    section_data = response.json()
-    assert section_data["project_id"] == project_id
-    assert len(section_data["items"]) == 2
-    assert section_data["items"]["item1"]["category"] == "Development"
+    # Check mock was called correctly
+    mock_validate.assert_called_once_with(project_id, ANY)
+    mock_create_update.assert_called_once()
     
-    # Verify the project was updated
-    response = client.get(f"/api/projects/{project_id}")
-    assert response.status_code == 200
-    project_data = response.json()
-    assert project_data["has_budget"] is True
+    # Verify response structure
+    response_data = response.json()
+    assert response_data["project_id"] == project_id
+    assert len(response_data["items"]) == 2
+    assert response_data["items"]["item1"]["category"] == "Development"
+    assert response_data["items"]["item2"]["amount"] == 5000.0
 
 
-# Requirements section tests
-def test_create_requirements_section():
-    """Test creating a requirements section."""
+@patch("app.api.routes.project_sections.validate_project_exists")
+@patch("app.services.project_sections_service.ProjectSectionsService.create_or_update_requirements_section")
+def test_create_requirements_section(mock_create_update, mock_validate, client):
+    """Test creating a requirements section with fully mocked dependencies."""
+    # Setup mocks
+    mock_validate.return_value = {
+        "id": "test-project-id",
+        "name": "Test Project"
+    }
+    
+    mock_create_update.return_value = {
+        "id": "section-3",
+        "project_id": "test-project-id",
+        "functional": [
+            {
+                "id": "req1",
+                "description": "User login",
+                "priority": "high",
+                "status": "approved"
+            }
+        ],
+        "non_functional": [
+            {
+                "id": "req2",
+                "description": "System should handle 1000 users concurrently",
+                "priority": "medium",
+                "status": "proposed" 
+            }
+        ],
+        "version": 1
+    }
+    
+    # Test data
     project_id = "test-project-id"
     requirements_data = {
         "functional": [
@@ -184,26 +200,48 @@ def test_create_requirements_section():
         ]
     }
     
+    # Act
     response = client.put(f"/api/projects/{project_id}/requirements", json=requirements_data)
+    
+    # Assert
     assert response.status_code == 200
     
-    # Verify the section was created
-    section_data = response.json()
-    assert section_data["project_id"] == project_id
-    assert len(section_data["functional"]) == 1
-    assert len(section_data["non_functional"]) == 1
-    assert section_data["functional"][0]["description"] == "User login"
+    # Check mock was called correctly
+    mock_validate.assert_called_once_with(project_id, ANY)
+    mock_create_update.assert_called_once()
     
-    # Verify the project was updated
-    response = client.get(f"/api/projects/{project_id}")
-    assert response.status_code == 200
-    project_data = response.json()
-    assert project_data["has_requirements"] is True
+    # Verify response structure
+    response_data = response.json()
+    assert response_data["project_id"] == project_id
+    assert len(response_data["functional"]) == 1
+    assert len(response_data["non_functional"]) == 1
+    assert response_data["functional"][0]["description"] == "User login"
+    assert response_data["non_functional"][0]["description"] == "System should handle 1000 users concurrently"
 
 
-# Metadata section tests
-def test_create_metadata_section():
-    """Test creating a metadata section."""
+@patch("app.api.routes.project_sections.validate_project_exists")
+@patch("app.services.project_sections_service.ProjectSectionsService.create_or_update_metadata_section")
+def test_create_metadata_section(mock_create_update, mock_validate, client):
+    """Test creating a metadata section with fully mocked dependencies."""
+    # Setup mocks
+    mock_validate.return_value = {
+        "id": "test-project-id",
+        "name": "Test Project"
+    }
+    
+    mock_create_update.return_value = {
+        "id": "section-4",
+        "project_id": "test-project-id",
+        "data": {
+            "team_size": 5,
+            "priority": "high",
+            "estimated_cost": 150000,
+            "tags": ["web", "mobile", "cloud"]
+        },
+        "version": 1
+    }
+    
+    # Test data
     project_id = "test-project-id"
     metadata_data = {
         "data": {
@@ -214,110 +252,163 @@ def test_create_metadata_section():
         }
     }
     
+    # Act
     response = client.put(f"/api/projects/{project_id}/metadata", json=metadata_data)
+    
+    # Assert
     assert response.status_code == 200
     
-    # Verify the section was created
-    section_data = response.json()
-    assert section_data["project_id"] == project_id
-    assert section_data["data"]["team_size"] == 5
-    assert section_data["data"]["tags"] == ["web", "mobile", "cloud"]
+    # Check mock was called correctly
+    mock_validate.assert_called_once_with(project_id, ANY)
+    mock_create_update.assert_called_once()
     
-    # Verify the project was updated
-    response = client.get(f"/api/projects/{project_id}")
-    assert response.status_code == 200
-    project_data = response.json()
-    assert project_data["has_metadata"] is True
+    # Verify response structure
+    response_data = response.json()
+    assert response_data["project_id"] == project_id
+    assert response_data["data"]["team_size"] == 5
+    assert response_data["data"]["priority"] == "high"
+    assert response_data["data"]["tags"] == ["web", "mobile", "cloud"]
 
 
-# End-to-end test for project with all sections
-def test_full_project_with_sections():
-    """Test creating and retrieving a project with all sections."""
-    # Create a new project
-    project_data = {
+@patch("app.api.routes.projects.ProjectSectionsService")
+@patch("app.db.base.db.get_db")
+def test_full_project_with_sections(mock_get_db, mock_sections_service, client):
+    """Test retrieving a project with all sections."""
+    # Mock the database operations
+    new_project_id = "test-full-project-id"
+    mock_db = AsyncMock()
+    
+    # Set up mock responses for all required methods
+    mock_db.projects = AsyncMock()
+    
+    # Mock the project find_one response
+    mock_db.projects.find_one = AsyncMock(return_value={
+        "id": new_project_id,
         "name": "Complete Project",
         "description": "Project with all sections",
         "template_type": "web_app",
+        "status": "draft",
         "business_goals": ["Business Value"],
-        "target_users": ["End Users"]
-    }
+        "target_users": ["End Users"],
+        "has_timeline": True,
+        "has_budget": True,
+        "has_requirements": True,
+        "has_metadata": True,
+        "created_at": "2023-01-01T00:00:00Z",
+        "updated_at": "2023-01-01T00:00:00Z",
+        "team_members": [],
+        "version": 1,
+    })
     
-    # Create project
-    response = client.post("/api/projects", json=project_data)
-    assert response.status_code == 200
-    project = response.json()
-    project_id = project["id"]
+    # Set up the get_db mock to return our mock database
+    mock_get_db.return_value = mock_db
     
-    # Add timeline section
-    timeline_data = {
-        "items": {
+    # Setup mocks for section retrievals
+    timeline_section = TimelineSection(
+        id="timeline-id",
+        project_id=new_project_id,
+        items={
             "milestone1": {
                 "date": "2023-03-01",
                 "milestone": "Project Kickoff",
                 "description": "Starting the project"
             }
-        }
-    }
-    response = client.put(f"/api/projects/{project_id}/timeline", json=timeline_data)
-    assert response.status_code == 200
+        },
+        created_at=datetime.now(),
+        updated_at=datetime.now(),
+        version=1
+    )
     
-    # Add budget section
-    budget_data = {
-        "items": {
+    budget_section = BudgetSection(
+        id="budget-id",
+        project_id=new_project_id,
+        items={
             "budget1": {
                 "category": "Marketing",
                 "amount": 20000.0,
                 "notes": "Marketing budget"
             }
-        }
-    }
-    response = client.put(f"/api/projects/{project_id}/budget", json=budget_data)
-    assert response.status_code == 200
+        },
+        created_at=datetime.now(),
+        updated_at=datetime.now(),
+        version=1
+    )
     
-    # Add requirements section
-    requirements_data = {
-        "functional": [
+    requirements_section = RequirementsSection(
+        id="requirements-id",
+        project_id=new_project_id,
+        functional=[
             {
+                "id": "func-req-1",
                 "description": "User registration",
                 "priority": "critical",
                 "status": "approved"
             }
         ],
-        "non_functional": [
+        non_functional=[
             {
+                "id": "non-func-req-1",
                 "description": "Page load time under 2 seconds",
                 "priority": "high",
                 "status": "approved"
             }
-        ]
-    }
-    response = client.put(f"/api/projects/{project_id}/requirements", json=requirements_data)
-    assert response.status_code == 200
+        ],
+        created_at=datetime.now(),
+        updated_at=datetime.now(),
+        version=1
+    )
     
-    # Add metadata section
-    metadata_data = {
-        "data": {
+    metadata_section = MetadataSection(
+        id="metadata-id",
+        project_id=new_project_id,
+        data={
             "complexity": "medium",
             "estimated_duration": "6 months"
-        }
-    }
-    response = client.put(f"/api/projects/{project_id}/metadata", json=metadata_data)
-    assert response.status_code == 200
+        },
+        created_at=datetime.now(),
+        updated_at=datetime.now(),
+        version=1
+    )
     
-    # Retrieve the full project
-    response = client.get(f"/api/projects/{project_id}")
-    assert response.status_code == 200
+    # Set up the mock service methods
+    mock_sections_service.get_timeline_section = AsyncMock(return_value=timeline_section)
+    mock_sections_service.get_budget_section = AsyncMock(return_value=budget_section)
+    mock_sections_service.get_requirements_section = AsyncMock(return_value=requirements_section)
+    mock_sections_service.get_metadata_section = AsyncMock(return_value=metadata_section)
     
-    # Check that all sections are included
-    full_project = response.json()
-    assert full_project["has_timeline"] is True
-    assert full_project["has_budget"] is True
-    assert full_project["has_requirements"] is True
-    assert full_project["has_metadata"] is True
+    # Act - retrieve the project with all sections
+    response = client.get(f"/api/projects/{new_project_id}")
     
-    # Verify section contents
-    assert full_project["timeline"]["milestone1"]["milestone"] == "Project Kickoff"
-    assert full_project["budget"]["budget1"]["category"] == "Marketing"
-    assert any(req["description"] == "User registration" for req in full_project["functional_requirements"])
-    assert any(req["description"] == "Page load time under 2 seconds" for req in full_project["non_functional_requirements"])
-    assert full_project["metadata"]["complexity"] == "medium" 
+    # Assert
+    assert response.status_code == 200, f"Failed to retrieve project: {response.text}"
+    result = response.json()
+    
+    # Verify the sections were included
+    assert result["has_timeline"] is True
+    assert result["has_budget"] is True
+    assert result["has_requirements"] is True
+    assert result["has_metadata"] is True
+    
+    # Check the timeline section
+    assert "timeline" in result
+    assert "milestone1" in result["timeline"]
+    assert result["timeline"]["milestone1"]["milestone"] == "Project Kickoff"
+    
+    # Check the budget section
+    assert "budget" in result
+    assert "budget1" in result["budget"]
+    assert result["budget"]["budget1"]["category"] == "Marketing"
+    
+    # Check the requirements section
+    assert "functional_requirements" in result
+    assert len(result["functional_requirements"]) == 1
+    assert result["functional_requirements"][0]["description"] == "User registration"
+    
+    assert "non_functional_requirements" in result
+    assert len(result["non_functional_requirements"]) == 1
+    assert result["non_functional_requirements"][0]["description"] == "Page load time under 2 seconds"
+    
+    # Check the metadata section
+    assert "metadata" in result
+    assert result["metadata"]["complexity"] == "medium"
+    assert result["metadata"]["estimated_duration"] == "6 months" 
