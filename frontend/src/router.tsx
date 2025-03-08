@@ -4,29 +4,74 @@ import NewProject from "./pages/NewProject";
 import Projects from "./pages/Projects";
 import Templates from "./pages/Templates";
 import Settings from "./pages/Settings";
+import ProtectedRoute from "./components/ProtectedRoute";
+
+// Auth pages
+import Login from "./pages/auth/Login";
+import Register from "./pages/auth/Register";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+import ResetPassword from "./pages/auth/ResetPassword";
 
 const router = createBrowserRouter([
+  // Auth routes (public)
+  {
+    path: "/login",
+    element: <Login />,
+  },
+  {
+    path: "/register",
+    element: <Register />,
+  },
+  {
+    path: "/forgot-password",
+    element: <ForgotPassword />,
+  },
+  {
+    path: "/reset-password",
+    element: <ResetPassword />,
+  },
+  
+  // Protected routes (require authentication)
   {
     path: "/",
-    element: <Dashboard />,
+    element: (
+      <ProtectedRoute>
+        <Dashboard />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/new-project",
-    element: <NewProject />,
+    element: (
+      <ProtectedRoute>
+        <NewProject />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/projects",
-    element: <Projects />,
+    element: (
+      <ProtectedRoute>
+        <Projects />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/templates",
-    element: <Templates />,
+    element: (
+      <ProtectedRoute>
+        <Templates />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/settings",
-    element: <Settings />,
+    element: (
+      <ProtectedRoute>
+        <Settings />
+      </ProtectedRoute>
+    ),
   },
-  // Other routes will be added as we implement them
 ]);
 
 const Router = () => {
