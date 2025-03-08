@@ -7,7 +7,7 @@ import { useAuth } from "../../contexts/AuthContext";
 const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { signIn, bypassAuthInDev, isDevBypass } = useAuth();
+  const { signIn } = useAuth();
   
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -44,18 +44,7 @@ const Login = () => {
     }
   };
 
-  // For development purposes - enable quick login
-  const handleDevLogin = () => {
-    setEmail("dev@example.com");
-    setPassword("password123");
-  };
-  
-  // For development purposes - bypass authentication completely
-  const handleDevBypass = () => {
-    bypassAuthInDev();
-    // Navigate to the intended destination
-    navigate(from, { replace: true });
-  };
+  // Development functionality removed
 
   return (
     <AuthLayout>
@@ -65,10 +54,10 @@ const Login = () => {
             <Lock className="h-6 w-6" />
           </div>
         </div>
-        <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-slate-900">
+        <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
           Sign in to your account
         </h2>
-        <p className="mt-2 text-center text-sm text-slate-600">
+        <p className="mt-2 text-center text-sm text-slate-600 dark:text-slate-400">
           Or{" "}
           <Link
             to="/register"
@@ -80,7 +69,7 @@ const Login = () => {
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+        <div className="bg-white dark:bg-slate-800 py-8 px-4 shadow sm:rounded-lg sm:px-10">
           {/* Success message from registration */}
           {successMessage && (
             <div className="mb-4 bg-green-50 text-green-700 p-3 rounded-md flex items-start">
@@ -101,7 +90,7 @@ const Login = () => {
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-medium text-slate-700"
+                className="block text-sm font-medium text-slate-700 dark:text-slate-300"
               >
                 Email address
               </label>
@@ -117,7 +106,7 @@ const Login = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="appearance-none block w-full pl-10 pr-3 py-2 border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                  className="appearance-none block w-full pl-10 pr-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white sm:text-sm"
                   placeholder="you@example.com"
                 />
               </div>
@@ -126,7 +115,7 @@ const Login = () => {
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-medium text-slate-700"
+                className="block text-sm font-medium text-slate-700 dark:text-slate-300"
               >
                 Password
               </label>
@@ -142,7 +131,7 @@ const Login = () => {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="appearance-none block w-full pl-10 pr-10 py-2 border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                  className="appearance-none block w-full pl-10 pr-10 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white sm:text-sm"
                   placeholder="••••••••"
                 />
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
@@ -173,7 +162,7 @@ const Login = () => {
                 />
                 <label
                   htmlFor="remember-me"
-                  className="ml-2 block text-sm text-slate-700"
+                  className="ml-2 block text-sm text-slate-700 dark:text-slate-300"
                 >
                   Remember me
                 </label>
@@ -182,7 +171,7 @@ const Login = () => {
               <div className="text-sm">
                 <Link
                   to="/forgot-password"
-                  className="font-medium text-primary-600 hover:text-primary-500"
+                  className="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
                 >
                   Forgot your password?
                 </Link>
@@ -221,7 +210,7 @@ const Login = () => {
                 <div className="w-full border-t border-slate-300" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-slate-500">
+                <span className="px-2 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400">
                   Or continue with
                 </span>
               </div>
@@ -230,7 +219,7 @@ const Login = () => {
             <div className="mt-6 grid grid-cols-2 gap-3">
               <button
                 type="button"
-                className="w-full inline-flex justify-center py-2 px-4 border border-slate-300 rounded-md shadow-sm bg-white text-sm font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                className="w-full inline-flex justify-center py-2 px-4 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm bg-white dark:bg-slate-700 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 dark:focus:ring-offset-slate-800"
               >
                 <span className="sr-only">Sign in with Google</span>
                 <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
@@ -240,7 +229,7 @@ const Login = () => {
 
               <button
                 type="button"
-                className="w-full inline-flex justify-center py-2 px-4 border border-slate-300 rounded-md shadow-sm bg-white text-sm font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                className="w-full inline-flex justify-center py-2 px-4 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm bg-white dark:bg-slate-700 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 dark:focus:ring-offset-slate-800"
               >
                 <span className="sr-only">Sign in with GitHub</span>
                 <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
@@ -254,33 +243,7 @@ const Login = () => {
             </div>
           </div>
 
-          {/* Development-only buttons */}
-          {import.meta.env.MODE !== "production" && (
-            <div className="mt-6 space-y-3">
-              <button
-                type="button"
-                onClick={handleDevLogin}
-                className="w-full flex justify-center py-2 px-4 border border-yellow-300 rounded-md shadow-sm text-sm font-medium text-yellow-800 bg-yellow-100 hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
-              >
-                Dev: Fill credentials
-              </button>
-              
-              <button
-                type="button"
-                onClick={handleDevBypass}
-                className="w-full flex justify-center py-2 px-4 border border-purple-300 rounded-md shadow-sm text-sm font-medium text-purple-800 bg-purple-100 hover:bg-purple-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
-              >
-                Dev: Bypass Authentication
-              </button>
-              
-              {isDevBypass && (
-                <div className="mt-2 bg-purple-50 text-purple-700 p-3 rounded-md flex items-start">
-                  <CheckCircle className="h-5 w-5 mr-2 mt-0.5 flex-shrink-0" />
-                  <span>Development bypass is active. You can access protected routes without authentication.</span>
-                </div>
-              )}
-            </div>
-          )}
+          {/* Development buttons removed */}
         </div>
       </div>
     </AuthLayout>
