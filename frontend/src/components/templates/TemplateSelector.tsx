@@ -62,40 +62,42 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
     <div
       className={`border rounded-lg p-5 cursor-pointer transition-all hover:shadow-md ${
         isSelected
-          ? "border-primary-500 ring-2 ring-primary-100 bg-primary-50"
-          : "border-slate-200 hover:border-primary-300"
+          ? "border-primary-500 ring-2 ring-primary-100 dark:ring-primary-900/30 bg-primary-50 dark:bg-primary-900/20"
+          : "border-slate-200 dark:border-slate-700 hover:border-primary-300 dark:hover:border-primary-600"
       }`}
       onClick={onSelect}
     >
-      <div className="h-32 bg-slate-100 rounded flex items-center justify-center mb-4 relative">
+      <div className="h-32 bg-slate-100 dark:bg-slate-800 rounded flex items-center justify-center mb-4 relative">
         <span className="text-5xl">{getTemplateIcon()}</span>
         {isSelected && (
           <div className="absolute top-2 right-2">
-            <div className="text-primary-600 w-5 h-5">✓</div>
+            <div className="text-primary-600 dark:text-primary-400 w-5 h-5">
+              ✓
+            </div>
           </div>
         )}
       </div>
 
-      <h3 className="font-medium text-slate-800">
+      <h3 className="font-medium text-slate-800 dark:text-slate-100">
         {template.name || "Unnamed Template"}
       </h3>
-      <p className="text-sm text-slate-600 mt-1 line-clamp-2">
+      <p className="text-sm text-slate-600 dark:text-slate-400 mt-1 line-clamp-2">
         {template.description || "No description available"}
       </p>
 
       <div className="mt-3 flex flex-wrap gap-1">
         {template.tech_stack?.frontend && (
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
+          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200">
             {String(template.tech_stack.frontend)}
           </span>
         )}
         {template.tech_stack?.backend && (
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
+          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200">
             {String(template.tech_stack.backend)}
           </span>
         )}
         {template.tech_stack?.database && (
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
+          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200">
             {String(template.tech_stack.database)}
           </span>
         )}
@@ -174,15 +176,17 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
   if (isLoading) {
     return (
       <div className="py-10 text-center">
-        <div className="animate-pulse inline-block h-8 w-8 rounded-full bg-primary-200"></div>
-        <p className="mt-4 text-slate-600">Loading templates...</p>
+        <div className="animate-pulse inline-block h-8 w-8 rounded-full bg-primary-200 dark:bg-primary-900/50"></div>
+        <p className="mt-4 text-slate-600 dark:text-slate-400">
+          Loading templates...
+        </p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="py-10 text-center text-red-600">
+      <div className="py-10 text-center text-red-600 dark:text-red-400">
         <p>{error}</p>
         <button
           className="mt-4 px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700"
@@ -198,17 +202,23 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
   if (!templates || templates.length === 0) {
     return (
       <div className="py-10 text-center">
-        <p className="text-slate-600">No project templates available.</p>
+        <p className="text-slate-600 dark:text-slate-400">
+          No project templates available.
+        </p>
         <div className="mt-6">
           <div
-            className="border rounded-lg p-5 cursor-pointer transition-all hover:shadow-md mx-auto max-w-md"
+            className="border border-slate-200 dark:border-slate-700 rounded-lg p-5 cursor-pointer transition-all hover:shadow-md mx-auto max-w-md"
             onClick={handleCustomProject}
           >
-            <div className="h-32 bg-slate-100 rounded flex items-center justify-center mb-4">
-              <span className="text-5xl text-slate-400">+</span>
+            <div className="h-32 bg-slate-100 dark:bg-slate-800 rounded flex items-center justify-center mb-4">
+              <span className="text-5xl text-slate-400 dark:text-slate-500">
+                +
+              </span>
             </div>
-            <h3 className="font-medium text-slate-800">Custom Project</h3>
-            <p className="text-sm text-slate-600 mt-1">
+            <h3 className="font-medium text-slate-800 dark:text-slate-100">
+              Custom Project
+            </h3>
+            <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
               Start from scratch with a blank project
             </p>
           </div>
@@ -220,10 +230,10 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
   return (
     <div className="space-y-6">
       <div className="mb-4">
-        <h2 className="text-xl font-semibold text-slate-800">
+        <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100">
           Select a Template
         </h2>
-        <p className="text-slate-600">
+        <p className="text-slate-600 dark:text-slate-400">
           Choose a template to jumpstart your project or start from scratch
         </p>
       </div>
@@ -233,16 +243,20 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
         <div
           className={`border rounded-lg p-5 cursor-pointer transition-all hover:shadow-md ${
             !selectedTemplate
-              ? "border-primary-500 ring-2 ring-primary-100"
-              : "border-slate-200 hover:border-primary-300"
+              ? "border-primary-500 ring-2 ring-primary-100 dark:ring-primary-900/30 bg-primary-50 dark:bg-primary-900/20"
+              : "border-slate-200 dark:border-slate-700 hover:border-primary-300 dark:hover:border-primary-600"
           }`}
           onClick={handleCustomProject}
         >
-          <div className="h-32 bg-slate-100 rounded flex items-center justify-center mb-4">
-            <span className="text-5xl text-slate-400">+</span>
+          <div className="h-32 bg-slate-100 dark:bg-slate-800 rounded flex items-center justify-center mb-4">
+            <span className="text-5xl text-slate-400 dark:text-slate-500">
+              +
+            </span>
           </div>
-          <h3 className="font-medium text-slate-800">Custom Project</h3>
-          <p className="text-sm text-slate-600 mt-1">
+          <h3 className="font-medium text-slate-800 dark:text-slate-100">
+            Custom Project
+          </h3>
+          <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
             Start from scratch with a blank project
           </p>
         </div>

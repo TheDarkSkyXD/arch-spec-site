@@ -425,8 +425,10 @@ const NewProject = () => {
         if (loading) {
           return (
             <div className="py-10 text-center">
-              <div className="animate-pulse inline-block h-8 w-8 rounded-full bg-primary-200"></div>
-              <p className="mt-4 text-slate-600">Loading template...</p>
+              <div className="animate-pulse inline-block h-8 w-8 rounded-full bg-primary-200 dark:bg-primary-900"></div>
+              <p className="mt-4 text-slate-600 dark:text-slate-400">
+                Loading template...
+              </p>
             </div>
           );
         }
@@ -435,7 +437,7 @@ const NewProject = () => {
         if (error) {
           return (
             <div className="py-10 text-center">
-              <div className="text-red-600 mb-4">
+              <div className="text-red-600 dark:text-red-400 mb-4">
                 <p>{error}</p>
               </div>
               <div className="flex justify-center gap-4">
@@ -454,7 +456,7 @@ const NewProject = () => {
           <div>
             <div className="mb-6 text-center">
               <button
-                className="mx-auto px-6 py-3 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-800 font-medium transition-colors"
+                className="mx-auto px-6 py-3 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg text-slate-800 dark:text-slate-200 font-medium transition-colors"
                 onClick={handleBlankProjectSelect}
               >
                 Start with a Blank Project
@@ -463,10 +465,10 @@ const NewProject = () => {
 
             <div className="relative py-4 my-4">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-200"></div>
+                <div className="w-full border-t border-slate-200 dark:border-slate-700"></div>
               </div>
               <div className="relative flex justify-center">
-                <span className="px-2 bg-white text-sm text-slate-500">
+                <span className="px-2 bg-white dark:bg-slate-800 text-sm text-slate-500 dark:text-slate-400">
                   Or select a template
                 </span>
               </div>
@@ -478,7 +480,7 @@ const NewProject = () => {
             />
 
             {selectedTemplate && (
-              <div className="mt-8 border-t border-slate-200 pt-6">
+              <div className="mt-8 border-t border-slate-200 dark:border-slate-700 pt-6">
                 <TemplateDetails template={selectedTemplate} />
               </div>
             )}
@@ -616,23 +618,23 @@ const NewProject = () => {
         <div className="mb-6">
           <button
             onClick={() => navigate("/")}
-            className="flex items-center text-slate-500 hover:text-slate-700 mb-2 text-sm font-medium"
+            className="flex items-center text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 mb-2 text-sm font-medium"
           >
             <ArrowLeft size={16} className="mr-1" />
             Back to Dashboard
           </button>
-          <h1 className="text-2xl font-bold text-slate-800 font-heading">
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 font-heading">
             Create New Project
           </h1>
-          <p className="text-slate-500 mt-1">
+          <p className="text-slate-500 dark:text-slate-400 mt-1">
             Define your project specifications to generate an architecture plan
           </p>
         </div>
 
         {/* Main content card */}
-        <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
           {/* Steps indicator */}
-          <div className="p-6 border-b border-slate-100">
+          <div className="p-6 border-b border-slate-100 dark:border-slate-700">
             <ProgressBar
               steps={steps}
               currentStep={currentStep}
@@ -644,7 +646,7 @@ const NewProject = () => {
           <div className="p-6">{renderStepContent()}</div>
 
           {/* Footer with navigation buttons */}
-          <div className="p-6 bg-slate-50 border-t border-slate-100 flex justify-between">
+          <div className="p-6 bg-slate-50 dark:bg-slate-900 border-t border-slate-100 dark:border-slate-700 flex justify-between">
             <button
               onClick={() => {
                 if (!isFirstStep) {
@@ -654,7 +656,7 @@ const NewProject = () => {
                   navigate("/");
                 }
               }}
-              className="flex items-center px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-100"
+              className="flex items-center px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
             >
               <ChevronLeft size={16} className="mr-1" />
               {isFirstStep ? "Cancel" : "Previous"}
@@ -666,7 +668,7 @@ const NewProject = () => {
                 currentStep === "template" &&
                 !selectedTemplate &&
                 !isBlankProject
-                  ? "bg-slate-300 text-slate-500 cursor-not-allowed"
+                  ? "bg-slate-300 dark:bg-slate-600 text-slate-500 dark:text-slate-400 cursor-not-allowed"
                   : "bg-primary-600 hover:bg-primary-700 text-white"
               }`}
               disabled={

@@ -47,7 +47,7 @@ const ProjectBasicsForm = ({
       <div>
         <label
           htmlFor="name"
-          className="block text-sm font-medium text-slate-700"
+          className="block text-sm font-medium text-slate-700 dark:text-slate-300"
         >
           Project Name
         </label>
@@ -55,20 +55,22 @@ const ProjectBasicsForm = ({
           id="name"
           type="text"
           {...register("name")}
-          className={`mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm ${
+          className={`mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 ${
             errors.name ? "border-red-500 focus:ring-red-500" : ""
           }`}
           placeholder="Enter project name"
         />
         {errors.name && (
-          <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
+          <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+            {errors.name.message}
+          </p>
         )}
       </div>
 
       <div>
         <label
           htmlFor="description"
-          className="block text-sm font-medium text-slate-700"
+          className="block text-sm font-medium text-slate-700 dark:text-slate-300"
         >
           Description
         </label>
@@ -76,13 +78,13 @@ const ProjectBasicsForm = ({
           id="description"
           rows={4}
           {...register("description")}
-          className={`mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm ${
+          className={`mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 ${
             errors.description ? "border-red-500 focus:ring-red-500" : ""
           }`}
           placeholder="Describe your project"
         />
         {errors.description && (
-          <p className="mt-1 text-sm text-red-600">
+          <p className="mt-1 text-sm text-red-600 dark:text-red-400">
             {errors.description.message}
           </p>
         )}
@@ -91,7 +93,7 @@ const ProjectBasicsForm = ({
       <div>
         <label
           htmlFor="business_goals"
-          className="block text-sm font-medium text-slate-700"
+          className="block text-sm font-medium text-slate-700 dark:text-slate-300"
         >
           Business Goals
         </label>
@@ -99,24 +101,24 @@ const ProjectBasicsForm = ({
           id="business_goals"
           rows={2}
           {...register("business_goals")}
-          className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm"
-          placeholder="What business problems are you trying to solve? (Comma separated)"
+          className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+          placeholder="List your key business goals (comma separated)"
         />
       </div>
 
       <div>
         <label
           htmlFor="target_users"
-          className="block text-sm font-medium text-slate-700"
+          className="block text-sm font-medium text-slate-700 dark:text-slate-300"
         >
           Target Users
         </label>
-        <input
+        <textarea
           id="target_users"
-          type="text"
+          rows={2}
           {...register("target_users")}
-          className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm"
-          placeholder="Who will use this product? (Comma separated)"
+          className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+          placeholder="Describe your target user personas (comma separated)"
         />
       </div>
 
@@ -124,15 +126,15 @@ const ProjectBasicsForm = ({
         <div>
           <label
             htmlFor="domain"
-            className="block text-sm font-medium text-slate-700"
+            className="block text-sm font-medium text-slate-700 dark:text-slate-300"
           >
-            Business Domain
+            Domain
           </label>
           <input
             id="domain"
             type="text"
             {...register("domain")}
-            className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm"
+            className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
             placeholder="e.g. Healthcare, Finance, Education"
           />
         </div>
@@ -140,7 +142,7 @@ const ProjectBasicsForm = ({
         <div>
           <label
             htmlFor="organization"
-            className="block text-sm font-medium text-slate-700"
+            className="block text-sm font-medium text-slate-700 dark:text-slate-300"
           >
             Organization
           </label>
@@ -148,7 +150,7 @@ const ProjectBasicsForm = ({
             id="organization"
             type="text"
             {...register("organization")}
-            className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm"
+            className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
             placeholder="Your organization name"
           />
         </div>
@@ -157,7 +159,7 @@ const ProjectBasicsForm = ({
       <div>
         <label
           htmlFor="project_lead"
-          className="block text-sm font-medium text-slate-700"
+          className="block text-sm font-medium text-slate-700 dark:text-slate-300"
         >
           Project Lead
         </label>
@@ -165,8 +167,8 @@ const ProjectBasicsForm = ({
           id="project_lead"
           type="text"
           {...register("project_lead")}
-          className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm"
-          placeholder="Who is leading this project?"
+          className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+          placeholder="Name of project lead"
         />
       </div>
 

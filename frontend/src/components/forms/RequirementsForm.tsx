@@ -101,10 +101,10 @@ export default function RequirementsForm({
     <form onSubmit={handleSubmit}>
       <div className="space-y-6">
         <div>
-          <h2 className="text-xl font-semibold text-slate-800 mb-4">
+          <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-4">
             Project Requirements
           </h2>
-          <p className="text-slate-600 mb-6">
+          <p className="text-slate-600 dark:text-slate-400 mb-6">
             Define the functional and non-functional requirements for your
             project.
           </p>
@@ -112,16 +112,16 @@ export default function RequirementsForm({
 
         {/* Functional Requirements */}
         <div className="space-y-4">
-          <h3 className="text-lg font-medium text-slate-800">
+          <h3 className="text-lg font-medium text-slate-800 dark:text-slate-100">
             Functional Requirements
           </h3>
-          <p className="text-sm text-slate-600">
+          <p className="text-sm text-slate-600 dark:text-slate-400">
             What specific features and capabilities should your application
             have?
           </p>
 
           {errors.functional && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-md flex items-start gap-2 text-red-700">
+            <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md flex items-start gap-2 text-red-700 dark:text-red-400">
               <AlertCircle size={16} className="mt-0.5" />
               <span>{errors.functional}</span>
             </div>
@@ -131,7 +131,7 @@ export default function RequirementsForm({
             {functionalReqs.map((req) => (
               <div
                 key={req.id}
-                className="flex justify-between items-center p-3 bg-slate-50 border border-slate-200 rounded-md"
+                className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md"
               >
                 <div className="flex gap-2 items-center">
                   <span
@@ -141,26 +141,26 @@ export default function RequirementsForm({
                   >
                     {req.priority}
                   </span>
-                  <p>{req.description}</p>
+                  <p className="dark:text-slate-300">{req.description}</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => removeFunctionalRequirement(req.id)}
-                  className="text-slate-400 hover:text-red-500"
+                  className="text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400"
                 >
-                  <Trash2 size={16} />
+                  <Trash2 size={18} />
                 </button>
               </div>
             ))}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex gap-2">
             <input
               type="text"
               value={newFunctionalReq}
               onChange={(e) => setNewFunctionalReq(e.target.value)}
               placeholder="Enter a functional requirement"
-              className="flex-1 p-2 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="flex-1 p-2 border border-slate-300 dark:border-slate-600 rounded focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
             />
             <button
               type="button"
@@ -168,7 +168,7 @@ export default function RequirementsForm({
               disabled={!newFunctionalReq.trim()}
               className={`p-2 rounded-md flex items-center ${
                 !newFunctionalReq.trim()
-                  ? "bg-slate-200 text-slate-400 cursor-not-allowed"
+                  ? "bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed"
                   : "bg-primary-600 text-white hover:bg-primary-700"
               }`}
             >
@@ -179,10 +179,10 @@ export default function RequirementsForm({
 
         {/* Non-Functional Requirements */}
         <div className="space-y-4">
-          <h3 className="text-lg font-medium text-slate-800">
+          <h3 className="text-lg font-medium text-slate-800 dark:text-slate-100">
             Non-Functional Requirements
           </h3>
-          <p className="text-sm text-slate-600">
+          <p className="text-sm text-slate-600 dark:text-slate-400">
             What qualities should your application have (performance, security,
             usability, etc.)?
           </p>
@@ -191,7 +191,7 @@ export default function RequirementsForm({
             {nonFunctionalReqs.map((req) => (
               <div
                 key={req.id}
-                className="flex justify-between items-center p-3 bg-slate-50 border border-slate-200 rounded-md"
+                className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md"
               >
                 <div className="flex gap-2 items-center">
                   <span
@@ -201,26 +201,26 @@ export default function RequirementsForm({
                   >
                     {req.priority}
                   </span>
-                  <p>{req.description}</p>
+                  <p className="dark:text-slate-300">{req.description}</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => removeNonFunctionalRequirement(req.id)}
-                  className="text-slate-400 hover:text-red-500"
+                  className="text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400"
                 >
-                  <Trash2 size={16} />
+                  <Trash2 size={18} />
                 </button>
               </div>
             ))}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex gap-2">
             <input
               type="text"
               value={newNonFunctionalReq}
               onChange={(e) => setNewNonFunctionalReq(e.target.value)}
               placeholder="Enter a non-functional requirement"
-              className="flex-1 p-2 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="flex-1 p-2 border border-slate-300 dark:border-slate-600 rounded focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
             />
             <button
               type="button"
@@ -228,7 +228,7 @@ export default function RequirementsForm({
               disabled={!newNonFunctionalReq.trim()}
               className={`p-2 rounded-md flex items-center ${
                 !newNonFunctionalReq.trim()
-                  ? "bg-slate-200 text-slate-400 cursor-not-allowed"
+                  ? "bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed"
                   : "bg-primary-600 text-white hover:bg-primary-700"
               }`}
             >
@@ -236,22 +236,23 @@ export default function RequirementsForm({
             </button>
           </div>
         </div>
-      </div>
 
-      <div className="flex justify-between mt-8 pt-6 border-t border-slate-200">
-        <button
-          type="button"
-          onClick={onBack}
-          className="px-4 py-2 border border-slate-300 rounded text-slate-700 hover:bg-slate-50"
-        >
-          Back
-        </button>
-        <button
-          type="submit"
-          className="px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700"
-        >
-          Continue
-        </button>
+        {/* Form Actions */}
+        <div className="flex justify-between mt-8 pt-4 border-t border-slate-200 dark:border-slate-700">
+          <button
+            type="button"
+            onClick={onBack}
+            className="px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-md text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
+          >
+            Back
+          </button>
+          <button
+            type="submit"
+            className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 text-sm font-medium"
+          >
+            Continue
+          </button>
+        </div>
       </div>
     </form>
   );

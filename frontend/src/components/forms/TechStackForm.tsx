@@ -274,19 +274,21 @@ const TechStackForm = ({
 
       {/* Frontend Section */}
       <div>
-        <h3 className="text-lg font-medium text-slate-800 mb-4">Frontend</h3>
+        <h3 className="text-lg font-medium text-slate-800 dark:text-slate-100 mb-4">
+          Frontend
+        </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div>
             <label
               htmlFor="frontend"
-              className="block text-sm font-medium text-slate-700"
+              className="block text-sm font-medium text-slate-700 dark:text-slate-300"
             >
               Framework
             </label>
             <select
               id="frontend"
               {...register("frontend")}
-              className={`mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm ${
+              className={`mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 ${
                 errors.frontend ? "border-red-500 focus:ring-red-500" : ""
               }`}
             >
@@ -298,7 +300,7 @@ const TechStackForm = ({
               ))}
             </select>
             {errors.frontend && (
-              <p className="mt-1 text-sm text-red-600">
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">
                 {errors.frontend.message}
               </p>
             )}
@@ -307,14 +309,14 @@ const TechStackForm = ({
           <div>
             <label
               htmlFor="frontend_language"
-              className="block text-sm font-medium text-slate-700"
+              className="block text-sm font-medium text-slate-700 dark:text-slate-300"
             >
               Language
             </label>
             <select
               id="frontend_language"
               {...register("frontend_language")}
-              className={`mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm ${
+              className={`mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 ${
                 errors.frontend_language
                   ? "border-red-500 focus:ring-red-500"
                   : ""
@@ -325,7 +327,7 @@ const TechStackForm = ({
               <option value="TypeScript">TypeScript</option>
             </select>
             {errors.frontend_language && (
-              <p className="mt-1 text-sm text-red-600">
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">
                 {errors.frontend_language.message}
               </p>
             )}
@@ -334,14 +336,14 @@ const TechStackForm = ({
           <div>
             <label
               htmlFor="ui_library"
-              className="block text-sm font-medium text-slate-700"
+              className="block text-sm font-medium text-slate-700 dark:text-slate-300"
             >
               UI Library
             </label>
             <select
               id="ui_library"
               {...register("ui_library")}
-              className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm"
+              className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
               disabled={!frontend || uiLibraryOptions.length === 0}
             >
               <option value="">Select UI Library</option>
@@ -358,14 +360,14 @@ const TechStackForm = ({
             <div>
               <label
                 htmlFor="state_management"
-                className="block text-sm font-medium text-slate-700"
+                className="block text-sm font-medium text-slate-700 dark:text-slate-300"
               >
                 State Management
               </label>
               <select
                 id="state_management"
                 {...register("state_management")}
-                className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm"
+                className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                 disabled={stateManagementOptions.length === 0}
               >
                 <option value="">Select State Management</option>
@@ -382,19 +384,21 @@ const TechStackForm = ({
 
       {/* Backend Section */}
       <div>
-        <h3 className="text-lg font-medium text-slate-800 mb-4">Backend</h3>
+        <h3 className="text-lg font-medium text-slate-800 dark:text-slate-100 mb-4">
+          Backend
+        </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label
               htmlFor="backend"
-              className="block text-sm font-medium text-slate-700"
+              className="block text-sm font-medium text-slate-700 dark:text-slate-300"
             >
               Framework
             </label>
             <select
               id="backend"
               {...register("backend")}
-              className={`mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm ${
+              className={`mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 ${
                 errors.backend ? "border-red-500 focus:ring-red-500" : ""
               }`}
             >
@@ -406,7 +410,7 @@ const TechStackForm = ({
               ))}
             </select>
             {errors.backend && (
-              <p className="mt-1 text-sm text-red-600">
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">
                 {errors.backend.message}
               </p>
             )}
@@ -415,14 +419,14 @@ const TechStackForm = ({
           <div>
             <label
               htmlFor="backend_provider"
-              className="block text-sm font-medium text-slate-700"
+              className="block text-sm font-medium text-slate-700 dark:text-slate-300"
             >
               Provider (if applicable)
             </label>
             <select
               id="backend_provider"
               {...register("backend_provider")}
-              className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm"
+              className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
             >
               <option value="">Select Provider</option>
               <option value="AWS Lambda">AWS Lambda</option>
@@ -438,19 +442,21 @@ const TechStackForm = ({
 
       {/* Database Section */}
       <div>
-        <h3 className="text-lg font-medium text-slate-800 mb-4">Database</h3>
+        <h3 className="text-lg font-medium text-slate-800 dark:text-slate-100 mb-4">
+          Database
+        </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label
               htmlFor="database"
-              className="block text-sm font-medium text-slate-700"
+              className="block text-sm font-medium text-slate-700 dark:text-slate-300"
             >
               Type
             </label>
             <select
               id="database"
               {...register("database")}
-              className={`mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm ${
+              className={`mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 ${
                 errors.database ? "border-red-500 focus:ring-red-500" : ""
               }`}
               disabled={!backend || databaseOptions.length === 0}
@@ -469,7 +475,7 @@ const TechStackForm = ({
                   ))}
             </select>
             {errors.database && (
-              <p className="mt-1 text-sm text-red-600">
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">
                 {errors.database.message}
               </p>
             )}
@@ -478,14 +484,14 @@ const TechStackForm = ({
           <div>
             <label
               htmlFor="database_provider"
-              className="block text-sm font-medium text-slate-700"
+              className="block text-sm font-medium text-slate-700 dark:text-slate-300"
             >
               Provider (if applicable)
             </label>
             <select
               id="database_provider"
               {...register("database_provider")}
-              className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm"
+              className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
             >
               <option value="">Select Provider</option>
               <option value="AWS RDS">AWS RDS</option>
@@ -501,14 +507,14 @@ const TechStackForm = ({
             <div>
               <label
                 htmlFor="orm"
-                className="block text-sm font-medium text-slate-700"
+                className="block text-sm font-medium text-slate-700 dark:text-slate-300"
               >
                 ORM / Database Access
               </label>
               <select
                 id="orm"
                 {...register("orm")}
-                className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm"
+                className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                 disabled={ormOptions.length === 0}
               >
                 <option value="">Select ORM</option>
@@ -525,21 +531,21 @@ const TechStackForm = ({
 
       {/* Authentication Section */}
       <div>
-        <h3 className="text-lg font-medium text-slate-800 mb-4">
+        <h3 className="text-lg font-medium text-slate-800 dark:text-slate-100 mb-4">
           Authentication
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label
               htmlFor="auth_provider"
-              className="block text-sm font-medium text-slate-700"
+              className="block text-sm font-medium text-slate-700 dark:text-slate-300"
             >
               Provider
             </label>
             <select
               id="auth_provider"
               {...register("auth_provider")}
-              className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm"
+              className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
               disabled={!backend || authOptions.length === 0}
             >
               <option value="">Select Auth Provider</option>
@@ -554,14 +560,14 @@ const TechStackForm = ({
           <div>
             <label
               htmlFor="auth_methods"
-              className="block text-sm font-medium text-slate-700"
+              className="block text-sm font-medium text-slate-700 dark:text-slate-300"
             >
               Methods
             </label>
             <select
               id="auth_methods"
               {...register("auth_methods")}
-              className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm"
+              className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
             >
               <option value="">Select Auth Methods</option>
               <option value="Email/Password">Email/Password</option>
@@ -581,7 +587,7 @@ const TechStackForm = ({
         <button
           type="button"
           onClick={onBack}
-          className="px-4 py-2 border border-slate-300 rounded-md text-sm font-medium text-slate-700 hover:bg-slate-50"
+          className="px-4 py-2 border border-slate-300 rounded-md text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50"
         >
           Back
         </button>
