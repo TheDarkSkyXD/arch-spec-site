@@ -68,7 +68,7 @@ try:
     try:
         from .routes import users
         api_router.include_router(users.router, prefix="/users", tags=["users"])
-        logger.info("Users router loaded successfully")
+        logger.info(f"Users router loaded successfully with routes: {[route.path for route in users.router.routes]}")
     except Exception as e:
         logger.error(f"Failed to load users router: {str(e)}")
     

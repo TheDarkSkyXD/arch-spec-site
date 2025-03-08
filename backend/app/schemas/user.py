@@ -1,6 +1,6 @@
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Optional, List, Dict, Any
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, Field, EmailStr, ConfigDict
 from bson import ObjectId
 
 
@@ -40,16 +40,16 @@ class UserInDB(UserBase):
     """User schema as stored in the database."""
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     firebase_uid: str = Field(..., description="Firebase Auth UID")
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     last_login: Optional[datetime] = None
     is_active: bool = True
     settings: Dict[str, Any] = Field(default_factory=dict)
     
-    class Config:
-        populate_by_name = True
-        json_encoders = {ObjectId: str}
-        json_schema_extra = {
+    model_config = ConfigDict(
+        populate_by_name=True,
+        json_encoders={ObjectId: str},
+        json_schema_extra={
             "example": {
                 "_id": "507f1f77bcf86cd799439011",
                 "email": "user@example.com",
@@ -63,6 +63,7 @@ class UserInDB(UserBase):
                 "settings": {"theme": "dark"}
             }
         }
+    )
 
 
 class UserResponse(BaseModel):
@@ -76,6 +77,7 @@ class UserResponse(BaseModel):
     last_login: Optional[datetime] = None
     settings: Dict[str, Any] = Field(default_factory=dict)
     
-    class Config:
-        populate_by_name = True
-        json_encoders = {ObjectId: str}
+    model_config = ConfigDict(
+        populate_by_name=True,
+        json_encoders={ObjectId: str}
+    )

@@ -1,22 +1,22 @@
-import { useState, useEffect } from 'react';
-import { useAuth } from '../contexts';
-import { userApi } from '../api/userApi';
-import { toast } from 'react-hot-toast';
-import Button from '../components/ui/Button';
-import Card from '../components/ui/Card';
-import Spinner from '../components/ui/Spinner';
-import Toggle from '../components/ui/Toggle';
-import ProfileLayout from '../layouts/ProfileLayout';
+import { useState, useEffect } from "react";
+import { useAuth } from "../contexts";
+import { userApi } from "../api/userApi";
+import { toast } from "react-hot-toast";
+import Button from "../components/ui/Button";
+import Card from "../components/ui/Card";
+import Spinner from "../components/ui/Spinner";
+import Toggle from "../components/ui/Toggle";
+import ProfileLayout from "../layouts/ProfileLayout";
 
 interface UserSettings {
-  theme: 'light' | 'dark' | 'system';
+  theme: "light" | "dark" | "system";
   notifications: boolean;
   emailUpdates: boolean;
   [key: string]: any;
 }
 
 const defaultSettings: UserSettings = {
-  theme: 'system',
+  theme: "system",
   notifications: true,
   emailUpdates: false,
 };
@@ -25,23 +25,48 @@ const UserSettingsPage = () => {
   const { currentUser } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [settings, setSettings] = useState<UserSettings>(defaultSettings);
 
   useEffect(() => {
     const loadSettings = async () => {
-      if (!currentUser?.profile) return;
-      
+      if (!currentUser) {
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
+      setError(null);
+
       try {
+        // Try to load settings from API directly
+        const profile = await userApi.getCurrentUser();
+
         // Merge default settings with user settings from profile
-        const userSettings = currentUser.profile.settings as Record<string, any>;
+        const userSettings = profile.settings as Record<string, any>;
         setSettings({
           ...defaultSettings,
           ...userSettings,
         });
+
+        // Apply theme setting to the document
+        applyTheme(userSettings?.theme || defaultSettings.theme);
       } catch (error) {
-        console.error('Error loading settings:', error);
-        toast.error('Failed to load settings');
+        console.error("Error loading settings:", error);
+        setError("Failed to load settings. Using default settings.");
+
+        // Fallback to cached settings if available
+        if (currentUser?.profile?.settings) {
+          setSettings({
+            ...defaultSettings,
+            ...currentUser.profile.settings,
+          });
+
+          // Apply theme setting to the document
+          applyTheme(
+            currentUser.profile.settings?.theme || defaultSettings.theme
+          );
+        }
       } finally {
         setLoading(false);
       }
@@ -50,11 +75,32 @@ const UserSettingsPage = () => {
     loadSettings();
   }, [currentUser]);
 
-  const handleThemeChange = (theme: 'light' | 'dark' | 'system') => {
+  const applyTheme = (theme: "light" | "dark" | "system") => {
+    const root = window.document.documentElement;
+
+    // Remove all theme classes
+    root.classList.remove("light", "dark");
+
+    // Apply selected theme
+    if (theme === "system") {
+      // Check system preference
+      const prefersDark = window.matchMedia(
+        "(prefers-color-scheme: dark)"
+      ).matches;
+      root.classList.add(prefersDark ? "dark" : "light");
+    } else {
+      root.classList.add(theme);
+    }
+  };
+
+  const handleThemeChange = (theme: "light" | "dark" | "system") => {
     setSettings((prev) => ({
       ...prev,
       theme,
     }));
+
+    // Apply theme immediately for better UX
+    applyTheme(theme);
   };
 
   const handleToggleChange = (setting: string, value: boolean) => {
@@ -66,12 +112,15 @@ const UserSettingsPage = () => {
 
   const handleSaveSettings = async () => {
     setSaving(true);
+    setError(null);
+
     try {
       await userApi.updateUserSettings(settings);
-      toast.success('Settings saved successfully');
+      toast.success("Settings saved successfully");
     } catch (error) {
-      console.error('Error saving settings:', error);
-      toast.error('Failed to save settings');
+      console.error("Error saving settings:", error);
+      toast.error("Failed to save settings");
+      setError("Failed to save settings. Please try again later.");
     } finally {
       setSaving(false);
     }
@@ -87,66 +136,91 @@ const UserSettingsPage = () => {
     );
   }
 
+  if (!currentUser) {
+    return (
+      <ProfileLayout title="User Settings">
+        <div className="flex flex-col justify-center items-center h-full p-8">
+          <div className="text-red-500 mb-4">
+            You must be signed in to view settings
+          </div>
+          <Button href="/login">Sign In</Button>
+        </div>
+      </ProfileLayout>
+    );
+  }
+
   return (
     <ProfileLayout title="User Settings">
       <div className="grid grid-cols-1 gap-6">
+        {error && (
+          <div className="p-4 bg-red-50 border border-red-100 text-red-600 rounded-md">
+            {error}
+          </div>
+        )}
+
         {/* Appearance Settings */}
         <Card>
           <h2 className="text-xl font-semibold mb-4">Appearance</h2>
-          
+
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Theme</label>
-              <div className="flex space-x-4">
-                <ThemeButton 
-                  active={settings.theme === 'light'}
-                  onClick={() => handleThemeChange('light')}
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Theme
+              </label>
+              <div className="flex flex-wrap gap-4">
+                <ThemeButton
+                  active={settings.theme === "light"}
+                  onClick={() => handleThemeChange("light")}
                   label="Light"
                 />
-                <ThemeButton 
-                  active={settings.theme === 'dark'}
-                  onClick={() => handleThemeChange('dark')}
+                <ThemeButton
+                  active={settings.theme === "dark"}
+                  onClick={() => handleThemeChange("dark")}
                   label="Dark"
                 />
-                <ThemeButton 
-                  active={settings.theme === 'system'}
-                  onClick={() => handleThemeChange('system')}
+                <ThemeButton
+                  active={settings.theme === "system"}
+                  onClick={() => handleThemeChange("system")}
                   label="System"
                 />
               </div>
             </div>
           </div>
         </Card>
-        
+
         {/* Notification Settings */}
         <Card>
           <h2 className="text-xl font-semibold mb-4">Notifications</h2>
-          
+
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="font-medium">Push Notifications</h3>
-                <p className="text-sm text-gray-500">Receive notifications in the app</p>
+                <p className="text-sm text-gray-500">
+                  Receive notifications in the app
+                </p>
               </div>
-              <Toggle 
-                enabled={settings.notifications} 
-                onChange={(value) => handleToggleChange('notifications', value)} 
+              <Toggle
+                enabled={settings.notifications}
+                onChange={(value) => handleToggleChange("notifications", value)}
               />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="font-medium">Email Updates</h3>
-                <p className="text-sm text-gray-500">Receive email notifications about account activity</p>
+                <p className="text-sm text-gray-500">
+                  Receive email notifications about account activity
+                </p>
               </div>
-              <Toggle 
-                enabled={settings.emailUpdates} 
-                onChange={(value) => handleToggleChange('emailUpdates', value)} 
+              <Toggle
+                enabled={settings.emailUpdates}
+                onChange={(value) => handleToggleChange("emailUpdates", value)}
               />
             </div>
           </div>
         </Card>
-        
+
         {/* Save Button */}
         <div className="flex justify-end">
           <Button onClick={handleSaveSettings} disabled={saving}>
@@ -171,9 +245,10 @@ const ThemeButton = ({ active, onClick, label }: ThemeButtonProps) => {
     <button
       type="button"
       onClick={onClick}
-      className={`px-4 py-2 rounded-md ${active
-        ? 'bg-blue-100 text-blue-700 border border-blue-300'
-        : 'bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200'
+      className={`px-4 py-2 rounded-md ${
+        active
+          ? "bg-blue-100 text-blue-700 border border-blue-300"
+          : "bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200"
       }`}
     >
       {label}

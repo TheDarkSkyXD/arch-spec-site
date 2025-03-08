@@ -48,9 +48,25 @@ MONGODB_URI=mongodb://localhost:27017
 MONGODB_DB_NAME=archspec
 ANTHROPIC_API_KEY=your_anthropic_api_key_here
 ANTHROPIC_MODEL=claude-3-sonnet-20240229
+
+# Firebase credentials (required for authentication)
+FIREBASE_TYPE=service_account
+FIREBASE_PROJECT_ID=your_project_id
+FIREBASE_PRIVATE_KEY_ID=your_private_key_id
+FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nYour private key here...\n-----END PRIVATE KEY-----\n"
+FIREBASE_CLIENT_EMAIL=your_client_email@example.com
+FIREBASE_CLIENT_ID=your_client_id
+FIREBASE_AUTH_URI=https://accounts.google.com/o/oauth2/auth
+FIREBASE_TOKEN_URI=https://oauth2.googleapis.com/token
+FIREBASE_AUTH_PROVIDER_X509_CERT_URL=https://www.googleapis.com/oauth2/v1/certs
+FIREBASE_CLIENT_X509_CERT_URL=your_client_x509_cert_url
+FIREBASE_UNIVERSE_DOMAIN=googleapis.com
 ```
 
-7. Replace `your_anthropic_api_key_here` with your actual Anthropic API key.
+7. Replace the placeholder values with your actual API keys and Firebase credentials. You can obtain Firebase credentials from the Firebase console:
+   - Go to Project Settings > Service accounts
+   - Click "Generate new private key"
+   - Use the values from the downloaded JSON file to populate the environment variables
 
 ### Running with Docker
 

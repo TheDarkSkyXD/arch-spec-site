@@ -1,33 +1,67 @@
 import logging
 import json
+import os
 from typing import Optional, Dict, Any
-from datetime import datetime
+from datetime import datetime, UTC
 
 import firebase_admin
 from firebase_admin import auth, credentials
 from fastapi import Request, HTTPException, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from dotenv import load_dotenv
 
 from ..services.user_service import UserService
+from .config import settings
 
 logger = logging.getLogger(__name__)
 
+# Load environment variables
+load_dotenv()
+
 # Simple settings object for environment configuration
 class Settings:
-    ENVIRONMENT = "development"  # Default to development for tests
+    ENVIRONMENT = os.getenv("ENVIRONMENT", "development")  # Default to development for tests
 
-settings = Settings()
+settings_local = Settings()
 
 # Initialize Firebase Admin SDK
+firebase_initialized = False
 try:
-    # Use service account credentials from environment or file
-    cred = credentials.Certificate("firebase-service-account.json")
-    firebase_admin.initialize_app(cred)
-    logger.info("Firebase Admin SDK initialized successfully")
+    # Check if Firebase environment variables are available
+    if (os.getenv("FIREBASE_PROJECT_ID") and 
+        os.getenv("FIREBASE_PRIVATE_KEY") and 
+        os.getenv("FIREBASE_CLIENT_EMAIL")):
+        
+        # Create credentials dictionary from environment variables
+        firebase_credentials = {
+            "type": os.getenv("FIREBASE_TYPE", "service_account"),
+            "project_id": os.getenv("FIREBASE_PROJECT_ID"),
+            "private_key_id": os.getenv("FIREBASE_PRIVATE_KEY_ID"),
+            "private_key": os.getenv("FIREBASE_PRIVATE_KEY").replace("\\n", "\n"),
+            "client_email": os.getenv("FIREBASE_CLIENT_EMAIL"),
+            "client_id": os.getenv("FIREBASE_CLIENT_ID"),
+            "auth_uri": os.getenv("FIREBASE_AUTH_URI", "https://accounts.google.com/o/oauth2/auth"),
+            "token_uri": os.getenv("FIREBASE_TOKEN_URI", "https://oauth2.googleapis.com/token"),
+            "auth_provider_x509_cert_url": os.getenv("FIREBASE_AUTH_PROVIDER_X509_CERT_URL", 
+                                                    "https://www.googleapis.com/oauth2/v1/certs"),
+            "client_x509_cert_url": os.getenv("FIREBASE_CLIENT_X509_CERT_URL"),
+            "universe_domain": os.getenv("FIREBASE_UNIVERSE_DOMAIN", "googleapis.com")
+        }
+        
+        try:
+            # Initialize Firebase with credentials from environment variables
+            cred = credentials.Certificate(firebase_credentials)
+            firebase_admin.initialize_app(cred)
+            firebase_initialized = True
+            logger.info("Firebase Admin SDK initialized successfully from environment variables")
+        except Exception as e:
+            logger.error(f"Failed to initialize Firebase with environment variables: {str(e)}")
+            
+    else:
+        logger.warning("Firebase environment variables not found. Running in development mode only.")
 except Exception as e:
     logger.error(f"Failed to initialize Firebase Admin SDK: {str(e)}")
     # Continue without Firebase for development purposes
-    # In production, you would want to fail fast here
 
 
 class FirebaseAuth:
@@ -38,6 +72,12 @@ class FirebaseAuth:
         
     async def authenticate_token(self, token: str) -> Dict[str, Any]:
         """Authenticate a Firebase token and return the user data."""
+        # In development mode with no Firebase, accept any token
+        if not firebase_initialized and settings_local.ENVIRONMENT == "development":
+            logger.info("Using development mode authentication")
+            test_user = await self.get_test_user()
+            return {"firebase_user": {"uid": "test-uid", "email": "test@example.com"}, "db_user": test_user}
+        
         try:
             # Verify the token with Firebase
             decoded_token = auth.verify_id_token(token)
@@ -49,6 +89,11 @@ class FirebaseAuth:
             
         except Exception as e:
             logger.error(f"Firebase authentication error: {str(e)}")
+            if settings_local.ENVIRONMENT == "development":
+                # In development, fall back to test user
+                logger.info("Falling back to test user in development mode")
+                test_user = await self.get_test_user()
+                return {"firebase_user": {"uid": "test-uid", "email": "test@example.com"}, "db_user": test_user}
             raise HTTPException(status_code=401, detail="Invalid authentication credentials")
     
     async def get_or_create_user(self, firebase_user: Dict[str, Any]) -> Dict[str, Any]:
@@ -57,6 +102,11 @@ class FirebaseAuth:
         user = await UserService.get_user_by_firebase_uid(firebase_user["uid"])
         
         if user:
+            # Update last login time
+            await UserService.update_user(
+                str(user["_id"]), 
+                {"last_login": datetime.now(UTC)}
+            )
             return user
         
         # Create new user
@@ -65,6 +115,27 @@ class FirebaseAuth:
             email=firebase_user.get("email", ""),
             display_name=firebase_user.get("name"),
             photo_url=firebase_user.get("picture")
+        )
+    
+    async def get_test_user(self) -> Dict[str, Any]:
+        """Get or create a test user for development."""
+        # Look for existing test user
+        test_user = await UserService.get_user_by_email("test@example.com")
+        
+        if test_user:
+            # Update last login time
+            await UserService.update_user(
+                str(test_user["_id"]), 
+                {"last_login": datetime.now(UTC)}
+            )
+            return test_user
+        
+        # Create test user if it doesn't exist
+        return await UserService.create_user(
+            firebase_uid="test-uid",
+            email="test@example.com",
+            display_name="Test User",
+            photo_url=""
         )
 
 
@@ -75,9 +146,9 @@ firebase_auth = FirebaseAuth()
 async def get_current_user(request: Request) -> Dict[str, Any]:
     """Dependency to get the current authenticated user."""
     # Development bypass for testing
-    if settings.ENVIRONMENT == 'development' and request.headers.get('X-Dev-Bypass') == 'true':
+    if settings_local.ENVIRONMENT == 'development' and request.headers.get('X-Dev-Bypass') == 'true':
         # Use a test user in development mode
-        test_user = await UserService.get_user_by_email('test@example.com')
+        test_user = await firebase_auth.get_test_user()
         if test_user:
             return test_user
     
@@ -92,6 +163,10 @@ async def get_current_user(request: Request) -> Dict[str, Any]:
 
 async def get_firebase_user(request: Request) -> Dict[str, Any]:
     """Dependency to get the Firebase user data."""
+    # Development bypass for testing
+    if settings_local.ENVIRONMENT == 'development' and request.headers.get('X-Dev-Bypass') == 'true':
+        return {"uid": "test-uid", "email": "test@example.com"}
+    
     token = _get_token_from_header(request)
     if not token:
         raise HTTPException(status_code=401, detail="Not authenticated")

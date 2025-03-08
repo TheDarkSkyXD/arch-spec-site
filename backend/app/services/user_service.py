@@ -1,5 +1,5 @@
-from datetime import datetime
-from typing import Dict, List, Any, Optional
+from datetime import datetime, UTC
+from typing import Dict, List, Any, Optional, Union
 from bson import ObjectId
 
 from ..db.base import db
@@ -10,15 +10,30 @@ class UserService:
     """Service for user-related operations."""
     
     @staticmethod
+    def _prepare_user_document(user: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+        """Transform MongoDB document for API response.
+        
+        Converts ObjectId to string and handles other necessary transformations.
+        """
+        if user is None:
+            return None
+            
+        # Convert _id from ObjectId to string
+        if '_id' in user and isinstance(user['_id'], ObjectId):
+            user['_id'] = str(user['_id'])
+            
+        return user
+    
+    @staticmethod
     async def get_user_by_id(user_id: str) -> Optional[Dict[str, Any]]:
         """Get a user by ID."""
         database = db.get_db()
-        if not database:
+        if database is None:
             return None
             
         try:
             user = await database.users.find_one({"_id": ObjectId(user_id)})
-            return user
+            return UserService._prepare_user_document(user)
         except Exception:
             return None
     
@@ -26,12 +41,12 @@ class UserService:
     async def get_user_by_firebase_uid(firebase_uid: str) -> Optional[Dict[str, Any]]:
         """Get a user by Firebase UID."""
         database = db.get_db()
-        if not database:
+        if database is None:
             return None
             
         try:
             user = await database.users.find_one({"firebase_uid": firebase_uid})
-            return user
+            return UserService._prepare_user_document(user)
         except Exception:
             return None
     
@@ -39,12 +54,12 @@ class UserService:
     async def get_user_by_email(email: str) -> Optional[Dict[str, Any]]:
         """Get a user by email."""
         database = db.get_db()
-        if not database:
+        if database is None:
             return None
             
         try:
             user = await database.users.find_one({"email": email})
-            return user
+            return UserService._prepare_user_document(user)
         except Exception:
             return None
     
@@ -53,7 +68,7 @@ class UserService:
                          photo_url: Optional[str] = None) -> Optional[Dict[str, Any]]:
         """Create a new user."""
         database = db.get_db()
-        if not database:
+        if database is None:
             return None
             
         try:
@@ -63,7 +78,7 @@ class UserService:
                 return existing_user
                 
             # Prepare user data
-            now = datetime.utcnow()
+            now = datetime.now(UTC)
             user_data = {
                 "firebase_uid": firebase_uid,
                 "email": email,
@@ -87,19 +102,33 @@ class UserService:
             return None
     
     @staticmethod
-    async def update_user(user_id: str, user_data: UserUpdate) -> Optional[Dict[str, Any]]:
-        """Update a user's information."""
+    async def update_user(user_id: str, user_data: Union[UserUpdate, Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+        """Update a user's information.
+        
+        Args:
+            user_id: The user ID to update
+            user_data: Either a UserUpdate model or a dictionary with user data
+            
+        Returns:
+            The updated user document or None if the update failed
+        """
         database = db.get_db()
-        if not database:
+        if database is None:
             return None
             
-        # Filter out None values
-        update_data = {k: v for k, v in user_data.model_dump().items() if v is not None}
+        # Handle both UserUpdate model and dictionary
+        if isinstance(user_data, UserUpdate):
+            # Filter out None values if it's a Pydantic model
+            update_data = {k: v for k, v in user_data.model_dump().items() if v is not None}
+        else:
+            # It's already a dictionary
+            update_data = {k: v for k, v in user_data.items() if v is not None}
+            
         if not update_data:
             return await UserService.get_user_by_id(user_id)
             
         # Add updated_at timestamp
-        update_data["updated_at"] = datetime.utcnow()
+        update_data["updated_at"] = datetime.now(UTC)
         
         try:
             result = await database.users.update_one(
@@ -117,13 +146,13 @@ class UserService:
     async def delete_user(user_id: str) -> bool:
         """Delete a user (soft delete by setting is_active to False)."""
         database = db.get_db()
-        if not database:
+        if database is None:
             return False
             
         try:
             result = await database.users.update_one(
                 {"_id": ObjectId(user_id)},
-                {"$set": {"is_active": False, "updated_at": datetime.utcnow()}}
+                {"$set": {"is_active": False, "updated_at": datetime.now(UTC)}}
             )
             
             return result.modified_count > 0
@@ -142,7 +171,7 @@ class UserService:
                 {"_id": ObjectId(user_id)},
                 {"$set": {
                     "settings": settings,
-                    "updated_at": datetime.utcnow()
+                    "updated_at": datetime.now(UTC)
                 }}
             )
             
