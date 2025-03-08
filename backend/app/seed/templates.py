@@ -66,7 +66,7 @@ PROJECT_TEMPLATES = [
                 "hosting": {
                     "frontend": "Vercel",
                     "backend": "Supabase",
-                    "options": ["Netlify", "AWS Amplify", "Digital Ocean"]
+                    "options": ["Netlify", "AWS Amplify", "DigitalOcean App Platform"]
                 }
             },
             "features": {
@@ -497,13 +497,14 @@ PROJECT_TEMPLATES = [
     },
 ]
 
-async def seed_templates(db):
+async def seed_templates(db, clean_all: bool = False):
     """
     Seed project templates into the database.
     If templates already exist, check if they need to be updated.
     
     Args:
         db: Database instance
+        clean_all: If True, delete all existing records before inserting new ones
     """
     try:
         # Check if templates collection exists and has data
@@ -516,6 +517,13 @@ async def seed_templates(db):
                 validation_result = validate_template_tech_stack(template["template"]["techStack"])
                 if not validation_result["is_valid"]:
                     logger.warning(f"Template '{template['template']['name']}' contains invalid technologies: {validation_result['invalid_technologies']}")
+        
+        if clean_all and count > 0:
+            # Delete all existing records if clean_all is True
+            logger.info("Clean all option enabled. Removing all existing template documents...")
+            delete_result = await templates_collection.delete_many({})
+            logger.info(f"Deleted {delete_result.deleted_count} template documents")
+            count = 0  # Reset count to 0 to force insertion of new records
         
         if count == 0:
             # No templates exist, insert all

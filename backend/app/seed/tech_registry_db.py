@@ -20,18 +20,32 @@ See /app/seed/README.md for more detailed documentation.
 import logging
 import datetime
 
-from .tech_registry import TECH_REGISTRY, ALL_TECHNOLOGIES
+from .tech_registry import (
+    get_tech_registry_schema
+)
+from ..schemas.tech_registry_schema import (
+    TechRegistrySchema,
+    FrontendTechnologies,
+    BackendTechnologies, 
+    DatabaseTechnologies,
+    AuthenticationTechnologies,
+    DeploymentTechnologies,
+    TestingTechnologies,
+    StorageTechnologies,
+    ServerlessTechnologies
+)
 
 logger = logging.getLogger(__name__)
 
 
-async def seed_tech_registry(db):
+async def seed_tech_registry(db, clean_all: bool = False):
     """
     Seed technology registry data into the database.
     If the registry already exists, check if it needs to be updated.
     
     Args:
         db: Database instance
+        clean_all: If True, delete all existing records before inserting new ones
     """
     try:
         print("Starting tech registry seeding...")
@@ -42,33 +56,70 @@ async def seed_tech_registry(db):
         
         print(f"Found {count} existing tech registry documents in database")
         
+        # Get the registry schema
+        registry_schema = get_tech_registry_schema()
+        
         # Prepare the data in a format suitable for the database
         registry_data = {
             "version": "1.0.0",
-            "last_updated": datetime.datetime.utcnow(),
-            "categories": []
+            "last_updated": datetime.datetime.now(datetime.UTC),
+            "frontend": {
+                "frameworks": registry_schema.frontend.frameworks,
+                "languages": registry_schema.frontend.languages,
+                "stateManagement": registry_schema.frontend.stateManagement,
+                "uiLibraries": registry_schema.frontend.uiLibraries,
+                "formHandling": registry_schema.frontend.formHandling,
+                "routing": registry_schema.frontend.routing,
+                "apiClients": registry_schema.frontend.apiClients,
+                "metaFrameworks": registry_schema.frontend.metaFrameworks,
+            },
+            "backend": {
+                "frameworks": registry_schema.backend.frameworks,
+                "languages": registry_schema.backend.languages,
+                "orms": registry_schema.backend.orms,
+                "authFrameworks": registry_schema.backend.authFrameworks,
+            },
+            "database": {
+                "relational": registry_schema.database.relational,
+                "noSql": registry_schema.database.noSql,
+                "providers": registry_schema.database.providers,
+            },
+            "authentication": {
+                "providers": registry_schema.authentication.providers,
+                "methods": registry_schema.authentication.methods,
+            },
+            "deployment": {
+                "platforms": registry_schema.deployment.platforms,
+                "containerization": registry_schema.deployment.containerization,
+                "ci_cd": registry_schema.deployment.ci_cd,
+            },
+            "testing": {
+                "unitTesting": registry_schema.testing.unitTesting,
+                "e2eTesting": registry_schema.testing.e2eTesting,
+                "apiTesting": registry_schema.testing.apiTesting,
+            },
+            "storage": {
+                "objectStorage": registry_schema.storage.objectStorage,
+                "fileSystem": registry_schema.storage.fileSystem,
+            },
+            "serverless": {
+                "functions": registry_schema.serverless.functions,
+                "platforms": registry_schema.serverless.platforms,
+            },
+            "all_technologies": list(registry_schema.all_technologies)
         }
         
-        # Convert the registry structure for database storage
-        for category, subcategories in TECH_REGISTRY.items():
-            category_data = {
-                "name": category,
-                "subcategories": []
-            }
-            
-            for subcategory, technologies in subcategories.items():
-                subcategory_data = {
-                    "name": subcategory,
-                    "technologies": technologies
-                }
-                category_data["subcategories"].append(subcategory_data)
-            
-            registry_data["categories"].append(category_data)
+        print(f"Prepared tech registry with {len(registry_schema.all_technologies)} technologies")
+        logger.info(f"Prepared tech registry with {len(registry_schema.all_technologies)} technologies")
         
-        # Add the flat list for quick lookup
-        registry_data["all_technologies"] = list(ALL_TECHNOLOGIES)
-        print(f"Prepared tech registry with {len(ALL_TECHNOLOGIES)} technologies")
-        logger.info(f"Prepared tech registry with {len(ALL_TECHNOLOGIES)} technologies")
+        if clean_all and count > 0:
+            # Delete all existing records if clean_all is True
+            print("Clean all option enabled. Removing all existing tech registry documents...")
+            logger.info("Clean all option enabled. Removing all existing tech registry documents...")
+            delete_result = await tech_registry_collection.delete_many({})
+            print(f"Deleted {delete_result.deleted_count} tech registry documents")
+            logger.info(f"Deleted {delete_result.deleted_count} tech registry documents")
+            count = 0  # Reset count to 0 to force insertion of new records
         
         if count == 0:
             # No existing data, insert new record
@@ -98,7 +149,7 @@ async def seed_tech_registry(db):
                 # Compare the technologies in memory vs database
                 if "all_technologies" in existing_registry:
                     db_techs = set(existing_registry["all_technologies"])
-                    memory_techs = ALL_TECHNOLOGIES
+                    memory_techs = registry_schema.all_technologies
                     
                     # Get differences
                     new_techs = memory_techs - db_techs
@@ -147,25 +198,89 @@ async def seed_tech_registry(db):
         raise
 
 
-async def get_registry_from_db(db):
+async def get_registry_from_db(db) -> TechRegistrySchema:
     """
-    Get the technology registry from the database.
+    Get the technology registry from the database and convert it to a TechRegistrySchema.
     
     Args:
         db: Database instance
         
     Returns:
-        The technology registry data or None if not found
+        TechRegistrySchema: The technology registry as a Pydantic model, or None if not found
     """
     try:
         tech_registry_collection = db.get_collection("tech_registry")
-        registry = await tech_registry_collection.find_one({})
+        registry_dict = await tech_registry_collection.find_one({})
         
-        if registry and "_id" in registry:
-            # Convert MongoDB ObjectId to string for JSON serialization
-            registry["_id"] = str(registry["_id"])
+        if not registry_dict:
+            logger.warning("No tech registry found in database")
+            return None
             
-        return registry
+        # Convert MongoDB ObjectId to string for JSON serialization
+        if "_id" in registry_dict:
+            registry_dict["_id"] = str(registry_dict["_id"])
+        
+        # Convert from database format to TechRegistrySchema
+        schema = TechRegistrySchema()
+        
+        # Create the schema from the database record
+        frontend = registry_dict["frontend"]
+        schema.frontend = FrontendTechnologies(
+            frameworks=frontend.get("frameworks", []),
+            languages=frontend.get("languages", []),
+            stateManagement=frontend.get("stateManagement", []),
+            uiLibraries=frontend.get("uiLibraries", []),
+            formHandling=frontend.get("formHandling", []),
+            routing=frontend.get("routing", []),
+            apiClients=frontend.get("apiClients", []),
+            metaFrameworks=frontend.get("metaFrameworks", []),
+        )
+        
+        schema.backend = BackendTechnologies(
+            frameworks=registry_dict["backend"].get("frameworks", []),
+            languages=registry_dict["backend"].get("languages", []),
+            orms=registry_dict["backend"].get("orms", []),
+            authFrameworks=registry_dict["backend"].get("authFrameworks", []),
+        )
+        
+        schema.database = DatabaseTechnologies(
+            relational=registry_dict["database"].get("relational", []),
+            noSql=registry_dict["database"].get("noSql", []),
+            providers=registry_dict["database"].get("providers", []),
+        )
+        
+        schema.authentication = AuthenticationTechnologies(
+            providers=registry_dict["authentication"].get("providers", []),
+            methods=registry_dict["authentication"].get("methods", []),
+        )
+        
+        schema.deployment = DeploymentTechnologies(
+            platforms=registry_dict["deployment"].get("platforms", []),
+            containerization=registry_dict["deployment"].get("containerization", []),
+            ci_cd=registry_dict["deployment"].get("ci_cd", []),
+        )
+        
+        schema.testing = TestingTechnologies(
+            unitTesting=registry_dict["testing"].get("unitTesting", []),
+            e2eTesting=registry_dict["testing"].get("e2eTesting", []),
+            apiTesting=registry_dict["testing"].get("apiTesting", []),
+        )
+        
+        schema.storage = StorageTechnologies(
+            objectStorage=registry_dict["storage"].get("objectStorage", []),
+            fileSystem=registry_dict["storage"].get("fileSystem", []),
+        )
+
+        schema.serverless = ServerlessTechnologies(
+            functions=registry_dict["serverless"].get("functions", []),
+            platforms=registry_dict["serverless"].get("platforms", []),
+        )
+        
+        # Set all_technologies from the database
+        if "all_technologies" in registry_dict:
+            schema.all_technologies = set(registry_dict["all_technologies"])
+        
+        return schema
     except Exception as e:
         logger.error(f"Error retrieving tech registry from database: {str(e)}")
         return None 

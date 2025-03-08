@@ -214,7 +214,7 @@ TECH_STACK_RAW_DATA = {
                 "name": "MySQL",
                 "description": "Open-source relational database management system",
                 "compatibility": {
-                    "hosting": ["Self-hosted", "AWS RDS", "PlanetScale", "Railway", "DigitalOcean"],
+                    "hosting": ["Self-hosted", "AWS RDS", "PlanetScale", "Railway", "Managed Instance"],
                     "orms": ["Prisma", "TypeORM", "Sequelize", "Django ORM", "SQLAlchemy", "Hibernate", "Entity Framework Core"]
                 }
             },
@@ -240,7 +240,7 @@ TECH_STACK_RAW_DATA = {
                 "name": "MongoDB",
                 "description": "Document-based distributed database",
                 "compatibility": {
-                    "hosting": ["Self-hosted", "MongoDB Atlas", "Railway", "DigitalOcean"],
+                    "hosting": ["Self-hosted", "MongoDB Atlas", "Railway", "Managed Instance"],
                     "orms": ["Mongoose", "MongoDB Node.js Driver", "PyMongo", "Spring Data MongoDB"]
                 }
             },
@@ -249,7 +249,7 @@ TECH_STACK_RAW_DATA = {
                 "description": "Cloud-hosted NoSQL database from Firebase",
                 "compatibility": {
                     "hosting": ["Firebase"],
-                    "orms": ["Firebase SDK"]
+                    "orms": ["Firebase"]
                 }
             },
             {

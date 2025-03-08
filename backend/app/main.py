@@ -67,12 +67,12 @@ async def lifespan(app: FastAPI):
                 print("Database connection available, proceeding with seeding")
                 # Seed tech registry data
                 print("Starting tech registry seeding...")
-                await seed_tech_registry(database)
+                await seed_tech_registry(database, clean_all=False)
                 print("Tech registry seeding complete")
                 
                 # Seed template data
                 print("Starting template seeding...")
-                await seed_templates(database)
+                await seed_templates(database, clean_all=False)
                 print("Template seeding complete")
             else:
                 print("Database connection not available, skipping seeding")
