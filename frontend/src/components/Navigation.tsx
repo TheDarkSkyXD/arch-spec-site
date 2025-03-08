@@ -26,7 +26,7 @@ const Navigation = () => {
                 <img
                   src="/assets/images/arch-spec-logo-horizontal.png"
                   alt="ArchSpec Logo"
-                  className="h-8 w-auto"
+                  className="h-12 w-auto rounded-md"
                 />
               </Link>
             </div>
