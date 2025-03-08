@@ -2,7 +2,6 @@ import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useEffect, useState } from "react";
-import axios from "axios";
 import {
   TechStackData,
   TechStackSelection,
@@ -10,8 +9,7 @@ import {
   CompatibleOptionsResponse,
   Technology,
 } from "../../types/techStack";
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+import { techStackService } from "../../services/techStackService";
 
 const techStackSchema = z.object({
   frontend: z.string().min(1, "Frontend framework is required"),
@@ -98,10 +96,8 @@ const TechStackForm = ({
     const fetchTechStackOptions = async () => {
       setIsLoading(true);
       try {
-        const response = await axios.get<TechStackData>(
-          `${API_URL}/api/tech-stack/options`
-        );
-        setTechStackOptions(response.data);
+        const data = await techStackService.getAllTechnologyOptions();
+        setTechStackOptions(data);
       } catch (error) {
         console.error("Error fetching tech stack options:", error);
       } finally {
@@ -138,32 +134,31 @@ const TechStackForm = ({
         }
 
         // Send to backend for compatibility check
-        const response = await axios.post<CompatibilityResult>(
-          `${API_URL}/api/tech-stack/compatibility/check`,
+        const result = await techStackService.checkCompatibility(
           currentSelection
         );
 
         // Update issues and compatible options
-        setCompatibilityIssues(response.data.compatibility_issues);
+        setCompatibilityIssues(result.compatibility_issues);
 
         // Update compatible options based on response
-        if (response.data.compatible_options) {
-          if (response.data.compatible_options.ui_libraries) {
-            setUiLibraryOptions(response.data.compatible_options.ui_libraries);
+        if (result.compatible_options) {
+          if (result.compatible_options.ui_libraries) {
+            setUiLibraryOptions(result.compatible_options.ui_libraries);
           }
-          if (response.data.compatible_options.state_management) {
+          if (result.compatible_options.state_management) {
             setStateManagementOptions(
-              response.data.compatible_options.state_management
+              result.compatible_options.state_management
             );
           }
-          if (response.data.compatible_options.databases) {
-            setDatabaseOptions(response.data.compatible_options.databases);
+          if (result.compatible_options.databases) {
+            setDatabaseOptions(result.compatible_options.databases);
           }
-          if (response.data.compatible_options.orms) {
-            setOrmOptions(response.data.compatible_options.orms);
+          if (result.compatible_options.orms) {
+            setOrmOptions(result.compatible_options.orms);
           }
-          if (response.data.compatible_options.auth) {
-            setAuthOptions(response.data.compatible_options.auth);
+          if (result.compatible_options.auth) {
+            setAuthOptions(result.compatible_options.auth);
           }
         }
       } catch (error) {
@@ -183,15 +178,11 @@ const TechStackForm = ({
       if (!category || !technology) return;
 
       try {
-        const response = await axios.post<CompatibleOptionsResponse>(
-          `${API_URL}/api/tech-stack/compatibility/options`,
-          {
-            category,
-            technology,
-          }
+        const result = await techStackService.getCompatibleOptions(
+          category,
+          technology
         );
-
-        const options = response.data.options;
+        const options = result.options;
 
         // Update specific option lists based on the response
         if (options.state_management) {

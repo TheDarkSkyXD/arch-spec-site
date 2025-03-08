@@ -239,28 +239,6 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Custom/Empty project option */}
-        <div
-          className={`border rounded-lg p-5 cursor-pointer transition-all hover:shadow-md ${
-            !selectedTemplate
-              ? "border-primary-500 ring-2 ring-primary-100 dark:ring-primary-900/30 bg-primary-50 dark:bg-primary-900/20"
-              : "border-slate-200 dark:border-slate-700 hover:border-primary-300 dark:hover:border-primary-600"
-          }`}
-          onClick={handleCustomProject}
-        >
-          <div className="h-32 bg-slate-100 dark:bg-slate-800 rounded flex items-center justify-center mb-4">
-            <span className="text-5xl text-slate-400 dark:text-slate-500">
-              +
-            </span>
-          </div>
-          <h3 className="font-medium text-slate-800 dark:text-slate-100">
-            Custom Project
-          </h3>
-          <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-            Start from scratch with a blank project
-          </p>
-        </div>
-
         {/* Template cards */}
         {templates.map((template) => (
           <TemplateCard

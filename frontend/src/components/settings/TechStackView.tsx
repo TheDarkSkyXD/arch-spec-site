@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { Loader, RefreshCw, Download, Save } from "lucide-react";
-import axios from "axios";
 import JsonEditor from "../common/JsonEditor";
 import { useTechStack, useRefreshTechStack } from "../../hooks/useDataQueries";
 import { TechStackData } from "../../types/techStack";
+import { techStackService } from "../../services/techStackService";
 
 // Use a type assertion to make TechStackData compatible with Record<string, unknown>
 // This is needed because JsonEditor expects a Record<string, unknown>
@@ -50,7 +50,7 @@ const TechStackView = () => {
 
     try {
       setError(null);
-      await axios.put("/api/tech-stack", techStackData);
+      await techStackService.updateTechStack(techStackData);
       setOriginalData(JSON.parse(JSON.stringify(techStackData)));
       setHasChanges(false);
     } catch (err) {

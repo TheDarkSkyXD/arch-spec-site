@@ -78,4 +78,23 @@ export const techStackService = {
       throw error;
     }
   },
+
+  /**
+   * Update the tech stack configuration.
+   *
+   * @param techStackData - The updated tech stack data
+   * @returns The updated tech stack data
+   */
+  async updateTechStack(techStackData: TechStackData): Promise<TechStackData> {
+    try {
+      const response = await apiClient.put<TechStackData>(
+        `${API_BASE_URL}/tech-stack`,
+        techStackData
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error updating tech stack data:", error);
+      throw error;
+    }
+  },
 };
