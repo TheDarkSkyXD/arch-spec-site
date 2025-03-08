@@ -1,3 +1,12 @@
+export interface Requirement {
+  id: string;
+  description: string;
+  priority: "low" | "medium" | "high" | "critical";
+  status: "proposed" | "approved" | "implemented" | "verified" | "deferred";
+  category?: string;
+  tags: string[];
+}
+
 export interface Project {
   id: string;
   name: string;
@@ -6,9 +15,99 @@ export interface Project {
   updated_at: string;
   template_type: string;
   status: "draft" | "in_progress" | "completed";
+  business_goals: string[];
+  target_users: string[];
+  domain?: string;
+  organization?: string;
+  project_lead?: string;
+  functional_requirements: Requirement[];
+  non_functional_requirements: Requirement[];
   metadata: {
-    version: string;
-    author: string;
+    [key: string]: any;
+  };
+  version: number;
+  timeline?: {
+    [key: string]: any;
+  };
+  budget?: {
+    [key: string]: any;
+  };
+}
+
+export interface ProjectTemplate {
+  id: string;
+  name: string;
+  description: string;
+  version: string;
+  project_defaults: {
+    name: string;
+    description: string;
+    business_goals: string[];
+    target_users: string[];
+  };
+  tech_stack: {
+    frontend: string;
+    backend: string;
+    database: string;
+    [key: string]: string;
+  };
+  features: {
+    core_modules: Array<{
+      name: string;
+      description: string;
+      enabled: boolean;
+      optional: boolean;
+      providers: string[];
+    }>;
+  };
+  tags?: string[];
+  thumbnail?: string;
+}
+
+export interface ProjectCreate {
+  name: string;
+  description: string;
+  template_type: string;
+  business_goals: string[];
+  target_users: string[];
+  domain?: string;
+  organization?: string;
+  project_lead?: string;
+  timeline?: {
+    [key: string]: any;
+  };
+  budget?: {
+    [key: string]: any;
+  };
+  functional_requirements?: Requirement[];
+  non_functional_requirements?: Requirement[];
+  template_id?: string;
+  template_data?: ProjectTemplate;
+}
+
+export interface ProjectUpdate {
+  name?: string;
+  description?: string;
+  template_type?: string;
+  status?: string;
+  business_goals?: string[];
+  target_users?: string[];
+  domain?: string;
+  organization?: string;
+  project_lead?: string;
+  timeline?: {
+    [key: string]: any;
+  };
+  budget?: {
+    [key: string]: any;
+  };
+  functional_requirements?: Requirement[];
+  non_functional_requirements?: Requirement[];
+  metadata?: {
+    [key: string]: any;
+  };
+  template_data?: {
+    [key: string]: any;
   };
 }
 
@@ -68,17 +167,4 @@ export interface Artifact {
   format: "mermaid" | "json" | "markdown";
   content: string;
   created_at: string;
-}
-
-export interface ProjectTemplate {
-  id: string;
-  name: string;
-  description: string;
-  tech_stack: {
-    frontend: string;
-    backend: string;
-    database: string;
-  };
-  tags: string[];
-  thumbnail: string;
 }

@@ -10,7 +10,8 @@ import uuid
 from datetime import datetime
 
 from ...db.base import db
-from ...schemas.project import Project, ProjectCreate, ProjectUpdate
+from ...schemas.project import Project, ProjectCreate, ProjectUpdate, ProjectResponse, ProjectDetailResponse, ProjectInDB
+from ...schemas.templates import ProjectTemplate
 
 router = APIRouter()
 
@@ -20,7 +21,7 @@ def get_db():
     return db.get_db()
 
 
-@router.get("", response_model=List[Project])
+@router.get("", response_model=List[ProjectResponse])
 async def get_projects(database: AsyncIOMotorDatabase = Depends(get_db)):
     """Get all projects.
     
@@ -34,7 +35,7 @@ async def get_projects(database: AsyncIOMotorDatabase = Depends(get_db)):
     return projects
 
 
-@router.post("", response_model=Project)
+@router.post("", response_model=ProjectDetailResponse)
 async def create_project(project: ProjectCreate, database: AsyncIOMotorDatabase = Depends(get_db)):
     """Create a new project.
     
@@ -46,20 +47,39 @@ async def create_project(project: ProjectCreate, database: AsyncIOMotorDatabase 
         The created project.
     """
     project_dict = project.model_dump()
-    project_dict.update({
-        "id": str(uuid.uuid4()),
-        "created_at": datetime.utcnow(),
-        "updated_at": datetime.utcnow(),
-        "status": "draft",
-        "metadata": {}
-    })
+    
+    # If template_id is provided, fetch the template and use it
+    template = None
+    if project.template_id:
+        template_doc = await database.templates.find_one({"id": project.template_id})
+        if template_doc:
+            template = ProjectTemplate(**template_doc["template"])
+    elif project.template_data:
+        template = project.template_data
+    
+    # Create project from template if available
+    if template:
+        project_obj = ProjectInDB.from_template(template, project)
+        project_dict = project_obj.model_dump()
+    else:
+        # No template, create a basic project
+        project_dict.update({
+            "id": str(uuid.uuid4()),
+            "created_at": datetime.utcnow(),
+            "updated_at": datetime.utcnow(),
+            "status": "draft",
+            "metadata": {},
+            "team_members": [],
+            "version": 1,
+            "revision_history": []
+        })
     
     await database.projects.insert_one(project_dict)
     
     return project_dict
 
 
-@router.get("/{id}", response_model=Project)
+@router.get("/{id}", response_model=ProjectDetailResponse)
 async def get_project(id: str, database: AsyncIOMotorDatabase = Depends(get_db)):
     """Get a project by ID.
     
@@ -79,7 +99,7 @@ async def get_project(id: str, database: AsyncIOMotorDatabase = Depends(get_db))
     return project
 
 
-@router.put("/{id}", response_model=Project)
+@router.put("/{id}", response_model=ProjectDetailResponse)
 async def update_project(id: str, project_update: ProjectUpdate, database: AsyncIOMotorDatabase = Depends(get_db)):
     """Update a project.
     
@@ -102,10 +122,29 @@ async def update_project(id: str, project_update: ProjectUpdate, database: Async
     if update_data:
         update_data["updated_at"] = datetime.utcnow()
         
-        result = await database.projects.update_one(
-            {"id": id},
-            {"$set": update_data}
-        )
+        # If updating version-tracked fields, add to revision history
+        if any(key in update_data for key in ["functional_requirements", "non_functional_requirements", "template_data"]):
+            # Increment version
+            update_data["version"] = project.get("version", 1) + 1
+            
+            # Add revision record
+            revision = {
+                "version": update_data["version"],
+                "timestamp": update_data["updated_at"],
+                "changes": list(update_data.keys())
+            }
+            
+            # Add to revision history
+            result = await database.projects.update_one(
+                {"id": id},
+                {"$set": update_data, "$push": {"revision_history": revision}}
+            )
+        else:
+            # Regular update without version tracking
+            result = await database.projects.update_one(
+                {"id": id},
+                {"$set": update_data}
+            )
         
         if result.modified_count == 0:
             raise HTTPException(status_code=400, detail="Project update failed")

@@ -7,19 +7,79 @@ import {
   FolderPlus,
   Filter,
   MoreVertical,
+  Users,
+  CheckCircle,
+  AlertCircle,
 } from "lucide-react";
 import MainLayout from "../layouts/MainLayout";
-import ProjectCard from "../components/dashboard/ProjectCard";
 import { useProjectStore } from "../store/projectStore";
 
 const Projects = () => {
   const navigate = useNavigate();
-  const { projects, fetchProjects, isLoading } = useProjectStore();
+  const { projects, fetchProjects, isLoading, error } = useProjectStore();
   const [searchQuery, setSearchQuery] = useState("");
+  const [filteredProjects, setFilteredProjects] = useState(projects);
 
   useEffect(() => {
     fetchProjects();
   }, [fetchProjects]);
+
+  useEffect(() => {
+    if (searchQuery.trim() === "") {
+      setFilteredProjects(projects);
+    } else {
+      const query = searchQuery.toLowerCase();
+      setFilteredProjects(
+        projects.filter(
+          (project) =>
+            project.name.toLowerCase().includes(query) ||
+            project.description.toLowerCase().includes(query) ||
+            project.domain?.toLowerCase().includes(query) ||
+            project.organization?.toLowerCase().includes(query) ||
+            project.business_goals.some((goal) =>
+              goal.toLowerCase().includes(query)
+            ) ||
+            project.target_users.some((user) =>
+              user.toLowerCase().includes(query)
+            )
+        )
+      );
+    }
+  }, [searchQuery, projects]);
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "draft":
+        return "bg-slate-100 text-slate-800";
+      case "in_progress":
+        return "bg-blue-100 text-blue-800";
+      case "completed":
+        return "bg-green-100 text-green-800";
+      default:
+        return "bg-slate-100 text-slate-800";
+    }
+  };
+
+  const getStatusDot = (status: string) => {
+    switch (status) {
+      case "draft":
+        return (
+          <span className="w-1.5 h-1.5 rounded-full bg-slate-500 mr-1.5"></span>
+        );
+      case "in_progress":
+        return (
+          <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mr-1.5"></span>
+        );
+      case "completed":
+        return (
+          <span className="w-1.5 h-1.5 rounded-full bg-green-500 mr-1.5"></span>
+        );
+      default:
+        return (
+          <span className="w-1.5 h-1.5 rounded-full bg-slate-500 mr-1.5"></span>
+        );
+    }
+  };
 
   return (
     <MainLayout>
@@ -75,25 +135,28 @@ const Projects = () => {
                 Loading projects...
               </span>
             </div>
-          ) : projects.length > 0 ? (
+          ) : error ? (
+            <div className="flex justify-center items-center py-16 bg-white rounded-lg shadow-sm border border-slate-200">
+              <AlertCircle className="h-8 w-8 text-red-600 mr-3" />
+              <span className="text-slate-600 font-medium">
+                Error loading projects. Please try again.
+              </span>
+            </div>
+          ) : filteredProjects.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {projects.map((project) => (
+              {filteredProjects.map((project) => (
                 <div
                   key={project.id}
                   className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow duration-200"
                 >
                   <div className="p-4">
                     <div className="flex justify-between items-start mb-2">
-                      <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        {project.status === "in_progress" && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mr-1.5"></span>
-                        )}
-                        {project.status === "completed" && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-green-500 mr-1.5"></span>
-                        )}
-                        {project.status === "draft" && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-slate-500 mr-1.5"></span>
-                        )}
+                      <div
+                        className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                          project.status
+                        )}`}
+                      >
+                        {getStatusDot(project.status)}
                         {project.status.replace("_", " ")}
                       </div>
                       <button className="text-slate-400 hover:text-slate-600 p-1 rounded-full hover:bg-slate-100">
@@ -106,6 +169,42 @@ const Projects = () => {
                     <p className="text-slate-500 text-sm line-clamp-2 mb-4">
                       {project.description}
                     </p>
+
+                    {/* Project metadata */}
+                    <div className="space-y-2 mb-4">
+                      {project.domain && (
+                        <div className="flex items-center text-xs text-slate-500">
+                          <span className="font-medium mr-2">Domain:</span>
+                          {project.domain}
+                        </div>
+                      )}
+                      {project.organization && (
+                        <div className="flex items-center text-xs text-slate-500">
+                          <span className="font-medium mr-2">
+                            Organization:
+                          </span>
+                          {project.organization}
+                        </div>
+                      )}
+                      {project.project_lead && (
+                        <div className="flex items-center text-xs text-slate-500">
+                          <Users size={12} className="mr-1" />
+                          <span className="font-medium mr-2">Lead:</span>
+                          {project.project_lead}
+                        </div>
+                      )}
+                      {project.functional_requirements && (
+                        <div className="flex items-center text-xs text-slate-500">
+                          <CheckCircle size={12} className="mr-1" />
+                          <span className="font-medium mr-2">
+                            Requirements:
+                          </span>
+                          {project.functional_requirements.length +
+                            (project.non_functional_requirements?.length || 0)}
+                        </div>
+                      )}
+                    </div>
+
                     <div className="flex justify-between items-center text-xs text-slate-500 pt-4 border-t border-slate-100">
                       <span>
                         Updated{" "}

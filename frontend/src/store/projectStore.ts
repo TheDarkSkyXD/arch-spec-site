@@ -1,6 +1,14 @@
 import { create } from "zustand";
-import { Project, Specification } from "../types/project";
-import { mockProjects } from "../data/mockData";
+import {
+  Project,
+  Specification,
+  ProjectCreate,
+  ProjectUpdate as ProjectUpdateType,
+  Requirement,
+} from "../types/project";
+import axios from "axios";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 interface ProjectState {
   projects: Project[];
@@ -11,12 +19,28 @@ interface ProjectState {
 
   // Actions
   fetchProjects: () => Promise<void>;
-  createProject: (
-    project: Omit<Project, "id" | "created_at" | "updated_at">
-  ) => Promise<void>;
+  createProject: (project: ProjectCreate) => Promise<Project | null>;
   selectProject: (id: string) => Promise<void>;
-  updateProject: (id: string, data: Partial<Project>) => Promise<void>;
+  updateProject: (id: string, data: ProjectUpdateType) => Promise<void>;
   deleteProject: (id: string) => Promise<void>;
+
+  // Requirement actions
+  addRequirement: (
+    projectId: string,
+    type: "functional" | "non-functional",
+    requirement: Omit<Requirement, "id">
+  ) => Promise<void>;
+  updateRequirement: (
+    projectId: string,
+    type: "functional" | "non-functional",
+    requirementId: string,
+    data: Partial<Requirement>
+  ) => Promise<void>;
+  deleteRequirement: (
+    projectId: string,
+    type: "functional" | "non-functional",
+    requirementId: string
+  ) => Promise<void>;
 
   // Specification actions
   fetchSpecification: (projectId: string) => Promise<void>;
@@ -34,14 +58,13 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
   isLoading: false,
   error: null,
 
-  // In a real application, these would make API calls
   fetchProjects: async () => {
     set({ isLoading: true, error: null });
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      set({ projects: mockProjects, isLoading: false });
+      const response = await axios.get(`${API_URL}/api/projects`);
+      set({ projects: response.data, isLoading: false });
     } catch (error) {
+      console.error("Failed to fetch projects:", error);
       set({ error: "Failed to fetch projects", isLoading: false });
     }
   },
@@ -49,35 +72,29 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
   createProject: async (project) => {
     set({ isLoading: true, error: null });
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      const newProject: Project = {
-        ...project,
-        id: Math.random().toString(36).substring(2, 9),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      };
+      const response = await axios.post(`${API_URL}/api/projects`, project);
+      const newProject = response.data;
 
       set((state) => ({
         projects: [...state.projects, newProject],
-        currentProject: newProject,
         isLoading: false,
       }));
+
+      return newProject;
     } catch (error) {
+      console.error("Failed to create project:", error);
       set({ error: "Failed to create project", isLoading: false });
+      return null;
     }
   },
 
   selectProject: async (id) => {
     set({ isLoading: true, error: null });
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 300));
-
-      const project = get().projects.find((p) => p.id === id) || null;
-      set({ currentProject: project, isLoading: false });
+      const response = await axios.get(`${API_URL}/api/projects/${id}`);
+      set({ currentProject: response.data, isLoading: false });
     } catch (error) {
+      console.error("Failed to select project:", error);
       set({ error: "Failed to select project", isLoading: false });
     }
   },
@@ -85,26 +102,19 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
   updateProject: async (id, data) => {
     set({ isLoading: true, error: null });
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      const response = await axios.put(`${API_URL}/api/projects/${id}`, data);
+      const updatedProject = response.data;
 
       set((state) => ({
-        projects: state.projects.map((p) =>
-          p.id === id
-            ? { ...p, ...data, updated_at: new Date().toISOString() }
-            : p
-        ),
+        projects: state.projects.map((p) => (p.id === id ? updatedProject : p)),
         currentProject:
           state.currentProject?.id === id
-            ? {
-                ...state.currentProject,
-                ...data,
-                updated_at: new Date().toISOString(),
-              }
+            ? updatedProject
             : state.currentProject,
         isLoading: false,
       }));
     } catch (error) {
+      console.error("Failed to update project:", error);
       set({ error: "Failed to update project", isLoading: false });
     }
   },
@@ -112,8 +122,7 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
   deleteProject: async (id) => {
     set({ isLoading: true, error: null });
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await axios.delete(`${API_URL}/api/projects/${id}`);
 
       set((state) => ({
         projects: state.projects.filter((p) => p.id !== id),
@@ -122,90 +131,109 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
         isLoading: false,
       }));
     } catch (error) {
+      console.error("Failed to delete project:", error);
       set({ error: "Failed to delete project", isLoading: false });
+    }
+  },
+
+  addRequirement: async (projectId, type, requirement) => {
+    set({ isLoading: true, error: null });
+    try {
+      const currentProject = get().currentProject;
+      if (!currentProject) throw new Error("No project selected");
+
+      // Create a new requirement with a temporary ID
+      // The backend will assign a proper ID when saving
+      const newRequirement: Requirement = {
+        ...requirement,
+        id: `temp-${Date.now()}`, // This will be replaced by the backend
+        tags: requirement.tags || [],
+        priority: requirement.priority || "medium",
+        status: requirement.status || "proposed",
+      };
+
+      // Determine which requirements list to update
+      const field =
+        type === "functional"
+          ? "functional_requirements"
+          : "non_functional_requirements";
+      const requirements = [...(currentProject[field] || []), newRequirement];
+
+      // Update the project
+      await get().updateProject(projectId, {
+        [field]: requirements,
+      } as any);
+    } catch (error) {
+      console.error(`Failed to add ${type} requirement:`, error);
+      set({ error: `Failed to add requirement`, isLoading: false });
+    }
+  },
+
+  updateRequirement: async (projectId, type, requirementId, data) => {
+    set({ isLoading: true, error: null });
+    try {
+      const currentProject = get().currentProject;
+      if (!currentProject) throw new Error("No project selected");
+
+      // Determine which requirements list to update
+      const field =
+        type === "functional"
+          ? "functional_requirements"
+          : "non_functional_requirements";
+      const requirements = currentProject[field] || [];
+
+      // Update the specific requirement
+      const updatedRequirements = requirements.map((req) =>
+        req.id === requirementId ? { ...req, ...data } : req
+      );
+
+      // Update the project
+      await get().updateProject(projectId, {
+        [field]: updatedRequirements,
+      } as any);
+    } catch (error) {
+      console.error(`Failed to update ${type} requirement:`, error);
+      set({ error: `Failed to update requirement`, isLoading: false });
+    }
+  },
+
+  deleteRequirement: async (projectId, type, requirementId) => {
+    set({ isLoading: true, error: null });
+    try {
+      const currentProject = get().currentProject;
+      if (!currentProject) throw new Error("No project selected");
+
+      // Determine which requirements list to update
+      const field =
+        type === "functional"
+          ? "functional_requirements"
+          : "non_functional_requirements";
+      const requirements = currentProject[field] || [];
+
+      // Filter out the requirement to delete
+      const updatedRequirements = requirements.filter(
+        (req) => req.id !== requirementId
+      );
+
+      // Update the project
+      await get().updateProject(projectId, {
+        [field]: updatedRequirements,
+      } as any);
+    } catch (error) {
+      console.error(`Failed to delete ${type} requirement:`, error);
+      set({ error: `Failed to delete requirement`, isLoading: false });
     }
   },
 
   fetchSpecification: async (projectId) => {
     set({ isLoading: true, error: null });
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      // In a real app, this would fetch from an API
-      const mockSpecification: Specification = {
-        id: Math.random().toString(36).substring(2, 9),
-        project_id: projectId,
-        requirements: {
-          project_type: "Web Application",
-          functional_requirements: [
-            "User authentication",
-            "Expense tracking",
-            "Income tracking",
-            "Budget planning",
-            "Reports and analytics",
-          ],
-          non_functional_requirements: [
-            "Responsive design",
-            "Fast loading times",
-            "Secure data storage",
-          ],
-          tech_stack: {
-            frontend: "React",
-            backend: "Node.js",
-            database: "PostgreSQL",
-          },
-        },
-        architecture: {
-          pattern: "MVC",
-          components: ["Frontend", "Backend API", "Database"],
-          data_flow: ["User -> Frontend -> API -> Database"],
-          diagram: "graph TD\n  A[Frontend] --> B[API]\n  B --> C[Database]",
-        },
-        data_model: {
-          entities: [
-            {
-              name: "User",
-              attributes: [
-                { name: "id", type: "UUID", constraints: ["primary_key"] },
-                { name: "email", type: "string", constraints: ["unique"] },
-                { name: "password", type: "string", constraints: [] },
-              ],
-              relationships: ["Has many Expenses", "Has many Incomes"],
-            },
-          ],
-        },
-        api_endpoints: [
-          {
-            path: "/api/auth/login",
-            method: "POST",
-            request_body: '{ "email": "string", "password": "string" }',
-            response:
-              '{ "token": "string", "user": { "id": "string", "email": "string" } }',
-            description: "User login endpoint",
-          },
-        ],
-        implementation: {
-          file_structure: [
-            "src/",
-            "src/components/",
-            "src/pages/",
-            "src/api/",
-            "src/utils/",
-          ],
-          key_components: [
-            "Authentication",
-            "Dashboard",
-            "Expense Tracker",
-            "Budget Planner",
-          ],
-        },
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      };
-
-      set({ currentSpecification: mockSpecification, isLoading: false });
+      const response = await axios.get(
+        `${API_URL}/api/projects/${projectId}/specification`
+      );
+      set({ currentSpecification: response.data, isLoading: false });
     } catch (error) {
+      console.error("Failed to fetch specification:", error);
       set({ error: "Failed to fetch specification", isLoading: false });
     }
   },
@@ -213,20 +241,14 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
   updateSpecification: async (projectId, data) => {
     set({ isLoading: true, error: null });
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      const response = await axios.put(
+        `${API_URL}/api/projects/${projectId}/specification`,
+        data
+      );
 
-      set((state) => ({
-        currentSpecification: state.currentSpecification
-          ? {
-              ...state.currentSpecification,
-              ...data,
-              updated_at: new Date().toISOString(),
-            }
-          : null,
-        isLoading: false,
-      }));
+      set({ currentSpecification: response.data, isLoading: false });
     } catch (error) {
+      console.error("Failed to update specification:", error);
       set({ error: "Failed to update specification", isLoading: false });
     }
   },
@@ -234,12 +256,12 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
   generateArtifacts: async (projectId) => {
     set({ isLoading: true, error: null });
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // In a real app, this would trigger artifact generation on the backend
+      await axios.post(
+        `${API_URL}/api/projects/${projectId}/generate-artifacts`
+      );
       set({ isLoading: false });
     } catch (error) {
+      console.error("Failed to generate artifacts:", error);
       set({ error: "Failed to generate artifacts", isLoading: false });
     }
   },
