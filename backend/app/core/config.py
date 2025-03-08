@@ -28,6 +28,7 @@ class Settings(BaseSettings):
     app_name: str = "ArchSpec API"
     version: str = "0.1.0"
     description: str = "AI-driven software specification system"
+    environment: str = "development"
     
     # CORS settings
     cors_origins: List[str] = ["http://localhost:3000", "http://localhost:5173"]

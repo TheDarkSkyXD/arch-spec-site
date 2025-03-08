@@ -58,6 +58,20 @@ try:
     except Exception as e:
         logger.error(f"Failed to load tech registry router: {str(e)}")
     
+    try:
+        from .routes import project_sections
+        api_router.include_router(project_sections.router, tags=["project-sections"])
+        logger.info("Project Sections router loaded successfully")
+    except Exception as e:
+        logger.error(f"Failed to load project sections router: {str(e)}")
+    
+    try:
+        from .routes import users
+        api_router.include_router(users.router, prefix="/users", tags=["users"])
+        logger.info("Users router loaded successfully")
+    except Exception as e:
+        logger.error(f"Failed to load users router: {str(e)}")
+    
     logger.info("API routes imported successfully")
 except Exception as e:
     logger.error(f"Failed to import API routes: {str(e)}") 
