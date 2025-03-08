@@ -20,19 +20,38 @@ export const app = initializeApp(firebaseConfig);
 export let analytics;
 export let auth;
 
+// Custom logger function that only logs in development mode
+const logMessage = (message: string, isError = false) => {
+  if (import.meta.env.DEV) {
+    if (isError) {
+      // In development, we may want to see errors, but we can control this
+      console.error(message);
+    } else {
+      console.log(message);
+    }
+  }
+  // In production, don't log anything
+};
+
 try {
   analytics = getAnalytics(app);
   // Initialize Firebase Auth
   auth = getAuth(app);
 
-  console.log("Firebase initialized successfully!");
+  logMessage("Firebase initialized successfully!");
 
   // Connect to Auth Emulator if in development
   if (import.meta.env.DEV) {
     // Uncomment the following line if you want to use the Auth Emulator
     // connectAuthEmulator(auth, "http://localhost:9099");
-    console.log("Firebase auth running in development mode");
+    logMessage("Firebase auth running in development mode");
   }
 } catch (error) {
-  console.error("Firebase initialization error:", error);
+  // Only log initialization errors in development, not in production
+  logMessage(
+    `Firebase initialization error: ${
+      error instanceof Error ? error.message : "Unknown error"
+    }`,
+    true
+  );
 }

@@ -1,13 +1,24 @@
 import { ReactNode, useState, useEffect } from "react";
-import * as authService from '../services/auth';
-import { userApi } from '../api/userApi';
-import { AuthContext } from './AuthContextDefinition';
-import { User } from './AuthTypes';
+import * as authService from "../services/auth";
+import { userApi } from "../api/userApi";
+import { AuthContext } from "./AuthContextDefinition";
+import { User } from "./AuthTypes";
 
 // Props for the AuthProvider component
 interface AuthProviderProps {
   children: ReactNode;
 }
+
+// Custom logger function that only logs in development
+const logMessage = (message: string, isError = false) => {
+  if (import.meta.env.DEV) {
+    if (isError) {
+      console.error(message);
+    } else {
+      console.log(message);
+    }
+  }
+};
 
 // AuthProvider component
 export const AuthProvider = ({ children }: AuthProviderProps) => {
@@ -20,7 +31,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const profile = await userApi.getCurrentUser();
       return { ...user, profile };
     } catch (error) {
-      console.error('Error loading user profile:', error);
+      // Log errors only in development mode
+      logMessage("Error loading user profile", true);
       return user;
     }
   };
@@ -47,11 +59,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   // Sign in with email and password
   const signIn = async (email: string, password: string) => {
     setLoading(true);
-    
+
     try {
       // Sign in with Firebase
       await authService.signInWithEmail(email, password);
-      
+
       // Auth state listener will handle setting the user
     } catch (error) {
       setLoading(false);
@@ -62,11 +74,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   // Sign in with Google
   const signInWithGoogle = async () => {
     setLoading(true);
-    
+
     try {
       // Sign in with Google via Firebase
       await authService.signInWithGoogle();
-      
+
       // Auth state listener will handle setting the user
     } catch (error) {
       setLoading(false);
@@ -77,11 +89,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   // Sign up with email and password
   const signUp = async (email: string, password: string) => {
     setLoading(true);
-    
+
     try {
       // Create user with Firebase
       await authService.signUpWithEmail(email, password);
-      
+
       // Auth state listener will handle setting the user
     } catch (error) {
       setLoading(false);
@@ -92,11 +104,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   // Sign out
   const signOut = async () => {
     setLoading(true);
-    
+
     try {
       // Sign out from Firebase
       await authService.signOut();
-      
+
       // Auth state listener will handle clearing the user
     } catch (error) {
       setLoading(false);
@@ -106,7 +118,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   // Send password reset email
   const sendPasswordResetEmail = async (email: string) => {
-    await authService.resetPassword(email);
+    try {
+      await authService.resetPassword(email);
+    } catch (error) {
+      throw error;
+    }
   };
 
   // Provide the auth context value
@@ -117,7 +133,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     signInWithGoogle,
     signUp,
     signOut,
-    sendPasswordResetEmail
+    sendPasswordResetEmail,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

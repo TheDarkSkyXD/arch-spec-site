@@ -10,6 +10,7 @@ import {
   AuthError,
 } from "firebase/auth";
 import { app, auth } from "../firebase/config";
+import { getAuthErrorMessage } from "../utils/authErrorHandler";
 
 // User type definition
 export interface User {
@@ -45,9 +46,10 @@ export const signInWithEmail = async (
     );
     return await mapFirebaseUser(userCredential.user);
   } catch (error) {
-    const authError = error as AuthError;
-    console.error("Error signing in with email and password:", authError);
-    throw new Error(authError.message || "Failed to sign in");
+    // Use the error handler utility to get a user-friendly message
+    // Remove console.error to prevent leaking implementation details
+    const errorMessage = getAuthErrorMessage(error);
+    throw new Error(errorMessage);
   }
 };
 
@@ -64,9 +66,10 @@ export const signUpWithEmail = async (
     );
     return await mapFirebaseUser(userCredential.user);
   } catch (error) {
-    const authError = error as AuthError;
-    console.error("Error signing up with email and password:", authError);
-    throw new Error(authError.message || "Failed to sign up");
+    // Use the error handler utility to get a user-friendly message
+    // Remove console.error to prevent leaking implementation details
+    const errorMessage = getAuthErrorMessage(error);
+    throw new Error(errorMessage);
   }
 };
 
@@ -77,9 +80,10 @@ export const signInWithGoogle = async (): Promise<User> => {
     const userCredential = await signInWithPopup(auth, provider);
     return await mapFirebaseUser(userCredential.user);
   } catch (error) {
-    const authError = error as AuthError;
-    console.error("Error signing in with Google:", authError);
-    throw new Error(authError.message || "Failed to sign in with Google");
+    // Use the error handler utility to get a user-friendly message
+    // Remove console.error to prevent leaking implementation details
+    const errorMessage = getAuthErrorMessage(error);
+    throw new Error(errorMessage);
   }
 };
 
@@ -88,9 +92,10 @@ export const signOut = async (): Promise<void> => {
   try {
     await firebaseSignOut(auth);
   } catch (error) {
-    const authError = error as AuthError;
-    console.error("Error signing out:", authError);
-    throw new Error(authError.message || "Failed to sign out");
+    // Use the error handler utility to get a user-friendly message
+    // Remove console.error to prevent leaking implementation details
+    const errorMessage = getAuthErrorMessage(error);
+    throw new Error(errorMessage);
   }
 };
 
@@ -99,9 +104,10 @@ export const resetPassword = async (email: string): Promise<void> => {
   try {
     await sendPasswordResetEmail(auth, email);
   } catch (error) {
-    const authError = error as AuthError;
-    console.error("Error resetting password:", authError);
-    throw new Error(authError.message || "Failed to reset password");
+    // Use the error handler utility to get a user-friendly message
+    // Remove console.error to prevent leaking implementation details
+    const errorMessage = getAuthErrorMessage(error);
+    throw new Error(errorMessage);
   }
 };
 

@@ -10,6 +10,8 @@ import {
 } from "lucide-react";
 import AuthLayout from "../../layouts/AuthLayout";
 import { useAuth } from "../../contexts/AuthContextDefinition";
+import ErrorMessage from "../../components/ui/ErrorMessage";
+import SuccessMessage from "../../components/ui/SuccessMessage";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -44,12 +46,12 @@ const Login = () => {
       // Navigate to the intended destination
       navigate(from, { replace: true });
     } catch (err) {
-      console.error("Login error:", err);
+      // Error messages are now handled in the auth service
+      // Just use the message directly without exposing implementation details
       if (err instanceof Error) {
-        console.error("Error details:", err.message);
-        setError(err.message || "Invalid email or password");
+        setError(err.message);
       } else {
-        setError("Invalid email or password");
+        setError("Sign in failed. Please try again.");
       }
     } finally {
       setLoading(false);
@@ -83,20 +85,16 @@ const Login = () => {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white dark:bg-slate-800 py-8 px-4 shadow sm:rounded-lg sm:px-10">
           {/* Success message from registration */}
-          {successMessage && (
-            <div className="mb-4 bg-green-50 text-green-700 p-3 rounded-md flex items-start">
-              <CheckCircle className="h-5 w-5 mr-2 mt-0.5 flex-shrink-0" />
-              <span>{successMessage}</span>
-            </div>
-          )}
+          <SuccessMessage
+            message={successMessage || ""}
+            onDismiss={() => navigate(location.pathname, { replace: true })}
+          />
 
-          {/* Error message */}
-          {error && (
-            <div className="mb-4 bg-red-50 text-red-700 p-3 rounded-md flex items-start">
-              <AlertCircle className="h-5 w-5 mr-2 mt-0.5 flex-shrink-0" />
-              <span>{error}</span>
-            </div>
-          )}
+          {/* Error message with improved styling */}
+          <ErrorMessage
+            message={error || ""}
+            onDismiss={() => setError(null)}
+          />
 
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
