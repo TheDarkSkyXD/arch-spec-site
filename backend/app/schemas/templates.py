@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import Dict, List, Optional, Any, Union
 
-from .tech_stack import TechStackData
+from .shared_schemas import TechStackData
 
 class ProjectDefaults(BaseModel):
     """Project default information."""

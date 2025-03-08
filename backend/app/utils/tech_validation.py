@@ -20,10 +20,8 @@ from typing import Dict, List, Any, Optional
 
 from app.seed.tech_registry import (
     is_valid_tech,
-    get_category_for_tech,
     validate_template_tech_stack
 )
-from app.schemas.tech_stack import TechStackData
 
 logger = logging.getLogger(__name__)
 

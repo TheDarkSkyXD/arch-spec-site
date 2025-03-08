@@ -17,7 +17,7 @@ See /app/seed/README.md for more detailed documentation.
 import logging
 from typing import Dict, List, Set, Optional, Any, Union
 
-from ..schemas.tech_stack import TechStackData
+from ..schemas.shared_schemas import TechStackData
 from ..schemas.tech_registry_schema import (
     TechRegistrySchema,
     InvalidTechnology,

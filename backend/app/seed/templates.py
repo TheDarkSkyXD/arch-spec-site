@@ -18,9 +18,8 @@ See /app/seed/README.md for more detailed documentation.
 import logging
 import datetime
 from typing import Dict, List, Optional
-from bson import ObjectId
 
-from ..seed.templates.sample_templates import PROJECT_TEMPLATES
+from ..seed.template_data.sample_templates import PROJECT_TEMPLATES
 
 from ..seed.tech_registry import validate_template_tech_stack
 

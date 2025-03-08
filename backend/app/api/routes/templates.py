@@ -3,10 +3,10 @@ API routes for project templates.
 """
 import logging
 from fastapi import APIRouter, HTTPException, Path, Body
-from typing import Dict, List, Any
+from typing import Dict, Any
 
-from ...schemas.templates import ProjectTemplateResponse, ProjectTemplateList, ProjectTemplate
-from ...schemas.tech_stack import TechStackData
+from ...schemas.templates import ProjectTemplateResponse, ProjectTemplateList
+from ...schemas.shared_schemas import TechStackData
 from ...services.templates_service import TemplatesService
 from ...seed.tech_registry import validate_template_tech_stack
 

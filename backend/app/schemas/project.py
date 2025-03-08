@@ -1,9 +1,9 @@
 from datetime import datetime
-from typing import Dict, Optional, List, Any, Union, ClassVar
+from typing import Dict, Optional, List, Any
 from pydantic import BaseModel, Field
 import uuid
 
-from .templates import ProjectTemplate, ProjectDefaults
+from .templates import ProjectTemplate
 from .shared_schemas import (
     TechStackData, Features, Pages, DataModel, Api, 
     Testing, ProjectStructure, Deployment, Documentation
@@ -75,8 +75,8 @@ class ProjectBase(BaseModel):
 
 class ProjectCreate(ProjectBase):
     """Model for creating a new Project."""
-    template_id: Optional[str] = None  # ID of the template to use as a base
-    template_data: Optional[ProjectTemplate] = None  # Template data if not using an existing template
+    # Template handling is now done on the frontend
+    pass
 
 
 class ProjectUpdate(BaseModel):
@@ -115,65 +115,6 @@ class ProjectInDB(ProjectBase):
     team_members: List[str] = Field(default_factory=list)  # List of team member IDs
     version: int = 1  # Project version to track changes
     revision_history: List[Dict[str, Any]] = Field(default_factory=list)  # History of changes
-    
-    @classmethod
-    def from_template(cls, template: ProjectTemplate, project_data: ProjectCreate) -> "ProjectInDB":
-        """Create a new project from a template and project data."""
-        # Initialize project with template defaults
-        project_defaults = template.project_defaults
-        
-        # Set basic section flags based on data availability
-        has_timeline = project_data.timeline is not None or project_defaults.timeline is not None
-        has_budget = project_data.budget is not None or project_defaults.budget is not None
-        has_requirements = (
-            (project_data.functional_requirements and len(project_data.functional_requirements) > 0) or
-            (project_data.non_functional_requirements and len(project_data.non_functional_requirements) > 0) or
-            (project_defaults.functional_requirements and len(project_defaults.functional_requirements) > 0) or
-            (project_defaults.non_functional_requirements and len(project_defaults.non_functional_requirements) > 0)
-        )
-        has_metadata = project_defaults.metadata is not None
-        
-        # Set architecture section flags based on template data availability
-        has_tech_stack = hasattr(template, 'tech_stack') and template.tech_stack is not None
-        has_features = hasattr(template, 'features') and template.features is not None
-        has_pages = hasattr(template, 'pages') and template.pages is not None
-        has_data_model = hasattr(template, 'data_model') and template.data_model is not None
-        has_api = hasattr(template, 'api') and template.api is not None
-        has_testing = hasattr(template, 'testing') and template.testing is not None
-        has_project_structure = hasattr(template, 'project_structure') and template.project_structure is not None
-        has_deployment = hasattr(template, 'deployment') and template.deployment is not None
-        has_documentation = hasattr(template, 'documentation') and template.documentation is not None
-        
-        # Create the project with data from the template and provided project data
-        project = cls(
-            name=project_data.name or project_defaults.name,
-            description=project_data.description or project_defaults.description,
-            template_type=project_data.template_type,
-            business_goals=project_data.business_goals or project_defaults.business_goals,
-            target_users=project_data.target_users or project_defaults.target_users,
-            domain=project_data.domain,
-            organization=project_data.organization,
-            project_lead=project_data.project_lead,
-            template_id=template.id if hasattr(template, 'id') else None,
-            
-            # Set section availability flags
-            has_timeline=has_timeline,
-            has_budget=has_budget,
-            has_requirements=has_requirements,
-            has_metadata=has_metadata,
-            
-            has_tech_stack=has_tech_stack,
-            has_features=has_features,
-            has_pages=has_pages,
-            has_data_model=has_data_model,
-            has_api=has_api,
-            has_testing=has_testing,
-            has_project_structure=has_project_structure,
-            has_deployment=has_deployment,
-            has_documentation=has_documentation,
-        )
-        
-        return project
 
 
 class Project(ProjectInDB):

@@ -16,7 +16,6 @@ from app.schemas.tech_stack import (
     CompatibleOptionsResponse
 )
 from app.db.base import db
-from app.seed.tech_stack_db import get_tech_stack_from_db
 
 logger = logging.getLogger(__name__)
 
@@ -292,29 +291,34 @@ except Exception as e:
     logger.error(f"Error validating tech stack data: {str(e)}")
     raise ValueError(f"Tech stack data validation failed: {str(e)}")
 
-# Function to get the tech stack data, preferring database but falling back to in-memory data
 async def get_tech_stack_data() -> Dict[str, Any]:
     """
-    Get the tech stack compatibility data, preferring database but falling back to in-memory data.
+    Get the technology stack compatibility data from the database or fallback to raw data.
     
     Returns:
-        Dict: The tech stack compatibility data
+        Dict: The technology stack compatibility data
     """
     try:
-        # Try to get tech stack data from database first
+        # Import the function dynamically inside this function to avoid circular imports
+        from app.seed.tech_stack_db import get_tech_stack_from_db
+        
+        # Get the database instance
         database = db.get_db()
-        if database:
-            db_tech_stack = await get_tech_stack_from_db(database)
-            if db_tech_stack:
-                logger.info("Using tech stack data from database")
-                return db_tech_stack
-                
-        # Fall back to in-memory data if database access fails
-        logger.info("Using in-memory tech stack data (database data not available)")
-        return TECH_STACK_DATA
+        
+        # Try to get data from database first
+        tech_stack_data = await get_tech_stack_from_db(database)
+        
+        # If data is found in the database, use it
+        if tech_stack_data:
+            return tech_stack_data
+            
+        # Otherwise, use the raw data as fallback
+        logger.warning("Tech stack data not found in database, using raw data")
+        return TECH_STACK_RAW_DATA
     except Exception as e:
-        logger.warning(f"Error retrieving tech stack data from database: {str(e)}. Using in-memory data.")
-        return TECH_STACK_DATA
+        logger.error(f"Error getting tech stack data: {str(e)}")
+        # Fallback to raw data in case of an error
+        return TECH_STACK_RAW_DATA
 
 def check_compatibility(tech_choice: Union[Dict[str, str], TechStackSelection]) -> CompatibilityResult:
     """
@@ -372,16 +376,18 @@ def check_compatibility(tech_choice: Union[Dict[str, str], TechStackSelection]) 
 
 async def check_compatibility_with_db(tech_choice: Union[Dict[str, str], TechStackSelection]) -> CompatibilityResult:
     """
-    Check compatibility between selected technology choices, using database data with fallback.
+    Check compatibility of a technology choice with the tech stack database.
     
     Args:
-        tech_choice: Dict or TechStackSelection containing selected technologies
-            
+        tech_choice: The technology choice to check compatibility for
+    
     Returns:
-        CompatibilityResult: Object containing compatibility results
+        CompatibilityResult: The compatibility result
     """
-    # This is the async version that uses the database with fallback
     try:
+        # Use our updated function to get tech stack data
+        tech_stack_data = await get_tech_stack_data()
+        
         # Handle both dictionary and Pydantic model inputs
         if isinstance(tech_choice, TechStackSelection):
             # Convert Pydantic model to dict
@@ -415,11 +421,11 @@ async def check_compatibility_with_db(tech_choice: Union[Dict[str, str], TechSta
         )
     
     except Exception as e:
-        logger.error(f"Error in compatibility check: {str(e)}")
+        logger.error(f"Error checking compatibility: {str(e)}")
         return CompatibilityResult(
-            valid=False,
-            compatibility_issues=[f"Error: {str(e)}"],
-            invalid_technologies=[]
+            compatible=False,
+            message=f"Error checking compatibility: {str(e)}",
+            compatible_with={}
         )
 
 def get_compatible_options(category: str, technology: str) -> CompatibleOptionsResponse:
@@ -444,18 +450,17 @@ def get_compatible_options(category: str, technology: str) -> CompatibleOptionsR
 
 async def get_compatible_options_with_db(category: str, technology: str) -> CompatibleOptionsResponse:
     """
-    Get a list of compatible technologies for a given technology in a category,
-    using database data with fallback.
+    Get compatible options for a given technology from the database.
     
     Args:
-        category: Technology category (e.g., 'frontend', 'backend')
-        technology: Technology name
-        
+        category: The technology category (e.g., 'frontend', 'backend', etc.)
+        technology: The technology to get compatible options for
+    
     Returns:
-        CompatibleOptionsResponse: Compatible technology options
+        CompatibleOptionsResponse: The compatible options
     """
     try:
-        # Get tech stack data from database with fallback
+        # Use our updated function to get tech stack data
         tech_stack_data = await get_tech_stack_data()
         
         result = CompatibleOptionsResponse(
@@ -473,19 +478,18 @@ async def get_compatible_options_with_db(category: str, technology: str) -> Comp
         return CompatibleOptionsResponse(
             category=category,
             technology=technology,
-            compatible_options={}
+            compatible_options=[]
         )
 
 async def get_all_tech_options_with_db():
     """
-    Get all available technology options from all categories,
-    using database data with fallback.
+    Get all available technology options from the database.
     
     Returns:
-        Dict: All technology options by category
+        Dict: All available technology options
     """
     try:
-        # Get tech stack data from database with fallback
+        # Use our updated function to get tech stack data
         tech_stack_data = await get_tech_stack_data()
         
         # Extract and organize the tech options from the tech stack data
@@ -498,12 +502,5 @@ async def get_all_tech_options_with_db():
             "hosting": tech_stack_data.get("hosting", {})
         }
     except Exception as e:
-        logger.error(f"Error getting all technology options: {str(e)}")
-        # Fallback to in-memory data on error
-        return {
-            "frontend": TECH_STACK_DATA.get("frontend", {}),
-            "backend": TECH_STACK_DATA.get("backend", {}),
-            "database": TECH_STACK_DATA.get("database", {}),
-            "authentication": TECH_STACK_DATA.get("authentication", {}),
-            "hosting": TECH_STACK_DATA.get("hosting", {})
-        }
+        logger.error(f"Error getting all tech options: {str(e)}")
+        return {}

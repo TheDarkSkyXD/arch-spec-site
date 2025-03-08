@@ -15,7 +15,7 @@ from ..schemas.templates import (
     ProjectTemplate,
     ProjectTemplateResponse
 )
-from ..schemas.tech_stack import TechStackData
+from ..schemas.shared_schemas import TechStackData
 from ..seed.tech_registry import validate_template_tech_stack
 
 logger = logging.getLogger(__name__)
