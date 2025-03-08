@@ -1,0 +1,14 @@
+## General Rules
+
+- This project is a monorepo with a frontend and backend
+  - cd to the frontend or backend directory to run the commands
+  - The frontend uses pnpm package manager
+  - The backend uses uv as the package manager
+- The IDE uses PowerShell terminals
+- No need to manually activate virtual environment
+- Ensure centralized types and interfaces
+- This project is in active development, a green field project. So there's no need to worry about backward compatibility with old data or code. Update everything if needed.
+
+## Backend Testing
+
+- Run tests with `uv run pytest tests` after cd'ing to the backend directory
