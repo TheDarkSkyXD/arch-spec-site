@@ -1,4 +1,4 @@
-import axios from "axios";
+import apiClient from "./apiClient";
 
 // Define your API base URL
 const API_BASE_URL = "/api";
@@ -73,13 +73,13 @@ export interface TechSuggestionsResult {
 export const techRegistryApi = {
   // Get the complete tech registry
   getTechRegistry: async (): Promise<TechRegistryResponse> => {
-    const response = await axios.get(`${API_BASE_URL}/tech-registry`);
+    const response = await apiClient.get(`${API_BASE_URL}/tech-registry`);
     return response.data;
   },
 
   // Validate a single technology name
   validateTechnology: async (techName: string): Promise<ValidationResult> => {
-    const response = await axios.get(
+    const response = await apiClient.get(
       `${API_BASE_URL}/tech-registry/validate-tech?tech_name=${encodeURIComponent(
         techName
       )}`
@@ -92,7 +92,7 @@ export const techRegistryApi = {
     techStack: TechStackData,
     templateStack?: TechStackData
   ): Promise<TechStackValidationResult> => {
-    const response = await axios.post(
+    const response = await apiClient.post(
       `${API_BASE_URL}/tech-registry/validate-tech-stack`,
       {
         tech_stack: techStack,
@@ -106,7 +106,7 @@ export const techRegistryApi = {
   getTechSuggestions: async (
     partialTechStack: TechStackData
   ): Promise<TechSuggestionsResult> => {
-    const response = await axios.post(
+    const response = await apiClient.post(
       `${API_BASE_URL}/tech-registry/get-suggestions`,
       {
         ...partialTechStack,
@@ -117,7 +117,9 @@ export const techRegistryApi = {
 
   // Refresh the tech registry from the source
   refreshTechRegistry: async (): Promise<TechRegistryResponse> => {
-    const response = await axios.post(`${API_BASE_URL}/tech-registry/refresh`);
+    const response = await apiClient.post(
+      `${API_BASE_URL}/tech-registry/refresh`
+    );
     return response.data;
   },
 };

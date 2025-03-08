@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { techRegistryApi } from "../api/techRegistryApi";
 import { templatesService } from "../services/templatesService";
-import axios from "axios";
+import { techStackService } from "../services/techStackService";
 
 // Query keys for different types of data
 export const QUERY_KEYS = {
@@ -77,7 +77,7 @@ export function useTechnologies(category?: string, subcategory?: string) {
       if (!techRegistryQuery.data?.data) {
         return [];
       }
-      
+
       // If no category is selected but we have all_technologies, return that
       if (!category && techRegistryQuery.data.data.all_technologies) {
         return techRegistryQuery.data.data.all_technologies;
@@ -95,14 +95,19 @@ export function useTechnologies(category?: string, subcategory?: string) {
 
       // If subcategory is specified, return technologies from that subcategory
       if (subcategory) {
-        return typeof categoryData === 'object' && !Array.isArray(categoryData) ? 
-          categoryData[subcategory] || [] : [];
+        return typeof categoryData === "object" && !Array.isArray(categoryData)
+          ? categoryData[subcategory] || []
+          : [];
       }
 
       // If no subcategory specified, return all technologies from all subcategories
       const allTechnologies: string[] = [];
-      
-      if (typeof categoryData === 'object' && !Array.isArray(categoryData) && categoryData !== null) {
+
+      if (
+        typeof categoryData === "object" &&
+        !Array.isArray(categoryData) &&
+        categoryData !== null
+      ) {
         Object.values(categoryData).forEach((technologies) => {
           if (Array.isArray(technologies)) {
             allTechnologies.push(...technologies);
@@ -152,9 +157,8 @@ export function useTechStack() {
   return useQuery({
     queryKey: [QUERY_KEYS.TECH_STACK],
     queryFn: async () => {
-      // Use the correct endpoint for tech stack options
-      const response = await axios.get("/api/tech-stack/options");
-      return response.data;
+      // Use the tech stack service to ensure proper authentication
+      return await techStackService.getAllTechnologyOptions();
     },
   });
 }
@@ -233,9 +237,14 @@ export function useTechSubcategories(categoryName?: string) {
       }
 
       const category = techRegistryQuery.data.data[categoryName];
-      
+
       // Check if category exists and is an object (not an array or primitive)
-      if (!category || typeof category !== 'object' || Array.isArray(category) || category === null) {
+      if (
+        !category ||
+        typeof category !== "object" ||
+        Array.isArray(category) ||
+        category === null
+      ) {
         return [];
       }
 

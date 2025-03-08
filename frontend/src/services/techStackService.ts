@@ -1,7 +1,7 @@
 /**
  * Service for tech stack compatibility API interactions.
  */
-import axios from "axios";
+import apiClient from "../api/apiClient";
 import {
   TechStackSelection,
   CompatibilityResult,
@@ -10,7 +10,8 @@ import {
   TechStackData,
 } from "../types/techStack";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+// Define the API base URL to be consistent with other services
+const API_BASE_URL = "/api";
 
 /**
  * Tech Stack API service for compatibility checks and options.
@@ -26,8 +27,8 @@ export const techStackService = {
     selection: TechStackSelection
   ): Promise<CompatibilityResult> {
     try {
-      const response = await axios.post<CompatibilityResult>(
-        `${API_URL}/api/tech-stack/compatibility/check`,
+      const response = await apiClient.post<CompatibilityResult>(
+        `${API_BASE_URL}/tech-stack/compatibility/check`,
         selection
       );
       return response.data;
@@ -50,8 +51,8 @@ export const techStackService = {
   ): Promise<CompatibleOptionsResponse> {
     try {
       const request: CompatibleOptionsRequest = { category, technology };
-      const response = await axios.post<CompatibleOptionsResponse>(
-        `${API_URL}/api/tech-stack/compatibility/options`,
+      const response = await apiClient.post<CompatibleOptionsResponse>(
+        `${API_BASE_URL}/tech-stack/compatibility/options`,
         request
       );
       return response.data;
@@ -68,8 +69,8 @@ export const techStackService = {
    */
   async getAllTechnologyOptions(): Promise<TechStackData> {
     try {
-      const response = await axios.get<TechStackData>(
-        `${API_URL}/api/tech-stack/options`
+      const response = await apiClient.get<TechStackData>(
+        `${API_BASE_URL}/tech-stack/options`
       );
       return response.data;
     } catch (error) {
