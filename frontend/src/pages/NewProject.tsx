@@ -27,6 +27,7 @@ import { ProjectCreate, ProjectTemplate, Requirement } from "../types/project";
 import TemplateSelector from "../components/templates/TemplateSelector";
 import TemplateDetails from "../components/templates/TemplateDetails";
 import { templatesService } from "../services/templatesService";
+import { useAuth } from "../contexts/AuthContextDefinition";
 
 // Type definitions for form data
 interface FeatureModule {
@@ -77,6 +78,7 @@ const NewProject = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const templateId = searchParams.get("template");
+  const { currentUser } = useAuth();
 
   const { createProject } = useProjectStore();
   const [currentStep, setCurrentStep] = useState("template");
@@ -365,23 +367,20 @@ const NewProject = () => {
 
   const handleCreateProject = async () => {
     try {
-      const metadata: ProjectMetadata = {
-        version: "0.1",
-        author: "User",
-      };
+      setLoading(true);
+      setError(null);
 
-      // If template was selected, include template information in metadata
-      if (selectedTemplate) {
-        metadata.template = {
-          name: selectedTemplate.name,
-          version: selectedTemplate.version,
-        };
+      // Make sure we have required fields
+      if (!formData.name || !formData.description) {
+        setError("Project name and description are required");
+        setLoading(false);
+        return;
       }
 
-      // Create new project with all collected data
-      const newProject: ProjectCreate = {
-        name: formData.name || "",
-        description: formData.description || "",
+      // Prepare project data
+      const projectData: ProjectCreate = {
+        name: formData.name!,
+        description: formData.description!,
         template_type: formData.template_type || "web_app",
         business_goals: formData.business_goals || [],
         target_users: formData.target_users || [],
@@ -390,21 +389,57 @@ const NewProject = () => {
         project_lead: formData.project_lead,
         functional_requirements: formData.functional_requirements || [],
         non_functional_requirements: formData.non_functional_requirements || [],
-        template_id: formData.template_id,
-        template_data: formData.template_data,
       };
 
-      const result = await createProject(newProject);
+      // Add template id if using a template
+      if (selectedTemplate && !isBlankProject) {
+        projectData.template_id = selectedTemplate.id;
 
-      if (result) {
-        navigate(`/projects/${result.id}`);
+        // Include metadata with template info
+        projectData.metadata = {
+          version: "0.1",
+          author: currentUser?.displayName || currentUser?.email || "Anonymous",
+          template: {
+            name: selectedTemplate.name,
+            version: selectedTemplate.version,
+          },
+        };
       } else {
-        // Handle error case
+        // Include basic metadata
+        projectData.metadata = {
+          version: "0.1",
+          author: currentUser?.displayName || currentUser?.email || "Anonymous",
+        };
+      }
+
+      // Handle sections data if available
+      if (formData.timeline) {
+        projectData.timeline = formData.timeline;
+      }
+
+      if (formData.budget) {
+        projectData.budget = formData.budget;
+      }
+
+      // Add template data if we're using a template
+      if (selectedTemplate && !isBlankProject) {
+        projectData.template_data = selectedTemplate;
+      }
+
+      console.log("Creating project with data:", projectData);
+      const newProject = await createProject(projectData);
+
+      if (newProject) {
+        console.log("Project created successfully:", newProject);
+        navigate(`/projects/${newProject.id}`);
+      } else {
         setError("Failed to create project. Please try again.");
       }
-    } catch (error) {
-      console.error("Failed to create project:", error);
-      setError("An unexpected error occurred. Please try again.");
+    } catch (err) {
+      console.error("Error creating project:", err);
+      setError("An error occurred while creating the project.");
+    } finally {
+      setLoading(false);
     }
   };
 

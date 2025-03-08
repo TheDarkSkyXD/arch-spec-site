@@ -2,7 +2,8 @@
 API routes for tech stack compatibility.
 """
 import logging
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Depends
+from typing import Dict, Any
 
 from ...schemas.tech_stack import (
     TechStackSelection, 
@@ -11,13 +12,17 @@ from ...schemas.tech_stack import (
     AllTechOptionsResponse
 )
 from ...services.tech_stack_service import TechStackService
+from ...core.firebase_auth import get_current_user
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
 @router.post("/compatibility/check", response_model=CompatibilityResult)
-async def check_compatibility(selection: TechStackSelection):
+async def check_compatibility(
+    selection: TechStackSelection,
+    current_user: Dict[str, Any] = Depends(get_current_user)
+):
     """
     Check compatibility between selected technology choices.
     
@@ -34,7 +39,8 @@ async def check_compatibility(selection: TechStackSelection):
 @router.get("/compatibility/options", response_model=CompatibleOptionsResponse)
 async def get_compatible_options(
     category: str = Query(..., description="Technology category (e.g. 'frontend', 'backend')"),
-    technology: str = Query(..., description="Technology name to get compatible options for")
+    technology: str = Query(..., description="Technology name to get compatible options for"),
+    current_user: Dict[str, Any] = Depends(get_current_user)
 ):
     """
     Get compatible options for a given technology.
@@ -50,7 +56,7 @@ async def get_compatible_options(
 
 
 @router.get("/options", response_model=AllTechOptionsResponse)
-async def get_all_technology_options():
+async def get_all_technology_options(current_user: Dict[str, Any] = Depends(get_current_user)):
     """
     Get all available technology options from all categories.
     

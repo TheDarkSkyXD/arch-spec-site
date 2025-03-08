@@ -5,7 +5,7 @@ This module provides API routes for managing projects.
 
 from fastapi import APIRouter, HTTPException, Depends
 from motor.motor_asyncio import AsyncIOMotorDatabase
-from typing import List
+from typing import List, Dict, Any
 import uuid
 from datetime import datetime
 
@@ -13,6 +13,7 @@ from ...db.base import db
 from ...schemas.project import ProjectCreate, ProjectUpdate, ProjectResponse, ProjectDetailResponse, ProjectInDB
 from ...schemas.templates import ProjectTemplate
 from ...services.project_sections_service import ProjectSectionsService
+from ...core.firebase_auth import get_current_user
 
 router = APIRouter()
 
@@ -23,31 +24,45 @@ def get_db():
 
 
 @router.get("", response_model=List[ProjectResponse])
-async def get_projects(database: AsyncIOMotorDatabase = Depends(get_db)):
-    """Get all projects.
+async def get_projects(
+    database: AsyncIOMotorDatabase = Depends(get_db),
+    current_user: Dict[str, Any] = Depends(get_current_user)
+):
+    """Get all projects for the current user.
     
     Args:
         database: The database instance.
+        current_user: The authenticated user.
         
     Returns:
-        A list of all projects.
+        A list of projects belonging to the current user.
     """
-    projects = await database.projects.find().to_list(length=100)
+    user_id = str(current_user["_id"])
+    projects = await database.projects.find({"user_id": user_id}).to_list(length=100)
     return projects
 
 
 @router.post("", response_model=ProjectDetailResponse)
-async def create_project(project: ProjectCreate, database: AsyncIOMotorDatabase = Depends(get_db)):
+async def create_project(
+    project: ProjectCreate, 
+    database: AsyncIOMotorDatabase = Depends(get_db),
+    current_user: Dict[str, Any] = Depends(get_current_user)
+):
     """Create a new project.
     
     Args:
         project: The project data.
         database: The database instance.
+        current_user: The authenticated user.
         
     Returns:
         The created project.
     """
     project_dict = project.model_dump()
+    
+    # Set the user ID
+    user_id = str(current_user["_id"])
+    project_dict["user_id"] = user_id
     
     # Create a basic project
     project_dict.update({
@@ -151,20 +166,26 @@ async def create_project(project: ProjectCreate, database: AsyncIOMotorDatabase 
 
 
 @router.get("/{id}", response_model=ProjectDetailResponse)
-async def get_project_detail(id: str, database: AsyncIOMotorDatabase = Depends(get_db)):
+async def get_project_detail(
+    id: str, 
+    database: AsyncIOMotorDatabase = Depends(get_db),
+    current_user: Dict[str, Any] = Depends(get_current_user)
+):
     """Get a project by ID with all details.
     
     Args:
         id: The project ID.
         database: The database instance.
+        current_user: The authenticated user.
         
     Returns:
         The project details.
         
     Raises:
-        HTTPException: If the project is not found.
+        HTTPException: If the project is not found or doesn't belong to the user.
     """
-    project = await database.projects.find_one({"id": id})
+    user_id = str(current_user["_id"])
+    project = await database.projects.find_one({"id": id, "user_id": user_id})
     if project is None:
         raise HTTPException(status_code=404, detail="Project not found")
     
@@ -243,22 +264,31 @@ async def get_project_detail(id: str, database: AsyncIOMotorDatabase = Depends(g
 
 
 @router.put("/{id}", response_model=ProjectDetailResponse)
-async def update_project(id: str, project_update: ProjectUpdate, database: AsyncIOMotorDatabase = Depends(get_db)):
+async def update_project(
+    id: str, 
+    project_update: ProjectUpdate, 
+    database: AsyncIOMotorDatabase = Depends(get_db),
+    current_user: Dict[str, Any] = Depends(get_current_user)
+):
     """Update a project.
     
     Args:
         id: The project ID.
         project_update: The project update data.
         database: The database instance.
+        current_user: The authenticated user.
         
     Returns:
         The updated project.
         
     Raises:
-        HTTPException: If the project is not found.
+        HTTPException: If the project is not found or doesn't belong to the user.
     """
-    project = await database.projects.find_one({"id": id})
-    if project is None:
+    user_id = str(current_user["_id"])
+    
+    # Check if project exists and belongs to user
+    existing_project = await database.projects.find_one({"id": id, "user_id": user_id})
+    if existing_project is None:
         raise HTTPException(status_code=404, detail="Project not found")
     
     # Extract section updates (for backward compatibility)
@@ -283,7 +313,7 @@ async def update_project(id: str, project_update: ProjectUpdate, database: Async
         # Update version if needed
         if "template_data" in update_data:
             # Increment version
-            update_data["version"] = project.get("version", 1) + 1
+            update_data["version"] = existing_project.get("version", 1) + 1
             
             # Add revision record
             revision = {
@@ -317,7 +347,7 @@ async def update_project(id: str, project_update: ProjectUpdate, database: Async
         )
         
         # Update the flag if needed
-        if not project.get("has_timeline", False):
+        if not existing_project.get("has_timeline", False):
             await database.projects.update_one(
                 {"id": id},
                 {"$set": {"has_timeline": True, "updated_at": datetime.utcnow()}}
@@ -330,7 +360,7 @@ async def update_project(id: str, project_update: ProjectUpdate, database: Async
         )
         
         # Update the flag if needed
-        if not project.get("has_budget", False):
+        if not existing_project.get("has_budget", False):
             await database.projects.update_one(
                 {"id": id},
                 {"$set": {"has_budget": True, "updated_at": datetime.utcnow()}}
@@ -342,7 +372,7 @@ async def update_project(id: str, project_update: ProjectUpdate, database: Async
         
         # Get current values for any field not being updated
         requirements_section = None
-        if project.get("has_requirements", False):
+        if existing_project.get("has_requirements", False):
             requirements_section = await database.requirements_sections.find_one({"project_id": id})
         
         # Default to empty lists if not found or missing keys
@@ -363,7 +393,7 @@ async def update_project(id: str, project_update: ProjectUpdate, database: Async
         )
         
         # Update the flag if needed
-        if not project.get("has_requirements", False):
+        if not existing_project.get("has_requirements", False):
             await database.projects.update_one(
                 {"id": id},
                 {"$set": {"has_requirements": True, "updated_at": datetime.utcnow()}}
@@ -376,7 +406,7 @@ async def update_project(id: str, project_update: ProjectUpdate, database: Async
         )
         
         # Update the flag if needed
-        if not project.get("has_metadata", False):
+        if not existing_project.get("has_metadata", False):
             await database.projects.update_one(
                 {"id": id},
                 {"$set": {"has_metadata": True, "updated_at": datetime.utcnow()}}
@@ -387,29 +417,72 @@ async def update_project(id: str, project_update: ProjectUpdate, database: Async
 
 
 @router.delete("/{id}")
-async def delete_project(id: str, database: AsyncIOMotorDatabase = Depends(get_db)):
+async def delete_project(
+    id: str, 
+    database: AsyncIOMotorDatabase = Depends(get_db),
+    current_user: Dict[str, Any] = Depends(get_current_user)
+):
     """Delete a project.
     
     Args:
         id: The project ID.
         database: The database instance.
+        current_user: The authenticated user.
         
     Returns:
         A success message.
         
     Raises:
-        HTTPException: If the project is not found or the deletion fails.
+        HTTPException: If the project is not found or doesn't belong to the user.
     """
-    project = await database.projects.find_one({"id": id})
+    user_id = str(current_user["_id"])
+    
+    # Check if project exists and belongs to user
+    project = await database.projects.find_one({"id": id, "user_id": user_id})
     if project is None:
         raise HTTPException(status_code=404, detail="Project not found")
     
-    result = await database.projects.delete_one({"id": id})
+    # Delete the project
+    await database.projects.delete_one({"id": id, "user_id": user_id})
     
-    if result.deleted_count == 0:
-        raise HTTPException(status_code=400, detail="Project deletion failed")
+    # Delete all related sections
+    if project.get("has_timeline", False):
+        await database.timeline_sections.delete_one({"project_id": id})
     
-    # Also delete related specification and artifacts
-    await database.specifications.delete_many({"project_id": id})
+    if project.get("has_budget", False):
+        await database.budget_sections.delete_one({"project_id": id})
+    
+    if project.get("has_requirements", False):
+        await database.requirements_sections.delete_one({"project_id": id})
+    
+    if project.get("has_metadata", False):
+        await database.metadata_sections.delete_one({"project_id": id})
+    
+    if project.get("has_tech_stack", False):
+        await database.tech_stack_sections.delete_one({"project_id": id})
+    
+    if project.get("has_features", False):
+        await database.features_sections.delete_one({"project_id": id})
+    
+    if project.get("has_pages", False):
+        await database.pages_sections.delete_one({"project_id": id})
+    
+    if project.get("has_data_model", False):
+        await database.data_model_sections.delete_one({"project_id": id})
+    
+    if project.get("has_api", False):
+        await database.api_sections.delete_one({"project_id": id})
+    
+    if project.get("has_testing", False):
+        await database.testing_sections.delete_one({"project_id": id})
+    
+    if project.get("has_project_structure", False):
+        await database.project_structure_sections.delete_one({"project_id": id})
+    
+    if project.get("has_deployment", False):
+        await database.deployment_sections.delete_one({"project_id": id})
+    
+    if project.get("has_documentation", False):
+        await database.documentation_sections.delete_one({"project_id": id})
     
     return {"message": "Project deleted successfully"} 

@@ -47,6 +47,7 @@ class ProjectBase(BaseModel):
     domain: Optional[str] = None  # Business domain (e.g., "healthcare", "finance")
     organization: Optional[str] = None  # Organization name
     project_lead: Optional[str] = None  # Project lead name or ID
+    user_id: Optional[str] = None  # ID of the user who created this project
     
     # References to sections stored in separate collections
     # Original basic sections
@@ -134,6 +135,7 @@ class ProjectResponse(BaseModel):
     domain: Optional[str] = None
     organization: Optional[str] = None
     project_lead: Optional[str] = None
+    user_id: Optional[str] = None
     created_at: datetime
     updated_at: datetime
     template_id: Optional[str] = None

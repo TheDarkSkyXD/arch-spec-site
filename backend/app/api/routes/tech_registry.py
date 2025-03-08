@@ -16,6 +16,7 @@ from app.utils.tech_validation import (
 )
 from app.db.base import db
 from app.seed.tech_registry_db import get_registry_from_db
+from app.core.firebase_auth import get_current_user
 
 router = APIRouter(
     prefix="/tech-registry",
@@ -30,7 +31,7 @@ def get_db():
 
 
 @router.get("/")
-async def get_tech_registry():
+async def get_tech_registry(current_user: Dict[str, Any] = Depends(get_current_user)):
     """
     Get the full technology registry.
     Tries to get it from the database first, falls back to in-memory data.
@@ -47,7 +48,7 @@ async def get_tech_registry():
 
 
 @router.get("/memory")
-async def get_tech_registry_from_memory():
+async def get_tech_registry_from_memory(current_user: Dict[str, Any] = Depends(get_current_user)):
     """
     Get the technology registry directly from memory (not database).
     """
@@ -55,7 +56,7 @@ async def get_tech_registry_from_memory():
 
 
 @router.get("/db")
-async def get_tech_registry_from_db_endpoint():
+async def get_tech_registry_from_db_endpoint(current_user: Dict[str, Any] = Depends(get_current_user)):
     """
     Get the technology registry from the database.
     """
@@ -72,13 +73,17 @@ async def get_tech_registry_from_db_endpoint():
 
 
 @router.get("/validate-tech")
-async def validate_technology(tech_name: str):
+async def validate_technology(
+    tech_name: str,
+    current_user: Dict[str, Any] = Depends(get_current_user)
+):
     """
     Validate if a technology name exists in the registry.
     Checks both database and in-memory data.
     
     Args:
         tech_name: Name of the technology to validate
+        current_user: The authenticated user
     """
     # Try to validate against database first
     database = get_db()
@@ -114,7 +119,8 @@ async def validate_technology(tech_name: str):
 @router.post("/validate-tech-stack")
 async def validate_tech_stack(
     tech_stack: Dict[str, Any],
-    template_tech_stack: Optional[Dict[str, Any]] = None
+    template_tech_stack: Optional[Dict[str, Any]] = None,
+    current_user: Dict[str, Any] = Depends(get_current_user)
 ):
     """
     Validate a project's tech stack against the registry and optional template.
@@ -123,19 +129,24 @@ async def validate_tech_stack(
     Args:
         tech_stack: The tech stack to validate
         template_tech_stack: Optional template tech stack to check compatibility with
+        current_user: The authenticated user
     """
     validation_result = validate_project_tech_stack(tech_stack, template_tech_stack)
     return validation_result
 
 
 @router.post("/get-suggestions")
-async def tech_suggestions(partial_tech_stack: Dict[str, Any]):
+async def tech_suggestions(
+    partial_tech_stack: Dict[str, Any],
+    current_user: Dict[str, Any] = Depends(get_current_user)
+):
     """
     Get technology suggestions based on a partial tech stack.
     Uses in-memory suggestion function as it already handles all the logic.
     
     Args:
         partial_tech_stack: The partially completed tech stack
+        current_user: The authenticated user
     """
     suggestions = get_tech_suggestions(partial_tech_stack)
     return {"suggestions": suggestions} 

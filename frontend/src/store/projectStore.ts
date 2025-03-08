@@ -6,9 +6,10 @@ import {
   ProjectUpdate as ProjectUpdateType,
   Requirement,
 } from "../types/project";
-import axios from "axios";
+import apiClient from "../api/apiClient";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+// We're now using apiClient which has the base URL configured already
+// const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 interface ProjectState {
   projects: Project[];
@@ -61,7 +62,7 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
   fetchProjects: async () => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.get(`${API_URL}/api/projects`);
+      const response = await apiClient.get(`/api/projects`);
       set({ projects: response.data, isLoading: false });
     } catch (error) {
       console.error("Failed to fetch projects:", error);
@@ -72,7 +73,7 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
   createProject: async (project) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.post(`${API_URL}/api/projects`, project);
+      const response = await apiClient.post(`/api/projects`, project);
       const newProject = response.data;
 
       set((state) => ({
@@ -91,7 +92,7 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
   selectProject: async (id) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.get(`${API_URL}/api/projects/${id}`);
+      const response = await apiClient.get(`/api/projects/${id}`);
       set({ currentProject: response.data, isLoading: false });
     } catch (error) {
       console.error("Failed to select project:", error);
@@ -102,7 +103,7 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
   updateProject: async (id, data) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.put(`${API_URL}/api/projects/${id}`, data);
+      const response = await apiClient.put(`/api/projects/${id}`, data);
       const updatedProject = response.data;
 
       set((state) => ({
@@ -122,7 +123,7 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
   deleteProject: async (id) => {
     set({ isLoading: true, error: null });
     try {
-      await axios.delete(`${API_URL}/api/projects/${id}`);
+      await apiClient.delete(`/api/projects/${id}`);
 
       set((state) => ({
         projects: state.projects.filter((p) => p.id !== id),
@@ -228,8 +229,8 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
   fetchSpecification: async (projectId) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.get(
-        `${API_URL}/api/projects/${projectId}/specification`
+      const response = await apiClient.get(
+        `/api/projects/${projectId}/specification`
       );
       set({ currentSpecification: response.data, isLoading: false });
     } catch (error) {
@@ -241,8 +242,8 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
   updateSpecification: async (projectId, data) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.put(
-        `${API_URL}/api/projects/${projectId}/specification`,
+      const response = await apiClient.put(
+        `/api/projects/${projectId}/specification`,
         data
       );
 
@@ -256,9 +257,7 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
   generateArtifacts: async (projectId) => {
     set({ isLoading: true, error: null });
     try {
-      await axios.post(
-        `${API_URL}/api/projects/${projectId}/generate-artifacts`
-      );
+      await apiClient.post(`/api/projects/${projectId}/generate-artifacts`);
       set({ isLoading: false });
     } catch (error) {
       console.error("Failed to generate artifacts:", error);

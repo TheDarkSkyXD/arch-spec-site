@@ -14,6 +14,7 @@ from ...db.base import db
 from ...schemas.specification import Specification, SpecificationCreate, SpecificationUpdate
 from ...schemas.artifact import Artifact
 from ...services.generator_service import GeneratorService
+from ...core.firebase_auth import get_current_user
 
 logger = logging.getLogger(__name__)
 
@@ -53,19 +54,30 @@ def get_db():
 
 
 @router.get("/projects/{project_id}/specification", response_model=Specification)
-async def get_specification(project_id: str, database: AsyncIOMotorDatabase = Depends(get_db)):
+async def get_specification(
+    project_id: str, 
+    database: AsyncIOMotorDatabase = Depends(get_db),
+    current_user: Dict[str, Any] = Depends(get_current_user)
+):
     """Get a project's specification.
     
     Args:
         project_id: The project ID.
         database: The database instance.
+        current_user: The authenticated user.
         
     Returns:
         The project's specification.
         
     Raises:
-        HTTPException: If the specification is not found.
+        HTTPException: If the specification is not found or doesn't belong to the user.
     """
+    # Check if project belongs to the user
+    user_id = str(current_user["_id"])
+    project = await database.projects.find_one({"id": project_id, "user_id": user_id})
+    if project is None:
+        raise HTTPException(status_code=404, detail="Project not found")
+    
     specification = await database.specifications.find_one({"project_id": project_id})
     if specification is None:
         raise HTTPException(status_code=404, detail="Specification not found")
@@ -76,7 +88,8 @@ async def get_specification(project_id: str, database: AsyncIOMotorDatabase = De
 async def create_or_update_specification(
     project_id: str,
     specification_data: SpecificationCreate,
-    database: AsyncIOMotorDatabase = Depends(get_db)
+    database: AsyncIOMotorDatabase = Depends(get_db),
+    current_user: Dict[str, Any] = Depends(get_current_user)
 ):
     """Create or update a project's specification.
     
@@ -84,15 +97,17 @@ async def create_or_update_specification(
         project_id: The project ID.
         specification_data: The specification data.
         database: The database instance.
+        current_user: The authenticated user.
         
     Returns:
         The created or updated specification.
         
     Raises:
-        HTTPException: If the project is not found.
+        HTTPException: If the project is not found or doesn't belong to the user.
     """
-    # Check if project exists
-    project = await database.projects.find_one({"id": project_id})
+    # Check if project exists and belongs to user
+    user_id = str(current_user["_id"])
+    project = await database.projects.find_one({"id": project_id, "user_id": user_id})
     if project is None:
         raise HTTPException(status_code=404, detail="Project not found")
     
@@ -132,19 +147,30 @@ async def create_or_update_specification(
 
 
 @router.post("/projects/{project_id}/specification/generate", response_model=List[Artifact])
-async def generate_artifacts(project_id: str, database: AsyncIOMotorDatabase = Depends(get_db)):
+async def generate_artifacts(
+    project_id: str, 
+    database: AsyncIOMotorDatabase = Depends(get_db),
+    current_user: Dict[str, Any] = Depends(get_current_user)
+):
     """Generate artifacts from a project's specification.
     
     Args:
         project_id: The project ID.
         database: The database instance.
+        current_user: The authenticated user.
         
     Returns:
         The generated artifacts.
         
     Raises:
-        HTTPException: If the specification is not found.
+        HTTPException: If the specification is not found or project doesn't belong to the user.
     """
+    # Check if project belongs to user
+    user_id = str(current_user["_id"])
+    project = await database.projects.find_one({"id": project_id, "user_id": user_id})
+    if project is None:
+        raise HTTPException(status_code=404, detail="Project not found")
+    
     # Get specification
     specification = await database.specifications.find_one({"project_id": project_id})
     if specification is None:

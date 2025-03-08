@@ -1,7 +1,7 @@
 /**
  * Service for interacting with project templates API.
  */
-import axios from "axios";
+import apiClient from "../api/apiClient";
 import { ProjectTemplate } from "../types";
 
 // Define interface for API response structure
@@ -13,8 +13,6 @@ interface TemplateResponse {
 interface TemplatesListResponse {
   templates: TemplateResponse[];
 }
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 /**
  * Check if a template has the minimum required structure
@@ -43,8 +41,8 @@ export const templatesService = {
    */
   async getTemplates(): Promise<ProjectTemplate[]> {
     try {
-      const response = await axios.get<TemplatesListResponse>(
-        `${API_URL}/api/templates`
+      const response = await apiClient.get<TemplatesListResponse>(
+        `/api/templates`
       );
 
       // Validate response structure
@@ -82,8 +80,8 @@ export const templatesService = {
    */
   async getTemplateById(id: string): Promise<ProjectTemplate | null> {
     try {
-      const response = await axios.get<TemplateResponse>(
-        `${API_URL}/api/templates/${id}`
+      const response = await apiClient.get<TemplateResponse>(
+        `/api/templates/${id}`
       );
 
       if (
@@ -121,8 +119,8 @@ export const templatesService = {
     templateData: Partial<ProjectTemplate>
   ): Promise<ProjectTemplate | null> {
     try {
-      const response = await axios.put<TemplateResponse>(
-        `${API_URL}/api/templates/${id}`,
+      const response = await apiClient.put<TemplateResponse>(
+        `/api/templates/${id}`,
         templateData
       );
 
