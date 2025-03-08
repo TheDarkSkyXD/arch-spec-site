@@ -15,11 +15,20 @@ export interface TechCategory {
 }
 
 export interface TechRegistry {
+  // Index signature to allow dynamic keys for categories
+  [category: string]:
+    | {
+        [subcategory: string]: string[];
+      }
+    | string[]
+    | string
+    | undefined;
+
+  // Special properties that should not be treated as categories
+  _id?: string;
   all_technologies?: string[];
-  categories: TechCategory[];
   last_updated?: string;
   version?: string;
-  [key: string]: unknown; // For any additional properties
 }
 
 export interface TechRegistryResponse {
@@ -33,6 +42,33 @@ export interface ValidationResult {
   message?: string;
 }
 
+export interface TechStackData {
+  [category: string]: {
+    [subcategory: string]: string[];
+  };
+}
+
+export interface TechStackValidationResult {
+  is_valid: boolean;
+  invalid_technologies?: {
+    section: string;
+    key: string;
+    technology: string;
+  }[];
+  message?: string;
+}
+
+export interface TechSuggestion {
+  category: string;
+  subcategory: string;
+  technologies: string[];
+  reason: string;
+}
+
+export interface TechSuggestionsResult {
+  suggestions: TechSuggestion[];
+}
+
 // Tech Registry API methods
 export const techRegistryApi = {
   // Get the complete tech registry
@@ -41,37 +77,47 @@ export const techRegistryApi = {
     return response.data;
   },
 
-  // Get categories
-  getCategories: async (): Promise<string[]> => {
-    const response = await axios.get(
-      `${API_BASE_URL}/tech-registry/categories`
-    );
-    return response.data.categories;
-  },
-
-  // Get technologies by category and optionally subcategory
-  getTechnologies: async (
-    category: string,
-    subcategory?: string
-  ): Promise<string[]> => {
-    let url = `${API_BASE_URL}/tech-registry/technologies?category=${encodeURIComponent(
-      category
-    )}`;
-    if (subcategory) {
-      url += `&subcategory=${encodeURIComponent(subcategory)}`;
-    }
-
-    const response = await axios.get(url);
-    return response.data.technologies;
-  },
-
-  // Validate if a technology exists in the registry
+  // Validate a single technology name
   validateTechnology: async (techName: string): Promise<ValidationResult> => {
     const response = await axios.get(
       `${API_BASE_URL}/tech-registry/validate-tech?tech_name=${encodeURIComponent(
         techName
       )}`
     );
+    return response.data;
+  },
+
+  // Validate an entire tech stack
+  validateTechStack: async (
+    techStack: TechStackData,
+    templateStack?: TechStackData
+  ): Promise<TechStackValidationResult> => {
+    const response = await axios.post(
+      `${API_BASE_URL}/tech-registry/validate-tech-stack`,
+      {
+        tech_stack: techStack,
+        template_tech_stack: templateStack || null,
+      }
+    );
+    return response.data;
+  },
+
+  // Get suggestions based on partial tech stack
+  getTechSuggestions: async (
+    partialTechStack: TechStackData
+  ): Promise<TechSuggestionsResult> => {
+    const response = await axios.post(
+      `${API_BASE_URL}/tech-registry/get-suggestions`,
+      {
+        ...partialTechStack,
+      }
+    );
+    return response.data;
+  },
+
+  // Refresh the tech registry from the source
+  refreshTechRegistry: async (): Promise<TechRegistryResponse> => {
+    const response = await axios.post(`${API_BASE_URL}/tech-registry/refresh`);
     return response.data;
   },
 };

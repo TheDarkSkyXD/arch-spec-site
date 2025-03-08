@@ -1,90 +1,95 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { TechRegistry } from "../../api/techRegistryApi";
 import {
   useTechRegistry,
   useRefreshTechRegistry,
+  useTechCategories,
+  useTechnologies,
+  useTechSubcategories,
 } from "../../hooks/useDataQueries";
 
 const TechRegistryView: React.FC = () => {
   // Use React Query for data fetching and caching
   const { data: response, isLoading, error: queryError } = useTechRegistry();
+  const { data: categoriesData } = useTechCategories();
   const { refreshTechRegistry } = useRefreshTechRegistry();
+
+  // Get subcategories when a category is selected
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string>("");
+  const { data: subcategoriesData } = useTechSubcategories(selectedCategory);
+
+  // Get technologies based on category/subcategory selection
+  const { data: technologiesData } = useTechnologies(
+    selectedCategory,
+    selectedSubcategory
+  );
 
   const [registryData, setRegistryData] = useState<TechRegistry | null>(null);
   const [source, setSource] = useState<string>("unknown");
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("");
-  const [filteredTechnologies, setFilteredTechnologies] = useState<string[]>(
-    []
-  );
+  const [filteredTechnologies, setFilteredTechnologies] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState("browse");
 
-  // Update component state when data is fetched
+  // Process and prepare data when response is received
   useEffect(() => {
     if (response) {
       setRegistryData(response.data);
       setSource(response.source || "unknown");
       setError(null);
+    } else if (queryError) {
+      setError("Failed to load tech registry data");
+      setRegistryData(null);
     }
-  }, [response]);
+  }, [response, queryError]);
 
-  // Set error if query fails
+  // Use effect to filter technologies based on search query and selection
   useEffect(() => {
-    if (queryError) {
-      console.error("Failed to fetch registry data:", queryError);
-      setError("Failed to load tech registry. Please try again later.");
+    if (!registryData) {
+      setFilteredTechnologies([]);
+      return;
     }
-  }, [queryError]);
 
-  // Filter technologies when search query or selected category changes
-  useEffect(() => {
-    if (!registryData) return;
-
-    try {
-      let technologies: string[] = [];
-
-      // If all_technologies exists, use it for filtering
-      if (registryData.all_technologies) {
-        technologies = [...registryData.all_technologies];
-      } else {
-        // Otherwise, build the list from categories and subcategories
-        registryData.categories.forEach((category) => {
-          category.subcategories.forEach((subcategory) => {
-            technologies = [...technologies, ...subcategory.technologies];
-          });
-        });
-      }
-
-      // Filter by category if one is selected
-      if (selectedCategory) {
-        const category = registryData.categories.find(
-          (c) => c.name === selectedCategory
-        );
-        if (category) {
-          technologies = [];
-          category.subcategories.forEach((subcategory) => {
-            technologies = [...technologies, ...subcategory.technologies];
+    // If no category is selected or "All Categories" is selected, show all technologies
+    let techsToFilter: string[] = [];
+    
+    if (!selectedCategory && registryData.all_technologies) {
+      // Use all_technologies if available
+      techsToFilter = registryData.all_technologies;
+    } else if (!selectedCategory) {
+      // Otherwise collect all technologies from all categories
+      techsToFilter = [];
+      Object.entries(registryData).forEach(([category, subcategories]) => {
+        // Skip special properties
+        if (["_id", "all_technologies", "last_updated", "version"].includes(category)) {
+          return;
+        }
+        
+        // Only process objects (categories with subcategories)
+        if (typeof subcategories === "object" && subcategories !== null && !Array.isArray(subcategories)) {
+          Object.values(subcategories).forEach(techs => {
+            if (Array.isArray(techs)) {
+              techsToFilter.push(...techs);
+            }
           });
         }
-      }
-
-      // Filter by search query
-      if (searchQuery) {
-        technologies = technologies.filter((tech) =>
-          tech.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-      }
-
-      // Remove duplicates and sort
-      setFilteredTechnologies([...new Set(technologies)].sort());
-    } catch (err) {
-      console.error("Error processing tech registry data:", err);
-      setError(
-        "Error processing registry data. The data format may be unexpected."
-      );
+      });
+    } else if (technologiesData) {
+      // Use the data from our hook if a category is selected
+      techsToFilter = technologiesData;
     }
-  }, [registryData, searchQuery, selectedCategory]);
+
+    // Filter technologies based on search query if provided
+    if (searchQuery) {
+      const filtered = techsToFilter.filter((tech) =>
+        tech.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredTechnologies(filtered);
+    } else {
+      setFilteredTechnologies(techsToFilter);
+    }
+  }, [searchQuery, technologiesData, selectedCategory, registryData]);
 
   const handleRefresh = () => {
     // Use React Query's invalidation to refresh data
@@ -110,27 +115,145 @@ const TechRegistryView: React.FC = () => {
     }
   };
 
-  // Simple category selector
-  const renderCategorySelector = () => {
-    if (!registryData || !registryData.categories) return null;
+  // Create techInfoMap at the component level, not inside render function
+  const techInfoMap = useMemo(() => {
+    if (!response?.data)
+      return new Map<string, { category: string; subcategory: string }>();
+
+    const infoMap = new Map<
+      string,
+      { category: string; subcategory: string }
+    >();
+    Object.entries(response.data).forEach(([category, subcategories]) => {
+      // Skip if this is not a category object with subcategories
+      if (
+        typeof subcategories !== "object" ||
+        subcategories === null ||
+        Array.isArray(subcategories)
+      )
+        return;
+
+      // Skip special properties
+      if (
+        ["_id", "all_technologies", "last_updated", "version"].includes(
+          category
+        )
+      )
+        return;
+
+      Object.entries(subcategories as Record<string, unknown>).forEach(
+        ([subcategory, techs]) => {
+          // Skip if not an array of technologies
+          if (!Array.isArray(techs)) return;
+
+          techs.forEach((tech: string) => {
+            infoMap.set(tech, { category, subcategory });
+          });
+        }
+      );
+    });
+
+    return infoMap;
+  }, [response?.data]);
+
+  // Enhanced category and subcategory selectors
+  const renderFilters = () => {
+    if (!response?.data) return null;
 
     return (
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Filter by Category
-        </label>
-        <select
-          value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
-          className="block w-full max-w-xs px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-        >
-          <option value="">All Categories</option>
-          {registryData.categories.map((category) => (
-            <option key={category.name} value={category.name}>
-              {category.name}
-            </option>
-          ))}
-        </select>
+      <div className="mb-6 bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
+        <h3 className="text-base font-medium text-gray-700 mb-3">
+          Filter Technologies
+        </h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Search input */}
+          <div>
+            <label className="block text-sm font-medium text-gray-600 mb-1">
+              Search
+            </label>
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Enter technology name..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="block w-full pl-9 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              />
+              <svg
+                className="absolute left-3 top-2.5 h-4 w-4 text-gray-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+            </div>
+          </div>
+
+          {/* Category selector */}
+          <div>
+            <label className="block text-sm font-medium text-gray-600 mb-1">
+              Category
+            </label>
+            <select
+              value={selectedCategory}
+              onChange={(e) => {
+                setSelectedCategory(e.target.value);
+                setSelectedSubcategory("");
+              }}
+              className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            >
+              <option value="">All Categories</option>
+              {categoriesData &&
+                categoriesData.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+            </select>
+          </div>
+
+          {/* Subcategory selector */}
+          <div>
+            <label className="block text-sm font-medium text-gray-600 mb-1">
+              Subcategory
+            </label>
+            <select
+              value={selectedSubcategory}
+              onChange={(e) => setSelectedSubcategory(e.target.value)}
+              disabled={!selectedCategory}
+              className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed"
+            >
+              <option value="">All Subcategories</option>
+              {subcategoriesData &&
+                subcategoriesData.map((subcategory) => (
+                  <option key={subcategory} value={subcategory}>
+                    {subcategory}
+                  </option>
+                ))}
+            </select>
+          </div>
+
+          {/* Reset button */}
+          <div className="flex items-end">
+            <button
+              onClick={() => {
+                setSearchQuery("");
+                setSelectedCategory("");
+                setSelectedSubcategory("");
+              }}
+              className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-4 rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition"
+            >
+              Reset Filters
+            </button>
+          </div>
+        </div>
       </div>
     );
   };
@@ -161,72 +284,182 @@ const TechRegistryView: React.FC = () => {
     );
   };
 
-  // Render technologies in a grid
-  const renderTechnologiesGrid = () => {
-    if (filteredTechnologies.length === 0) {
+  // Render technologies in a grid or list layout
+  const renderTechnologiesView = () => {
+    if (isLoading) {
+      return <div className="text-center py-8">Loading technologies...</div>;
+    }
+
+    if (error) {
       return (
-        <div className="p-6 text-center text-gray-500 border rounded-md">
-          No technologies found matching your criteria.
+        <div className="text-center py-8 text-red-600">
+          Error loading technologies: {error}
         </div>
       );
     }
 
+    if (!filteredTechnologies || filteredTechnologies.length === 0) {
+      return (
+        <div className="text-center py-8 text-gray-600">
+          No technologies found matching your criteria. Try adjusting your
+          filters.
+        </div>
+      );
+    }
+
+    // Handler for clicking on category/subcategory labels
+    const handleCategoryClick = (category: string) => {
+      setSelectedCategory(category);
+      setSelectedSubcategory(""); // Reset subcategory when changing category
+      setActiveTab("browse"); // Ensure we're on browse tab
+    };
+
+    const handleSubcategoryClick = (category: string, subcategory: string) => {
+      setSelectedCategory(category);
+      setSelectedSubcategory(subcategory);
+      setActiveTab("browse"); // Ensure we're on browse tab
+    };
+
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-        {filteredTechnologies.map((tech) => (
-          <div
-            key={tech}
-            className="p-3 border rounded-md bg-gray-50 hover:bg-gray-100"
-          >
-            {tech}
-          </div>
-        ))}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        {filteredTechnologies.map((tech) => {
+          const techInfo = techInfoMap.get(tech);
+          return (
+            <div
+              key={tech}
+              className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow flex flex-col items-center text-center"
+            >
+              <div className="font-medium text-gray-900 mb-1">{tech}</div>
+              {techInfo?.category ? (
+                <button
+                  onClick={() => handleCategoryClick(techInfo.category)}
+                  className="text-xs text-gray-500 hover:text-indigo-600 hover:underline transition-colors"
+                  aria-label={`Filter by category: ${techInfo.category}`}
+                  title={`Filter by category: ${techInfo.category}`}
+                >
+                  {techInfo.category}
+                </button>
+              ) : (
+                <div className="text-xs text-gray-500">
+                  {selectedCategory || "Unknown"}
+                </div>
+              )}
+              {techInfo?.subcategory ? (
+                <button
+                  onClick={() => handleSubcategoryClick(techInfo.category, techInfo.subcategory)}
+                  className="text-xs text-indigo-500 hover:text-indigo-700 hover:underline transition-colors mt-0.5"
+                  aria-label={`Filter by subcategory: ${techInfo.subcategory}`}
+                  title={`Filter by subcategory: ${techInfo.subcategory}`}
+                >
+                  {techInfo.subcategory}
+                </button>
+              ) : (
+                <div className="text-xs text-indigo-500 mt-0.5">
+                  {selectedSubcategory || "General"}
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
     );
   };
 
-  // JSON view tab - Enhanced with better styling
+  // Render JSON view with syntax highlighting
   const renderJsonView = () => {
-    if (!registryData) return null;
+    if (!registryData) {
+      return (
+        <div className="text-center py-8 text-gray-600">
+          No registry data available
+        </div>
+      );
+    }
+
+    // Format JSON with indentation
+    const formattedJson = JSON.stringify(registryData, null, 2);
 
     return (
-      <div className="bg-white border rounded-md shadow-sm">
-        <div className="p-4 border-b bg-gray-50 flex justify-between items-center">
-          <h3 className="font-medium">Tech Registry - JSON Data</h3>
-          <span className="text-xs text-gray-500">Source: {source}</span>
-        </div>
-        <div className="overflow-auto p-0 max-h-[600px]">
-          <pre
-            className="text-xs text-left p-4 m-0 font-mono whitespace-pre overflow-x-auto"
-            style={{
-              backgroundColor: "#f8f9fa",
-              color: "#333",
-              tabSize: 2,
-            }}
+      <div className="relative">
+        <div className="mb-4 flex justify-between items-center">
+          <div className="text-sm text-gray-500">
+            Source: <span className="font-mono text-gray-700">{source}</span>
+          </div>
+          <button
+            onClick={handleDownloadJson}
+            className="px-3 py-1 text-sm text-indigo-600 border border-indigo-200 rounded-md hover:bg-indigo-50 flex items-center"
           >
-            {JSON.stringify(registryData, null, 2)}
-          </pre>
+            <svg
+              className="w-4 h-4 mr-1"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+              />
+            </svg>
+            Download JSON
+          </button>
         </div>
+
+        <pre className="bg-gray-50 p-4 border rounded-md overflow-auto max-h-[600px] text-sm">
+          <code>{formattedJson}</code>
+        </pre>
       </div>
     );
   };
 
-  // Metadata tab - Improved styling
+  // Render metadata and stats about the tech registry
   const renderMetadataView = () => {
-    if (!registryData) return null;
+    if (!registryData) {
+      return (
+        <div className="text-center py-8 text-gray-600">
+          No registry data available
+        </div>
+      );
+    }
 
     // Calculate total technologies by category
     const techCountsByCategory: Record<string, number> = {};
-    registryData.categories.forEach((category) => {
-      techCountsByCategory[category.name] = category.subcategories.reduce(
-        (sum, subcat) => sum + subcat.technologies.length,
-        0
-      );
+    const specialProperties = [
+      "_id",
+      "all_technologies",
+      "last_updated",
+      "version",
+    ];
+
+    Object.entries(registryData).forEach(([category, data]) => {
+      // Skip special properties
+      if (specialProperties.includes(category)) return;
+
+      if (typeof data === "object" && !Array.isArray(data) && data !== null) {
+        let count = 0;
+        Object.values(data).forEach((techs) => {
+          if (Array.isArray(techs)) {
+            count += techs.length;
+          }
+        });
+        techCountsByCategory[category] = count;
+      }
     });
 
     const totalTechs =
       registryData.all_technologies?.length ||
       Object.values(techCountsByCategory).reduce((a, b) => a + b, 0);
+
+    // Count subcategories
+    let totalSubcategories = 0;
+    Object.entries(registryData).forEach(([category, data]) => {
+      // Skip special properties
+      if (specialProperties.includes(category)) return;
+
+      if (typeof data === "object" && !Array.isArray(data) && data !== null) {
+        totalSubcategories += Object.keys(data).length;
+      }
+    });
 
     return (
       <div className="space-y-6">
@@ -245,117 +478,147 @@ const TechRegistryView: React.FC = () => {
               <div className="text-xs uppercase tracking-wider text-gray-500 font-semibold">
                 Data Source
               </div>
-              <div className="mt-1 text-2xl font-semibold text-indigo-600">
+              <div className="mt-1 text-xl font-semibold text-indigo-600">
                 {source}
               </div>
             </div>
+
             <div className="p-5 text-center">
               <div className="text-xs uppercase tracking-wider text-gray-500 font-semibold">
-                Version
+                Categories
               </div>
-              <div className="mt-1 text-2xl font-semibold text-indigo-600">
-                {registryData.version || "N/A"}
+              <div className="mt-1 text-xl font-semibold text-indigo-600">
+                {Object.keys(techCountsByCategory).length}
               </div>
             </div>
+
             <div className="p-5 text-center">
               <div className="text-xs uppercase tracking-wider text-gray-500 font-semibold">
-                Total Technologies
+                Subcategories
               </div>
-              <div className="mt-1 text-2xl font-semibold text-indigo-600">
+              <div className="mt-1 text-xl font-semibold text-indigo-600">
+                {totalSubcategories}
+              </div>
+            </div>
+
+            <div className="p-5 text-center">
+              <div className="text-xs uppercase tracking-wider text-gray-500 font-semibold">
+                Technologies
+              </div>
+              <div className="mt-1 text-xl font-semibold text-indigo-600">
                 {totalTechs}
-              </div>
-            </div>
-            <div className="p-5 text-center">
-              <div className="text-xs uppercase tracking-wider text-gray-500 font-semibold">
-                Last Updated
-              </div>
-              <div className="mt-1 text-sm font-medium text-gray-800">
-                {registryData.last_updated
-                  ? new Date(registryData.last_updated).toLocaleString()
-                  : "Unknown"}
               </div>
             </div>
           </div>
         </div>
 
-        {/* Categories breakdown */}
-        <div className="bg-white border rounded-md shadow-sm">
+        {/* Category breakdown */}
+        <div className="bg-white border rounded-md shadow-sm overflow-hidden">
           <div className="bg-gray-50 p-4 border-b">
             <h3 className="text-lg font-medium">Categories Breakdown</h3>
             <p className="text-sm text-gray-500 mt-1">
-              Technologies organized by categories and subcategories
+              Distribution of technologies across categories
             </p>
           </div>
 
           <div className="divide-y">
-            {registryData.categories.map((category) => (
-              <div key={category.name} className="p-4">
+            {Object.entries(techCountsByCategory).map(([category, count]) => (
+              <div key={category} className="p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-medium text-gray-800">{category.name}</h4>
-                  <span className="px-2 py-1 text-xs rounded-full bg-indigo-50 text-indigo-700">
-                    {techCountsByCategory[category.name]} technologies
+                  <h4 className="font-medium text-gray-800">{category}</h4>
+                  <span className="text-sm text-gray-600">
+                    {count} technologies
                   </span>
                 </div>
-
-                <div className="ml-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 mt-3">
-                  {category.subcategories.map((subcat) => (
-                    <div
-                      key={subcat.name}
-                      className="bg-gray-50 p-3 rounded-md border border-gray-100"
-                    >
-                      <div className="flex justify-between items-center">
-                        <span className="font-medium text-sm">
-                          {subcat.name}
-                        </span>
-                        <span className="text-xs text-gray-500">
-                          {subcat.technologies.length}
-                        </span>
-                      </div>
-                      {subcat.technologies.length <= 3 && (
-                        <div className="mt-2 text-xs text-gray-600">
-                          {subcat.technologies.join(", ")}
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className="bg-indigo-500 h-2 rounded-full"
+                    style={{
+                      width: `${(count / totalTechs) * 100}%`,
+                    }}
+                  ></div>
                 </div>
               </div>
             ))}
           </div>
-        </div>
-
-        <div className="text-xs text-gray-500 text-center">
-          Tech registry data is automatically synchronized between code and
-          database
         </div>
       </div>
     );
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold">Tech Registry</h2>
+    <div className="bg-gray-50 rounded-lg shadow-sm border border-slate-200 p-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
+        <div>
+          <h2 className="text-xl font-semibold text-gray-800">Tech Registry</h2>
+          <p className="text-sm text-gray-600 mt-1">
+            Browse and filter available technologies in the registry
+          </p>
+        </div>
         <div className="flex gap-2">
           <button
             onClick={handleRefresh}
-            className="px-4 py-2 text-sm border rounded-md bg-white hover:bg-gray-50"
+            className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-md bg-white border border-gray-300 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
           >
+            <svg
+              className="w-4 h-4 mr-2"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+              />
+            </svg>
             Refresh
           </button>
           <button
             onClick={handleDownloadJson}
             disabled={!registryData}
-            className="px-4 py-2 text-sm border rounded-md bg-white hover:bg-gray-50 disabled:opacity-50"
+            className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-md bg-white border border-gray-300 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
+            <svg
+              className="w-4 h-4 mr-2"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+              />
+            </svg>
             Export JSON
           </button>
         </div>
       </div>
 
       {error && (
-        <div className="p-4 mb-6 bg-red-50 text-red-800 rounded-md border border-red-200">
-          {error}
+        <div className="p-4 mb-6 bg-red-50 text-red-800 rounded-md border border-red-200 flex items-start">
+          <svg
+            className="h-5 w-5 text-red-400 mr-2 mt-0.5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          <div>
+            <p className="font-medium">{error}</p>
+            <p className="text-sm mt-1">
+              Try refreshing the page or contact an administrator.
+            </p>
+          </div>
         </div>
       )}
 
@@ -377,28 +640,8 @@ const TechRegistryView: React.FC = () => {
 
           {activeTab === "browse" && (
             <div>
-              {/* Search input */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Search Technologies
-                </label>
-                <input
-                  type="text"
-                  placeholder="Enter technology name..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                />
-              </div>
-
-              {renderCategorySelector()}
-
-              <div className="mt-4">
-                <div className="mb-2 text-sm text-gray-500">
-                  Showing {filteredTechnologies.length} technologies
-                </div>
-                {renderTechnologiesGrid()}
-              </div>
+              {renderFilters()}
+              {renderTechnologiesView()}
             </div>
           )}
 
