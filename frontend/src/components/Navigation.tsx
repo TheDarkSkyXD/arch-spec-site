@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { useAuth } from '../contexts';
-import UserAccountDropdown from './UserAccountDropdown';
+import { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { useAuth } from "../contexts";
+import UserAccountDropdown from "./UserAccountDropdown";
 
 const Navigation = () => {
   const { currentUser } = useAuth();
@@ -11,9 +11,9 @@ const Navigation = () => {
   const isActive = (path: string) => location.pathname === path;
 
   const navItems = [
-    { name: 'Dashboard', path: '/' },
-    { name: 'Projects', path: '/projects' },
-    { name: 'Templates', path: '/templates' },
+    { name: "Dashboard", path: "/" },
+    { name: "Projects", path: "/projects" },
+    { name: "Templates", path: "/templates" },
   ];
 
   return (
@@ -22,8 +22,12 @@ const Navigation = () => {
         <div className="flex justify-between h-16">
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
-              <Link to="/" className="text-xl font-bold text-primary-600 dark:text-primary-400">
-                ArchSpec
+              <Link to="/" className="flex items-center">
+                <img
+                  src="/assets/images/arch-spec-logo-horizontal.png"
+                  alt="ArchSpec Logo"
+                  className="h-8 w-auto"
+                />
               </Link>
             </div>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
@@ -31,10 +35,11 @@ const Navigation = () => {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${isActive(item.path)
-                    ? 'border-primary-500 text-slate-900 dark:text-white'
-                    : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700 dark:text-slate-300 dark:hover:text-white'
-                    }`}
+                  className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
+                    isActive(item.path)
+                      ? "border-primary-500 text-slate-900 dark:text-white"
+                      : "border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700 dark:text-slate-300 dark:hover:text-white"
+                  }`}
                 >
                   {item.name}
                 </Link>
@@ -115,17 +120,18 @@ const Navigation = () => {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${isActive(item.path)
-                  ? 'bg-primary-50 border-primary-500 text-primary-700 dark:bg-slate-700 dark:border-primary-400 dark:text-primary-400'
-                  : 'border-transparent text-slate-600 hover:bg-slate-50 hover:border-slate-300 hover:text-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white'
-                  }`}
+                className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${
+                  isActive(item.path)
+                    ? "bg-primary-50 border-primary-500 text-primary-700 dark:bg-slate-700 dark:border-primary-400 dark:text-primary-400"
+                    : "border-transparent text-slate-600 hover:bg-slate-50 hover:border-slate-300 hover:text-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
+                }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 {item.name}
               </Link>
             ))}
           </div>
-          
+
           {currentUser ? (
             <div className="pt-4 pb-3 border-t border-slate-200 dark:border-slate-700">
               <div className="flex items-center px-4">
@@ -142,15 +148,15 @@ const Navigation = () => {
                         {currentUser.displayName
                           ? currentUser.displayName.charAt(0).toUpperCase()
                           : currentUser.email
-                            ? currentUser.email.charAt(0).toUpperCase()
-                            : 'U'}
+                          ? currentUser.email.charAt(0).toUpperCase()
+                          : "U"}
                       </span>
                     )}
                   </div>
                 </div>
                 <div className="ml-3">
                   <div className="text-base font-medium text-slate-800 dark:text-white">
-                    {currentUser.displayName || 'User'}
+                    {currentUser.displayName || "User"}
                   </div>
                   <div className="text-sm font-medium text-slate-500 dark:text-slate-400">
                     {currentUser.email}
@@ -183,7 +189,9 @@ const Navigation = () => {
                   onClick={() => {
                     setMobileMenuOpen(false);
                     // Call signOut function from the UserAccountDropdown
-                    const dropdown = document.querySelector('[aria-expanded="true"]');
+                    const dropdown = document.querySelector(
+                      '[aria-expanded="true"]'
+                    );
                     if (dropdown) {
                       (dropdown as HTMLElement).click();
                     }

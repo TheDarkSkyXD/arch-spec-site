@@ -1,6 +1,5 @@
 import { ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { FileCode } from "lucide-react";
 
 interface AuthLayoutProps {
   children: ReactNode;
@@ -14,13 +13,12 @@ const AuthLayout = ({ children }: AuthLayoutProps) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
-              <Link to="/" className="flex items-center gap-2">
-                <div className="bg-primary-600 text-white p-1.5 rounded-md">
-                  <FileCode size={20} />
-                </div>
-                <span className="font-heading font-bold tracking-tight text-slate-800 dark:text-white text-xl">
-                  ArchSpec
-                </span>
+              <Link to="/" className="flex items-center">
+                <img
+                  src="/assets/images/arch-spec-logo.png"
+                  alt="ArchSpec Logo"
+                  className="h-10 w-auto"
+                />
               </Link>
             </div>
           </div>
@@ -28,9 +26,7 @@ const AuthLayout = ({ children }: AuthLayoutProps) => {
       </div>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col justify-center">
-        {children}
-      </div>
+      <div className="flex-1 flex flex-col justify-center">{children}</div>
 
       {/* Footer */}
       <footer className="bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 py-6">

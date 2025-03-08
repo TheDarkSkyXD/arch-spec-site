@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="frontend/public/assets/images/arch-spec-logo-horizontal.png" alt="ArchSpec Logo" width="500"/>
+</p>
+
 # ArchSpec
 
 ArchSpec is an AI-powered software specification system that transforms the software development process by creating comprehensive, implementation-ready specifications before any code is written.
