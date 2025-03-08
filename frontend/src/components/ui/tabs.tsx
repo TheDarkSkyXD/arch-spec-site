@@ -102,7 +102,7 @@ export const TabsTrigger: React.FC<TabsTriggerProps> = ({
       className={`px-4 py-2 text-sm font-medium transition-all border-b-2 -mb-px ${
         isActive
           ? "border-primary-600 text-primary-600"
-          : "border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300"
+          : "border-transparent text-slate-600 hover:text-primary-500 hover:border-primary-300 dark:hover:text-primary-400 dark:hover:border-primary-400"
       } ${className}`}
       onClick={handleClick}
     >
