@@ -3,8 +3,9 @@ import "./App.css";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { queryClient } from "./lib/query-client";
-import { AuthProvider } from "./contexts/AuthContext";
+import { AuthProvider } from "./contexts/AuthContextProvider";
 import { ThemeProvider } from "./contexts/ThemeContextProvider";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
       <ThemeProvider>
         <AuthProvider>
           <Router />
+          <Toaster position="top-right" />
           {import.meta.env.MODE !== "production" && (
             <ReactQueryDevtools initialIsOpen={false} />
           )}

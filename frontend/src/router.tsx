@@ -4,6 +4,9 @@ import NewProject from "./pages/NewProject";
 import Projects from "./pages/Projects";
 import Templates from "./pages/Templates";
 import Settings from "./pages/Settings";
+import Profile from "./pages/Profile";
+import UserSettings from "./pages/UserSettings";
+import SecuritySettings from "./pages/SecuritySettings";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 // Auth pages
@@ -69,6 +72,30 @@ const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <Settings />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/profile",
+    element: (
+      <ProtectedRoute>
+        <Profile />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/user-settings",
+    element: (
+      <ProtectedRoute>
+        <UserSettings />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/security-settings",
+    element: (
+      <ProtectedRoute>
+        <SecuritySettings />
       </ProtectedRoute>
     ),
   },
