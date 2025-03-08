@@ -198,6 +198,7 @@ export interface ProjectTemplate {
 }
 
 export interface ProjectCreate {
+  metadata?: { version: string; author: string; template?: { name: string; version: string; }; };
   name: string;
   description: string;
   template_type: string;

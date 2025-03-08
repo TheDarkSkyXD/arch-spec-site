@@ -1,19 +1,19 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContextDefinition";
 import { useProjectStore } from "../store/projectStore";
-import { templatesService } from "../services/templatesService";
-import { ProjectTemplate, ProjectCreate } from "../types/project";
+import { ProjectCreate } from "../types/project";
 import {
-  ProjectWizardFormData,
-  BasicsFormData,
-  TechStackFormData,
-  RequirementsFormData,
-  FeaturesFormData,
-  PagesFormData,
-  ApiEndpointsFormData
-} from "../components/project/ProjectWizardTypes";
+  ProjectWizardFormData} from "../components/project/ProjectWizardTypes";
 import { projectWizardSteps } from "../components/project/ProjectWizardSteps";
+import { useProjectTemplateSection } from "./wizard/useProjectTemplateSection";
+import { useProjectBasicsSection } from "./wizard/useProjectBasicsSection";
+import { useApiEndpointsSection } from "./wizard/useApiEndpointsSection";
+import { useFeaturesSection } from "./wizard/useFeaturesSection";
+import { usePagesSection } from "./wizard/usePagesSection";
+import { useRequirementsSection } from "./wizard/useRequirementsSection";
+import { useTechStackSection } from "./wizard/useTechStackSection";
+
 
 export function useProjectWizard() {
   const navigate = useNavigate();
@@ -23,8 +23,6 @@ export function useProjectWizard() {
   const { createProject } = useProjectStore();
 
   const [currentStep, setCurrentStep] = useState("template");
-  const [selectedTemplate, setSelectedTemplate] = useState<ProjectTemplate | null>(null);
-  const [isBlankProject, setIsBlankProject] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<ProjectWizardFormData>({
@@ -40,252 +38,51 @@ export function useProjectWizard() {
     non_functional_requirements: [],
   });
 
-  // Load template from API if templateId is provided
-  useEffect(() => {
-    const loadTemplateFromApi = async () => {
-      if (templateId) {
-        try {
-          setLoading(true);
-          setError(null);
-          console.log(`Attempting to load template with ID: ${templateId}`);
+  // Initialize section hooks
+  const templateSection = useProjectTemplateSection({
+    templateId,
+    formData,
+    setFormData,
+    setCurrentStep,
+    setLoading,
+    setError
+  });
 
-          const template = await templatesService.getTemplateById(templateId);
+  const basicsSection = useProjectBasicsSection({
+    formData,
+    setFormData,
+    setCurrentStep
+  });
 
-          if (template) {
-            console.log(`Successfully loaded template: ${template.name} (${template.version})`);
-            setSelectedTemplate(template);
-          } else {
-            console.error(`Template with ID ${templateId} not found in API response`);
-            setError(`Template with ID ${templateId} not found. Please try browsing all templates.`);
-          }
-        } catch (err) {
-          console.error("Error loading template:", err);
-          setError("Failed to load the selected template. Please try again later.");
-        } finally {
-          setLoading(false);
-        }
-      }
-    };
+  const techStackSection = useTechStackSection({
+    formData,
+    setFormData,
+    setCurrentStep
+  });
 
-    loadTemplateFromApi();
-  }, [templateId]);
+  const requirementsSection = useRequirementsSection({
+    formData,
+    setFormData,
+    setCurrentStep
+  });
 
-  // When a template is selected, update form data
-  useEffect(() => {
-    if (selectedTemplate) {
-      // Prepare empty defaults in case fields don't exist
-      const emptyFeatures = { core_modules: [] };
-      const emptyPages = { public: [], authenticated: [], admin: [] };
-      const emptyApi = { endpoints: [] };
+  const featuresSection = useFeaturesSection({
+    formData,
+    setFormData,
+    setCurrentStep
+  });
 
-      // Parse business goals and target users into arrays if they're provided as strings
-      const parseStringToArray = (value: string | string[] | undefined): string[] => {
-        if (!value) return [];
-        if (Array.isArray(value)) return value;
-        return value
-          .split(",")
-          .map((item) => item.trim())
-          .filter(Boolean);
-      };
+  const pagesSection = usePagesSection({
+    formData,
+    setFormData,
+    setCurrentStep
+  });
 
-      // Extract values from project defaults
-      const businessGoals = selectedTemplate.project_defaults?.business_goals || [];
-      const targetUsers = selectedTemplate.project_defaults?.target_users || [];
-
-      // Update form data with template values
-      setFormData({
-        name: selectedTemplate.project_defaults?.name || "",
-        description: selectedTemplate.project_defaults?.description || "",
-        template_type: selectedTemplate.name || "web_app",
-        business_goals: parseStringToArray(businessGoals),
-        target_users: parseStringToArray(targetUsers),
-        functional_requirements: [],
-        non_functional_requirements: [],
-        template_id: templateId || undefined,
-        template_data: {
-          ...selectedTemplate,
-          features: selectedTemplate.features || emptyFeatures,
-          pages: selectedTemplate.pages || emptyPages,
-          api: selectedTemplate.api || emptyApi,
-        },
-      });
-    }
-  }, [selectedTemplate, templateId]);
-
-  const handleTemplateSelect = (template: ProjectTemplate | null) => {
-    setSelectedTemplate(template);
-    if (template) {
-      setIsBlankProject(false);
-      // After selecting a template, automatically move to the next step
-      setCurrentStep("basics");
-    }
-  };
-
-  const handleBlankProjectSelect = () => {
-    setSelectedTemplate(null);
-    setIsBlankProject(true);
-
-    // Initialize with empty defaults for a blank project
-    setFormData({
-      name: "",
-      description: "",
-      template_type: "custom",
-      business_goals: [],
-      target_users: [],
-      domain: "",
-      organization: "",
-      project_lead: "",
-      functional_requirements: [],
-      non_functional_requirements: [],
-      template_id: undefined,
-      template_data: {
-        id: "blank",
-        name: "Custom Project",
-        description: "A custom project created from scratch",
-        version: "1.0.0",
-        project_defaults: {
-          name: "",
-          description: "",
-          business_goals: [],
-          target_users: [],
-        },
-        tech_stack: {
-          frontend: "",
-          backend: "",
-          database: "",
-        },
-        features: {
-          core_modules: [],
-        },
-        pages: {
-          public: [],
-          authenticated: [],
-          admin: [],
-        },
-        api: {
-          endpoints: [],
-        },
-      },
-    });
-
-    // Move to the basics step
-    setCurrentStep("basics");
-  };
-
-  const handleBasicsSubmit = (data: BasicsFormData) => {
-    const businessGoals =
-      typeof data.business_goals === "string"
-        ? data.business_goals
-            .split(",")
-            .map((g) => g.trim())
-            .filter(Boolean)
-        : (data.business_goals as string[]) || [];
-
-    const targetUsers =
-      typeof data.target_users === "string"
-        ? data.target_users
-            .split(",")
-            .map((u) => u.trim())
-            .filter(Boolean)
-        : (data.target_users as string[]) || [];
-
-    setFormData((prev) => ({
-      ...prev,
-      name: data.name,
-      description: data.description,
-      domain: data.domain,
-      organization: data.organization,
-      project_lead: data.project_lead,
-      business_goals: businessGoals,
-      target_users: targetUsers,
-    }));
-
-    setCurrentStep("tech-stack");
-  };
-
-  const handleTechStackSubmit = (data: TechStackFormData) => {
-    // Update the tech stack in the template_data
-    if (formData.template_data) {
-      setFormData((prev) => ({
-        ...prev,
-        template_data: {
-          ...prev.template_data!,
-          tech_stack: {
-            ...prev.template_data!.tech_stack,
-            frontend: data.frontend,
-            backend: data.backend,
-            database: data.database,
-          },
-        },
-      }));
-    }
-
-    setCurrentStep("requirements");
-  };
-
-  const handleRequirementsSubmit = (data: RequirementsFormData) => {
-    setFormData((prev) => ({
-      ...prev,
-      functional_requirements: data.functional_requirements,
-      non_functional_requirements: data.non_functional_requirements,
-    }));
-
-    setCurrentStep("features");
-  };
-
-  const handleFeaturesSubmit = (data: FeaturesFormData) => {
-    // Update the features in the template_data
-    if (formData.template_data) {
-      setFormData((prev) => ({
-        ...prev,
-        template_data: {
-          ...prev.template_data!,
-          features: {
-            ...prev.template_data!.features,
-            core_modules: data.core_modules,
-          },
-        },
-      }));
-    }
-
-    setCurrentStep("pages");
-  };
-
-  const handlePagesSubmit = (data: PagesFormData) => {
-    // Update the pages in the template_data
-    if (formData.template_data) {
-      setFormData((prev) => ({
-        ...prev,
-        template_data: {
-          ...prev.template_data!,
-          pages: {
-            public: data.public,
-            authenticated: data.authenticated,
-            admin: data.admin,
-          },
-        },
-      }));
-    }
-
-    setCurrentStep("api");
-  };
-
-  const handleApiEndpointsSubmit = (data: ApiEndpointsFormData) => {
-    // Update the API endpoints in the template_data
-    if (formData.template_data) {
-      setFormData((prev) => ({
-        ...prev,
-        template_data: {
-          ...prev.template_data!,
-          api: {
-            endpoints: data.endpoints,
-          },
-        },
-      }));
-    }
-
-    setCurrentStep("review");
-  };
+  const apiEndpointsSection = useApiEndpointsSection({
+    formData,
+    setFormData,
+    setCurrentStep
+  });
 
   const handleCreateProject = async () => {
     try {
@@ -314,16 +111,16 @@ export function useProjectWizard() {
       };
 
       // Add template id if using a template
-      if (selectedTemplate && !isBlankProject) {
-        projectData.template_id = selectedTemplate.id;
+      if (templateSection.selectedTemplate && !templateSection.isBlankProject) {
+        projectData.template_id = templateSection.selectedTemplate.id;
 
         // Include metadata with template info
         projectData.metadata = {
           version: "0.1",
           author: currentUser?.displayName || currentUser?.email || "Anonymous",
           template: {
-            name: selectedTemplate.name,
-            version: selectedTemplate.version,
+            name: templateSection.selectedTemplate.name,
+            version: templateSection.selectedTemplate.version,
           },
         };
       } else {
@@ -344,8 +141,8 @@ export function useProjectWizard() {
       }
 
       // Add template data if we're using a template
-      if (selectedTemplate && !isBlankProject) {
-        projectData.template_data = selectedTemplate;
+      if (templateSection.selectedTemplate && !templateSection.isBlankProject) {
+        projectData.template_data = templateSection.selectedTemplate;
       }
 
       console.log("Creating project with data:", projectData);
@@ -378,10 +175,10 @@ export function useProjectWizard() {
   const submitCurrentForm = () => {
     if (currentStep === "template") {
       // For the template step, either use the selected template or start with a blank project
-      if (isBlankProject) {
+      if (templateSection.isBlankProject) {
         setCurrentStep("basics");
         return;
-      } else if (selectedTemplate) {
+      } else if (templateSection.selectedTemplate) {
         setCurrentStep("basics");
         return;
       }
@@ -415,24 +212,24 @@ export function useProjectWizard() {
   };
 
   // Check if we can continue from the template step
-  const canContinueFromTemplate = isBlankProject || (currentStep === "template" && selectedTemplate !== null);
+  const canContinueFromTemplate = templateSection.isBlankProject || (currentStep === "template" && templateSection.selectedTemplate !== null);
 
   return {
     currentStep,
     setCurrentStep,
-    selectedTemplate,
-    isBlankProject,
+    selectedTemplate: templateSection.selectedTemplate,
+    isBlankProject: templateSection.isBlankProject,
     loading,
     error,
     formData,
-    handleTemplateSelect,
-    handleBlankProjectSelect,
-    handleBasicsSubmit,
-    handleTechStackSubmit,
-    handleRequirementsSubmit,
-    handleFeaturesSubmit,
-    handlePagesSubmit,
-    handleApiEndpointsSubmit,
+    handleTemplateSelect: templateSection.handleTemplateSelect,
+    handleBlankProjectSelect: templateSection.handleBlankProjectSelect,
+    handleBasicsSubmit: basicsSection.handleBasicsSubmit,
+    handleTechStackSubmit: techStackSection.handleTechStackSubmit,
+    handleRequirementsSubmit: requirementsSection.handleRequirementsSubmit,
+    handleFeaturesSubmit: featuresSection.handleFeaturesSubmit,
+    handlePagesSubmit: pagesSection.handlePagesSubmit,
+    handleApiEndpointsSubmit: apiEndpointsSection.handleApiEndpointsSubmit,
     handleCreateProject,
     handleStepClick,
     submitCurrentForm,
