@@ -36,13 +36,13 @@ const Dashboard = () => {
     <MainLayout>
       <div className="w-full h-full">
         {/* Welcome header */}
-        <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6 mb-6">
+        <div className="bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-slate-200 dark:border-slate-800 p-6 mb-6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between">
             <div className="mb-4 md:mb-0 md:mr-6">
-              <h1 className="text-2xl font-bold text-slate-800 font-heading mb-2">
+              <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 font-heading mb-2">
                 Architecture Specifications
               </h1>
-              <p className="text-slate-500">
+              <p className="text-slate-500 dark:text-slate-400">
                 Create, manage, and export your software architecture
                 specifications with ease.
               </p>
@@ -57,7 +57,7 @@ const Dashboard = () => {
               </button>
               <button
                 onClick={() => navigate("/templates")}
-                className="bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 px-4 py-2 rounded-lg flex items-center justify-center gap-2 shadow-sm"
+                className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 px-4 py-2 rounded-lg flex items-center justify-center gap-2 shadow-sm"
               >
                 <Package size={18} />
                 <span>Browse Templates</span>
@@ -68,23 +68,23 @@ const Dashboard = () => {
 
         {/* Stats row */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-          <div className="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
+          <div className="bg-white dark:bg-slate-900 p-4 rounded-lg shadow-sm border border-slate-200 dark:border-slate-800">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg font-semibold text-slate-800">Projects</h3>
-              <div className="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center">
-                <FileCode size={16} className="text-primary-600" />
+              <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100">Projects</h3>
+              <div className="w-8 h-8 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                <FileCode size={16} className="text-primary-600 dark:text-primary-400" />
               </div>
             </div>
-            <div className="text-2xl font-bold text-slate-900 mb-1">
+            <div className="text-2xl font-bold text-slate-900 dark:text-white mb-1">
               {projects.length}
             </div>
-            <p className="text-slate-500 text-sm">
+            <p className="text-slate-500 dark:text-slate-400 text-sm">
               Total architecture projects
             </p>
-            <div className="mt-3 pt-3 border-t border-slate-100">
+            <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800">
               <button
                 onClick={() => navigate("/projects")}
-                className="text-primary-600 hover:text-primary-700 text-sm font-medium flex items-center gap-1"
+                className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 text-sm font-medium flex items-center gap-1"
               >
                 View all projects
                 <ArrowUpRight size={14} />
@@ -92,38 +92,38 @@ const Dashboard = () => {
             </div>
           </div>
 
-          <div className="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
+          <div className="bg-white dark:bg-slate-900 p-4 rounded-lg shadow-sm border border-slate-200 dark:border-slate-800">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg font-semibold text-slate-800">
+              <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100">
                 Templates
               </h3>
-              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Package size={16} className="text-blue-600" />
+              <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                <Package size={16} className="text-blue-600 dark:text-blue-400" />
               </div>
             </div>
             {templatesLoading ? (
               <div className="flex items-center gap-2">
-                <Loader className="animate-spin h-4 w-4 text-blue-600" />
-                <span className="text-slate-500 text-sm">Loading...</span>
+                <Loader className="animate-spin h-4 w-4 text-blue-600 dark:text-blue-400" />
+                <span className="text-slate-500 dark:text-slate-400 text-sm">Loading...</span>
               </div>
             ) : queryError ? (
-              <div className="text-red-500 text-sm">
+              <div className="text-red-500 dark:text-red-400 text-sm">
                 Error loading templates
               </div>
             ) : (
               <>
-                <div className="text-2xl font-bold text-slate-900 mb-1">
+                <div className="text-2xl font-bold text-slate-900 dark:text-white mb-1">
                   {templates.length}
                 </div>
-                <p className="text-slate-500 text-sm">
+                <p className="text-slate-500 dark:text-slate-400 text-sm">
                   Available project templates
                 </p>
               </>
             )}
-            <div className="mt-3 pt-3 border-t border-slate-100">
+            <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800">
               <button
                 onClick={() => navigate("/templates")}
-                className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center gap-1"
+                className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm font-medium flex items-center gap-1"
               >
                 Browse templates
                 <ArrowUpRight size={14} />
@@ -131,22 +131,22 @@ const Dashboard = () => {
             </div>
           </div>
 
-          <div className="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
+          <div className="bg-white dark:bg-slate-900 p-4 rounded-lg shadow-sm border border-slate-200 dark:border-slate-800">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg font-semibold text-slate-800">
+              <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100">
                 Documentation
               </h3>
-              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                <LayoutDashboard size={16} className="text-purple-600" />
+              <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
+                <LayoutDashboard size={16} className="text-purple-600 dark:text-purple-400" />
               </div>
             </div>
-            <div className="text-sm mb-1 text-slate-500">
+            <div className="text-sm mb-1 text-slate-500 dark:text-slate-400">
               Learn how to create effective architecture specs
             </div>
-            <div className="mt-3 pt-3 border-t border-slate-100">
+            <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800">
               <button
                 onClick={() => navigate("/docs")}
-                className="text-purple-600 hover:text-purple-700 text-sm font-medium flex items-center gap-1"
+                className="text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 text-sm font-medium flex items-center gap-1"
               >
                 View documentation
                 <ArrowUpRight size={14} />
@@ -158,10 +158,10 @@ const Dashboard = () => {
         {/* Templates section */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-slate-800">Templates</h2>
+            <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100">Templates</h2>
             <button
               onClick={() => navigate("/templates")}
-              className="text-primary-600 hover:text-primary-700 font-medium text-sm flex items-center gap-1"
+              className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium text-sm flex items-center gap-1"
             >
               View all
               <ArrowRight size={16} />
@@ -169,20 +169,20 @@ const Dashboard = () => {
           </div>
 
           {templatesLoading ? (
-            <div className="flex justify-center items-center py-12 bg-white rounded-lg shadow-sm border border-slate-200">
-              <Loader className="animate-spin h-8 w-8 text-primary-600 mr-3" />
-              <span className="text-slate-600 font-medium">
+            <div className="flex justify-center items-center py-12 bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-slate-200 dark:border-slate-800">
+              <Loader className="animate-spin h-8 w-8 text-primary-600 dark:text-primary-400 mr-3" />
+              <span className="text-slate-600 dark:text-slate-300 font-medium">
                 Loading templates...
               </span>
             </div>
           ) : queryError ? (
-            <div className="text-center py-8 bg-white rounded-lg shadow-sm border border-slate-200">
-              <p className="text-red-600 mb-2">
+            <div className="text-center py-8 bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-slate-200 dark:border-slate-800">
+              <p className="text-red-600 dark:text-red-400 mb-2">
                 {queryError.message || String(queryError)}
               </p>
               <button
                 onClick={() => navigate("/templates")}
-                className="text-primary-600 hover:text-primary-700 font-medium"
+                className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium"
               >
                 Browse all templates
               </button>
@@ -192,18 +192,18 @@ const Dashboard = () => {
               {templates.slice(0, 3).map((template) => (
                 <div
                   key={template.name}
-                  className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow duration-200"
+                  className="bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden hover:shadow-md transition-shadow duration-200"
                 >
-                  <div className="h-32 bg-gradient-to-r from-primary-100 to-blue-100 flex items-center justify-center">
-                    <div className="bg-white rounded-lg p-3">
-                      <Package size={24} className="text-primary-600" />
+                  <div className="h-32 bg-gradient-to-r from-primary-100 to-blue-100 dark:from-primary-900/30 dark:to-blue-900/30 flex items-center justify-center">
+                    <div className="bg-white dark:bg-slate-800 rounded-lg p-3">
+                      <Package size={24} className="text-primary-600 dark:text-primary-400" />
                     </div>
                   </div>
                   <div className="p-4">
-                    <h3 className="text-lg font-semibold text-slate-800 mb-1">
+                    <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-1">
                       {template.name}
                     </h3>
-                    <p className="text-slate-500 text-sm line-clamp-2 mb-3">
+                    <p className="text-slate-500 dark:text-slate-400 text-sm line-clamp-2 mb-3">
                       {template.description}
                     </p>
                     <div className="flex flex-wrap gap-1 mb-4">
@@ -211,7 +211,7 @@ const Dashboard = () => {
                         template.tags.map((tag, index) => (
                           <span
                             key={index}
-                            className="inline-flex px-2 py-1 rounded-full bg-slate-100 text-slate-600 text-xs"
+                            className="inline-flex px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs"
                           >
                             {tag}
                           </span>
@@ -221,7 +221,7 @@ const Dashboard = () => {
                       onClick={() =>
                         handleTemplateSelect(template.id || template.version)
                       }
-                      className="w-full bg-primary-600 hover:bg-primary-700 text-white py-2 rounded-lg"
+                      className="w-full bg-primary-600 dark:bg-primary-900 hover:bg-primary-700 dark:hover:bg-primary-800 text-white py-2 rounded-lg"
                     >
                       Use This Template
                     </button>
@@ -230,11 +230,11 @@ const Dashboard = () => {
               ))}
             </div>
           ) : (
-            <div className="text-center py-8 bg-white rounded-lg shadow-sm border border-slate-200">
-              <p className="text-slate-600 mb-2">No templates available</p>
+            <div className="text-center py-8 bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-slate-200 dark:border-slate-800">
+              <p className="text-slate-600 dark:text-slate-300 mb-2">No templates available</p>
               <button
                 onClick={() => navigate("/new-project")}
-                className="text-primary-600 hover:text-primary-700 font-medium"
+                className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium"
               >
                 Create a project from scratch
               </button>
@@ -245,12 +245,12 @@ const Dashboard = () => {
         {/* Recent projects section */}
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-slate-800">
+            <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100">
               Recent Projects
             </h2>
             <button
               onClick={() => navigate("/new-project")}
-              className="bg-primary-600 hover:bg-primary-700 text-white px-3 py-1.5 rounded-lg flex items-center gap-1.5"
+              className="bg-primary-600 dark:bg-primary-900 hover:bg-primary-700 dark:hover:bg-primary-800 text-white px-3 py-1.5 rounded-lg flex items-center gap-1.5"
             >
               <Plus size={16} />
               New Project
@@ -259,9 +259,9 @@ const Dashboard = () => {
 
           <div>
             {isLoading ? (
-              <div className="flex justify-center items-center py-12 bg-white rounded-lg shadow-sm border border-slate-200">
-                <Loader className="animate-spin h-8 w-8 text-primary-600 mr-3" />
-                <span className="text-slate-600 font-medium">
+              <div className="flex justify-center items-center py-12 bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-slate-200 dark:border-slate-800">
+                <Loader className="animate-spin h-8 w-8 text-primary-600 dark:text-primary-400 mr-3" />
+                <span className="text-slate-600 dark:text-slate-300 font-medium">
                   Loading projects...
                 </span>
               </div>
@@ -270,35 +270,35 @@ const Dashboard = () => {
                 {projects.map((project) => (
                   <div
                     key={project.id}
-                    className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow duration-200"
+                    className="bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden hover:shadow-md transition-shadow duration-200"
                   >
                     <div className="p-4">
-                      <div className="inline-flex items-center px-2 py-1 mb-2 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      <div className="inline-flex items-center px-2 py-1 mb-2 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
                         {project.status === "in_progress" && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mr-1.5"></span>
+                          <span className="w-1.5 h-1.5 rounded-full bg-blue-500 dark:bg-blue-400 mr-1.5"></span>
                         )}
                         {project.status === "completed" && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-green-500 mr-1.5"></span>
+                          <span className="w-1.5 h-1.5 rounded-full bg-green-500 dark:bg-green-400 mr-1.5"></span>
                         )}
                         {project.status === "draft" && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-slate-500 mr-1.5"></span>
+                          <span className="w-1.5 h-1.5 rounded-full bg-slate-500 dark:bg-slate-400 mr-1.5"></span>
                         )}
                         {project.status.replace("_", " ")}
                       </div>
-                      <h3 className="text-lg font-semibold text-slate-800 mb-1">
+                      <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-1">
                         {project.name}
                       </h3>
-                      <p className="text-slate-500 text-sm line-clamp-2 mb-3">
+                      <p className="text-slate-500 dark:text-slate-400 text-sm line-clamp-2 mb-3">
                         {project.description}
                       </p>
-                      <div className="flex justify-between items-center text-xs text-slate-500 pt-3 border-t border-slate-100">
+                      <div className="flex justify-between items-center text-xs text-slate-500 dark:text-slate-400 pt-3 border-t border-slate-100 dark:border-slate-800">
                         <span>
                           Updated{" "}
                           {new Date(project.updated_at).toLocaleDateString()}
                         </span>
                         <button
                           onClick={() => navigate(`/projects/${project.id}`)}
-                          className="text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1"
+                          className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium flex items-center gap-1"
                         >
                           View
                           <ArrowRight size={14} />
@@ -309,20 +309,20 @@ const Dashboard = () => {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-16 bg-white rounded-lg shadow-sm border border-slate-200">
-                <div className="mx-auto w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
-                  <Calendar size={24} className="text-slate-400" />
+              <div className="text-center py-16 bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-slate-200 dark:border-slate-800">
+                <div className="mx-auto w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4">
+                  <Calendar size={24} className="text-slate-400 dark:text-slate-300" />
                 </div>
-                <h3 className="text-xl font-semibold text-slate-800 mb-2">
+                <h3 className="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-2">
                   No projects yet
                 </h3>
-                <p className="text-slate-500 max-w-md mx-auto mb-6">
+                <p className="text-slate-500 dark:text-slate-400 max-w-md mx-auto mb-6">
                   Create your first project to start building your architecture
                   specifications
                 </p>
                 <button
                   onClick={() => navigate("/new-project")}
-                  className="px-5 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg shadow-sm flex items-center gap-2 mx-auto"
+                  className="px-5 py-2 bg-primary-600 dark:bg-primary-900 hover:bg-primary-700 dark:hover:bg-primary-800 text-white rounded-lg shadow-sm flex items-center gap-2 mx-auto"
                 >
                   <PlusCircle size={18} />
                   Create Your First Project

@@ -4,16 +4,19 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { queryClient } from "./lib/query-client";
 import { AuthProvider } from "./contexts/AuthContext";
+import { ThemeProvider } from "./contexts/ThemeContextProvider";
 
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <Router />
-        {import.meta.env.MODE !== "production" && (
-          <ReactQueryDevtools initialIsOpen={false} />
-        )}
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <Router />
+          {import.meta.env.MODE !== "production" && (
+            <ReactQueryDevtools initialIsOpen={false} />
+          )}
+        </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
