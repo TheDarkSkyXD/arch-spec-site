@@ -6,7 +6,7 @@ const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
 // Create axios instance with auth header
-const apiClient = axios.create({
+export const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     "Content-Type": "application/json",
@@ -16,19 +16,45 @@ const apiClient = axios.create({
 // Add request interceptor to include auth token
 apiClient.interceptors.request.use(
   async (config) => {
-    const token = await getAuthToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-
-    // Add development bypass header if in development mode
-    if (import.meta.env.DEV) {
-      config.headers["X-Dev-Bypass"] = "true";
+    try {
+      const token = await getAuthToken();
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      } else {
+        // If no token is available, this might be an unauthorized request
+        delete config.headers.Authorization;
+      }
+    } catch (error) {
+      console.error("Error getting auth token:", error);
+      // Remove any existing auth header if we can't get a new token
+      delete config.headers.Authorization;
     }
 
     return config;
   },
   (error) => Promise.reject(error)
+);
+
+// Add response interceptor to handle auth errors
+apiClient.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (error.response?.status === 401) {
+      // Token might be expired, try to get a fresh token
+      try {
+        const newToken = await getAuthToken();
+        if (newToken) {
+          // Retry the original request with the new token
+          const originalRequest = error.config;
+          originalRequest.headers.Authorization = `Bearer ${newToken}`;
+          return apiClient(originalRequest);
+        }
+      } catch (refreshError) {
+        console.error("Error refreshing token:", refreshError);
+      }
+    }
+    return Promise.reject(error);
+  }
 );
 
 // Mock data for fallback in development
@@ -52,7 +78,7 @@ const mockUserProfile: UserProfile = {
 // User interfaces
 export interface UserProfile {
   _id: string;
-  firebase_uid?: string;
+  firebase_uid: string;
   email: string;
   display_name?: string;
   photo_url?: string;
@@ -78,13 +104,6 @@ export const userApi = {
       return response.data;
     } catch (error) {
       console.error("Error fetching user profile:", error);
-
-      // In development mode, return mock data as fallback
-      if (import.meta.env.DEV) {
-        console.warn("Using mock user profile in development mode");
-        return mockUserProfile;
-      }
-
       throw error;
     }
   },
@@ -96,18 +115,6 @@ export const userApi = {
       return response.data;
     } catch (error) {
       console.error("Error updating user profile:", error);
-
-      // In development mode, return mock data with updates as fallback
-      if (import.meta.env.DEV) {
-        console.warn("Using mock user profile update in development mode");
-        const updatedProfile = {
-          ...mockUserProfile,
-          ...userData,
-          updated_at: new Date().toISOString(),
-        };
-        return updatedProfile;
-      }
-
       throw error;
     }
   },
@@ -121,18 +128,6 @@ export const userApi = {
       return response.data;
     } catch (error) {
       console.error("Error updating user settings:", error);
-
-      // In development mode, return mock data with settings as fallback
-      if (import.meta.env.DEV) {
-        console.warn("Using mock user settings update in development mode");
-        const updatedProfile = {
-          ...mockUserProfile,
-          settings,
-          updated_at: new Date().toISOString(),
-        };
-        return updatedProfile;
-      }
-
       throw error;
     }
   },

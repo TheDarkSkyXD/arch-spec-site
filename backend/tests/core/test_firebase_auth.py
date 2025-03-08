@@ -364,3 +364,39 @@ async def test_production_environment_no_bypass(mock_user_service):
     finally:
         # Restore original environment setting
         settings.ENVIRONMENT = original_env
+
+
+@pytest.mark.asyncio
+async def test_get_or_create_user_retry_on_failure(mock_user_service, sample_firebase_token, sample_db_user):
+    """Test that a user can still be created successfully if create_user fails initially but succeeds on retry"""
+    # Setup
+    firebase_auth = FirebaseAuth()
+    
+    # User doesn't exist yet
+    mock_user_service.get_user_by_firebase_uid.return_value = None
+    
+    # First attempt to create user fails, second attempt succeeds
+    mock_user_service.create_user.side_effect = [None, sample_db_user]
+    
+    # Execute - should raise an exception since first create attempt fails
+    with pytest.raises(Exception, match="Failed to create user in database"):
+        await firebase_auth.get_or_create_user(sample_firebase_token)
+    
+    # Assert create_user was called
+    mock_user_service.create_user.assert_called_once()
+    
+    # Reset mocks for second attempt
+    mock_user_service.create_user.reset_mock()
+    mock_user_service.get_user_by_firebase_uid.reset_mock()
+    
+    # Setup for second attempt - still no existing user
+    mock_user_service.get_user_by_firebase_uid.return_value = None
+    mock_user_service.create_user.return_value = sample_db_user
+    
+    # Execute second attempt - should succeed
+    result = await firebase_auth.get_or_create_user(sample_firebase_token)
+    
+    # Assert
+    assert result == sample_db_user
+    mock_user_service.get_user_by_firebase_uid.assert_called_once_with(sample_firebase_token["uid"])
+    mock_user_service.create_user.assert_called_once()

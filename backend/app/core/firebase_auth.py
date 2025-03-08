@@ -72,71 +72,108 @@ class FirebaseAuth:
         
     async def authenticate_token(self, token: str) -> Dict[str, Any]:
         """Authenticate a Firebase token and return the user data."""
-        # In development mode with no Firebase, accept any token
-        if not firebase_initialized and settings_local.ENVIRONMENT == "development":
-            logger.info("Using development mode authentication")
+        # Only use test user in development mode when Firebase is not initialized AND dev bypass is explicitly requested
+        if (not firebase_initialized and 
+            settings_local.ENVIRONMENT == "development" and 
+            not token.startswith('ey')):  # Check if it's not a JWT token
+            logger.info("Using development mode authentication without Firebase")
             test_user = await self.get_test_user()
             return {"firebase_user": {"uid": "test-uid", "email": "test@example.com"}, "db_user": test_user}
         
         try:
             # Verify the token with Firebase
             decoded_token = auth.verify_id_token(token)
+            logger.info(f"Successfully verified Firebase token for user: {decoded_token.get('email', 'unknown')}")
             
             # Get user from database or create if not exists
-            user_data = await self.get_or_create_user(decoded_token)
-            
-            return {"firebase_user": decoded_token, "db_user": user_data}
+            try:
+                user_data = await self.get_or_create_user(decoded_token)
+                if not user_data:
+                    logger.error("Failed to get or create user after successful token verification")
+                    raise HTTPException(status_code=500, detail="Failed to create user in database")
+                return {"firebase_user": decoded_token, "db_user": user_data}
+            except Exception as e:
+                logger.error(f"Error in get_or_create_user: {str(e)}")
+                raise HTTPException(status_code=500, detail="Error processing user data")
             
         except Exception as e:
             logger.error(f"Firebase authentication error: {str(e)}")
-            if settings_local.ENVIRONMENT == "development":
-                # In development, fall back to test user
-                logger.info("Falling back to test user in development mode")
-                test_user = await self.get_test_user()
-                return {"firebase_user": {"uid": "test-uid", "email": "test@example.com"}, "db_user": test_user}
             raise HTTPException(status_code=401, detail="Invalid authentication credentials")
     
     async def get_or_create_user(self, firebase_user: Dict[str, Any]) -> Dict[str, Any]:
         """Get user from database or create if not exists."""
-        # Check if user exists
-        user = await UserService.get_user_by_firebase_uid(firebase_user["uid"])
-        
-        if user:
-            # Update last login time
-            await UserService.update_user(
-                str(user["_id"]), 
-                {"last_login": datetime.now(UTC)}
+        try:
+            # Check if user exists
+            user = await UserService.get_user_by_firebase_uid(firebase_user["uid"])
+            
+            if user:
+                # Update last login time
+                updated_user = await UserService.update_user(
+                    str(user["_id"]), 
+                    {"last_login": datetime.now(UTC)}
+                )
+                if not updated_user:
+                    logger.error(f"Failed to update last login for user: {user['_id']}")
+                    return user  # Return original user if update fails
+                return updated_user
+            
+            # Create new user
+            logger.info(f"Creating new user for Firebase UID: {firebase_user['uid']}")
+            user = await UserService.create_user(
+                firebase_uid=firebase_user["uid"],
+                email=firebase_user.get("email", ""),
+                display_name=firebase_user.get("name"),
+                photo_url=firebase_user.get("picture")
             )
+            
+            if not user:
+                logger.error(f"Failed to create user for Firebase UID: {firebase_user['uid']}")
+                raise Exception("Failed to create user in database")
+                
+            logger.info(f"Successfully created new user with ID: {user.get('_id')}")
             return user
-        
-        # Create new user
-        return await UserService.create_user(
-            firebase_uid=firebase_user["uid"],
-            email=firebase_user.get("email", ""),
-            display_name=firebase_user.get("name"),
-            photo_url=firebase_user.get("picture")
-        )
+        except Exception as e:
+            logger.error(f"Error in get_or_create_user: {str(e)}")
+            raise
     
     async def get_test_user(self) -> Dict[str, Any]:
         """Get or create a test user for development."""
-        # Look for existing test user
-        test_user = await UserService.get_user_by_email("test@example.com")
-        
-        if test_user:
-            # Update last login time
-            await UserService.update_user(
-                str(test_user["_id"]), 
-                {"last_login": datetime.now(UTC)}
+        if settings_local.ENVIRONMENT != "development":
+            logger.error("Attempted to get test user in non-development environment")
+            raise HTTPException(status_code=401, detail="Test users not allowed in production")
+            
+        try:
+            # Look for existing test user
+            test_user = await UserService.get_user_by_email("test@example.com")
+            
+            if test_user:
+                # Update last login time
+                updated_user = await UserService.update_user(
+                    str(test_user["_id"]), 
+                    {"last_login": datetime.now(UTC)}
+                )
+                if not updated_user:
+                    logger.error("Failed to update test user last login")
+                    return test_user  # Return original user if update fails
+                return updated_user
+            
+            # Create test user if it doesn't exist
+            logger.info("Creating new test user")
+            test_user = await UserService.create_user(
+                firebase_uid="test-uid",
+                email="test@example.com",
+                display_name="Test User",
+                photo_url=""
             )
+            
+            if not test_user:
+                logger.error("Failed to create test user")
+                raise Exception("Failed to create test user")
+                
             return test_user
-        
-        # Create test user if it doesn't exist
-        return await UserService.create_user(
-            firebase_uid="test-uid",
-            email="test@example.com",
-            display_name="Test User",
-            photo_url=""
-        )
+        except Exception as e:
+            logger.error(f"Error in get_test_user: {str(e)}")
+            raise
 
 
 # Create a reusable instance
@@ -145,13 +182,6 @@ firebase_auth = FirebaseAuth()
 
 async def get_current_user(request: Request) -> Dict[str, Any]:
     """Dependency to get the current authenticated user."""
-    # Development bypass for testing
-    if settings_local.ENVIRONMENT == 'development' and request.headers.get('X-Dev-Bypass') == 'true':
-        # Use a test user in development mode
-        test_user = await firebase_auth.get_test_user()
-        if test_user:
-            return test_user
-    
     # Normal authentication flow
     token = _get_token_from_header(request)
     if not token:
@@ -163,10 +193,7 @@ async def get_current_user(request: Request) -> Dict[str, Any]:
 
 async def get_firebase_user(request: Request) -> Dict[str, Any]:
     """Dependency to get the Firebase user data."""
-    # Development bypass for testing
-    if settings_local.ENVIRONMENT == 'development' and request.headers.get('X-Dev-Bypass') == 'true':
-        return {"uid": "test-uid", "email": "test@example.com"}
-    
+    # Normal authentication flow
     token = _get_token_from_header(request)
     if not token:
         raise HTTPException(status_code=401, detail="Not authenticated")
