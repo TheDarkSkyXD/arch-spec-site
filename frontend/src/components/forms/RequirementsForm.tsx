@@ -11,7 +11,7 @@ interface RequirementsFormProps {
     functional_requirements: Requirement[];
     non_functional_requirements: Requirement[];
   }) => void;
-  onBack: () => void;
+  onBack?: () => void;
 }
 
 export default function RequirementsForm({
@@ -98,143 +98,140 @@ export default function RequirementsForm({
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div className="space-y-6">
-        <div>
-          <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-4">
-            Project Requirements
-          </h2>
-          <p className="text-slate-600 dark:text-slate-400 mb-6">
-            Define the functional and non-functional requirements for your
-            project.
-          </p>
-        </div>
+    <form id="requirements-form" onSubmit={handleSubmit} className="space-y-8">
+      <div>
+        <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-4">
+          Project Requirements
+        </h2>
+        <p className="text-slate-600 dark:text-slate-400 mb-6">
+          Define the functional and non-functional requirements for your
+          project.
+        </p>
+      </div>
 
-        {/* Functional Requirements */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium text-slate-800 dark:text-slate-100">
-            Functional Requirements
-          </h3>
-          <p className="text-sm text-slate-600 dark:text-slate-400">
-            What specific features and capabilities should your application
-            have?
-          </p>
+      {/* Functional Requirements */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-medium text-slate-800 dark:text-slate-100">
+          Functional Requirements
+        </h3>
+        <p className="text-sm text-slate-600 dark:text-slate-400">
+          What specific features and capabilities should your application have?
+        </p>
 
-          {errors.functional && (
-            <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md flex items-start gap-2 text-red-700 dark:text-red-400">
-              <AlertCircle size={16} className="mt-0.5" />
-              <span>{errors.functional}</span>
+        {errors.functional && (
+          <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md flex items-start gap-2 text-red-700 dark:text-red-400">
+            <AlertCircle size={16} className="mt-0.5" />
+            <span>{errors.functional}</span>
+          </div>
+        )}
+
+        <div className="space-y-2">
+          {functionalReqs.map((req) => (
+            <div
+              key={req.id}
+              className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md"
+            >
+              <div className="flex gap-2 items-center">
+                <span
+                  className={`inline-flex px-2 py-1 text-xs rounded-full ${getPriorityColor(
+                    req.priority
+                  )}`}
+                >
+                  {req.priority}
+                </span>
+                <p className="dark:text-slate-300">{req.description}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => removeFunctionalRequirement(req.id)}
+                className="text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400"
+              >
+                <Trash2 size={18} />
+              </button>
             </div>
-          )}
-
-          <div className="space-y-2">
-            {functionalReqs.map((req) => (
-              <div
-                key={req.id}
-                className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md"
-              >
-                <div className="flex gap-2 items-center">
-                  <span
-                    className={`inline-flex px-2 py-1 text-xs rounded-full ${getPriorityColor(
-                      req.priority
-                    )}`}
-                  >
-                    {req.priority}
-                  </span>
-                  <p className="dark:text-slate-300">{req.description}</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => removeFunctionalRequirement(req.id)}
-                  className="text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400"
-                >
-                  <Trash2 size={18} />
-                </button>
-              </div>
-            ))}
-          </div>
-
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={newFunctionalReq}
-              onChange={(e) => setNewFunctionalReq(e.target.value)}
-              placeholder="Enter a functional requirement"
-              className="flex-1 p-2 border border-slate-300 dark:border-slate-600 rounded focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
-            />
-            <button
-              type="button"
-              onClick={addFunctionalRequirement}
-              disabled={!newFunctionalReq.trim()}
-              className={`p-2 rounded-md flex items-center ${
-                !newFunctionalReq.trim()
-                  ? "bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed"
-                  : "bg-primary-600 text-white hover:bg-primary-700"
-              }`}
-            >
-              <PlusCircle size={20} />
-            </button>
-          </div>
+          ))}
         </div>
 
-        {/* Non-Functional Requirements */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium text-slate-800 dark:text-slate-100">
-            Non-Functional Requirements
-          </h3>
-          <p className="text-sm text-slate-600 dark:text-slate-400">
-            What qualities should your application have (performance, security,
-            usability, etc.)?
-          </p>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={newFunctionalReq}
+            onChange={(e) => setNewFunctionalReq(e.target.value)}
+            placeholder="Enter a functional requirement"
+            className="flex-1 p-2 border border-slate-300 dark:border-slate-600 rounded focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+          />
+          <button
+            type="button"
+            onClick={addFunctionalRequirement}
+            disabled={!newFunctionalReq.trim()}
+            className={`p-2 rounded-md flex items-center ${
+              !newFunctionalReq.trim()
+                ? "bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed"
+                : "bg-primary-600 text-white hover:bg-primary-700"
+            }`}
+          >
+            <PlusCircle size={20} />
+          </button>
+        </div>
+      </div>
 
-          <div className="space-y-2">
-            {nonFunctionalReqs.map((req) => (
-              <div
-                key={req.id}
-                className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md"
-              >
-                <div className="flex gap-2 items-center">
-                  <span
-                    className={`inline-flex px-2 py-1 text-xs rounded-full ${getPriorityColor(
-                      req.priority
-                    )}`}
-                  >
-                    {req.priority}
-                  </span>
-                  <p className="dark:text-slate-300">{req.description}</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => removeNonFunctionalRequirement(req.id)}
-                  className="text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400"
-                >
-                  <Trash2 size={18} />
-                </button>
-              </div>
-            ))}
-          </div>
+      {/* Non-Functional Requirements */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-medium text-slate-800 dark:text-slate-100">
+          Non-Functional Requirements
+        </h3>
+        <p className="text-sm text-slate-600 dark:text-slate-400">
+          What qualities should your application have (performance, security,
+          usability, etc.)?
+        </p>
 
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={newNonFunctionalReq}
-              onChange={(e) => setNewNonFunctionalReq(e.target.value)}
-              placeholder="Enter a non-functional requirement"
-              className="flex-1 p-2 border border-slate-300 dark:border-slate-600 rounded focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
-            />
-            <button
-              type="button"
-              onClick={addNonFunctionalRequirement}
-              disabled={!newNonFunctionalReq.trim()}
-              className={`p-2 rounded-md flex items-center ${
-                !newNonFunctionalReq.trim()
-                  ? "bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed"
-                  : "bg-primary-600 text-white hover:bg-primary-700"
-              }`}
+        <div className="space-y-2">
+          {nonFunctionalReqs.map((req) => (
+            <div
+              key={req.id}
+              className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md"
             >
-              <PlusCircle size={20} />
-            </button>
-          </div>
+              <div className="flex gap-2 items-center">
+                <span
+                  className={`inline-flex px-2 py-1 text-xs rounded-full ${getPriorityColor(
+                    req.priority
+                  )}`}
+                >
+                  {req.priority}
+                </span>
+                <p className="dark:text-slate-300">{req.description}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => removeNonFunctionalRequirement(req.id)}
+                className="text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400"
+              >
+                <Trash2 size={18} />
+              </button>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={newNonFunctionalReq}
+            onChange={(e) => setNewNonFunctionalReq(e.target.value)}
+            placeholder="Enter a non-functional requirement"
+            className="flex-1 p-2 border border-slate-300 dark:border-slate-600 rounded focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+          />
+          <button
+            type="button"
+            onClick={addNonFunctionalRequirement}
+            disabled={!newNonFunctionalReq.trim()}
+            className={`p-2 rounded-md flex items-center ${
+              !newNonFunctionalReq.trim()
+                ? "bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed"
+                : "bg-primary-600 text-white hover:bg-primary-700"
+            }`}
+          >
+            <PlusCircle size={20} />
+          </button>
         </div>
       </div>
     </form>

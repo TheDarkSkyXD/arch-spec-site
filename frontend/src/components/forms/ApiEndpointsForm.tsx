@@ -9,16 +9,20 @@ interface ApiEndpoint {
   roles: string[];
 }
 
+interface ApiEndpointsFormData {
+  endpoints: ApiEndpoint[];
+}
+
 interface ApiEndpointsFormProps {
-  initialData: {
-    endpoints: ApiEndpoint[];
-  };
-  onSubmit: (data: { endpoints: ApiEndpoint[] }) => void;
+  initialData: ApiEndpointsFormData;
+  onSubmit: (data: ApiEndpointsFormData) => void;
+  onBack?: () => void;
 }
 
 export default function ApiEndpointsForm({
   initialData,
   onSubmit,
+  onBack,
 }: ApiEndpointsFormProps) {
   const [endpoints, setEndpoints] = useState<ApiEndpoint[]>(
     initialData.endpoints || []
@@ -107,7 +111,7 @@ export default function ApiEndpointsForm({
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form id="api-endpoints-form" onSubmit={handleSubmit} className="space-y-8">
       <div className="space-y-6">
         <div>
           <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-4">

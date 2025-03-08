@@ -14,7 +14,7 @@ interface FeaturesFormProps {
     core_modules: FeatureModule[];
   };
   onSubmit: (data: { core_modules: FeatureModule[] }) => void;
-  onBack: () => void;
+  onBack?: () => void;
 }
 
 export default function FeaturesForm({
@@ -52,7 +52,7 @@ export default function FeaturesForm({
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form id="features-form" onSubmit={handleSubmit} className="space-y-8">
       <div className="space-y-6">
         <div>
           <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-4">

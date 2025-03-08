@@ -14,20 +14,23 @@ interface PageComponent {
   enabled: boolean;
 }
 
-interface PagesFormProps {
-  initialData: {
-    public: PageComponent[];
-    authenticated: PageComponent[];
-    admin: PageComponent[];
-  };
-  onSubmit: (data: {
-    public: PageComponent[];
-    authenticated: PageComponent[];
-    admin: PageComponent[];
-  }) => void;
+interface PagesFormData {
+  public: PageComponent[];
+  authenticated: PageComponent[];
+  admin: PageComponent[];
 }
 
-export default function PagesForm({ initialData, onSubmit }: PagesFormProps) {
+interface PagesFormProps {
+  initialData: PagesFormData;
+  onSubmit: (data: PagesFormData) => void;
+  onBack?: () => void;
+}
+
+export default function PagesForm({
+  initialData,
+  onSubmit,
+  onBack,
+}: PagesFormProps) {
   const [publicPages, setPublicPages] = useState<PageComponent[]>(
     initialData.public || []
   );
@@ -114,7 +117,7 @@ export default function PagesForm({ initialData, onSubmit }: PagesFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form id="pages-form" onSubmit={handleSubmit} className="space-y-8">
       <div className="space-y-6">
         <div>
           <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-4">

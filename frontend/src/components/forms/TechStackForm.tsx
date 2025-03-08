@@ -5,7 +5,10 @@ import { TechStackData, Technology } from "../../types/techStack";
 import { techStackService } from "../../services/techStackService";
 
 // Import schema
-import { techStackSchema, TechStackFormData } from "./tech-stack/techStackSchema";
+import {
+  techStackSchema,
+  TechStackFormData,
+} from "./tech-stack/techStackSchema";
 
 // Import section components
 import FrontendSection from "./tech-stack/FrontendSection";
@@ -16,7 +19,7 @@ import AuthenticationSection from "./tech-stack/AuthenticationSection";
 interface TechStackFormProps {
   initialData?: Partial<TechStackFormData>;
   onSubmit: (data: TechStackFormData) => void;
-  onBack: () => void;
+  onBack?: () => void;
 }
 
 const TechStackForm = ({
@@ -31,7 +34,9 @@ const TechStackForm = ({
 
   // State for filtered options
   const [uiLibraryOptions, setUiLibraryOptions] = useState<string[]>([]);
-  const [stateManagementOptions, setStateManagementOptions] = useState<string[]>([]);
+  const [stateManagementOptions, setStateManagementOptions] = useState<
+    string[]
+  >([]);
   const [databaseOptions, setDatabaseOptions] = useState<string[]>([]);
   const [ormOptions, setOrmOptions] = useState<string[]>([]);
   const [authOptions, setAuthOptions] = useState<string[]>([]);
@@ -61,11 +66,7 @@ const TechStackForm = ({
   // Watch for form value changes
   const watchedValues = useWatch({
     control,
-    name: [
-      "frontend",
-      "backend",
-      "database",
-    ],
+    name: ["frontend", "backend", "database"],
   });
 
   const [frontend, backend, database] = watchedValues;
@@ -107,9 +108,13 @@ const TechStackForm = ({
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+    <form
+      id="tech-stack-form"
+      onSubmit={handleSubmit(onSubmit)}
+      className="space-y-8"
+    >
       {/* Frontend Section */}
-      <FrontendSection 
+      <FrontendSection
         register={register}
         errors={errors}
         frontendFrameworks={getFrontendFrameworks()}
@@ -119,14 +124,14 @@ const TechStackForm = ({
       />
 
       {/* Backend Section */}
-      <BackendSection 
+      <BackendSection
         register={register}
         errors={errors}
         backendFrameworks={getBackendFrameworks()}
       />
 
       {/* Database Section */}
-      <DatabaseSection 
+      <DatabaseSection
         register={register}
         errors={errors}
         backend={backend}
@@ -137,29 +142,11 @@ const TechStackForm = ({
       />
 
       {/* Authentication Section */}
-      <AuthenticationSection 
+      <AuthenticationSection
         register={register}
         backend={backend}
         authOptions={authOptions}
       />
-
-      {/* Form Actions */}
-      <div className="flex justify-between">
-        <button
-          type="button"
-          onClick={onBack}
-          className="px-4 py-2 border border-slate-300 rounded-md shadow-sm text-sm font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-        >
-          Back
-        </button>
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="px-4 py-2 bg-primary-600 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-        >
-          {isSubmitting ? "Saving..." : "Next"}
-        </button>
-      </div>
     </form>
   );
 };

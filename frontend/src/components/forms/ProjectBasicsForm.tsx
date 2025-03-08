@@ -43,7 +43,11 @@ const ProjectBasicsForm = ({
   });
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form
+      id="project-basics-form"
+      onSubmit={handleSubmit(onSubmit)}
+      className="space-y-6"
+    >
       <div>
         <label
           htmlFor="name"
