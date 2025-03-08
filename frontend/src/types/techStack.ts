@@ -31,20 +31,66 @@ export interface CompatibleOptionsResponse {
   options: Record<string, string[]>;
 }
 
-export interface TechStackData {
-  frontend: {
-    frameworks: TechStackFramework[];
-  };
-  backend: {
-    frameworks: TechStackBackendFramework[];
-    baas: TechStackBaaS[];
-  };
-  database: {
-    sql: TechStackDatabase[];
-    nosql: TechStackDatabase[];
-  };
-  // Add other categories as needed
+/**
+ * Technology compatibility options
+ */
+export interface TechnologyCompatibility {
+  stateManagement?: string[];
+  uiLibraries?: string[];
+  formHandling?: string[];
+  routing?: string[];
+  apiClients?: string[];
+  metaFrameworks?: string[];
+  databases?: string[];
+  orms?: string[];
+  auth?: string[];
+  hosting?: string[];
+  storage?: string[];
+  functions?: string[];
 }
+
+/**
+ * Generic technology interface
+ */
+export interface Technology {
+  name: string;
+  description: string;
+  language?: string;
+  compatibility: TechnologyCompatibility;
+}
+
+export interface FrontendOptions {
+  frameworks: Technology[];
+}
+
+export interface BackendOptions {
+  frameworks: Technology[];
+  baas: Technology[];
+}
+
+export interface DatabaseType {
+  sql: Technology[];
+  nosql: Technology[];
+}
+
+export interface TechStackData {
+  frontend: FrontendOptions;
+  backend: BackendOptions;
+  database: DatabaseType;
+  hosting: Record<string, string[]>;
+  authentication: Record<string, string[]>;
+}
+
+export interface AllTechOptionsResponse {
+  frontend: Record<string, string[] | Technology[]>;
+  backend: Record<string, string[] | Technology[]>;
+  database: Record<string, string[] | Technology[]>;
+  hosting: Record<string, string[]>;
+  authentication: Record<string, string[]>;
+}
+
+// Keep the old interfaces for backwards compatibility with existing code
+// These can be deprecated and eventually removed
 
 export interface TechStackFramework {
   name: string;

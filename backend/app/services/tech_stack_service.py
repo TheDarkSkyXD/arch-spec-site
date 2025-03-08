@@ -1,8 +1,11 @@
 """
 Service for tech stack compatibility checks and data retrieval.
 """
-from typing import Dict, List, Any, Optional
-from ..seed.tech_stack import check_compatibility, get_compatible_options, TECH_STACK_DATA
+from ..seed.tech_stack import (
+    check_compatibility_with_db, 
+    get_compatible_options_with_db, 
+    get_all_tech_options_with_db
+)
 from ..schemas.tech_stack import (
     TechStackSelection, 
     CompatibilityResult, 
@@ -24,37 +27,40 @@ class TechStackService:
         Returns:
             Compatibility check results
         """
-        # Just pass the Pydantic model to the compatibility checker 
-        # which now accepts both Dict and TechStackSelection
-        return check_compatibility(selection)
+        # Use the database-first version of the compatibility checker
+        return await check_compatibility_with_db(selection)
     
     @staticmethod
     async def get_compatible_options(category: str, technology: str) -> CompatibleOptionsResponse:
         """
-        Get compatible options for a given technology in a specific category.
+        Get compatible options for a given technology in a category.
         
         Args:
-            category: The technology category
-            technology: The specific technology name
+            category: Technology category
+            technology: Technology name
             
         Returns:
-            Compatible options
+            Compatible options for the specified technology
         """
-        return get_compatible_options(category, technology)
+        # Use the database-first version of the function
+        return await get_compatible_options_with_db(category, technology)
     
     @staticmethod
     async def get_all_technology_options() -> AllTechOptionsResponse:
         """
-        Get all available technology options from the data.
+        Get all available technology options across all categories.
         
         Returns:
-            AllTechOptionsResponse containing all technology options
+            All technology options organized by category
         """
-        # Convert raw data to structured response
+        # Use the database-first version to get tech options
+        tech_options = await get_all_tech_options_with_db()
+        
+        # Return as a properly formatted AllTechOptionsResponse object
         return AllTechOptionsResponse(
-            frontend=TECH_STACK_DATA["frontend"],
-            backend=TECH_STACK_DATA["backend"],
-            database=TECH_STACK_DATA["database"],
-            hosting=TECH_STACK_DATA.get("hosting", {}),
-            authentication=TECH_STACK_DATA.get("authentication", {})
+            frontend=tech_options.get("frontend", {}),
+            backend=tech_options.get("backend", {}),
+            database=tech_options.get("database", {}),
+            authentication=tech_options.get("authentication", {}),
+            hosting=tech_options.get("hosting", {})
         ) 

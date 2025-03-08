@@ -83,9 +83,9 @@ export interface EntityField {
   generated?: boolean;
   unique?: boolean;
   required?: boolean;
-  default?: string;
+  default?: string | number | boolean;
   enum?: string[];
-  foreignKey?: Record<string, any>;
+  foreignKey?: Record<string, string | number | boolean>;
 }
 
 export interface Entity {
@@ -188,4 +188,13 @@ export interface ProjectTemplate {
   projectStructure: ProjectStructure;
   deployment: Deployment;
   documentation: Documentation;
+}
+
+export interface ProjectTemplateResponse {
+  id: string;
+  template: ProjectTemplate;
+}
+
+export interface ProjectTemplateList {
+  templates: ProjectTemplateResponse[];
 }

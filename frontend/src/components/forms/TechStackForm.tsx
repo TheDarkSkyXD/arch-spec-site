@@ -7,6 +7,8 @@ import {
   TechStackData,
   TechStackSelection,
   CompatibilityResult,
+  CompatibleOptionsResponse,
+  Technology,
 } from "../../types/techStack";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
@@ -181,7 +183,7 @@ const TechStackForm = ({
       if (!category || !technology) return;
 
       try {
-        const response = await axios.post(
+        const response = await axios.post<CompatibleOptionsResponse>(
           `${API_URL}/api/tech-stack/compatibility/options`,
           {
             category,
@@ -235,6 +237,23 @@ const TechStackForm = ({
     return <div className="p-4">Loading tech stack options...</div>;
   }
 
+  // Helper function to get frameworks from the updated TechStackData structure
+  const getFrontendFrameworks = (): Technology[] => {
+    return techStackOptions?.frontend?.frameworks || [];
+  };
+
+  // Helper function to get backend frameworks from the updated TechStackData structure
+  const getBackendFrameworks = (): Technology[] => {
+    return techStackOptions?.backend?.frameworks || [];
+  };
+
+  // Helper function to get all databases (SQL and NoSQL)
+  const getAllDatabases = (): Technology[] => {
+    const sqlDatabases = techStackOptions?.database?.sql || [];
+    const nosqlDatabases = techStackOptions?.database?.nosql || [];
+    return [...sqlDatabases, ...nosqlDatabases];
+  };
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
       {/* Compatibility Issues Warning */}
@@ -272,7 +291,7 @@ const TechStackForm = ({
               }`}
             >
               <option value="">Select Framework</option>
-              {techStackOptions.frontend.frameworks.map((framework) => (
+              {getFrontendFrameworks().map((framework) => (
                 <option key={framework.name} value={framework.name}>
                   {framework.name}
                 </option>
@@ -380,7 +399,7 @@ const TechStackForm = ({
               }`}
             >
               <option value="">Select Backend Framework</option>
-              {techStackOptions.backend.frameworks.map((framework) => (
+              {getBackendFrameworks().map((framework) => (
                 <option key={framework.name} value={framework.name}>
                   {framework.name}
                 </option>
@@ -437,11 +456,17 @@ const TechStackForm = ({
               disabled={!backend || databaseOptions.length === 0}
             >
               <option value="">Select Database Type</option>
-              {databaseOptions.map((db) => (
-                <option key={db} value={db}>
-                  {db}
-                </option>
-              ))}
+              {databaseOptions.length > 0
+                ? databaseOptions.map((db) => (
+                    <option key={db} value={db}>
+                      {db}
+                    </option>
+                  ))
+                : getAllDatabases().map((db) => (
+                    <option key={db.name} value={db.name}>
+                      {db.name}
+                    </option>
+                  ))}
             </select>
             {errors.database && (
               <p className="mt-1 text-sm text-red-600">
