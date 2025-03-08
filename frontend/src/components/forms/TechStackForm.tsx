@@ -5,8 +5,6 @@ import { useEffect, useState } from "react";
 import {
   TechStackData,
   TechStackSelection,
-  CompatibilityResult,
-  CompatibleOptionsResponse,
   Technology,
 } from "../../types/techStack";
 import { techStackService } from "../../services/techStackService";
