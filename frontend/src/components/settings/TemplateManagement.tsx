@@ -58,9 +58,11 @@ const TemplateManagement = () => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+    <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-6">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold">Project Templates</h2>
+        <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100">
+          Project Templates
+        </h2>
         <button
           onClick={handleCreateNew}
           className="px-3 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 flex items-center text-sm"
@@ -86,7 +88,7 @@ const TemplateManagement = () => {
           {isCreating ? (
             <TemplateCreateForm
               onCancel={handleCancel}
-              onTemplateCreated={handleTemplateUpdated}
+              onSave={handleTemplateUpdated}
             />
           ) : isEditing && selectedTemplate ? (
             <TemplateEditForm

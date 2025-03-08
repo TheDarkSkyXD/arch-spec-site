@@ -83,11 +83,13 @@ const TechStackView = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center border-b pb-4">
-        <h2 className="text-2xl font-semibold">Tech Stack Management</h2>
+      <div className="flex justify-between items-center border-b dark:border-slate-700 pb-4">
+        <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">
+          Tech Stack Management
+        </h2>
         <div className="flex space-x-2">
           <button
-            className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded flex items-center gap-1"
+            className="px-3 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 rounded flex items-center gap-1"
             onClick={fetchTechStackData}
             disabled={isLoading}
           >
@@ -99,7 +101,7 @@ const TechStackView = () => {
             <span>Refresh</span>
           </button>
           <button
-            className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded flex items-center gap-1"
+            className="px-3 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 rounded flex items-center gap-1"
             onClick={handleDownloadJson}
             disabled={!techStackData}
           >
@@ -118,20 +120,20 @@ const TechStackView = () => {
       </div>
 
       {queryError && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded text-red-700">
+        <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded text-red-700 dark:text-red-300">
           Error loading tech stack data. Please refresh the page or try again
           later.
         </div>
       )}
 
       {error && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded text-red-700">
+        <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded text-red-700 dark:text-red-300">
           {error}
         </div>
       )}
 
       {hasChanges && (
-        <div className="p-4 bg-yellow-50 border border-yellow-200 rounded text-yellow-800">
+        <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded text-yellow-800 dark:text-yellow-300">
           You have unsaved changes.
         </div>
       )}

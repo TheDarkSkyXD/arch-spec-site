@@ -50,13 +50,13 @@ const Projects = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "draft":
-        return "bg-slate-100 text-slate-800";
+        return "bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-300";
       case "in_progress":
-        return "bg-blue-100 text-blue-800";
+        return "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300";
       case "completed":
-        return "bg-green-100 text-green-800";
+        return "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300";
       default:
-        return "bg-slate-100 text-slate-800";
+        return "bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-300";
     }
   };
 
@@ -88,10 +88,10 @@ const Projects = () => {
         {/* Header with title and action button */}
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-slate-800 font-heading">
+            <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 font-heading">
               Projects
             </h1>
-            <p className="text-slate-500 mt-1">
+            <p className="text-slate-500 dark:text-slate-400 mt-1">
               Manage your software architecture specification projects
             </p>
           </div>
@@ -105,7 +105,7 @@ const Projects = () => {
         </div>
 
         {/* Search and filters bar */}
-        <div className="bg-white p-4 rounded-lg shadow-sm border border-slate-200 mb-6">
+        <div className="bg-white dark:bg-slate-800 p-4 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 mb-6">
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -114,12 +114,12 @@ const Projects = () => {
               <input
                 type="text"
                 placeholder="Search projects..."
-                className="w-full py-2 pl-10 pr-4 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                className="w-full py-2 pl-10 pr-4 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-slate-700 dark:text-slate-200 dark:placeholder-slate-400"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-700 hover:bg-slate-50">
+            <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-600">
               <Filter size={16} />
               <span>Filter</span>
             </button>
@@ -129,16 +129,16 @@ const Projects = () => {
         {/* Projects content */}
         <div className="w-full">
           {isLoading ? (
-            <div className="flex justify-center items-center py-16 bg-white rounded-lg shadow-sm border border-slate-200">
+            <div className="flex justify-center items-center py-16 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
               <Loader className="animate-spin h-8 w-8 text-primary-600 mr-3" />
-              <span className="text-slate-600 font-medium">
+              <span className="text-slate-600 dark:text-slate-300 font-medium">
                 Loading projects...
               </span>
             </div>
           ) : error ? (
-            <div className="flex justify-center items-center py-16 bg-white rounded-lg shadow-sm border border-slate-200">
+            <div className="flex justify-center items-center py-16 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
               <AlertCircle className="h-8 w-8 text-red-600 mr-3" />
-              <span className="text-slate-600 font-medium">
+              <span className="text-slate-600 dark:text-slate-300 font-medium">
                 Error loading projects. Please try again.
               </span>
             </div>
@@ -147,7 +147,7 @@ const Projects = () => {
               {filteredProjects.map((project) => (
                 <div
                   key={project.id}
-                  className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow duration-200"
+                  className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden hover:shadow-md transition-shadow duration-200"
                 >
                   <div className="p-4">
                     <div className="flex justify-between items-start mb-2">
@@ -159,27 +159,27 @@ const Projects = () => {
                         {getStatusDot(project.status)}
                         {project.status.replace("_", " ")}
                       </div>
-                      <button className="text-slate-400 hover:text-slate-600 p-1 rounded-full hover:bg-slate-100">
+                      <button className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700">
                         <MoreVertical size={16} />
                       </button>
                     </div>
-                    <h3 className="text-lg font-semibold text-slate-800 mb-1">
+                    <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-1">
                       {project.name}
                     </h3>
-                    <p className="text-slate-500 text-sm line-clamp-2 mb-4">
+                    <p className="text-slate-500 dark:text-slate-400 text-sm line-clamp-2 mb-4">
                       {project.description}
                     </p>
 
                     {/* Project metadata */}
                     <div className="space-y-2 mb-4">
                       {project.domain && (
-                        <div className="flex items-center text-xs text-slate-500">
+                        <div className="flex items-center text-xs text-slate-500 dark:text-slate-400">
                           <span className="font-medium mr-2">Domain:</span>
                           {project.domain}
                         </div>
                       )}
                       {project.organization && (
-                        <div className="flex items-center text-xs text-slate-500">
+                        <div className="flex items-center text-xs text-slate-500 dark:text-slate-400">
                           <span className="font-medium mr-2">
                             Organization:
                           </span>
@@ -187,14 +187,14 @@ const Projects = () => {
                         </div>
                       )}
                       {project.project_lead && (
-                        <div className="flex items-center text-xs text-slate-500">
+                        <div className="flex items-center text-xs text-slate-500 dark:text-slate-400">
                           <Users size={12} className="mr-1" />
                           <span className="font-medium mr-2">Lead:</span>
                           {project.project_lead}
                         </div>
                       )}
                       {project.functional_requirements && (
-                        <div className="flex items-center text-xs text-slate-500">
+                        <div className="flex items-center text-xs text-slate-500 dark:text-slate-400">
                           <CheckCircle size={12} className="mr-1" />
                           <span className="font-medium mr-2">
                             Requirements:
@@ -205,7 +205,7 @@ const Projects = () => {
                       )}
                     </div>
 
-                    <div className="flex justify-between items-center text-xs text-slate-500 pt-4 border-t border-slate-100">
+                    <div className="flex justify-between items-center text-xs text-slate-500 dark:text-slate-400 pt-4 border-t border-slate-100 dark:border-slate-700">
                       <span>
                         Updated{" "}
                         {new Date(project.updated_at).toLocaleDateString()}
@@ -222,14 +222,17 @@ const Projects = () => {
               ))}
             </div>
           ) : (
-            <div className="text-center py-16 bg-white rounded-lg shadow-sm border border-slate-200">
-              <div className="mx-auto w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
-                <FolderPlus size={24} className="text-slate-400" />
+            <div className="text-center py-16 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
+              <div className="mx-auto w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center mb-4">
+                <FolderPlus
+                  size={24}
+                  className="text-slate-400 dark:text-slate-500"
+                />
               </div>
-              <h3 className="text-xl font-semibold text-slate-800 mb-2">
+              <h3 className="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-2">
                 No projects yet
               </h3>
-              <p className="text-slate-500 max-w-md mx-auto mb-6">
+              <p className="text-slate-500 dark:text-slate-400 max-w-md mx-auto mb-6">
                 Create your first project to get started building your
                 architecture specifications
               </p>

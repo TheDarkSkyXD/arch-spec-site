@@ -2,16 +2,13 @@ import { Link, useLocation } from "react-router-dom";
 import {
   FileCode,
   Package,
-  FileOutput,
   Sliders,
   Users,
   Database,
   PlusCircle,
-  BookOpen,
   ChevronRight,
   Home,
   Settings,
-  HelpCircle,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -64,30 +61,6 @@ const Sidebar = ({ projectId }: SidebarProps) => {
             >
               <Package className="h-4 w-4 mr-3" />
               Templates
-            </Link>
-
-            <Link
-              to="/export"
-              className={`flex items-center px-3 py-2 text-sm rounded-md transition-all duration-200 ${
-                isActive("/export")
-                  ? "bg-slate-100 dark:bg-slate-800 text-primary-600 font-medium"
-                  : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-primary-600"
-              }`}
-            >
-              <FileOutput className="h-4 w-4 mr-3" />
-              Export
-            </Link>
-
-            <Link
-              to="/docs"
-              className={`flex items-center px-3 py-2 text-sm rounded-md transition-all duration-200 ${
-                isActive("/docs")
-                  ? "bg-slate-100 dark:bg-slate-800 text-primary-600 font-medium"
-                  : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-primary-600"
-              }`}
-            >
-              <BookOpen className="h-4 w-4 mr-3" />
-              Documentation
             </Link>
           </div>
 
@@ -159,8 +132,10 @@ const Sidebar = ({ projectId }: SidebarProps) => {
               </div>
             </div>
           )}
+        </nav>
 
-          <div className="space-y-1">
+        <div className="p-4 border-t border-slate-100 dark:border-slate-800">
+          <div className="mb-4">
             <Link
               to="/settings"
               className="flex items-center px-3 py-2 text-sm rounded-md transition-all duration-200 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-primary-600"
@@ -168,17 +143,7 @@ const Sidebar = ({ projectId }: SidebarProps) => {
               <Settings className="h-4 w-4 mr-3" />
               Settings
             </Link>
-            <Link
-              to="/help"
-              className="flex items-center px-3 py-2 text-sm rounded-md transition-all duration-200 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-primary-600"
-            >
-              <HelpCircle className="h-4 w-4 mr-3" />
-              Help & Resources
-            </Link>
           </div>
-        </nav>
-
-        <div className="p-4 border-t border-slate-100 dark:border-slate-800">
           <Link
             to="/new-project"
             className="bg-primary-600 hover:bg-primary-700 text-white rounded-md py-2 px-4 w-full flex items-center justify-center"

@@ -50,13 +50,13 @@ const TemplateDetail = ({
   if (!selectedTemplate && !isCreating) {
     return (
       <div className="text-center py-12">
-        <div className="bg-slate-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-          <Info className="w-8 h-8 text-slate-400" />
+        <div className="bg-slate-100 dark:bg-slate-700 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+          <Info className="w-8 h-8 text-slate-400 dark:text-slate-500" />
         </div>
-        <h3 className="text-lg font-medium text-slate-700 mb-2">
+        <h3 className="text-lg font-medium text-slate-700 dark:text-slate-200 mb-2">
           Select a template
         </h3>
-        <p className="text-slate-500 max-w-md mx-auto mb-6">
+        <p className="text-slate-500 dark:text-slate-400 max-w-md mx-auto mb-6">
           Select a template from the list to view its details or create a new
           template.
         </p>
@@ -114,9 +114,11 @@ const TemplateDetail = ({
   // Template is selected - show detail view
   if (selectedTemplate) {
     return (
-      <div className="p-6 bg-white rounded-lg shadow-sm border border-slate-200">
+      <div className="p-6 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
         <div className="flex justify-between items-start mb-6">
-          <h2 className="text-xl font-semibold">{selectedTemplate.name}</h2>
+          <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100">
+            {selectedTemplate.name}
+          </h2>
           <div className="flex space-x-3">
             <button
               onClick={onEdit}
@@ -131,61 +133,75 @@ const TemplateDetail = ({
         {/* Main template summary view */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div>
-            <h3 className="text-sm font-medium text-slate-500 mb-1">
+            <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
               Description
             </h3>
-            <p className="text-slate-800">{selectedTemplate.description}</p>
+            <p className="text-slate-800 dark:text-slate-200">
+              {selectedTemplate.description}
+            </p>
           </div>
           <div>
-            <h3 className="text-sm font-medium text-slate-500 mb-1">Version</h3>
-            <p className="text-slate-800">{selectedTemplate.version}</p>
+            <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
+              Version
+            </h3>
+            <p className="text-slate-800 dark:text-slate-200">
+              {selectedTemplate.version}
+            </p>
           </div>
         </div>
 
-        <div className="border-t border-slate-200 pt-6">
-          <h3 className="text-sm font-medium text-slate-700 mb-3">
+        <div className="border-t border-slate-200 dark:border-slate-700 pt-6">
+          <h3 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">
             Template Structure
           </h3>
 
           <div className="space-y-4">
             <div>
-              <h4 className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">
+              <h4 className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
                 Tech Stack
               </h4>
-              <div className="bg-slate-50 p-3 rounded-md">
+              <div className="bg-slate-50 dark:bg-slate-700 p-3 rounded-md">
                 {selectedTemplate.techStack ? (
                   <div className="grid grid-cols-2 gap-2 text-sm">
                     <div>
-                      <span className="text-slate-500">Frontend:</span>{" "}
-                      <span className="font-medium">
+                      <span className="text-slate-500 dark:text-slate-400">
+                        Frontend:
+                      </span>{" "}
+                      <span className="font-medium text-slate-700 dark:text-slate-200">
                         {selectedTemplate.techStack.frontend?.framework ||
                           "Not specified"}
                       </span>
                     </div>
                     <div>
-                      <span className="text-slate-500">Backend:</span>{" "}
-                      <span className="font-medium">
+                      <span className="text-slate-500 dark:text-slate-400">
+                        Backend:
+                      </span>{" "}
+                      <span className="font-medium text-slate-700 dark:text-slate-200">
                         {selectedTemplate.techStack.backend?.type ||
                           "Not specified"}
                       </span>
                     </div>
                     <div>
-                      <span className="text-slate-500">Database:</span>{" "}
-                      <span className="font-medium">
+                      <span className="text-slate-500 dark:text-slate-400">
+                        Database:
+                      </span>{" "}
+                      <span className="font-medium text-slate-700 dark:text-slate-200">
                         {selectedTemplate.techStack.database?.type ||
                           "Not specified"}
                       </span>
                     </div>
                     <div>
-                      <span className="text-slate-500">Authentication:</span>{" "}
-                      <span className="font-medium">
+                      <span className="text-slate-500 dark:text-slate-400">
+                        Authentication:
+                      </span>{" "}
+                      <span className="font-medium text-slate-700 dark:text-slate-200">
                         {selectedTemplate.techStack.authentication?.provider ||
                           "Not specified"}
                       </span>
                     </div>
                   </div>
                 ) : (
-                  <span className="text-slate-500 text-sm">
+                  <span className="text-slate-500 dark:text-slate-400 text-sm">
                     No tech stack defined
                   </span>
                 )}
@@ -193,10 +209,10 @@ const TemplateDetail = ({
             </div>
 
             <div>
-              <h4 className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">
+              <h4 className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
                 Features
               </h4>
-              <div className="bg-slate-50 p-3 rounded-md">
+              <div className="bg-slate-50 dark:bg-slate-700 p-3 rounded-md">
                 {selectedTemplate.features?.coreModules &&
                 selectedTemplate.features.coreModules.length > 0 ? (
                   <div className="grid grid-cols-1 gap-2">
@@ -209,24 +225,28 @@ const TemplateDetail = ({
                         >
                           <span
                             className={`w-2 h-2 rounded-full ${
-                              feature.enabled ? "bg-green-500" : "bg-slate-300"
+                              feature.enabled
+                                ? "bg-green-500"
+                                : "bg-slate-300 dark:bg-slate-600"
                             }`}
                           ></span>
-                          <span className="font-medium">{feature.name}</span>
-                          <span className="text-slate-500 text-xs">
+                          <span className="font-medium text-slate-700 dark:text-slate-200">
+                            {feature.name}
+                          </span>
+                          <span className="text-slate-500 dark:text-slate-400 text-xs">
                             {feature.description}
                           </span>
                         </div>
                       ))}
                     {selectedTemplate.features.coreModules.length > 5 && (
-                      <div className="text-xs text-slate-500 italic">
+                      <div className="text-xs text-slate-500 dark:text-slate-400 italic">
                         + {selectedTemplate.features.coreModules.length - 5}{" "}
                         more features
                       </div>
                     )}
                   </div>
                 ) : (
-                  <span className="text-slate-500 text-sm">
+                  <span className="text-slate-500 dark:text-slate-400 text-sm">
                     No features defined
                   </span>
                 )}
@@ -236,18 +256,18 @@ const TemplateDetail = ({
         </div>
 
         {/* Collapsible JSON Editor section */}
-        <div className="mt-8 border-t border-slate-200 pt-4">
+        <div className="mt-8 border-t border-slate-200 dark:border-slate-700 pt-4">
           <button
             onClick={() => setIsJsonExpanded(!isJsonExpanded)}
-            className="w-full flex items-center justify-between text-sm font-medium text-slate-700 hover:text-primary-600 transition-colors"
+            className="w-full flex items-center justify-between text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-500 transition-colors"
           >
             <span className="flex items-center">
               <span className="mr-2">View/Edit JSON Data</span>
-              <span className="text-xs bg-slate-100 px-2 py-0.5 rounded text-slate-600">
+              <span className="text-xs bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded text-slate-600 dark:text-slate-400">
                 Developer
               </span>
               {isJsonEditing && (
-                <span className="ml-2 text-xs bg-yellow-100 px-2 py-0.5 rounded text-yellow-700">
+                <span className="ml-2 text-xs bg-yellow-100 dark:bg-yellow-900/30 px-2 py-0.5 rounded text-yellow-700 dark:text-yellow-400">
                   Editing
                 </span>
               )}
@@ -264,13 +284,13 @@ const TemplateDetail = ({
               {/* JSON Editor and controls */}
               <div className="flex justify-between items-center mb-4">
                 <div className="flex items-center">
-                  <h4 className="text-sm font-medium text-slate-700">
+                  <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300">
                     Template JSON
                   </h4>
                   {!isJsonEditing && (
                     <button
                       onClick={() => setIsJsonEditing(true)}
-                      className="ml-4 px-3 py-1 text-xs border border-slate-300 text-slate-700 rounded-md hover:bg-slate-50 flex items-center"
+                      className="ml-4 px-3 py-1 text-xs border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-md hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center"
                     >
                       <Edit className="w-3.5 h-3.5 mr-1" />
                       Edit JSON
@@ -286,7 +306,7 @@ const TemplateDetail = ({
                         setEditedTemplate(selectedTemplate); // Reset to original
                         setSaveError(null);
                       }}
-                      className="px-3 py-1.5 text-sm border border-slate-300 text-slate-700 rounded-md hover:bg-slate-50 flex items-center"
+                      className="px-3 py-1.5 text-sm border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-md hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center"
                       disabled={isSaving}
                     >
                       <X className="w-4 h-4 mr-1.5" />
@@ -314,7 +334,7 @@ const TemplateDetail = ({
               </div>
 
               {saveError && (
-                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-600 text-sm">
+                <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md text-red-600 dark:text-red-400 text-sm">
                   {saveError}
                 </div>
               )}
@@ -328,8 +348,8 @@ const TemplateDetail = ({
                 readOnly={!isJsonEditing}
               />
 
-              <div className="mt-4 bg-blue-50 border border-blue-200 rounded-md p-4">
-                <p className="text-sm text-blue-700">
+              <div className="mt-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md p-4">
+                <p className="text-sm text-blue-700 dark:text-blue-400">
                   {isJsonEditing ? (
                     <strong>Warning:</strong>
                   ) : (
