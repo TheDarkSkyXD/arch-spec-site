@@ -4,6 +4,24 @@ from pydantic import BaseModel, Field
 import uuid
 
 from .templates import ProjectTemplate, ProjectDefaults
+from .shared_schemas import (
+    TechStackData, Features, Pages, DataModel, Api, 
+    Testing, ProjectStructure, Deployment, Documentation
+)
+
+
+class TimelineItem(BaseModel):
+    """Model for a timeline item."""
+    date: str
+    milestone: str
+    description: Optional[str] = None
+
+
+class BudgetItem(BaseModel):
+    """Model for a budget item."""
+    category: str
+    amount: float
+    notes: Optional[str] = None
 
 
 class Requirement(BaseModel):
@@ -29,10 +47,27 @@ class ProjectBase(BaseModel):
     domain: Optional[str] = None  # Business domain (e.g., "healthcare", "finance")
     organization: Optional[str] = None  # Organization name
     project_lead: Optional[str] = None  # Project lead name or ID
-    timeline: Optional[Dict[str, Any]] = None  # Project timeline information
-    budget: Optional[Dict[str, Any]] = None  # Budget information
-    functional_requirements: List[Requirement] = Field(default_factory=list)
-    non_functional_requirements: List[Requirement] = Field(default_factory=list)
+    
+    # References to sections stored in separate collections
+    # Original basic sections
+    has_timeline: bool = False
+    has_budget: bool = False
+    has_requirements: bool = False
+    has_metadata: bool = False
+    
+    # Architecture sections (previously part of template_data)
+    has_tech_stack: bool = False
+    has_features: bool = False
+    has_pages: bool = False
+    has_data_model: bool = False
+    has_api: bool = False
+    has_testing: bool = False
+    has_project_structure: bool = False
+    has_deployment: bool = False
+    has_documentation: bool = False
+    
+    # Original template information (kept for reference)
+    template_id: Optional[str] = None  # ID of the template used to create this project
     
     class Config:
         allow_population_by_field_name = True
@@ -55,12 +90,17 @@ class ProjectUpdate(BaseModel):
     domain: Optional[str] = None
     organization: Optional[str] = None
     project_lead: Optional[str] = None
-    timeline: Optional[Dict[str, Any]] = None
-    budget: Optional[Dict[str, Any]] = None
+    
+    # These fields are kept for backward compatibility with existing APIs
+    # In the new sectional approach, these updates should be directed to specific section endpoints
+    timeline: Optional[Dict[str, TimelineItem]] = None
+    budget: Optional[Dict[str, BudgetItem]] = None
     functional_requirements: Optional[List[Requirement]] = None
     non_functional_requirements: Optional[List[Requirement]] = None
     metadata: Optional[Dict[str, Any]] = None
-    template_data: Optional[Dict[str, Any]] = None  # Allow updating specific parts of the template
+    
+    # Retained for backward compatibility
+    template_data: Optional[ProjectTemplate] = None
     
     class Config:
         allow_population_by_field_name = True
@@ -73,8 +113,6 @@ class ProjectInDB(ProjectBase):
     updated_at: datetime = Field(default_factory=datetime.utcnow)
     status: str = "draft"
     team_members: List[str] = Field(default_factory=list)  # List of team member IDs
-    metadata: Dict[str, Any] = Field(default_factory=dict)
-    template_data: ProjectTemplate  # The complete template data associated with this project
     version: int = 1  # Project version to track changes
     revision_history: List[Dict[str, Any]] = Field(default_factory=list)  # History of changes
     
@@ -83,6 +121,28 @@ class ProjectInDB(ProjectBase):
         """Create a new project from a template and project data."""
         # Initialize project with template defaults
         project_defaults = template.project_defaults
+        
+        # Set basic section flags based on data availability
+        has_timeline = project_data.timeline is not None or project_defaults.timeline is not None
+        has_budget = project_data.budget is not None or project_defaults.budget is not None
+        has_requirements = (
+            (project_data.functional_requirements and len(project_data.functional_requirements) > 0) or
+            (project_data.non_functional_requirements and len(project_data.non_functional_requirements) > 0) or
+            (project_defaults.functional_requirements and len(project_defaults.functional_requirements) > 0) or
+            (project_defaults.non_functional_requirements and len(project_defaults.non_functional_requirements) > 0)
+        )
+        has_metadata = project_defaults.metadata is not None
+        
+        # Set architecture section flags based on template data availability
+        has_tech_stack = hasattr(template, 'tech_stack') and template.tech_stack is not None
+        has_features = hasattr(template, 'features') and template.features is not None
+        has_pages = hasattr(template, 'pages') and template.pages is not None
+        has_data_model = hasattr(template, 'data_model') and template.data_model is not None
+        has_api = hasattr(template, 'api') and template.api is not None
+        has_testing = hasattr(template, 'testing') and template.testing is not None
+        has_project_structure = hasattr(template, 'project_structure') and template.project_structure is not None
+        has_deployment = hasattr(template, 'deployment') and template.deployment is not None
+        has_documentation = hasattr(template, 'documentation') and template.documentation is not None
         
         # Create the project with data from the template and provided project data
         project = cls(
@@ -94,11 +154,23 @@ class ProjectInDB(ProjectBase):
             domain=project_data.domain,
             organization=project_data.organization,
             project_lead=project_data.project_lead,
-            timeline=project_data.timeline,
-            budget=project_data.budget,
-            functional_requirements=project_data.functional_requirements or [],
-            non_functional_requirements=project_data.non_functional_requirements or [],
-            template_data=template,
+            template_id=template.id if hasattr(template, 'id') else None,
+            
+            # Set section availability flags
+            has_timeline=has_timeline,
+            has_budget=has_budget,
+            has_requirements=has_requirements,
+            has_metadata=has_metadata,
+            
+            has_tech_stack=has_tech_stack,
+            has_features=has_features,
+            has_pages=has_pages,
+            has_data_model=has_data_model,
+            has_api=has_api,
+            has_testing=has_testing,
+            has_project_structure=has_project_structure,
+            has_deployment=has_deployment,
+            has_documentation=has_documentation,
         )
         
         return project
@@ -123,6 +195,25 @@ class ProjectResponse(BaseModel):
     project_lead: Optional[str] = None
     created_at: datetime
     updated_at: datetime
+    template_id: Optional[str] = None
+    
+    # Section availability flags
+    has_timeline: bool = False
+    has_budget: bool = False
+    has_requirements: bool = False
+    has_metadata: bool = False
+    
+    has_tech_stack: bool = False
+    has_features: bool = False
+    has_pages: bool = False
+    has_data_model: bool = False
+    has_api: bool = False
+    has_testing: bool = False
+    has_project_structure: bool = False
+    has_deployment: bool = False
+    has_documentation: bool = False
+    
+    # These fields will be populated from separate section documents when needed
     functional_requirements: List[Requirement] = Field(default_factory=list)
     non_functional_requirements: List[Requirement] = Field(default_factory=list)
     
@@ -131,10 +222,25 @@ class ProjectResponse(BaseModel):
 
 
 class ProjectDetailResponse(ProjectResponse):
-    """Detailed response model for Project data including template data."""
-    template_data: ProjectTemplate
+    """Detailed response model for Project data including all sections."""
     team_members: List[str]
-    metadata: Dict[str, Any]
+    metadata: Dict[str, Any] = Field(default_factory=dict)
     version: int
-    timeline: Optional[Dict[str, Any]] = None
-    budget: Optional[Dict[str, Any]] = None 
+    
+    # Basic section data populated from separate collections
+    timeline: Optional[Dict[str, TimelineItem]] = None
+    budget: Optional[Dict[str, BudgetItem]] = None
+    
+    # Architecture section data populated from separate collections
+    tech_stack: Optional[TechStackData] = None
+    features: Optional[Features] = None
+    pages: Optional[Pages] = None
+    data_model: Optional[DataModel] = None
+    api: Optional[Api] = None
+    testing: Optional[Testing] = None
+    project_structure: Optional[ProjectStructure] = None
+    deployment: Optional[Deployment] = None
+    documentation: Optional[Documentation] = None
+    
+    class Config:
+        allow_population_by_field_name = True 

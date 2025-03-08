@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ProjectTemplate } from "../../types";
+import { ProjectTemplate } from "../../types/project";
 import { useTemplates } from "../../hooks/useDataQueries";
 // Create inline version of TemplateCard component as a temporary solution
 // Import will be fixed automatically when TypeScript environment is correctly set up
@@ -19,15 +19,17 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
   // Get icon based on template type
   const getTemplateIcon = () => {
     try {
-      if (!template.techStack || !template.techStack.frontend) {
+      if (!template.tech_stack || !template.tech_stack.frontend) {
         return "🧩";
       }
 
-      if (template.techStack.frontend.framework === "React") {
+      // Frontend is now a string rather than an object with framework property
+      const frontend = String(template.tech_stack.frontend).toLowerCase();
+      if (frontend.includes("react")) {
         return "⚛️";
-      } else if (template.techStack.frontend.framework === "Vue.js") {
+      } else if (frontend.includes("vue")) {
         return "🟢";
-      } else if (template.techStack.frontend.framework === "Angular") {
+      } else if (frontend.includes("angular")) {
         return "🔴";
       } else {
         return "🧩";
@@ -40,11 +42,11 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
 
   const getFeaturesText = () => {
     // Add null checks to avoid accessing properties of undefined
-    if (!template.features || !template.features.coreModules) {
+    if (!template.features || !template.features.core_modules) {
       return "No features available";
     }
 
-    const enabledFeatures = template.features.coreModules
+    const enabledFeatures = template.features.core_modules
       .filter((feature) => feature.enabled)
       .map((feature) => feature.name);
 
@@ -82,19 +84,19 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
       </p>
 
       <div className="mt-3 flex flex-wrap gap-1">
-        {template.techStack?.frontend?.framework && (
+        {template.tech_stack?.frontend && (
           <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
-            {template.techStack.frontend.framework}
+            {String(template.tech_stack.frontend)}
           </span>
         )}
-        {template.techStack?.backend?.type && (
+        {template.tech_stack?.backend && (
           <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
-            {template.techStack.backend.type}
+            {String(template.tech_stack.backend)}
           </span>
         )}
-        {template.techStack?.database?.type && (
+        {template.tech_stack?.database && (
           <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
-            {template.techStack.database.type}
+            {String(template.tech_stack.database)}
           </span>
         )}
       </div>
@@ -107,7 +109,7 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
 };
 
 interface TemplateSelectorProps {
-  onTemplateSelect: (template: ProjectTemplate) => void;
+  onTemplateSelect: (template: ProjectTemplate | null) => void;
   selectedTemplateId?: string;
 }
 
@@ -151,6 +153,7 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
     const templateId = e.target.value;
     if (!templateId) {
       setSelectedTemplate(null);
+      onTemplateSelect(null);
       return;
     }
 
@@ -247,10 +250,13 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
         {/* Template cards */}
         {templates.map((template) => (
           <TemplateCard
-            key={template.name}
+            key={template.id || template.name}
             template={template}
-            isSelected={selectedTemplate?.name === template.name}
-            onSelect={() => setSelectedTemplate(template)}
+            isSelected={selectedTemplate?.id === template.id}
+            onSelect={() => {
+              setSelectedTemplate(template);
+              onTemplateSelect(template);
+            }}
           />
         ))}
       </div>

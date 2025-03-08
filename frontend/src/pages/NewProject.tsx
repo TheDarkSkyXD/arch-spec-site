@@ -9,23 +9,57 @@ import {
   ChevronLeft,
   ChevronRight,
   LayoutTemplate,
+  List,
+  Globe,
+  Server,
 } from "lucide-react";
 import MainLayout from "../layouts/MainLayout";
 import ProgressBar from "../components/common/ProgressBar";
 import ProjectBasicsForm from "../components/forms/ProjectBasicsForm";
 import TechStackForm from "../components/forms/TechStackForm";
+import RequirementsForm from "../components/forms/RequirementsForm";
+import FeaturesForm from "../components/forms/FeaturesForm";
+import PagesForm from "../components/forms/PagesForm";
+import ApiEndpointsForm from "../components/forms/ApiEndpointsForm";
+import ProjectReviewForm from "../components/forms/ProjectReviewForm";
 import { useProjectStore } from "../store/projectStore";
-import { ProjectTemplate } from "../types";
+import { ProjectCreate, ProjectTemplate, Requirement } from "../types/project";
 import TemplateSelector from "../components/templates/TemplateSelector";
 import TemplateDetails from "../components/templates/TemplateDetails";
 import { templatesService } from "../services/templatesService";
+
+// Type definitions for form data
+interface FeatureModule {
+  name: string;
+  description: string;
+  enabled: boolean;
+  optional: boolean;
+  providers: string[];
+}
+
+interface PageComponent {
+  name: string;
+  path: string;
+  components: string[];
+  enabled: boolean;
+}
+
+interface ApiEndpoint {
+  path: string;
+  description: string;
+  methods: string[];
+  auth: boolean;
+  roles: string[];
+}
 
 const steps = [
   { id: "template", name: "Template", icon: <LayoutTemplate size={16} /> },
   { id: "basics", name: "Project Basics", icon: <FileText size={16} /> },
   { id: "tech-stack", name: "Tech Stack", icon: <Code size={16} /> },
-  { id: "features", name: "Features", icon: <Database size={16} /> },
-  { id: "data-model", name: "Data Model", icon: <Database size={16} /> },
+  { id: "requirements", name: "Requirements", icon: <List size={16} /> },
+  { id: "features", name: "Features", icon: <Server size={16} /> },
+  { id: "pages", name: "Pages", icon: <Globe size={16} /> },
+  { id: "api", name: "API Endpoints", icon: <Database size={16} /> },
   { id: "review", name: "Review", icon: <CheckCircle size={16} /> },
 ];
 
@@ -48,27 +82,20 @@ const NewProject = () => {
   const [currentStep, setCurrentStep] = useState("template");
   const [selectedTemplate, setSelectedTemplate] =
     useState<ProjectTemplate | null>(null);
+  const [isBlankProject, setIsBlankProject] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [formData, setFormData] = useState({
-    basics: {
-      name: "",
-      description: "",
-      business_goals: "",
-      target_users: "",
-    },
-    techStack: {
-      frontend: "",
-      frontend_language: "",
-      ui_library: "",
-      state_management: "",
-      backend: "",
-      backend_provider: "",
-      database: "",
-      database_provider: "",
-      auth_provider: "",
-      auth_methods: "",
-    },
+  const [formData, setFormData] = useState<Partial<ProjectCreate>>({
+    name: "",
+    description: "",
+    template_type: "web_app",
+    business_goals: [],
+    target_users: [],
+    domain: "",
+    organization: "",
+    project_lead: "",
+    functional_requirements: [],
+    non_functional_requirements: [],
   });
 
   // Load template from API if templateId is provided
@@ -112,66 +139,228 @@ const NewProject = () => {
   // When a template is selected, update form data
   useEffect(() => {
     if (selectedTemplate) {
+      // Prepare empty defaults in case fields don't exist
+      const emptyFeatures = { core_modules: [] };
+      const emptyPages = { public: [], authenticated: [], admin: [] };
+      const emptyApi = { endpoints: [] };
+
+      // Parse business goals and target users into arrays if they're provided as strings
+      const parseStringToArray = (
+        value: string | string[] | undefined
+      ): string[] => {
+        if (!value) return [];
+        if (Array.isArray(value)) return value;
+        return value
+          .split(",")
+          .map((item) => item.trim())
+          .filter(Boolean);
+      };
+
+      // Extract values from project defaults
+      const businessGoals =
+        selectedTemplate.project_defaults?.business_goals || [];
+      const targetUsers = selectedTemplate.project_defaults?.target_users || [];
+
+      // Update form data with template values
       setFormData({
-        basics: {
-          name: selectedTemplate.projectDefaults?.name || "",
-          description: selectedTemplate.projectDefaults?.description || "",
-          business_goals: selectedTemplate.projectDefaults?.businessGoals
-            ?.length
-            ? selectedTemplate.projectDefaults.businessGoals.join(", ")
-            : "",
-          target_users: selectedTemplate.projectDefaults?.targetUsers?.length
-            ? selectedTemplate.projectDefaults.targetUsers.join(", ")
-            : "",
-        },
-        techStack: {
-          frontend: selectedTemplate.techStack?.frontend?.framework || "",
-          frontend_language:
-            selectedTemplate.techStack?.frontend?.language || "",
-          ui_library: selectedTemplate.techStack?.frontend?.uiLibrary || "",
-          state_management:
-            selectedTemplate.techStack?.frontend?.stateManagement || "",
-          backend: selectedTemplate.techStack?.backend?.type || "",
-          backend_provider: selectedTemplate.techStack?.backend?.provider || "",
-          database: selectedTemplate.techStack?.database?.type || "",
-          database_provider:
-            selectedTemplate.techStack?.database?.provider || "",
-          auth_provider:
-            selectedTemplate.techStack?.authentication?.provider || "",
-          auth_methods: selectedTemplate.techStack?.authentication?.methods
-            ?.length
-            ? selectedTemplate.techStack.authentication.methods.join(", ")
-            : "",
+        name: selectedTemplate.project_defaults?.name || "",
+        description: selectedTemplate.project_defaults?.description || "",
+        template_type: selectedTemplate.name || "web_app",
+        business_goals: parseStringToArray(businessGoals),
+        target_users: parseStringToArray(targetUsers),
+        functional_requirements: [],
+        non_functional_requirements: [],
+        template_id: templateId || undefined,
+        template_data: {
+          ...selectedTemplate,
+          features: selectedTemplate.features || emptyFeatures,
+          pages: selectedTemplate.pages || emptyPages,
+          api: selectedTemplate.api || emptyApi,
         },
       });
     }
-  }, [selectedTemplate]);
+  }, [selectedTemplate, templateId]);
 
   const handleTemplateSelect = (template: ProjectTemplate | null) => {
     setSelectedTemplate(template);
     if (template) {
+      setIsBlankProject(false);
       // After selecting a template, automatically move to the next step
       setCurrentStep("basics");
     }
   };
 
+  const handleBlankProjectSelect = () => {
+    setSelectedTemplate(null);
+    setIsBlankProject(true);
+
+    // Initialize with empty defaults for a blank project
+    setFormData({
+      name: "",
+      description: "",
+      template_type: "custom",
+      business_goals: [],
+      target_users: [],
+      domain: "",
+      organization: "",
+      project_lead: "",
+      functional_requirements: [],
+      non_functional_requirements: [],
+      template_id: undefined,
+      template_data: {
+        id: "blank",
+        name: "Custom Project",
+        description: "A custom project created from scratch",
+        version: "1.0.0",
+        project_defaults: {
+          name: "",
+          description: "",
+          business_goals: [],
+          target_users: [],
+        },
+        tech_stack: {
+          frontend: "",
+          backend: "",
+          database: "",
+        },
+        features: {
+          core_modules: [],
+        },
+        pages: {
+          public: [],
+          authenticated: [],
+          admin: [],
+        },
+        api: {
+          endpoints: [],
+        },
+      },
+    });
+
+    // Move to the basics step
+    setCurrentStep("basics");
+  };
+
   const handleBasicsSubmit = (data: Record<string, unknown>) => {
+    const businessGoals =
+      typeof data.business_goals === "string"
+        ? data.business_goals
+            .split(",")
+            .map((g) => g.trim())
+            .filter(Boolean)
+        : (data.business_goals as string[]) || [];
+
+    const targetUsers =
+      typeof data.target_users === "string"
+        ? data.target_users
+            .split(",")
+            .map((u) => u.trim())
+            .filter(Boolean)
+        : (data.target_users as string[]) || [];
+
     setFormData((prev) => ({
       ...prev,
-      basics: data as typeof prev.basics,
+      name: data.name as string,
+      description: data.description as string,
+      domain: data.domain as string,
+      organization: data.organization as string,
+      project_lead: data.project_lead as string,
+      business_goals: businessGoals,
+      target_users: targetUsers,
     }));
+
     setCurrentStep("tech-stack");
   };
 
   const handleTechStackSubmit = (data: Record<string, unknown>) => {
+    // Update the tech stack in the template_data
+    if (formData.template_data) {
+      setFormData((prev) => ({
+        ...prev,
+        template_data: {
+          ...prev.template_data!,
+          tech_stack: {
+            ...prev.template_data!.tech_stack,
+            frontend: data.frontend as string,
+            backend: data.backend as string,
+            database: data.database as string,
+          },
+        },
+      }));
+    }
+
+    setCurrentStep("requirements");
+  };
+
+  const handleRequirementsSubmit = (data: {
+    functional_requirements: Requirement[];
+    non_functional_requirements: Requirement[];
+  }) => {
     setFormData((prev) => ({
       ...prev,
-      techStack: data as typeof prev.techStack,
+      functional_requirements: data.functional_requirements,
+      non_functional_requirements: data.non_functional_requirements,
     }));
 
-    // For now, let's create the project and navigate to the dashboard
-    // In a real implementation, we would continue to the next steps
-    handleCreateProject();
+    setCurrentStep("features");
+  };
+
+  const handleFeaturesSubmit = (data: { core_modules: FeatureModule[] }) => {
+    // Update the features in the template_data
+    if (formData.template_data) {
+      setFormData((prev) => ({
+        ...prev,
+        template_data: {
+          ...prev.template_data!,
+          features: {
+            ...prev.template_data!.features,
+            core_modules: data.core_modules,
+          },
+        },
+      }));
+    }
+
+    setCurrentStep("pages");
+  };
+
+  const handlePagesSubmit = (data: {
+    public: PageComponent[];
+    authenticated: PageComponent[];
+    admin: PageComponent[];
+  }) => {
+    // Update the pages in the template_data
+    if (formData.template_data) {
+      setFormData((prev) => ({
+        ...prev,
+        template_data: {
+          ...prev.template_data!,
+          pages: {
+            public: data.public,
+            authenticated: data.authenticated,
+            admin: data.admin,
+          },
+        },
+      }));
+    }
+
+    setCurrentStep("api");
+  };
+
+  const handleApiEndpointsSubmit = (data: { endpoints: ApiEndpoint[] }) => {
+    // Update the API endpoints in the template_data
+    if (formData.template_data) {
+      setFormData((prev) => ({
+        ...prev,
+        template_data: {
+          ...prev.template_data!,
+          api: {
+            endpoints: data.endpoints,
+          },
+        },
+      }));
+    }
+
+    setCurrentStep("review");
   };
 
   const handleCreateProject = async () => {
@@ -189,17 +378,33 @@ const NewProject = () => {
         };
       }
 
-      await createProject({
-        name: formData.basics.name,
-        description: formData.basics.description,
-        template_type: selectedTemplate?.name || "custom",
-        status: "draft",
-        metadata,
-      });
+      // Create new project with all collected data
+      const newProject: ProjectCreate = {
+        name: formData.name || "",
+        description: formData.description || "",
+        template_type: formData.template_type || "web_app",
+        business_goals: formData.business_goals || [],
+        target_users: formData.target_users || [],
+        domain: formData.domain,
+        organization: formData.organization,
+        project_lead: formData.project_lead,
+        functional_requirements: formData.functional_requirements || [],
+        non_functional_requirements: formData.non_functional_requirements || [],
+        template_id: formData.template_id,
+        template_data: formData.template_data,
+      };
 
-      navigate("/");
+      const result = await createProject(newProject);
+
+      if (result) {
+        navigate(`/projects/${result.id}`);
+      } else {
+        // Handle error case
+        setError("Failed to create project. Please try again.");
+      }
     } catch (error) {
       console.error("Failed to create project:", error);
+      setError("An unexpected error occurred. Please try again.");
     }
   };
 
@@ -241,41 +446,32 @@ const NewProject = () => {
                   Browse all templates
                 </button>
               </div>
-
-              {/* Debug section for development - can be removed in production */}
-              <div className="mt-8 p-4 border border-slate-300 rounded-md bg-slate-50 text-left max-w-2xl mx-auto">
-                <h3 className="font-semibold text-slate-700 mb-2">
-                  Debug Information
-                </h3>
-                <p className="text-sm text-slate-600 mb-2">
-                  Template ID from URL:{" "}
-                  <code className="bg-slate-200 px-1 rounded">
-                    {templateId}
-                  </code>
-                </p>
-                <div className="text-sm text-slate-600">
-                  <p className="mb-1">Try these options:</p>
-                  <ol className="list-decimal pl-5 space-y-1">
-                    <li>
-                      Check that the template ID in the URL matches an actual
-                      template ID from the API
-                    </li>
-                    <li>
-                      Verify that the template API endpoint is working correctly
-                    </li>
-                    <li>
-                      Check the browser console for more detailed error
-                      information
-                    </li>
-                  </ol>
-                </div>
-              </div>
             </div>
           );
         }
 
         return (
           <div>
+            <div className="mb-6 text-center">
+              <button
+                className="mx-auto px-6 py-3 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-800 font-medium transition-colors"
+                onClick={handleBlankProjectSelect}
+              >
+                Start with a Blank Project
+              </button>
+            </div>
+
+            <div className="relative py-4 my-4">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-slate-200"></div>
+              </div>
+              <div className="relative flex justify-center">
+                <span className="px-2 bg-white text-sm text-slate-500">
+                  Or select a template
+                </span>
+              </div>
+            </div>
+
             <TemplateSelector
               onTemplateSelect={handleTemplateSelect}
               selectedTemplateId={templateId || undefined}
@@ -291,16 +487,90 @@ const NewProject = () => {
       case "basics":
         return (
           <ProjectBasicsForm
-            initialData={formData.basics}
+            initialData={{
+              name: formData.name || "",
+              description: formData.description || "",
+              business_goals: formData.business_goals?.join(", ") || "",
+              target_users: formData.target_users?.join(", ") || "",
+              domain: formData.domain || "",
+              organization: formData.organization || "",
+              project_lead: formData.project_lead || "",
+            }}
             onSubmit={handleBasicsSubmit}
           />
         );
       case "tech-stack":
         return (
           <TechStackForm
-            initialData={formData.techStack}
+            initialData={{
+              frontend: formData.template_data?.tech_stack?.frontend || "",
+              backend: formData.template_data?.tech_stack?.backend || "",
+              database: formData.template_data?.tech_stack?.database || "",
+              // Include other tech stack fields as needed
+              frontend_language: "",
+              ui_library: "",
+              state_management: "",
+              backend_provider: "",
+              database_provider: "",
+              auth_provider: "",
+              auth_methods: "",
+            }}
             onSubmit={handleTechStackSubmit}
             onBack={() => setCurrentStep("basics")}
+          />
+        );
+      case "requirements":
+        return (
+          <RequirementsForm
+            initialData={{
+              functional_requirements: formData.functional_requirements || [],
+              non_functional_requirements:
+                formData.non_functional_requirements || [],
+            }}
+            onSubmit={handleRequirementsSubmit}
+            onBack={() => setCurrentStep("tech-stack")}
+          />
+        );
+      case "features":
+        return (
+          <FeaturesForm
+            initialData={{
+              core_modules:
+                formData.template_data?.features?.core_modules || [],
+            }}
+            onSubmit={handleFeaturesSubmit}
+            onBack={() => setCurrentStep("requirements")}
+          />
+        );
+      case "pages":
+        return (
+          <PagesForm
+            initialData={{
+              public: formData.template_data?.pages?.public || [],
+              authenticated: formData.template_data?.pages?.authenticated || [],
+              admin: formData.template_data?.pages?.admin || [],
+            }}
+            onSubmit={handlePagesSubmit}
+            onBack={() => setCurrentStep("features")}
+          />
+        );
+      case "api":
+        return (
+          <ApiEndpointsForm
+            initialData={{
+              endpoints: formData.template_data?.api?.endpoints || [],
+            }}
+            onSubmit={handleApiEndpointsSubmit}
+            onBack={() => setCurrentStep("pages")}
+          />
+        );
+      case "review":
+        return (
+          <ProjectReviewForm
+            projectData={formData}
+            onSubmit={handleCreateProject}
+            onBack={() => setCurrentStep("api")}
+            onEdit={(section) => setCurrentStep(section)}
           />
         );
       default:
@@ -314,10 +584,15 @@ const NewProject = () => {
   const isLastStep = currentStepIndex === steps.length - 1;
 
   const submitCurrentForm = () => {
-    if (currentStep === "template" && selectedTemplate) {
-      // If template is selected, move to next step
-      setCurrentStep("basics");
-      return;
+    if (currentStep === "template") {
+      // For the template step, either use the selected template or start with a blank project
+      if (isBlankProject) {
+        setCurrentStep("basics");
+        return;
+      } else if (selectedTemplate) {
+        setCurrentStep("basics");
+        return;
+      }
     }
 
     const formElement = document.querySelector("form");
@@ -329,6 +604,10 @@ const NewProject = () => {
       formElement.dispatchEvent(submitEvent);
     }
   };
+
+  // Check if we can continue from the template step
+  const canContinueFromTemplate =
+    isBlankProject || (currentStep === "template" && selectedTemplate !== null);
 
   return (
     <MainLayout showSidebar={false}>
@@ -384,11 +663,17 @@ const NewProject = () => {
             <button
               onClick={submitCurrentForm}
               className={`flex items-center px-4 py-2 rounded-lg ${
-                currentStep === "template" && !selectedTemplate
+                currentStep === "template" &&
+                !selectedTemplate &&
+                !isBlankProject
                   ? "bg-slate-300 text-slate-500 cursor-not-allowed"
                   : "bg-primary-600 hover:bg-primary-700 text-white"
               }`}
-              disabled={currentStep === "template" && !selectedTemplate}
+              disabled={
+                currentStep === "template" &&
+                !selectedTemplate &&
+                !isBlankProject
+              }
             >
               {isLastStep ? "Create Project" : "Continue"}
               <ChevronRight size={16} className="ml-1" />
