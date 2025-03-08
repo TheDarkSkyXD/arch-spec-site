@@ -77,8 +77,9 @@ This script allows you to manually seed the database with tech registry and temp
 
 - Seed the tech registry data in the database
 - Seed the project templates in the database
+- Seed the tech stack compatibility data in the database
 - Optionally clean all existing data before seeding (full refresh)
-- Selectively seed only tech registry or only templates
+- Selectively seed only specific data collections
 
 #### Usage
 
@@ -92,21 +93,25 @@ python -m app.scripts.seed_database [options]
 - `--clean-all`: Delete all existing records before seeding
 - `--tech-registry-only`: Only seed tech registry data
 - `--templates-only`: Only seed template data
+- `--tech-stack-only`: Only seed tech stack compatibility data
 
 ##### Examples
 
 ```bash
-# Seed both tech registry and templates, keeping existing data
+# Seed all data (tech registry, templates, tech stack), keeping existing data
 python -m app.scripts.seed_database
 
-# Completely refresh tech registry and templates
+# Completely refresh all data
 python -m app.scripts.seed_database --clean-all
 
-# Only refresh the tech registry, keeping templates unchanged
+# Only refresh the tech registry, keeping other data unchanged
 python -m app.scripts.seed_database --tech-registry-only --clean-all
 
-# Only refresh templates, keeping tech registry unchanged
+# Only refresh templates, keeping other data unchanged
 python -m app.scripts.seed_database --templates-only --clean-all
+
+# Only refresh tech stack data, keeping other data unchanged
+python -m app.scripts.seed_database --tech-stack-only --clean-all
 ```
 
 ## Best Practices

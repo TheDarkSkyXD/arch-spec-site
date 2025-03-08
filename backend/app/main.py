@@ -32,6 +32,7 @@ from .db.base import db
 from .api.api import api_router
 from .seed.templates import seed_templates
 from .seed.tech_registry_db import seed_tech_registry
+from .seed.tech_stack_db import seed_tech_stack
 
 HAS_API_ROUTER = True
 
@@ -74,6 +75,11 @@ async def lifespan(app: FastAPI):
                 print("Starting template seeding...")
                 await seed_templates(database, clean_all=False)
                 print("Template seeding complete")
+                
+                # Seed tech stack compatibility data
+                print("Starting tech stack seeding...")
+                await seed_tech_stack(database, clean_all=False)
+                print("Tech stack seeding complete")
             else:
                 print("Database connection not available, skipping seeding")
         except Exception as e:

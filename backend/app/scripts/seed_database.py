@@ -10,6 +10,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../.
 
 from app.seed.tech_registry_db import seed_tech_registry
 from app.seed.templates import seed_templates
+from app.seed.tech_stack_db import seed_tech_stack
 from app.db.base import db
 
 # Configure logging
@@ -36,6 +37,11 @@ async def main():
         action="store_true", 
         help="Only seed template data"
     )
+    parser.add_argument(
+        "--tech-stack-only", 
+        action="store_true", 
+        help="Only seed tech stack compatibility data"
+    )
     
     args = parser.parse_args()
     
@@ -50,25 +56,37 @@ async def main():
             return
         
         # Determine what to seed based on args
-        seed_tech = True
-        seed_temps = True
+        seed_tech_registry_data = True
+        seed_templates_data = True
+        seed_tech_stack_data = True
         
         if args.tech_registry_only:
-            seed_temps = False
+            seed_templates_data = False
+            seed_tech_stack_data = False
         if args.templates_only:
-            seed_tech = False
+            seed_tech_registry_data = False
+            seed_tech_stack_data = False
+        if args.tech_stack_only:
+            seed_tech_registry_data = False
+            seed_templates_data = False
         
         # Seed tech registry if specified
-        if seed_tech:
+        if seed_tech_registry_data:
             logger.info(f"Seeding tech registry (clean_all={args.clean_all})")
             await seed_tech_registry(database, clean_all=args.clean_all)
             logger.info("Tech registry seeding complete")
         
         # Seed templates if specified
-        if seed_temps:
+        if seed_templates_data:
             logger.info(f"Seeding templates (clean_all={args.clean_all})")
             await seed_templates(database, clean_all=args.clean_all)
             logger.info("Templates seeding complete")
+            
+        # Seed tech stack compatibility data if specified
+        if seed_tech_stack_data:
+            logger.info(f"Seeding tech stack compatibility data (clean_all={args.clean_all})")
+            await seed_tech_stack(database, clean_all=args.clean_all)
+            logger.info("Tech stack seeding complete")
         
     except Exception as e:
         logger.error(f"Error during database seeding: {str(e)}")
@@ -79,4 +97,4 @@ async def main():
         logger.info("MongoDB connection closed")
 
 if __name__ == "__main__":
-    asyncio.run(main()) 
+    asyncio.run(main())
