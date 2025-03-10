@@ -50,13 +50,6 @@ try:
         logger.info("Templates router loaded successfully")
     except Exception as e:
         logger.error(f"Failed to load templates router: {str(e)}")
-        
-    try:
-        from .routes import tech_registry
-        api_router.include_router(tech_registry.router)
-        logger.info("Tech Registry router loaded successfully")
-    except Exception as e:
-        logger.error(f"Failed to load tech registry router: {str(e)}")
     
     try:
         from .routes import project_sections

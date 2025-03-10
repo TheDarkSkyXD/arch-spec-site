@@ -110,7 +110,7 @@ class ProjectSectionsService:
             # Update existing section
             update_dict = {k: v for k, v in update_data.model_dump(exclude_unset=True).items() if v is not None}
             if update_dict:
-                update_dict["updated_at"] = datetime.utcnow()
+                update_dict["updated_at"] = datetime.now(datetime.UTC)
                 update_dict["version"] = existing.get("version", 1) + 1
                 
                 await database.timeline_sections.update_one(
@@ -133,7 +133,7 @@ class ProjectSectionsService:
             # Update project to indicate it has this section
             await database.projects.update_one(
                 {"id": project_id},
-                {"$set": {"has_timeline": True, "updated_at": datetime.utcnow()}}
+                {"$set": {"has_timeline": True, "updated_at": datetime.now(datetime.UTC)}}
             )
             
             return new_section
@@ -161,7 +161,7 @@ class ProjectSectionsService:
             # Update existing section
             update_dict = {k: v for k, v in update_data.model_dump(exclude_unset=True).items() if v is not None}
             if update_dict:
-                update_dict["updated_at"] = datetime.utcnow()
+                update_dict["updated_at"] = datetime.now(datetime.UTC)
                 update_dict["version"] = existing.get("version", 1) + 1
                 
                 await database.budget_sections.update_one(
@@ -184,7 +184,7 @@ class ProjectSectionsService:
             # Update project to indicate it has this section
             await database.projects.update_one(
                 {"id": project_id},
-                {"$set": {"has_budget": True, "updated_at": datetime.utcnow()}}
+                {"$set": {"has_budget": True, "updated_at": datetime.now(datetime.UTC)}}
             )
             
             return new_section
@@ -204,7 +204,7 @@ class ProjectSectionsService:
             # Update existing section
             update_dict = {k: v for k, v in data.model_dump(exclude_unset=True).items() if v is not None}
             if update_dict:
-                update_dict["updated_at"] = datetime.utcnow()
+                update_dict["updated_at"] = datetime.now(datetime.UTC)
                 update_dict["version"] = existing.get("version", 1) + 1
                 update_dict["last_modified_by"] = user_id
                 
@@ -228,7 +228,7 @@ class ProjectSectionsService:
             # Update project to indicate it has this section
             await database.projects.update_one(
                 {"id": project_id},
-                {"$set": {"has_requirements": True, "updated_at": datetime.utcnow()}}
+                {"$set": {"has_requirements": True, "updated_at": datetime.now(datetime.UTC)}}
             )
             
             return new_section
@@ -256,7 +256,7 @@ class ProjectSectionsService:
             # Update existing section
             update_dict = {k: v for k, v in update_data.model_dump(exclude_unset=True).items() if v is not None}
             if update_dict:
-                update_dict["updated_at"] = datetime.utcnow()
+                update_dict["updated_at"] = datetime.now(datetime.UTC)
                 update_dict["version"] = existing.get("version", 1) + 1
                 
                 await database.metadata_sections.update_one(
@@ -279,7 +279,7 @@ class ProjectSectionsService:
             # Update project to indicate it has this section
             await database.projects.update_one(
                 {"id": project_id},
-                {"$set": {"has_metadata": True, "updated_at": datetime.utcnow()}}
+                {"$set": {"has_metadata": True, "updated_at": datetime.now(datetime.UTC)}}
             )
             
             return new_section
@@ -318,7 +318,7 @@ class ProjectSectionsService:
             # Update existing section
             update_dict = {k: v for k, v in update_data.model_dump(exclude_unset=True).items() if v is not None}
             if update_dict:
-                update_dict["updated_at"] = datetime.utcnow()
+                update_dict["updated_at"] = datetime.now(datetime.UTC)
                 update_dict["version"] = existing.get("version", 1) + 1
                 
                 await database.tech_stack_sections.update_one(
@@ -341,7 +341,7 @@ class ProjectSectionsService:
             # Update project to indicate it has this section
             await database.projects.update_one(
                 {"id": project_id},
-                {"$set": {"has_tech_stack": True, "updated_at": datetime.utcnow()}}
+                {"$set": {"has_tech_stack": True, "updated_at": datetime.now(datetime.UTC)}}
             )
             
             return new_section
@@ -380,7 +380,7 @@ class ProjectSectionsService:
             # Update existing section
             update_dict = {k: v for k, v in update_data.model_dump(exclude_unset=True).items() if v is not None}
             if update_dict:
-                update_dict["updated_at"] = datetime.utcnow()
+                update_dict["updated_at"] = datetime.now(datetime.UTC)
                 update_dict["version"] = existing.get("version", 1) + 1
                 
                 await database.features_sections.update_one(
@@ -403,7 +403,7 @@ class ProjectSectionsService:
             # Update project to indicate it has this section
             await database.projects.update_one(
                 {"id": project_id},
-                {"$set": {"has_features": True, "updated_at": datetime.utcnow()}}
+                {"$set": {"has_features": True, "updated_at": datetime.now(datetime.UTC)}}
             )
             
             return new_section
@@ -441,7 +441,7 @@ class ProjectSectionsService:
             # Update existing section
             update_dict = {k: v for k, v in update_data.model_dump(exclude_unset=True).items() if v is not None}
             if update_dict:
-                update_dict["updated_at"] = datetime.utcnow()
+                update_dict["updated_at"] = datetime.now(datetime.UTC)
                 update_dict["version"] = existing.get("version", 1) + 1
                 
                 await collection.update_one(
@@ -464,7 +464,7 @@ class ProjectSectionsService:
             # Update project to indicate it has this section
             await database.projects.update_one(
                 {"id": project_id},
-                {"$set": {flag_name: True, "updated_at": datetime.utcnow()}}
+                {"$set": {flag_name: True, "updated_at": datetime.now(datetime.UTC)}}
             )
             
             return new_section

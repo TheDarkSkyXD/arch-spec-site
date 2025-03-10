@@ -71,13 +71,13 @@ export function useProjectTemplateSection({
       };
 
       // Extract values from project defaults
-      const businessGoals = selectedTemplate.project_defaults?.business_goals || [];
-      const targetUsers = selectedTemplate.project_defaults?.target_users || [];
+      const businessGoals = selectedTemplate.projectDefaults?.business_goals || [];
+      const targetUsers = selectedTemplate.projectDefaults?.target_users || [];
 
       // Update form data with template values
       setFormData({
-        name: selectedTemplate.project_defaults?.name || "",
-        description: selectedTemplate.project_defaults?.description || "",
+        name: selectedTemplate.projectDefaults?.name || "",
+        description: selectedTemplate.projectDefaults?.description || "",
         template_type: selectedTemplate.name || "web_app",
         business_goals: parseStringToArray(businessGoals),
         target_users: parseStringToArray(targetUsers),
@@ -125,13 +125,13 @@ export function useProjectTemplateSection({
         name: "Custom Project",
         description: "A custom project created from scratch",
         version: "1.0.0",
-        project_defaults: {
+        projectDefaults: {
           name: "",
           description: "",
           business_goals: [],
           target_users: [],
         },
-        tech_stack: {
+        techStack: {
           frontend: "",
           backend: "",
           database: "",

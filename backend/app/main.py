@@ -4,9 +4,7 @@ This module provides the main FastAPI application.
 """
 
 import logging
-import os
-import sys
-from typing import List, Any, Dict
+from typing import Any, Dict
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
@@ -21,7 +19,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Set logging level to DEBUG for our app modules
-for logger_name in ["app.seed.tech_registry_db", "app.seed.templates"]:
+for logger_name in ["app.seed.templates"]:
     logging.getLogger(logger_name).setLevel(logging.DEBUG)
 
 # Import configuration and database
@@ -31,8 +29,7 @@ from .db.base import db
 # Import API router and seed data modules
 from .api.api import api_router
 from .seed.templates import seed_templates
-from .seed.tech_registry_db import seed_tech_registry
-from .seed.tech_stack_db import seed_tech_stack
+from .seed.tech_stack import seed_tech_stack
 
 HAS_API_ROUTER = True
 
@@ -45,11 +42,11 @@ async def lifespan(app: FastAPI):
     
     During startup, it:
     1. Connects to MongoDB
-    2. Seeds the tech registry to the database (creates or updates)
-       - The tech registry is the central source of truth for all technology names
+    2. Seeds the tech stack to the database (creates or updates)
+       - The tech stack is the central source of truth for all technology names
        - See /app/seed/README.md for more information
     3. Seeds project templates to the database (creates, updates, or marks deprecated)
-       - Templates are validated against the tech registry for consistency
+       - Templates are validated against the tech stack for consistency
     
     During shutdown, it:
     1. Closes MongoDB connection
@@ -66,20 +63,12 @@ async def lifespan(app: FastAPI):
             database = db.get_db()
             if database is not None:
                 print("Database connection available, proceeding with seeding")
-                # Seed tech registry data
-                print("Starting tech registry seeding...")
-                await seed_tech_registry(database, clean_all=False)
-                print("Tech registry seeding complete")
-                
-                # Seed template data
-                print("Starting template seeding...")
-                await seed_templates(database, clean_all=False)
-                print("Template seeding complete")
-                
-                # Seed tech stack compatibility data
-                print("Starting tech stack seeding...")
+
+                # Seed tech stack data
                 await seed_tech_stack(database, clean_all=False)
-                print("Tech stack seeding complete")
+
+                # Seed template data
+                await seed_templates(database, clean_all=False)
             else:
                 print("Database connection not available, skipping seeding")
         except Exception as e:

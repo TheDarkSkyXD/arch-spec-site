@@ -1,4 +1,5 @@
 '''
+https://claude.ai/chat/5a34f813-cc7d-4eed-aba1-974666555089
 This is a comprehensive tech stack data structure with bidirectional compatibility. The new structure has several key advantages:
 
 1. **Complete Technology Mapping**: Includes all technologies from the original dataset organized by type and relationship.

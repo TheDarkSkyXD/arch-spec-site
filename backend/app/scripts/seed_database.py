@@ -8,9 +8,8 @@ import sys
 import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
-from app.seed.tech_registry_db import seed_tech_registry
 from app.seed.templates import seed_templates
-from app.seed.tech_stack_db import seed_tech_stack
+from app.seed.tech_stack import seed_tech_stack
 from app.db.base import db
 
 # Configure logging
@@ -26,11 +25,6 @@ async def main():
         "--clean-all", 
         action="store_true", 
         help="Delete all existing records before seeding"
-    )
-    parser.add_argument(
-        "--tech-registry-only", 
-        action="store_true", 
-        help="Only seed tech registry data"
     )
     parser.add_argument(
         "--templates-only", 
@@ -56,25 +50,13 @@ async def main():
             return
         
         # Determine what to seed based on args
-        seed_tech_registry_data = True
         seed_templates_data = True
         seed_tech_stack_data = True
         
-        if args.tech_registry_only:
-            seed_templates_data = False
-            seed_tech_stack_data = False
         if args.templates_only:
-            seed_tech_registry_data = False
             seed_tech_stack_data = False
         if args.tech_stack_only:
-            seed_tech_registry_data = False
             seed_templates_data = False
-        
-        # Seed tech registry if specified
-        if seed_tech_registry_data:
-            logger.info(f"Seeding tech registry (clean_all={args.clean_all})")
-            await seed_tech_registry(database, clean_all=args.clean_all)
-            logger.info("Tech registry seeding complete")
         
         # Seed templates if specified
         if seed_templates_data:
@@ -82,9 +64,9 @@ async def main():
             await seed_templates(database, clean_all=args.clean_all)
             logger.info("Templates seeding complete")
             
-        # Seed tech stack compatibility data if specified
+        # Seed tech stack data if specified
         if seed_tech_stack_data:
-            logger.info(f"Seeding tech stack compatibility data (clean_all={args.clean_all})")
+            logger.info(f"Seeding tech stack data (clean_all={args.clean_all})")
             await seed_tech_stack(database, clean_all=args.clean_all)
             logger.info("Tech stack seeding complete")
         

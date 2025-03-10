@@ -9,9 +9,8 @@ The module implements a smart synchronization mechanism that:
 1. Adds new templates to the database
 2. Updates existing templates when they change in the code
 3. Marks templates as deprecated when they're removed from the code (instead of deleting)
-4. Validates templates against the tech registry to ensure consistency
 
-All technologies referenced in templates should exist in the tech_registry.py file.
+All technologies referenced in templates should exist in the tech_stack.py file.
 
 See /app/seed/README.md for more detailed documentation.
 """
@@ -20,8 +19,6 @@ import datetime
 from typing import Dict, List, Optional
 
 from ..seed.template_data.sample_templates import PROJECT_TEMPLATES
-
-from ..seed.tech_registry import validate_template_tech_stack
 
 logger = logging.getLogger(__name__)
 
@@ -35,16 +32,11 @@ async def seed_templates(db, clean_all: bool = False):
         clean_all: If True, delete all existing records before inserting new ones
     """
     try:
+        print("Seeding project templates...")
+
         # Check if templates collection exists and has data
         templates_collection = db.get_collection("templates")
         count = await templates_collection.count_documents({})
-        
-        # First validate all templates against the tech registry
-        for template in PROJECT_TEMPLATES:
-            if "techStack" in template.get("template", {}):
-                validation_result = validate_template_tech_stack(template["template"]["techStack"])
-                if not validation_result["is_valid"]:
-                    logger.warning(f"Template '{template['template']['name']}' contains invalid technologies: {validation_result['invalid_technologies']}")
         
         if clean_all and count > 0:
             # Delete all existing records if clean_all is True
@@ -92,7 +84,7 @@ async def seed_templates(db, clean_all: bool = False):
                 # Add a last_updated field
                 if "metadata" not in template:
                     template["metadata"] = {}
-                template["metadata"]["last_updated"] = datetime.datetime.utcnow()
+                template["metadata"]["last_updated"] = datetime.datetime.now(datetime.UTC)
                 
                 result = await templates_collection.replace_one(
                     {"id": template["id"]},
@@ -113,11 +105,11 @@ async def seed_templates(db, clean_all: bool = False):
                 for template_id in templates_to_remove:
                     result = await templates_collection.update_one(
                         {"id": template_id},
-                        {"$set": {"metadata.deprecated": True, "metadata.last_updated": datetime.datetime.utcnow()}}
+                        {"$set": {"metadata.deprecated": True, "metadata.last_updated": datetime.datetime.now(datetime.UTC)}}
                     )
                     if result.modified_count > 0:
                         logger.info(f"Marked template {template_id} as deprecated")
-    
+        print("Project templates seeded successfully")
     except Exception as e:
         logger.error(f"Error seeding templates: {str(e)}")
         raise

@@ -183,8 +183,8 @@ export interface ProjectTemplate {
   name: string;
   version: string;
   description: string;
-  project_defaults: ProjectDefaults;
-  tech_stack: TechStackData;
+  projectDefaults: ProjectDefaults;
+  techStack: TechStackData;
   features: Features;
   pages: Pages;
   data_model: DataModel;

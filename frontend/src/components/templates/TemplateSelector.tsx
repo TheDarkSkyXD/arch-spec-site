@@ -19,12 +19,12 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
   // Get icon based on template type
   const getTemplateIcon = () => {
     try {
-      if (!template.tech_stack || !template.tech_stack.frontend) {
+      if (!template.techStack || !template.techStack.frontend) {
         return "🧩";
       }
 
       // Frontend is now a string rather than an object with framework property
-      const frontend = String(template.tech_stack.frontend).toLowerCase();
+      const frontend = String(template.techStack.frontend).toLowerCase();
       if (frontend.includes("react")) {
         return "⚛️";
       } else if (frontend.includes("vue")) {
@@ -86,19 +86,19 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
       </p>
 
       <div className="mt-3 flex flex-wrap gap-1">
-        {template.tech_stack?.frontend && (
+        {template.techStack?.frontend && (
           <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200">
-            {String(template.tech_stack.frontend)}
+            {String(template.techStack.frontend)}
           </span>
         )}
-        {template.tech_stack?.backend && (
+        {template.techStack?.backend && (
           <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200">
-            {String(template.tech_stack.backend)}
+            {String(template.techStack.backend)}
           </span>
         )}
-        {template.tech_stack?.database && (
+        {template.techStack?.database && (
           <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200">
-            {String(template.tech_stack.database)}
+            {String(template.techStack.database)}
           </span>
         )}
       </div>

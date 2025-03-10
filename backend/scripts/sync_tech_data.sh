@@ -8,18 +8,13 @@ echo ""
 mkdir -p backend/app/scripts
 
 # Make Python scripts executable
-chmod +x backend/app/scripts/sync_tech_data.py
-chmod +x backend/app/scripts/correct_tech_data.py
-
-echo "Running tech data analysis script..."
-cd backend
-python -m app.scripts.sync_tech_data
+chmod +x backend/app/scripts/correct_templates.py
 
 echo ""
 echo "Running tech data correction script..."
-python -m app.scripts.correct_tech_data
+python -m app.scripts.correct_templates
 
 echo ""
 echo "========== Process completed =========="
-echo "Check the 'corrected_data' directory for corrected files"
+echo "Check the 'corrected_templates.py' file for corrected templates"
 echo "Review the suggested changes before replacing the original files" 

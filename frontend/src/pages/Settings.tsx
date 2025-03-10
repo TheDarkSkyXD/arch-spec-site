@@ -8,7 +8,6 @@ import {
 import MainLayout from "../layouts/MainLayout";
 import TemplateManagement from "../components/settings/TemplateManagement";
 import TechStackView from "../components/settings/TechStackView";
-import TechRegistryView from "../components/settings/TechRegistryView";
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState("templates");
@@ -34,7 +33,6 @@ const Settings = () => {
           <TabsList className="mb-8">
             <TabsTrigger value="templates">Templates</TabsTrigger>
             <TabsTrigger value="tech-stack">Tech Stack</TabsTrigger>
-            <TabsTrigger value="tech-registry">Tech Registry</TabsTrigger>
             <TabsTrigger value="general">General</TabsTrigger>
             <TabsTrigger value="account">Account</TabsTrigger>
             <TabsTrigger value="api">API</TabsTrigger>
@@ -46,10 +44,6 @@ const Settings = () => {
 
           <TabsContent value="tech-stack">
             <TechStackView />
-          </TabsContent>
-
-          <TabsContent value="tech-registry">
-            <TechRegistryView />
           </TabsContent>
 
           <TabsContent value="general">

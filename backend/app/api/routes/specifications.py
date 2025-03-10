@@ -117,7 +117,7 @@ async def create_or_update_specification(
     if existing_spec:
         # Update existing specification
         spec_dict = specification_data.model_dump()
-        spec_dict["updated_at"] = datetime.utcnow()
+        spec_dict["updated_at"] = datetime.now(datetime.UTC)
         
         await database.specifications.update_one(
             {"id": existing_spec["id"]},
@@ -131,8 +131,8 @@ async def create_or_update_specification(
         spec_dict = specification_data.model_dump()
         spec_dict.update({
             "id": str(uuid.uuid4()),
-            "created_at": datetime.utcnow(),
-            "updated_at": datetime.utcnow()
+            "created_at": datetime.now(datetime.UTC),
+            "updated_at": datetime.now(datetime.UTC)
         })
         
         await database.specifications.insert_one(spec_dict)
@@ -140,7 +140,7 @@ async def create_or_update_specification(
         # Update project status
         await database.projects.update_one(
             {"id": project_id},
-            {"$set": {"status": "in_progress", "updated_at": datetime.utcnow()}}
+            {"$set": {"status": "in_progress", "updated_at": datetime.now(datetime.UTC)}}
         )
         
         return spec_dict
@@ -187,7 +187,7 @@ async def generate_artifacts(
             "api_endpoints": enhanced_spec.get("api_endpoints", specification.get("api_endpoints", [])),
             "data_model": enhanced_spec.get("data_model", specification.get("data_model", {})),
             "implementation": enhanced_spec.get("implementation", specification.get("implementation", {})),
-            "updated_at": datetime.utcnow()
+            "updated_at": datetime.now(datetime.UTC)
         }}
     )
     
@@ -204,7 +204,7 @@ async def generate_artifacts(
     # Update project status
     await database.projects.update_one(
         {"id": project_id},
-        {"$set": {"status": "completed", "updated_at": datetime.utcnow()}}
+        {"$set": {"status": "completed", "updated_at": datetime.now(datetime.UTC)}}
     )
     
     # Retrieve all artifacts for this specification

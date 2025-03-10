@@ -124,23 +124,23 @@ const NewProject = () => {
             <div className="p-6">
               <TechStackForm
                 initialData={{
-                  frontend: formData.template_data?.tech_stack?.frontend || "",
-                  backend: formData.template_data?.tech_stack?.backend || "",
-                  database: formData.template_data?.tech_stack?.database || "",
+                  frontend: formData.template_data?.techStack?.frontend || "",
+                  backend: formData.template_data?.techStack?.backend || "",
+                  database: formData.template_data?.techStack?.database || "",
                   frontend_language:
-                    formData.template_data?.tech_stack?.frontend_language || "",
+                    formData.template_data?.techStack?.frontend_language || "",
                   ui_library:
-                    formData.template_data?.tech_stack?.ui_library || "",
+                    formData.template_data?.techStack?.ui_library || "",
                   state_management:
-                    formData.template_data?.tech_stack?.state_management || "",
+                    formData.template_data?.techStack?.state_management || "",
                   backend_provider:
-                    formData.template_data?.tech_stack?.backend_provider || "",
+                    formData.template_data?.techStack?.backend_provider || "",
                   database_provider:
-                    formData.template_data?.tech_stack?.database_provider || "",
+                    formData.template_data?.techStack?.database_provider || "",
                   auth_provider:
-                    formData.template_data?.tech_stack?.auth_provider || "",
+                    formData.template_data?.techStack?.auth_provider || "",
                   auth_methods:
-                    formData.template_data?.tech_stack?.auth_methods || "",
+                    formData.template_data?.techStack?.auth_methods || "",
                 }}
                 onSubmit={handleTechStackSubmit}
               />

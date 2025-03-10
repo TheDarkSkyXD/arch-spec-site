@@ -5,7 +5,7 @@ export const mockTemplates: ProjectTemplate[] = [
     id: "1",
     name: "React Web App with Supabase",
     description: "React, TypeScript, Supabase Auth & DB",
-    tech_stack: {
+    techStack: {
       frontend: "React",
       backend: "Supabase Functions",
       database: "PostgreSQL (Supabase)",
@@ -17,7 +17,7 @@ export const mockTemplates: ProjectTemplate[] = [
     id: "2",
     name: "Next.js E-commerce",
     description: "Next.js, Prisma, Stripe Integration",
-    tech_stack: {
+    techStack: {
       frontend: "Next.js",
       backend: "Next.js API Routes",
       database: "PostgreSQL (Prisma)",
@@ -29,7 +29,7 @@ export const mockTemplates: ProjectTemplate[] = [
     id: "3",
     name: "Custom Project",
     description: "Start from scratch with custom settings",
-    tech_stack: {
+    techStack: {
       frontend: "Custom",
       backend: "Custom",
       database: "Custom",

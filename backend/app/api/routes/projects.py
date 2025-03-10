@@ -67,8 +67,8 @@ async def create_project(
     # Create a basic project
     project_dict.update({
         "id": str(uuid.uuid4()),
-        "created_at": datetime.utcnow(),
-        "updated_at": datetime.utcnow(),
+        "created_at": datetime.now(datetime.UTC),
+        "updated_at": datetime.now(datetime.UTC),
         "status": "draft",
         "team_members": [],
         "version": 1,
@@ -308,7 +308,7 @@ async def update_project(
     
     # Update core project if needed
     if update_data:
-        update_data["updated_at"] = datetime.utcnow()
+        update_data["updated_at"] = datetime.now(datetime.UTC)
         
         # Update version if needed
         if "template_data" in update_data:
@@ -350,7 +350,7 @@ async def update_project(
         if not existing_project.get("has_timeline", False):
             await database.projects.update_one(
                 {"id": id},
-                {"$set": {"has_timeline": True, "updated_at": datetime.utcnow()}}
+                {"$set": {"has_timeline": True, "updated_at": datetime.now(datetime.UTC)}}
             )
     
     # Update budget section if provided
@@ -363,7 +363,7 @@ async def update_project(
         if not existing_project.get("has_budget", False):
             await database.projects.update_one(
                 {"id": id},
-                {"$set": {"has_budget": True, "updated_at": datetime.utcnow()}}
+                {"$set": {"has_budget": True, "updated_at": datetime.now(datetime.UTC)}}
             )
     
     # Update requirements section if provided
@@ -396,7 +396,7 @@ async def update_project(
         if not existing_project.get("has_requirements", False):
             await database.projects.update_one(
                 {"id": id},
-                {"$set": {"has_requirements": True, "updated_at": datetime.utcnow()}}
+                {"$set": {"has_requirements": True, "updated_at": datetime.now(datetime.UTC)}}
             )
     
     # Update metadata section if provided
@@ -409,7 +409,7 @@ async def update_project(
         if not existing_project.get("has_metadata", False):
             await database.projects.update_one(
                 {"id": id},
-                {"$set": {"has_metadata": True, "updated_at": datetime.utcnow()}}
+                {"$set": {"has_metadata": True, "updated_at": datetime.now(datetime.UTC)}}
             )
     
     # Return the updated project with all sections

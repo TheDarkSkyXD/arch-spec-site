@@ -8,7 +8,6 @@ from typing import Dict, Any
 from ...schemas.templates import ProjectTemplateResponse, ProjectTemplateList
 from ...schemas.shared_schemas import TechStackData
 from ...services.templates_service import TemplatesService
-from ...seed.tech_registry import validate_template_tech_stack
 from ...core.firebase_auth import get_current_user
 
 logger = logging.getLogger(__name__)

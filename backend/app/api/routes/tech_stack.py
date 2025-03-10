@@ -2,13 +2,10 @@
 API routes for tech stack compatibility.
 """
 import logging
-from fastapi import APIRouter, HTTPException, Query, Depends
+from fastapi import APIRouter, HTTPException, Depends
 from typing import Dict, Any
 
 from ...schemas.tech_stack import (
-    TechStackSelection, 
-    CompatibilityResult, 
-    CompatibleOptionsResponse,
     AllTechOptionsResponse
 )
 from ...services.tech_stack_service import TechStackService
@@ -16,43 +13,6 @@ from ...core.firebase_auth import get_current_user
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
-
-
-@router.post("/compatibility/check", response_model=CompatibilityResult)
-async def check_compatibility(
-    selection: TechStackSelection,
-    current_user: Dict[str, Any] = Depends(get_current_user)
-):
-    """
-    Check compatibility between selected technology choices.
-    
-    Returns which technologies are compatible with the current selections.
-    """
-    try:
-        result = await TechStackService.check_compatibility(selection)
-        return result
-    except Exception as e:
-        logger.error(f"Error checking compatibility: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error checking compatibility: {str(e)}")
-
-
-@router.get("/compatibility/options", response_model=CompatibleOptionsResponse)
-async def get_compatible_options(
-    category: str = Query(..., description="Technology category (e.g. 'frontend', 'backend')"),
-    technology: str = Query(..., description="Technology name to get compatible options for"),
-    current_user: Dict[str, Any] = Depends(get_current_user)
-):
-    """
-    Get compatible options for a given technology.
-    
-    Returns a list of technologies that are compatible with the specified technology.
-    """
-    try:
-        result = await TechStackService.get_compatible_options(category, technology)
-        return result
-    except Exception as e:
-        logger.error(f"Error getting compatible options: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error getting compatible options: {str(e)}")
 
 
 @router.get("/options", response_model=AllTechOptionsResponse)
