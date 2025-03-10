@@ -1,23 +1,83 @@
-import { UseFormRegister, FormState, FieldError } from "react-hook-form";
+import {
+  UseFormRegister,
+  FormState,
+  FieldError,
+  Control,
+} from "react-hook-form";
 import { Technology } from "../../../types/techStack";
 import { TechStackFormData } from "../tech-stack/techStackSchema";
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useRef } from "react";
 
 interface BackendSectionProps {
   register: UseFormRegister<TechStackFormData>;
   errors: FormState<TechStackFormData>["errors"];
   backendFrameworks: Technology[];
+  initialData?: Partial<TechStackFormData>;
+  control: Control<TechStackFormData>;
 }
 
 const BackendSection = ({
   register,
   errors,
   backendFrameworks,
+  initialData,
+  control,
 }: BackendSectionProps) => {
+  // Get setValue from control prop
+  const setValue = control.setValue;
+
+  // Create a ref to track whether we've applied initial data
+  const initialDataAppliedRef = useRef<boolean>(false);
+
   // Helper function to safely get error message
   const getErrorMessage = (error: FieldError | undefined): ReactNode => {
     return error?.message as ReactNode;
   };
+
+  // Set initial values if they exist in the available options
+  useEffect(() => {
+    if (!initialData || initialDataAppliedRef.current) return;
+
+    console.log("Checking initial data for backend section:", initialData);
+
+    // Track values that were successfully set
+    let valuesWereSet = false;
+
+    // Check and set backend if it exists in options
+    if (initialData.backend) {
+      const backendExists = backendFrameworks.some(
+        (framework) => framework.id === initialData.backend
+      );
+      if (backendExists) {
+        setValue("backend", initialData.backend, { shouldDirty: true });
+        console.log("Setting initial backend:", initialData.backend);
+        valuesWereSet = true;
+      } else {
+        console.log(
+          "Initial backend not available in options:",
+          initialData.backend
+        );
+      }
+    }
+
+    // Check and set backend provider
+    if (initialData.backend_provider) {
+      // For simplicity, we're not validating backend_provider against a list of options
+      setValue("backend_provider", initialData.backend_provider, {
+        shouldDirty: true,
+      });
+      console.log(
+        "Setting initial backend provider:",
+        initialData.backend_provider
+      );
+      valuesWereSet = true;
+    }
+
+    // Mark as applied if any values were set
+    if (valuesWereSet) {
+      initialDataAppliedRef.current = true;
+    }
+  }, [initialData, backendFrameworks, setValue]);
 
   return (
     <div>

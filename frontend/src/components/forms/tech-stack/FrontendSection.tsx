@@ -11,7 +11,7 @@ import {
   StateManagement,
 } from "../../../types/techStack";
 import { TechStackFormData } from "../tech-stack/techStackSchema";
-import { ReactNode, useEffect, useMemo } from "react";
+import { ReactNode, useEffect, useMemo, useRef } from "react";
 import {
   filterLanguageOptions,
   filterFrameworkOptions,
@@ -26,6 +26,7 @@ interface FrontendSectionProps {
   uiLibraryOptions: UILibrary[];
   stateManagementOptions: StateManagement[];
   control: Control<TechStackFormData>;
+  initialData?: Partial<TechStackFormData>;
 }
 
 const FrontendSection = ({
@@ -35,7 +36,14 @@ const FrontendSection = ({
   uiLibraryOptions,
   stateManagementOptions,
   control,
+  initialData,
 }: FrontendSectionProps) => {
+  // Get setValue from control prop
+  const setValue = control.setValue;
+
+  // Create a ref to track whether we've applied initial data
+  const initialDataAppliedRef = useRef<boolean>(false);
+
   // Helper function to safely get error message
   const getErrorMessage = (error: FieldError | undefined): ReactNode => {
     return error?.message as ReactNode;
@@ -148,6 +156,104 @@ const FrontendSection = ({
       stateManagementOptions,
     ]
   );
+
+  // Check if initial values exist in the available options and set them as defaults
+  useEffect(() => {
+    if (!initialData || initialDataAppliedRef.current) return;
+
+    console.log("Checking initial data for frontend section:", initialData);
+
+    // Track values that were successfully set
+    let valuesWereSet = false;
+
+    // Check and set each value if it exists in options
+    if (!selectedFramework && initialData.frontend) {
+      const frameworkExists = filteredFrameworks.some(
+        (framework) => framework.id === initialData.frontend
+      );
+      if (frameworkExists) {
+        setValue("frontend", initialData.frontend, { shouldDirty: true });
+        console.log("Setting initial framework:", initialData.frontend);
+        valuesWereSet = true;
+      } else {
+        console.log(
+          "Initial framework not available in options:",
+          initialData.frontend
+        );
+      }
+    }
+
+    if (!selectedLanguage && initialData.frontend_language) {
+      const languageExists = filteredLanguages.includes(
+        initialData.frontend_language
+      );
+      if (languageExists) {
+        setValue("frontend_language", initialData.frontend_language, {
+          shouldDirty: true,
+        });
+        console.log("Setting initial language:", initialData.frontend_language);
+        valuesWereSet = true;
+      } else {
+        console.log(
+          "Initial language not available in options:",
+          initialData.frontend_language
+        );
+      }
+    }
+
+    if (!selectedUILibrary && initialData.ui_library) {
+      const uiLibraryExists = filteredUILibraries.some(
+        (lib) => lib.id === initialData.ui_library
+      );
+      if (uiLibraryExists) {
+        setValue("ui_library", initialData.ui_library, { shouldDirty: true });
+        console.log("Setting initial UI library:", initialData.ui_library);
+        valuesWereSet = true;
+      } else {
+        console.log(
+          "Initial UI library not available in options:",
+          initialData.ui_library
+        );
+      }
+    }
+
+    if (!selectedStateManagement && initialData.state_management) {
+      const stateManagementExists = filteredStateManagement.some(
+        (sm) => sm.id === initialData.state_management
+      );
+      if (stateManagementExists) {
+        setValue("state_management", initialData.state_management, {
+          shouldDirty: true,
+        });
+        console.log(
+          "Setting initial state management:",
+          initialData.state_management
+        );
+        valuesWereSet = true;
+      } else {
+        console.log(
+          "Initial state management not available in options:",
+          initialData.state_management
+        );
+      }
+    }
+
+    // Mark as applied if any values were set
+    if (valuesWereSet) {
+      initialDataAppliedRef.current = true;
+    }
+  }, [
+    initialData,
+    filteredFrameworks,
+    filteredLanguages,
+    filteredUILibraries,
+    filteredStateManagement,
+    selectedFramework,
+    selectedLanguage,
+    selectedUILibrary,
+    selectedStateManagement,
+    setValue,
+  ]);
 
   return (
     <div>

@@ -174,6 +174,7 @@ const TechStackForm = ({
         uiLibraryOptions={getFrontendUILibraries()}
         stateManagementOptions={getFrontendStateManagement()}
         control={control}
+        initialData={initialData}
       />
 
       {/* Backend Section */}
@@ -181,6 +182,8 @@ const TechStackForm = ({
         register={register}
         errors={errors}
         backendFrameworks={getBackendFrameworks()}
+        initialData={initialData}
+        control={control}
       />
 
       {/* Database Section */}
@@ -192,6 +195,8 @@ const TechStackForm = ({
         databaseOptions={databaseOptions}
         ormOptions={ormOptions}
         allDatabases={getAllDatabases()}
+        initialData={initialData}
+        control={control}
       />
 
       {/* Authentication Section */}
@@ -199,6 +204,8 @@ const TechStackForm = ({
         register={register}
         backend={backend}
         authOptions={authOptions}
+        initialData={initialData}
+        control={control}
       />
 
       {/* Navigation buttons */}

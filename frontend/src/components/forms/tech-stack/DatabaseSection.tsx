@@ -1,7 +1,12 @@
-import { UseFormRegister, FormState, FieldError } from "react-hook-form";
+import {
+  UseFormRegister,
+  FormState,
+  FieldError,
+  Control,
+} from "react-hook-form";
 import { Technology } from "../../../types/techStack";
 import { TechStackFormData } from "../tech-stack/techStackSchema";
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useRef } from "react";
 
 interface DatabaseSectionProps {
   register: UseFormRegister<TechStackFormData>;
@@ -11,6 +16,8 @@ interface DatabaseSectionProps {
   databaseOptions: string[];
   ormOptions: string[];
   allDatabases: Technology[];
+  initialData?: Partial<TechStackFormData>;
+  control: Control<TechStackFormData>;
 }
 
 const DatabaseSection = ({
@@ -21,11 +28,72 @@ const DatabaseSection = ({
   databaseOptions,
   ormOptions,
   allDatabases,
+  initialData,
+  control,
 }: DatabaseSectionProps) => {
+  // Get setValue from control prop
+  const setValue = control.setValue;
+
+  // Create a ref to track whether we've applied initial data
+  const initialDataAppliedRef = useRef<boolean>(false);
+
   // Helper function to safely get error message
   const getErrorMessage = (error: FieldError | undefined): ReactNode => {
     return error?.message as ReactNode;
   };
+
+  // Set initial values if they exist in the available options
+  useEffect(() => {
+    if (!initialData || initialDataAppliedRef.current) return;
+
+    console.log("Checking initial data for database section:", initialData);
+
+    // Track values that were successfully set
+    let valuesWereSet = false;
+
+    // Check and set database if it exists in options
+    if (initialData.database) {
+      const dbExists = allDatabases.some(
+        (db) => db.id === initialData.database
+      );
+      if (dbExists) {
+        setValue("database", initialData.database, { shouldDirty: true });
+        console.log("Setting initial database:", initialData.database);
+        valuesWereSet = true;
+      } else {
+        console.log(
+          "Initial database not available in options:",
+          initialData.database
+        );
+      }
+    }
+
+    // Check and set database provider
+    if (initialData.database_provider) {
+      // For simplicity, we're not validating database_provider against a list of options
+      setValue("database_provider", initialData.database_provider, {
+        shouldDirty: true,
+      });
+      console.log(
+        "Setting initial database provider:",
+        initialData.database_provider
+      );
+      valuesWereSet = true;
+    }
+
+    // Check and set ORM
+    if (initialData.orm) {
+      // For simplicity, we're not validating orm against a list of options
+      setValue("orm", initialData.orm, { shouldDirty: true });
+      console.log("Setting initial ORM:", initialData.orm);
+      valuesWereSet = true;
+    }
+
+    // Mark as applied if any values were set
+    if (valuesWereSet) {
+      initialDataAppliedRef.current = true;
+    }
+  }, [initialData, allDatabases, setValue]);
 
   return (
     <div>
