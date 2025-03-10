@@ -14,10 +14,10 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-@router.get("/options", response_model=TechStackData,
+@router.get("/", response_model=TechStackData,
             summary="Get complete tech stack data",
             description="Retrieves the full tech stack with all technologies and compatibility information")
-async def get_all_technology_options():
+async def get_all_technology():
     """
     Retrieves the full tech stack with all technologies and compatibility information
     """

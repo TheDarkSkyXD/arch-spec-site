@@ -16,7 +16,7 @@ export function useTechStack() {
     queryKey: [QUERY_KEYS.TECH_STACK],
     queryFn: async () => {
       // Use the tech stack service to ensure proper authentication
-      return await techStackService.getAllTechnologyOptions();
+      return await techStackService.getAllTechnology();
     },
   });
 }

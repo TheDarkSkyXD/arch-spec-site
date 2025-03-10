@@ -76,7 +76,7 @@ const TechStackForm = ({
     const fetchTechStackOptions = async () => {
       setIsLoading(true);
       try {
-        const data = await techStackService.getAllTechnologyOptions();
+        const data = await techStackService.getAllTechnology();
         setTechStackOptions(data);
       } catch (error) {
         console.error("Error fetching tech stack options:", error);
