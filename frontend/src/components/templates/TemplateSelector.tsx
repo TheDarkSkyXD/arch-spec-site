@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ProjectTemplate } from "../../types/project";
+import { ProjectTemplate } from "../../types/templates";
 import { useTemplates } from "../../hooks/useDataQueries";
 // Create inline version of TemplateCard component as a temporary solution
 // Import will be fixed automatically when TypeScript environment is correctly set up

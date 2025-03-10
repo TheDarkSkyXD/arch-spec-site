@@ -3,29 +3,31 @@ import {
   FormState,
   FieldError,
   Control,
+  UseFormSetValue,
+  useWatch,
 } from "react-hook-form";
 import { Technology } from "../../../types/techStack";
 import { TechStackFormData } from "../tech-stack/techStackSchema";
 import { ReactNode, useEffect, useRef } from "react";
+import { TechStack } from "../../../types/templates";
 
 interface BackendSectionProps {
   register: UseFormRegister<TechStackFormData>;
   errors: FormState<TechStackFormData>["errors"];
   backendFrameworks: Technology[];
-  initialData?: Partial<TechStackFormData>;
+  setValue: UseFormSetValue<TechStackFormData>;
   control: Control<TechStackFormData>;
+  initialData?: TechStack;
 }
 
 const BackendSection = ({
   register,
   errors,
   backendFrameworks,
-  initialData,
   control,
+  setValue,
+  initialData,
 }: BackendSectionProps) => {
-  // Get setValue from control prop
-  const setValue = control.setValue;
-
   // Create a ref to track whether we've applied initial data
   const initialDataAppliedRef = useRef<boolean>(false);
 
@@ -33,6 +35,22 @@ const BackendSection = ({
   const getErrorMessage = (error: FieldError | undefined): ReactNode => {
     return error?.message as ReactNode;
   };
+
+  useEffect(() => {
+    console.log("backendFrameworks:", backendFrameworks);
+  }, [backendFrameworks]);
+
+  const watchedValues = useWatch({
+    control,
+    name: ["backend", "backend_provider"],
+  });
+
+  const [selectedBackend, selectedBackendProvider] = watchedValues;
+
+  console.log("Selected Backend values:", {
+    backend: selectedBackend,
+    backendProvider: selectedBackendProvider,
+  });
 
   // Set initial values if they exist in the available options
   useEffect(() => {

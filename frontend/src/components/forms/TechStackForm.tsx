@@ -20,9 +20,10 @@ import FrontendSection from "./tech-stack/FrontendSection";
 import BackendSection from "./tech-stack/BackendSection";
 import DatabaseSection from "./tech-stack/DatabaseSection";
 import AuthenticationSection from "./tech-stack/AuthenticationSection";
+import { TechStack } from "../../types/templates";
 
 interface TechStackFormProps {
-  initialData?: Partial<TechStackFormData>;
+  initialData?: TechStack;
   onSubmit: (data: TechStackFormData) => void;
   onBack?: () => void;
 }
@@ -42,26 +43,31 @@ const TechStackForm = ({
   const [ormOptions] = useState<string[]>([]);
   const [authOptions] = useState<string[]>([]);
 
+  const defaultValues: TechStackFormData = {
+    frontend: initialData?.frontend.framework || "",
+    frontend_language: initialData?.frontend.language || "",
+    ui_library: initialData?.frontend.uiLibrary || "",
+    state_management: initialData?.frontend.stateManagement || "",
+    backend: initialData?.backend.provider || "",
+    backend_provider: initialData?.backend.provider || "",
+    database: initialData?.database.provider || "",
+    database_provider: initialData?.database.provider || "",
+    auth_provider: initialData?.authentication.provider || "",
+    auth_methods:
+      initialData && initialData?.authentication?.methods?.length > 0
+        ? initialData?.authentication.methods[0]
+        : "",
+  };
+
   const {
     register,
     handleSubmit,
     control,
     formState: { errors },
+    setValue: setTechStackValue,
   } = useForm<TechStackFormData>({
     resolver: zodResolver(techStackSchema),
-    defaultValues: initialData || {
-      frontend: "",
-      frontend_language: "",
-      ui_library: "",
-      state_management: "",
-      backend: "",
-      backend_provider: "",
-      database: "",
-      orm: "",
-      database_provider: "",
-      auth_provider: "",
-      auth_methods: "",
-    },
+    defaultValues: defaultValues,
   });
 
   useEffect(() => {
@@ -174,6 +180,7 @@ const TechStackForm = ({
         uiLibraryOptions={getFrontendUILibraries()}
         stateManagementOptions={getFrontendStateManagement()}
         control={control}
+        setValue={setTechStackValue}
         initialData={initialData}
       />
 
@@ -184,6 +191,7 @@ const TechStackForm = ({
         backendFrameworks={getBackendFrameworks()}
         initialData={initialData}
         control={control}
+        setValue={setTechStackValue}
       />
 
       {/* Database Section */}
@@ -197,6 +205,7 @@ const TechStackForm = ({
         allDatabases={getAllDatabases()}
         initialData={initialData}
         control={control}
+        setValue={setTechStackValue}
       />
 
       {/* Authentication Section */}
@@ -206,6 +215,7 @@ const TechStackForm = ({
         authOptions={authOptions}
         initialData={initialData}
         control={control}
+        setValue={setTechStackValue}
       />
 
       {/* Navigation buttons */}

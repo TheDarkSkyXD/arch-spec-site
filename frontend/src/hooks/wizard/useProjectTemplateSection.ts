@@ -1,6 +1,6 @@
 import { useState, useEffect, Dispatch, SetStateAction } from "react";
 import { templatesService } from "../../services/templatesService";
-import { ProjectTemplate } from "../../types/project";
+import { ProjectTemplate } from "../../types/templates";
 import { ProjectWizardFormData } from "../../components/project/ProjectWizardTypes";
 
 interface ProjectTemplateSectionProps {
@@ -19,7 +19,8 @@ export function useProjectTemplateSection({
   setLoading,
   setError,
 }: ProjectTemplateSectionProps) {
-  const [selectedTemplate, setSelectedTemplate] = useState<ProjectTemplate | null>(null);
+  const [selectedTemplate, setSelectedTemplate] =
+    useState<ProjectTemplate | null>(null);
   const [isBlankProject, setIsBlankProject] = useState<boolean>(false);
 
   // Load template from API if templateId is provided
@@ -34,15 +35,23 @@ export function useProjectTemplateSection({
           const template = await templatesService.getTemplateById(templateId);
 
           if (template) {
-            console.log(`Successfully loaded template: ${template.name} (${template.version})`);
+            console.log(
+              `Successfully loaded template: ${template.name} (${template.version})`
+            );
             setSelectedTemplate(template);
           } else {
-            console.error(`Template with ID ${templateId} not found in API response`);
-            setError(`Template with ID ${templateId} not found. Please try browsing all templates.`);
+            console.error(
+              `Template with ID ${templateId} not found in API response`
+            );
+            setError(
+              `Template with ID ${templateId} not found. Please try browsing all templates.`
+            );
           }
         } catch (err) {
           console.error("Error loading template:", err);
-          setError("Failed to load the selected template. Please try again later.");
+          setError(
+            "Failed to load the selected template. Please try again later."
+          );
         } finally {
           setLoading(false);
         }
@@ -61,7 +70,9 @@ export function useProjectTemplateSection({
       const emptyApi = { endpoints: [] };
 
       // Parse business goals and target users into arrays if they're provided as strings
-      const parseStringToArray = (value: string | string[] | undefined): string[] => {
+      const parseStringToArray = (
+        value: string | string[] | undefined
+      ): string[] => {
         if (!value) return [];
         if (Array.isArray(value)) return value;
         return value
@@ -71,7 +82,8 @@ export function useProjectTemplateSection({
       };
 
       // Extract values from project defaults
-      const businessGoals = selectedTemplate.projectDefaults?.business_goals || [];
+      const businessGoals =
+        selectedTemplate.projectDefaults?.business_goals || [];
       const targetUsers = selectedTemplate.projectDefaults?.target_users || [];
 
       // Update form data with template values

@@ -1,12 +1,12 @@
 import { UseFormRegister, Control } from "react-hook-form";
 import { TechStackFormData } from "../tech-stack/techStackSchema";
 import { useEffect, useRef } from "react";
-
+import { TechStack } from "../../../types/templates";
 interface AuthenticationSectionProps {
   register: UseFormRegister<TechStackFormData>;
   backend: string | undefined;
   authOptions: string[];
-  initialData?: Partial<TechStackFormData>;
+  initialData?: TechStack;
   control: Control<TechStackFormData>;
 }
 

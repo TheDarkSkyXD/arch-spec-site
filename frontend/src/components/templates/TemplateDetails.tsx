@@ -1,5 +1,5 @@
 import React from "react";
-import { ProjectTemplate } from "../../types/project";
+import { ProjectTemplate } from "../../types/templates";
 
 interface TemplateDetailsProps {
   template: ProjectTemplate;

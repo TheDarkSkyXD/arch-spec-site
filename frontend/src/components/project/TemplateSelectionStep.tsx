@@ -1,7 +1,6 @@
-import { useState } from "react";
 import TemplateSelector from "../templates/TemplateSelector";
 import TemplateDetails from "../templates/TemplateDetails";
-import { ProjectTemplate } from "../../types/project";
+import { ProjectTemplate } from "../../types/templates";
 
 interface TemplateSelectionStepProps {
   selectedTemplate: ProjectTemplate | null;
@@ -20,7 +19,6 @@ const TemplateSelectionStep = ({
   loading = false,
   error = null,
 }: TemplateSelectionStepProps) => {
-  
   // Show loading state when fetching template
   if (loading) {
     return (
@@ -43,7 +41,7 @@ const TemplateSelectionStep = ({
         <div className="flex justify-center gap-4">
           <button
             className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700"
-            onClick={() => window.location.href = "/templates"}
+            onClick={() => (window.location.href = "/templates")}
           >
             Browse all templates
           </button>

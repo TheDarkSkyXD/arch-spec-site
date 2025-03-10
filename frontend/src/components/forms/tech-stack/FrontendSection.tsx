@@ -4,6 +4,7 @@ import {
   FieldError,
   useWatch,
   Control,
+  UseFormSetValue,
 } from "react-hook-form";
 import {
   Technology,
@@ -18,6 +19,7 @@ import {
   filterUILibraryOptions,
   filterStateManagementOptions,
 } from "../../../utils/techStackFilterUtils";
+import { TechStack } from "../../../types/templates";
 
 interface FrontendSectionProps {
   register: UseFormRegister<TechStackFormData>;
@@ -26,7 +28,8 @@ interface FrontendSectionProps {
   uiLibraryOptions: UILibrary[];
   stateManagementOptions: StateManagement[];
   control: Control<TechStackFormData>;
-  initialData?: Partial<TechStackFormData>;
+  setValue: UseFormSetValue<TechStackFormData>;
+  initialData?: TechStack;
 }
 
 const FrontendSection = ({
@@ -36,11 +39,9 @@ const FrontendSection = ({
   uiLibraryOptions,
   stateManagementOptions,
   control,
+  setValue,
   initialData,
 }: FrontendSectionProps) => {
-  // Get setValue from control prop
-  const setValue = control.setValue;
-
   // Create a ref to track whether we've applied initial data
   const initialDataAppliedRef = useRef<boolean>(false);
 
@@ -64,7 +65,7 @@ const FrontendSection = ({
 
   // Debug log for watched values
   useEffect(() => {
-    console.log("Selected values:", {
+    console.log("Selected Frontend values:", {
       framework: selectedFramework,
       language: selectedLanguage,
       uiLibrary: selectedUILibrary,
@@ -169,10 +170,12 @@ const FrontendSection = ({
     // Check and set each value if it exists in options
     if (!selectedFramework && initialData.frontend) {
       const frameworkExists = filteredFrameworks.some(
-        (framework) => framework.id === initialData.frontend
+        (framework) => framework.id === initialData.frontend.framework
       );
       if (frameworkExists) {
-        setValue("frontend", initialData.frontend, { shouldDirty: true });
+        setValue("frontend", initialData.frontend.framework, {
+          shouldDirty: true,
+        });
         console.log("Setting initial framework:", initialData.frontend);
         valuesWereSet = true;
       } else {
@@ -183,57 +186,62 @@ const FrontendSection = ({
       }
     }
 
-    if (!selectedLanguage && initialData.frontend_language) {
+    if (!selectedLanguage && initialData.frontend.language) {
       const languageExists = filteredLanguages.includes(
-        initialData.frontend_language
+        initialData.frontend.language
       );
       if (languageExists) {
-        setValue("frontend_language", initialData.frontend_language, {
+        setValue("frontend_language", initialData.frontend.language, {
           shouldDirty: true,
         });
-        console.log("Setting initial language:", initialData.frontend_language);
+        console.log("Setting initial language:", initialData.frontend.language);
         valuesWereSet = true;
       } else {
         console.log(
           "Initial language not available in options:",
-          initialData.frontend_language
+          initialData.frontend.language
         );
       }
     }
 
-    if (!selectedUILibrary && initialData.ui_library) {
+    if (!selectedUILibrary && initialData.frontend.uiLibrary) {
       const uiLibraryExists = filteredUILibraries.some(
-        (lib) => lib.id === initialData.ui_library
+        (lib) => lib.id === initialData.frontend.uiLibrary
       );
       if (uiLibraryExists) {
-        setValue("ui_library", initialData.ui_library, { shouldDirty: true });
-        console.log("Setting initial UI library:", initialData.ui_library);
+        setValue("ui_library", initialData.frontend.uiLibrary, {
+          shouldDirty: true,
+        });
+        console.log(
+          "Setting initial UI library:",
+          initialData.frontend.uiLibrary
+        );
         valuesWereSet = true;
       } else {
         console.log(
           "Initial UI library not available in options:",
-          initialData.ui_library
+          initialData.frontend.uiLibrary
         );
       }
     }
 
-    if (!selectedStateManagement && initialData.state_management) {
+    if (!selectedStateManagement && initialData.frontend.stateManagement) {
       const stateManagementExists = filteredStateManagement.some(
-        (sm) => sm.id === initialData.state_management
+        (sm) => sm.id === initialData.frontend.stateManagement
       );
       if (stateManagementExists) {
-        setValue("state_management", initialData.state_management, {
+        setValue("state_management", initialData.frontend.stateManagement, {
           shouldDirty: true,
         });
         console.log(
           "Setting initial state management:",
-          initialData.state_management
+          initialData.frontend.stateManagement
         );
         valuesWereSet = true;
       } else {
         console.log(
           "Initial state management not available in options:",
-          initialData.state_management
+          initialData.frontend.stateManagement
         );
       }
     }

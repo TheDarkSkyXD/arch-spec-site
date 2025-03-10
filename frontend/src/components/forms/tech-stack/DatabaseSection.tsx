@@ -7,7 +7,7 @@ import {
 import { Technology } from "../../../types/techStack";
 import { TechStackFormData } from "../tech-stack/techStackSchema";
 import { ReactNode, useEffect, useRef } from "react";
-
+import { TechStack } from "../../../types/templates";
 interface DatabaseSectionProps {
   register: UseFormRegister<TechStackFormData>;
   errors: FormState<TechStackFormData>["errors"];
@@ -16,7 +16,7 @@ interface DatabaseSectionProps {
   databaseOptions: string[];
   ormOptions: string[];
   allDatabases: Technology[];
-  initialData?: Partial<TechStackFormData>;
+  initialData?: TechStack;
   control: Control<TechStackFormData>;
 }
 

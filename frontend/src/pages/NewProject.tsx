@@ -9,6 +9,7 @@ import { useProjectWizard } from "../hooks/useProjectWizard";
 import TemplateSelectionStep from "../components/project/TemplateSelectionStep";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
+import { useEffect } from "react";
 
 const NewProject = () => {
   const navigate = useNavigate();
@@ -30,6 +31,10 @@ const NewProject = () => {
 
   // Check if we have the minimum required data (basics)
   const hasBasicData = formData.name && formData.description;
+
+  useEffect(() => {
+    console.log("Selected Template:", selectedTemplate);
+  }, [selectedTemplate]);
 
   return (
     <MainLayout showSidebar={false}>
@@ -123,25 +128,7 @@ const NewProject = () => {
             </div>
             <div className="p-6">
               <TechStackForm
-                initialData={{
-                  frontend: formData.template_data?.techStack?.frontend || "",
-                  backend: formData.template_data?.techStack?.backend || "",
-                  database: formData.template_data?.techStack?.database || "",
-                  frontend_language:
-                    formData.template_data?.techStack?.frontend_language || "",
-                  ui_library:
-                    formData.template_data?.techStack?.ui_library || "",
-                  state_management:
-                    formData.template_data?.techStack?.state_management || "",
-                  backend_provider:
-                    formData.template_data?.techStack?.backend_provider || "",
-                  database_provider:
-                    formData.template_data?.techStack?.database_provider || "",
-                  auth_provider:
-                    formData.template_data?.techStack?.auth_provider || "",
-                  auth_methods:
-                    formData.template_data?.techStack?.auth_methods || "",
-                }}
+                initialData={selectedTemplate?.techStack}
                 onSubmit={handleTechStackSubmit}
               />
               <div className="mt-4 flex justify-end">
