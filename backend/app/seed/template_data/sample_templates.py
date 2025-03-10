@@ -22,28 +22,34 @@ PROJECT_TEMPLATES = [
                     "stateManagement": "Context API",
                     "uiLibrary": "Tailwind CSS",
                     "formHandling": "React Hook Form",
-                    "routing": "React Router",
-                    "options": ["Redux", "MUI", "Styled Components"]
+                    "routing": "React Router"
                 },
                 "backend": {
-                    "type": "Serverless",
-                    "provider": "Supabase",
-                    "options": ["Firebase", "Custom Express", "NestJS"]
+                    "type": "baas",
+                    "service": "Supabase",
+                    "functions": "Edge Functions",
+                    "realtime": "Supabase Realtime"
                 },
                 "database": {
-                    "type": "PostgreSQL",
+                    "type": "sql",
+                    "system": "PostgreSQL",
                     "provider": "Supabase",
-                    "options": ["Firestore", "MongoDB Atlas", "MySQL"]
                 },
                 "authentication": {
                     "provider": "Supabase Auth",
-                    "methods": ["Email/Password", "Google", "GitHub"],
-                    "options": ["Firebase Auth", "Auth0", "Custom JWT"]
+                    "methods": ["Email/Password", "Google", "GitHub"]
                 },
                 "hosting": {
                     "frontend": "Vercel",
                     "backend": "Supabase",
-                    "options": ["Netlify", "AWS Amplify", "DigitalOcean App Platform"]
+                    "database": "Supabase"
+                },
+                "storage": {
+                    "type": "objectStorage",
+                    "service": "Supabase Storage"
+                },
+                "deployment": {
+                    "ci_cd": "GitHub Actions",
                 }
             },
             "features": {

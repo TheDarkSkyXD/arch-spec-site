@@ -9,46 +9,97 @@ export interface ProjectDefaults {
   targetUsers: string[];
 }
 
-export interface TechStackFrontend {
+// Frontend Types
+export interface FrontendTechStack {
   framework: string;
   language: string;
   stateManagement?: string;
   uiLibrary?: string;
   formHandling?: string;
   routing?: string;
-  options: string[];
+  apiClient?: string;
+  metaFramework?: string | null;
 }
 
-export interface TechStackBackend {
-  type: string;
-  provider?: string;
-  options: string[];
+// Backend Types
+export interface FrameworkBackend {
+  type: "framework";
+  framework: string; // Express.js, NestJS, Django, etc.
+  language: string; // JavaScript, TypeScript, Python, etc.
+  realtime?: string | null;
 }
 
-export interface TechStackDatabase {
-  type: string;
-  provider?: string;
-  options: string[];
+export interface BaaSBackend {
+  type: "baas";
+  service: string; // Supabase, Firebase, etc.
+  functions?: string | null;
+  realtime?: string | null;
 }
 
-export interface TechStackAuthentication {
+export interface ServerlessBackend {
+  type: "serverless";
+  service: string; // AWS Lambda, Azure Functions, etc.
+  language: string; // JavaScript, TypeScript, Python, etc.
+}
+
+// Combined Backend
+export type BackendTechStack =
+  | FrameworkBackend
+  | BaaSBackend
+  | ServerlessBackend;
+
+// Database Types
+export interface SQLDatabase {
+  type: "sql";
+  system: string; // PostgreSQL, MySQL, etc.
+  provider: string; // Supabase, AWS RDS, etc.
+  orm?: string | null;
+}
+
+export interface NoSQLDatabase {
+  type: "nosql";
+  system: string; // MongoDB, Firestore, etc.
+  provider: string; // MongoDB Atlas, Firebase, etc.
+  client?: string | null;
+}
+
+// Combined Database
+export type DatabaseTechStack = SQLDatabase | NoSQLDatabase;
+
+// Authentication
+export interface AuthenticationTechStack {
   provider: string;
   methods: string[];
-  options: string[];
 }
 
-export interface TechStackHosting {
-  frontend?: string;
-  backend?: string;
-  options: string[];
+// Hosting
+export interface HostingTechStack {
+  frontend: string;
+  backend: string;
+  database?: string;
 }
 
-export interface TechStack {
-  frontend: TechStackFrontend;
-  backend: TechStackBackend;
-  database: TechStackDatabase;
-  authentication: TechStackAuthentication;
-  hosting: TechStackHosting;
+// Storage
+export interface StorageTechStack {
+  type: string; // objectStorage, fileSystem
+  service: string;
+}
+
+// Deployment
+export interface DeploymentTechStack {
+  ci_cd?: string | null;
+  containerization?: string | null;
+}
+
+// Complete Project Template
+export interface ProjectTechStack {
+  frontend: FrontendTechStack;
+  backend: BackendTechStack;
+  database: DatabaseTechStack;
+  authentication: AuthenticationTechStack;
+  hosting: HostingTechStack;
+  storage?: StorageTechStack;
+  deployment?: DeploymentTechStack;
 }
 
 export interface FeatureModule {
@@ -179,7 +230,7 @@ export interface ProjectTemplate {
   description: string;
   tags?: string[];
   projectDefaults: ProjectDefaults;
-  techStack: TechStack;
+  techStack: ProjectTechStack;
   features: Features;
   pages: Pages;
   dataModel: DataModel;

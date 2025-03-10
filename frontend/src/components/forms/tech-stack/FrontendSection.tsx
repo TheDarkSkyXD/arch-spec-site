@@ -19,7 +19,7 @@ import {
   filterUILibraryOptions,
   filterStateManagementOptions,
 } from "../../../utils/techStackFilterUtils";
-import { TechStack } from "../../../types/templates";
+import { ProjectTechStack } from "../../../types/templates";
 
 interface FrontendSectionProps {
   register: UseFormRegister<TechStackFormData>;
@@ -29,7 +29,7 @@ interface FrontendSectionProps {
   stateManagementOptions: StateManagement[];
   control: Control<TechStackFormData>;
   setValue: UseFormSetValue<TechStackFormData>;
-  initialData?: TechStack;
+  initialData?: ProjectTechStack;
 }
 
 const FrontendSection = ({

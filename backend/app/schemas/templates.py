@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import Dict, List, Optional, Any, Union
 
-from .shared_schemas import TechStackData
+from .shared_schemas import ProjectTechStack
 
 class ProjectDefaults(BaseModel):
     """Project default information."""
@@ -140,7 +140,7 @@ class ProjectTemplate(BaseModel):
     version: str
     description: str
     project_defaults: ProjectDefaults = Field(alias="projectDefaults")
-    tech_stack: TechStackData = Field(alias="techStack")  # Using TechStackData directly
+    tech_stack: ProjectTechStack = Field(alias="techStack")  # Using TechStackData directly
     features: Features
     pages: Pages
     data_model: DataModel = Field(alias="dataModel")

@@ -20,10 +20,10 @@ import FrontendSection from "./tech-stack/FrontendSection";
 import BackendSection from "./tech-stack/BackendSection";
 import DatabaseSection from "./tech-stack/DatabaseSection";
 import AuthenticationSection from "./tech-stack/AuthenticationSection";
-import { TechStack } from "../../types/templates";
+import { ProjectTechStack } from "../../types/templates";
 
 interface TechStackFormProps {
-  initialData?: TechStack;
+  initialData?: ProjectTechStack;
   onSubmit: (data: TechStackFormData) => void;
   onBack?: () => void;
 }
@@ -152,6 +152,46 @@ const TechStackForm = ({
     );
   };
 
+  const getBackendBaaS = (): Technology[] => {
+    // Get all BaaS and filter to only return backend BaaS
+    const baas = techStackOptions?.technologies?.baas || {};
+
+    return Object.entries(baas).map(([name, baas]) => ({
+      ...baas,
+      id: name,
+    })) as Technology[];
+  };
+
+  const getBackendRealtime = (): Technology[] => {
+    // Get all realtime and filter to only return backend realtime
+    const realtime = techStackOptions?.technologies?.realtime || {};
+
+    return Object.entries(realtime).map(([name, realtime]) => ({
+      ...realtime,
+      id: name,
+    })) as Technology[];
+  };
+
+  const getBackendFunctions = (): Technology[] => {
+    // Get all functions and filter to only return backend functions
+    const functions = techStackOptions?.technologies?.serverless || {};
+
+    return Object.entries(functions).map(([name, functions]) => ({
+      ...functions,
+      id: name,
+    })) as Technology[];
+  };
+
+  const getBackendServerless = (): Technology[] => {
+    // Get all serverless options
+    const serverless = techStackOptions?.technologies?.serverless || {};
+
+    return Object.entries(serverless).map(([name, service]) => ({
+      ...service,
+      id: name,
+    })) as Technology[];
+  };
+
   const getAllDatabases = (): Technology[] => {
     // Get all databases
     const databases = techStackOptions?.technologies?.databases || {};
@@ -189,6 +229,10 @@ const TechStackForm = ({
         register={register}
         errors={errors}
         backendFrameworks={getBackendFrameworks()}
+        backendBaaS={getBackendBaaS()}
+        backendRealtime={getBackendRealtime()}
+        backendFunctions={getBackendFunctions()}
+        backendServerless={getBackendServerless()}
         initialData={initialData}
         control={control}
         setValue={setTechStackValue}
