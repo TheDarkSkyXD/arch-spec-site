@@ -34,7 +34,7 @@ class Requirement(BaseModel):
     tags: List[str] = Field(default_factory=list)
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class ProjectBase(BaseModel):
@@ -71,7 +71,7 @@ class ProjectBase(BaseModel):
     template_id: Optional[str] = None  # ID of the template used to create this project
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class ProjectCreate(ProjectBase):
@@ -104,7 +104,7 @@ class ProjectUpdate(BaseModel):
     template_data: Optional[ProjectTemplate] = None
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class ProjectInDB(ProjectBase):
@@ -161,7 +161,7 @@ class ProjectResponse(BaseModel):
     non_functional_requirements: List[Requirement] = Field(default_factory=list)
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class ProjectDetailResponse(ProjectResponse):
@@ -186,4 +186,4 @@ class ProjectDetailResponse(ProjectResponse):
     documentation: Optional[Documentation] = None
     
     class Config:
-        allow_population_by_field_name = True 
+        populate_by_name = True 

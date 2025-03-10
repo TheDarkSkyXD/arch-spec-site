@@ -25,7 +25,7 @@ class ProjectSection(BaseModel):
     last_modified_by: Optional[str] = None
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class TimelineSection(ProjectSection):
@@ -57,7 +57,7 @@ class TimelineSectionUpdate(BaseModel):
     last_modified_by: Optional[str] = None
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class BudgetSectionUpdate(BaseModel):
@@ -66,7 +66,7 @@ class BudgetSectionUpdate(BaseModel):
     last_modified_by: Optional[str] = None
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class RequirementsSectionUpdate(BaseModel):
@@ -76,7 +76,7 @@ class RequirementsSectionUpdate(BaseModel):
     last_modified_by: Optional[str] = None
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class MetadataSectionUpdate(BaseModel):
@@ -85,7 +85,7 @@ class MetadataSectionUpdate(BaseModel):
     last_modified_by: Optional[str] = None
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 # Core architecture sections derived from template data
@@ -143,7 +143,7 @@ class TechStackSectionUpdate(BaseModel):
     last_modified_by: Optional[str] = None
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class FeaturesSectionUpdate(BaseModel):
@@ -152,7 +152,7 @@ class FeaturesSectionUpdate(BaseModel):
     last_modified_by: Optional[str] = None
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class PagesSectionUpdate(BaseModel):
@@ -161,7 +161,7 @@ class PagesSectionUpdate(BaseModel):
     last_modified_by: Optional[str] = None
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class DataModelSectionUpdate(BaseModel):
@@ -170,7 +170,7 @@ class DataModelSectionUpdate(BaseModel):
     last_modified_by: Optional[str] = None
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class ApiSectionUpdate(BaseModel):
@@ -179,7 +179,7 @@ class ApiSectionUpdate(BaseModel):
     last_modified_by: Optional[str] = None
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class TestingSectionUpdate(BaseModel):
@@ -188,7 +188,7 @@ class TestingSectionUpdate(BaseModel):
     last_modified_by: Optional[str] = None
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class ProjectStructureSectionUpdate(BaseModel):
@@ -197,7 +197,7 @@ class ProjectStructureSectionUpdate(BaseModel):
     last_modified_by: Optional[str] = None
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class DeploymentSectionUpdate(BaseModel):
@@ -206,7 +206,7 @@ class DeploymentSectionUpdate(BaseModel):
     last_modified_by: Optional[str] = None
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class DocumentationSectionUpdate(BaseModel):
@@ -215,4 +215,4 @@ class DocumentationSectionUpdate(BaseModel):
     last_modified_by: Optional[str] = None
 
     class Config:
-        allow_population_by_field_name = True 
+        populate_by_name = True 

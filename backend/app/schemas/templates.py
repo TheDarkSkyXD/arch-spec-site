@@ -11,7 +11,7 @@ class ProjectDefaults(BaseModel):
     target_users: List[str] = Field(default_factory=list, alias="targetUsers")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class FeatureModule(BaseModel):
     """Feature module configuration."""
@@ -26,7 +26,7 @@ class Features(BaseModel):
     core_modules: List[FeatureModule] = Field(default_factory=list, alias="coreModules")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class PageComponent(BaseModel):
     """Page component."""
@@ -67,7 +67,7 @@ class Relationship(BaseModel):
     field: str
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class DataModel(BaseModel):
     """Application data model."""
@@ -75,7 +75,7 @@ class DataModel(BaseModel):
     relationships: List[Relationship] = Field(default_factory=list)
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class ApiEndpoint(BaseModel):
     """API endpoint configuration."""
@@ -151,7 +151,7 @@ class ProjectTemplate(BaseModel):
     documentation: Documentation
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class ProjectTemplateResponse(BaseModel):
     """Response schema for a project template."""

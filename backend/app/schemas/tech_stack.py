@@ -15,7 +15,7 @@ class FrameworkCompatibility(BaseModel):
     languages: Optional[List[str]] = Field(default_factory=list)
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class BackendFrameworkCompatibility(BaseModel):
     """Compatibility options for backend frameworks."""
@@ -26,7 +26,7 @@ class BackendFrameworkCompatibility(BaseModel):
     testing: Optional[List[str]] = Field(default_factory=list)
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class BaaSCompatibility(BaseModel):
     """Compatibility options for Backend as a Service."""
@@ -38,7 +38,7 @@ class BaaSCompatibility(BaseModel):
     realtime: Optional[List[str]] = Field(default_factory=list)
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class DatabaseCompatibility(BaseModel):
     """Compatibility options for databases."""
@@ -48,14 +48,14 @@ class DatabaseCompatibility(BaseModel):
     baas: Optional[List[str]] = Field(default_factory=list)
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class SimpleCompatibility(BaseModel):
     """Simple compatibility list for many technology types."""
     compatibleWith: Optional[Union[List[str], Dict[str, List[str]]]] = Field(default_factory=list)
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class HostingCompatibility(BaseModel):
     """Compatibility options for hosting services."""
@@ -64,14 +64,14 @@ class HostingCompatibility(BaseModel):
     database: Optional[List[str]] = Field(default_factory=list)
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class TestingCompatibility(BaseModel):
     """Compatibility options for testing tools."""
     frameworks: Optional[List[str]] = Field(default_factory=list)
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class StorageCompatibility(BaseModel):
     """Compatibility options for storage solutions."""
@@ -79,7 +79,7 @@ class StorageCompatibility(BaseModel):
     baas: Optional[List[str]] = Field(default_factory=list)
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class ServerlessCompatibility(BaseModel):
     """Compatibility options for serverless solutions."""
@@ -87,7 +87,7 @@ class ServerlessCompatibility(BaseModel):
     baas: Optional[List[str]] = Field(default_factory=list)
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class RealtimeCompatibility(BaseModel):
     """Compatibility options for realtime solutions."""
@@ -95,7 +95,7 @@ class RealtimeCompatibility(BaseModel):
     baas: Optional[List[str]] = Field(default_factory=list)
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 # Technology models for different types
 class FrontendFramework(BaseModel):
@@ -106,7 +106,7 @@ class FrontendFramework(BaseModel):
     compatibleWith: FrameworkCompatibility
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class BackendFramework(BaseModel):
     """Backend framework details."""
@@ -116,7 +116,7 @@ class BackendFramework(BaseModel):
     compatibleWith: BackendFrameworkCompatibility
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class BaaS(BaseModel):
     """Backend as a Service details."""
@@ -125,7 +125,7 @@ class BaaS(BaseModel):
     compatibleWith: BaaSCompatibility
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class Database(BaseModel):
     """Database details."""
@@ -134,7 +134,7 @@ class Database(BaseModel):
     compatibleWith: DatabaseCompatibility
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class StateManagement(BaseModel):
     """State management library details."""
@@ -142,7 +142,7 @@ class StateManagement(BaseModel):
     compatibleWith: Union[List[str], Dict[str, List[str]]]
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class UILibrary(BaseModel):
     """UI library details."""
@@ -150,7 +150,7 @@ class UILibrary(BaseModel):
     compatibleWith: Union[List[str], Dict[str, List[str]]]
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class FormHandling(BaseModel):
     """Form handling library details."""
@@ -158,7 +158,7 @@ class FormHandling(BaseModel):
     compatibleWith: Union[List[str], Dict[str, List[str]]]
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class Routing(BaseModel):
     """Routing library details."""
@@ -166,7 +166,7 @@ class Routing(BaseModel):
     compatibleWith: Union[List[str], Dict[str, List[str]]]
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class APIClient(BaseModel):
     """API client details."""
@@ -174,7 +174,7 @@ class APIClient(BaseModel):
     compatibleWith: Union[List[str], Dict[str, List[str]]]
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class MetaFramework(BaseModel):
     """Meta framework details."""
@@ -182,7 +182,7 @@ class MetaFramework(BaseModel):
     compatibleWith: Union[List[str], Dict[str, List[str]]]
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class ORM(BaseModel):
     """ORM details."""
@@ -190,7 +190,7 @@ class ORM(BaseModel):
     compatibleWith: Dict[str, List[str]]
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class Auth(BaseModel):
     """Authentication method details."""
@@ -198,7 +198,7 @@ class Auth(BaseModel):
     compatibleWith: Dict[str, List[str]]
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class Hosting(BaseModel):
     """Hosting service details."""
@@ -207,7 +207,7 @@ class Hosting(BaseModel):
     compatibleWith: Union[List[str], Dict[str, List[str]]]
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class Testing(BaseModel):
     """Testing tool details."""
@@ -216,7 +216,7 @@ class Testing(BaseModel):
     compatibleWith: Dict[str, List[str]]
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class Storage(BaseModel):
     """Storage solution details."""
@@ -225,7 +225,7 @@ class Storage(BaseModel):
     compatibleWith: Dict[str, List[str]]
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class Serverless(BaseModel):
     """Serverless solution details."""
@@ -234,7 +234,7 @@ class Serverless(BaseModel):
     compatibleWith: Dict[str, List[str]]
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class Realtime(BaseModel):
     """Realtime solution details."""
@@ -243,7 +243,7 @@ class Realtime(BaseModel):
     compatibleWith: Dict[str, List[str]]
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 # Categories for hierarchical navigation
 class FrontendCategories(BaseModel):
@@ -258,7 +258,7 @@ class FrontendCategories(BaseModel):
     metaFrameworks: List[str] = Field(default_factory=list)
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class BackendCategories(BaseModel):
     """Backend technology categories."""
@@ -269,7 +269,7 @@ class BackendCategories(BaseModel):
     realtime: List[str] = Field(default_factory=list)
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class DatabaseCategories(BaseModel):
     """Database technology categories."""
@@ -279,7 +279,7 @@ class DatabaseCategories(BaseModel):
     clients: List[str] = Field(default_factory=list)
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class AuthenticationCategories(BaseModel):
     """Authentication technology categories."""
@@ -287,7 +287,7 @@ class AuthenticationCategories(BaseModel):
     methods: List[str] = Field(default_factory=list)
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class DeploymentCategories(BaseModel):
     """Deployment technology categories."""
@@ -296,7 +296,7 @@ class DeploymentCategories(BaseModel):
     ci_cd: List[str] = Field(default_factory=list)
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class StorageCategories(BaseModel):
     """Storage technology categories."""
@@ -304,7 +304,7 @@ class StorageCategories(BaseModel):
     fileSystem: List[str] = Field(default_factory=list)
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class HostingCategories(BaseModel):
     """Hosting technology categories."""
@@ -313,7 +313,7 @@ class HostingCategories(BaseModel):
     database: List[str] = Field(default_factory=list)
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class TestingCategories(BaseModel):
     """Testing technology categories."""
@@ -322,7 +322,7 @@ class TestingCategories(BaseModel):
     apiTesting: List[str] = Field(default_factory=list)
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class Categories(BaseModel):
     """All technology categories for hierarchical navigation."""
@@ -336,7 +336,7 @@ class Categories(BaseModel):
     testing: TestingCategories = Field(default_factory=TestingCategories)
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 # Technologies detailed information with compatibility
 class Technologies(BaseModel):
@@ -359,7 +359,7 @@ class Technologies(BaseModel):
     realtime: Dict[str, Realtime] = Field(default_factory=dict)
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 # Main tech stack data model
 class TechStackData(BaseModel):
@@ -368,4 +368,4 @@ class TechStackData(BaseModel):
     technologies: Technologies = Field(default_factory=Technologies)
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
