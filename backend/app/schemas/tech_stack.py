@@ -275,7 +275,7 @@ class DatabaseCategories(BaseModel):
     """Database technology categories."""
     sql: List[str] = Field(default_factory=list)
     nosql: List[str] = Field(default_factory=list)
-    providers: List[str] = Field(default_factory=list)
+    hosting: List[str] = Field(default_factory=list)
     clients: List[str] = Field(default_factory=list)
     
     class Config:

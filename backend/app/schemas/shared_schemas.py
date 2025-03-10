@@ -114,13 +114,13 @@ BackendTechStack = Union[FrameworkBackend, BaaSBackend, ServerlessBackend]
 class SQLDatabase(BaseModel):
     type: Literal["sql"]
     system: str  # PostgreSQL, MySQL, etc.
-    provider: str  # Supabase, AWS RDS, etc.
+    hosting: str  # Supabase, AWS RDS, etc.
     orm: Optional[str] = None
 
 class NoSQLDatabase(BaseModel):
     type: Literal["nosql"]
     system: str  # MongoDB, Firestore, etc.
-    provider: str  # MongoDB Atlas, Firebase, etc.
+    hosting: str  # MongoDB Atlas, Firebase, etc.
     client: Optional[str] = None
 
 # Combined Database

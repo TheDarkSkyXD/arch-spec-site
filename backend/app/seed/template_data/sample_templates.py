@@ -33,7 +33,7 @@ PROJECT_TEMPLATES = [
                 "database": {
                     "type": "sql",
                     "system": "PostgreSQL",
-                    "provider": "Supabase",
+                    "hosting": "Supabase",
                 },
                 "authentication": {
                     "provider": "Supabase Auth",

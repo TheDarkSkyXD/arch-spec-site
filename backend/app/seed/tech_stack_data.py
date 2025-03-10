@@ -119,7 +119,7 @@ TECH_STACK_DATA = {
         "MongoDB", "Firestore", "DynamoDB", "Redis", "Cassandra", "Elasticsearch",
         "Redis Labs", "AWS ElastiCache", "Upstash", "Realtime Database"
       ],
-      "providers": [
+      "hosting": [
         "Supabase", "Firebase", "MongoDB Atlas", "AWS RDS", "PlanetScale", "Fauna",
         "Appwrite", "Managed Instance", "Self-hosted", "Local file", "Embedded"
       ],

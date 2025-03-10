@@ -52,14 +52,14 @@ export type BackendTechStack =
 export interface SQLDatabase {
   type: "sql";
   system: string; // PostgreSQL, MySQL, etc.
-  provider: string; // Supabase, AWS RDS, etc.
+  hosting: string; // Supabase, AWS RDS, etc.
   orm?: string | null;
 }
 
 export interface NoSQLDatabase {
   type: "nosql";
   system: string; // MongoDB, Firestore, etc.
-  provider: string; // MongoDB Atlas, Firebase, etc.
+  hosting: string; // MongoDB Atlas, Firebase, etc.
   client?: string | null;
 }
 

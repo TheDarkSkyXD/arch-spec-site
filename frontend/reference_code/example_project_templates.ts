@@ -19,7 +19,7 @@ const supabaseReactTemplate = {
   database: {
     type: "sql",
     system: "PostgreSQL",
-    provider: "Supabase",
+    hosting: "Supabase",
     orm: null,
   },
   authentication: {
@@ -62,7 +62,7 @@ const djangoReactTemplate = {
   database: {
     type: "sql",
     system: "PostgreSQL",
-    provider: "AWS RDS",
+    hosting: "AWS RDS",
     orm: "Django ORM",
   },
   authentication: {
@@ -104,7 +104,7 @@ const serverlessReactTemplate = {
   database: {
     type: "nosql",
     system: "DynamoDB",
-    provider: "AWS",
+    hosting: "AWS",
     client: null,
   },
   authentication: {

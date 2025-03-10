@@ -201,7 +201,7 @@ export interface BackendCategories {
 export interface DatabaseCategories {
   sql: string[];
   nosql: string[];
-  providers: string[];
+  hosting: string[];
   clients: string[];
 }
 
