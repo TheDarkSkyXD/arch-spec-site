@@ -1,13 +1,31 @@
-import { UseFormRegister, FormState } from "react-hook-form";
-import { Technology } from "../../../types/techStack";
+import {
+  UseFormRegister,
+  FormState,
+  FieldError,
+  useWatch,
+  Control,
+} from "react-hook-form";
+import {
+  Technology,
+  UILibrary,
+  StateManagement,
+} from "../../../types/techStack";
+import { TechStackFormData } from "../tech-stack/techStackSchema";
+import { ReactNode, useEffect, useMemo } from "react";
+import {
+  filterLanguageOptions,
+  filterFrameworkOptions,
+  filterUILibraryOptions,
+  filterStateManagementOptions,
+} from "../../../utils/techStackFilterUtils";
 
 interface FrontendSectionProps {
-  register: UseFormRegister<any>;
-  errors: FormState<any>["errors"];
+  register: UseFormRegister<TechStackFormData>;
+  errors: FormState<TechStackFormData>["errors"];
   frontendFrameworks: Technology[];
-  uiLibraryOptions: string[];
-  stateManagementOptions: string[];
-  frontend: string | undefined;
+  uiLibraryOptions: UILibrary[];
+  stateManagementOptions: StateManagement[];
+  control: Control<TechStackFormData>;
 }
 
 const FrontendSection = ({
@@ -16,8 +34,121 @@ const FrontendSection = ({
   frontendFrameworks,
   uiLibraryOptions,
   stateManagementOptions,
-  frontend,
+  control,
 }: FrontendSectionProps) => {
+  // Helper function to safely get error message
+  const getErrorMessage = (error: FieldError | undefined): ReactNode => {
+    return error?.message as ReactNode;
+  };
+
+  // Watch for form value changes
+  const watchedValues = useWatch({
+    control,
+    name: ["frontend", "frontend_language", "ui_library", "state_management"],
+  });
+
+  const [
+    selectedFramework,
+    selectedLanguage,
+    selectedUILibrary,
+    selectedStateManagement,
+  ] = watchedValues;
+
+  // Debug log for watched values
+  useEffect(() => {
+    console.log("Selected values:", {
+      framework: selectedFramework,
+      language: selectedLanguage,
+      uiLibrary: selectedUILibrary,
+      stateManagement: selectedStateManagement,
+    });
+  }, [
+    selectedFramework,
+    selectedLanguage,
+    selectedUILibrary,
+    selectedStateManagement,
+  ]);
+
+  const filteredLanguages = useMemo(
+    () =>
+      filterLanguageOptions(
+        selectedFramework,
+        selectedUILibrary,
+        selectedStateManagement,
+        frontendFrameworks,
+        uiLibraryOptions,
+        stateManagementOptions
+      ),
+    [
+      selectedFramework,
+      selectedUILibrary,
+      selectedStateManagement,
+      frontendFrameworks,
+      uiLibraryOptions,
+      stateManagementOptions,
+    ]
+  );
+
+  const filteredFrameworks = useMemo(
+    () =>
+      filterFrameworkOptions(
+        selectedLanguage,
+        selectedUILibrary,
+        selectedStateManagement,
+        frontendFrameworks,
+        uiLibraryOptions,
+        stateManagementOptions
+      ),
+    [
+      selectedLanguage,
+      selectedUILibrary,
+      selectedStateManagement,
+      frontendFrameworks,
+      uiLibraryOptions,
+      stateManagementOptions,
+    ]
+  );
+
+  const filteredUILibraries = useMemo(
+    () =>
+      filterUILibraryOptions(
+        selectedFramework,
+        selectedLanguage,
+        selectedStateManagement,
+        frontendFrameworks,
+        uiLibraryOptions,
+        stateManagementOptions
+      ),
+    [
+      selectedFramework,
+      selectedLanguage,
+      selectedStateManagement,
+      frontendFrameworks,
+      uiLibraryOptions,
+      stateManagementOptions,
+    ]
+  );
+
+  const filteredStateManagement = useMemo(
+    () =>
+      filterStateManagementOptions(
+        selectedFramework,
+        selectedLanguage,
+        selectedUILibrary,
+        frontendFrameworks,
+        uiLibraryOptions,
+        stateManagementOptions
+      ),
+    [
+      selectedFramework,
+      selectedLanguage,
+      selectedUILibrary,
+      frontendFrameworks,
+      uiLibraryOptions,
+      stateManagementOptions,
+    ]
+  );
+
   return (
     <div>
       <h3 className="text-lg font-medium text-slate-800 dark:text-slate-100 mb-4">
@@ -39,15 +170,15 @@ const FrontendSection = ({
             }`}
           >
             <option value="">Select Framework</option>
-            {frontendFrameworks.map((framework) => (
-              <option key={framework.name} value={framework.name}>
-                {framework.name}
+            {filteredFrameworks.map((framework) => (
+              <option key={framework.id} value={framework.id}>
+                {framework.id}
               </option>
             ))}
           </select>
           {errors.frontend && (
             <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-              {errors.frontend.message}
+              {getErrorMessage(errors.frontend)}
             </p>
           )}
         </div>
@@ -63,16 +194,21 @@ const FrontendSection = ({
             id="frontend_language"
             {...register("frontend_language")}
             className={`mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 ${
-              errors.frontend_language ? "border-red-500 focus:ring-red-500" : ""
+              errors.frontend_language
+                ? "border-red-500 focus:ring-red-500"
+                : ""
             }`}
           >
             <option value="">Select Language</option>
-            <option value="JavaScript">JavaScript</option>
-            <option value="TypeScript">TypeScript</option>
+            {filteredLanguages.map((language) => (
+              <option key={language} value={language}>
+                {language}
+              </option>
+            ))}
           </select>
           {errors.frontend_language && (
             <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-              {errors.frontend_language.message}
+              {getErrorMessage(errors.frontend_language)}
             </p>
           )}
         </div>
@@ -88,41 +224,37 @@ const FrontendSection = ({
             id="ui_library"
             {...register("ui_library")}
             className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
-            disabled={!frontend || uiLibraryOptions.length === 0}
           >
             <option value="">Select UI Library</option>
-            {uiLibraryOptions.map((lib) => (
-              <option key={lib} value={lib}>
-                {lib}
+            {filteredUILibraries.map((lib) => (
+              <option key={lib.id} value={lib.id}>
+                {lib.id}
               </option>
             ))}
           </select>
         </div>
 
         {/* State Management dropdown */}
-        {frontend && (
-          <div>
-            <label
-              htmlFor="state_management"
-              className="block text-sm font-medium text-slate-700 dark:text-slate-300"
-            >
-              State Management
-            </label>
-            <select
-              id="state_management"
-              {...register("state_management")}
-              className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
-              disabled={stateManagementOptions.length === 0}
-            >
-              <option value="">Select State Management</option>
-              {stateManagementOptions.map((sm) => (
-                <option key={sm} value={sm}>
-                  {sm}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
+        <div>
+          <label
+            htmlFor="state_management"
+            className="block text-sm font-medium text-slate-700 dark:text-slate-300"
+          >
+            State Management
+          </label>
+          <select
+            id="state_management"
+            {...register("state_management")}
+            className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+          >
+            <option value="">Select State Management</option>
+            {filteredStateManagement.map((sm) => (
+              <option key={sm.id} value={sm.id}>
+                {sm.id}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
     </div>
   );

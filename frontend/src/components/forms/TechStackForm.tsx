@@ -1,8 +1,13 @@
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
-import { TechStackData, Technology } from "../../types/techStack";
-import { techStackService } from "../../services/techStackService";
+import {
+  StateManagement,
+  TechStackData,
+  Technology,
+  UILibrary,
+} from "../../types/techStack";
+import { useTechStack } from "../../hooks/useDataQueries";
 
 // Import schema
 import {
@@ -33,19 +38,15 @@ const TechStackForm = ({
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // State for filtered options
-  const [uiLibraryOptions, setUiLibraryOptions] = useState<string[]>([]);
-  const [stateManagementOptions, setStateManagementOptions] = useState<
-    string[]
-  >([]);
-  const [databaseOptions, setDatabaseOptions] = useState<string[]>([]);
-  const [ormOptions, setOrmOptions] = useState<string[]>([]);
-  const [authOptions, setAuthOptions] = useState<string[]>([]);
+  const [databaseOptions] = useState<string[]>([]);
+  const [ormOptions] = useState<string[]>([]);
+  const [authOptions] = useState<string[]>([]);
 
   const {
     register,
     handleSubmit,
     control,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<TechStackFormData>({
     resolver: zodResolver(techStackSchema),
     defaultValues: initialData || {
@@ -63,44 +64,96 @@ const TechStackForm = ({
     },
   });
 
+  useEffect(() => {
+    console.log("initialData", initialData);
+  }, [initialData]);
+
   // Watch for form value changes
   const watchedValues = useWatch({
     control,
     name: ["frontend", "backend", "database"],
   });
 
-  const [frontend, backend, database] = watchedValues;
+  const [backend, database] = watchedValues;
 
-  // Initialize tech stack data from backend
+  // Use the data query hook instead of direct service call
+  const { data: techStackData, isLoading: isTechStackLoading } = useTechStack();
+
+  // Update local state when data from hook is received
   useEffect(() => {
-    const fetchTechStackOptions = async () => {
-      setIsLoading(true);
-      try {
-        const data = await techStackService.getAllTechnology();
-        setTechStackOptions(data);
-      } catch (error) {
-        console.error("Error fetching tech stack options:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchTechStackOptions();
-  }, []);
+    if (techStackData) {
+      setTechStackOptions(techStackData);
+      setIsLoading(false);
+    } else {
+      setIsLoading(isTechStackLoading);
+    }
+  }, [techStackData, isTechStackLoading]);
 
   // Helper functions to get tech options from the updated TechStackData structure
   const getFrontendFrameworks = (): Technology[] => {
-    return techStackOptions?.frontend?.frameworks || [];
+    // Get all frameworks and filter to only return frontend frameworks
+    const frameworks = techStackOptions?.technologies?.frameworks || {};
+
+    return (
+      Object.entries(frameworks)
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        .filter(([_, framework]) => framework.type === "frontend")
+        .map(([name, framework]) => ({
+          ...framework,
+          id: name,
+        }))
+        .sort((a, b) => a.id.localeCompare(b.id)) as Technology[]
+    );
+  };
+
+  const getFrontendUILibraries = (): UILibrary[] => {
+    // Get all UI libraries and filter to only return frontend UI libraries
+    const uiLibraries = techStackOptions?.technologies?.uiLibraries || {};
+
+    return Object.entries(uiLibraries)
+      .map(([name, uiLibrary]) => ({
+        ...uiLibrary,
+        id: name,
+      }))
+      .sort((a, b) => a.id.localeCompare(b.id)) as UILibrary[];
+  };
+
+  const getFrontendStateManagement = (): StateManagement[] => {
+    // Get all state management and filter to only return frontend state management
+    const stateManagement =
+      techStackOptions?.technologies?.stateManagement || {};
+
+    return Object.entries(stateManagement)
+      .map(([name, stateManagement]) => ({
+        ...stateManagement,
+        id: name,
+      }))
+      .sort((a, b) => a.id.localeCompare(b.id)) as StateManagement[];
   };
 
   const getBackendFrameworks = (): Technology[] => {
-    return techStackOptions?.backend?.frameworks || [];
+    // Get all frameworks and filter to only return backend frameworks
+    const frameworks = techStackOptions?.technologies?.frameworks || {};
+
+    return (
+      Object.entries(frameworks)
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        .filter(([_, framework]) => framework.type === "backend")
+        .map(([name, framework]) => ({
+          ...framework,
+          id: name,
+        })) as Technology[]
+    );
   };
 
   const getAllDatabases = (): Technology[] => {
-    const sqlDatabases = techStackOptions?.database?.sql || [];
-    const nosqlDatabases = techStackOptions?.database?.nosql || [];
-    return [...sqlDatabases, ...nosqlDatabases];
+    // Get all databases
+    const databases = techStackOptions?.technologies?.databases || {};
+
+    return Object.entries(databases).map(([name, database]) => ({
+      ...database,
+      id: name,
+    })) as Technology[];
   };
 
   if (isLoading || !techStackOptions) {
@@ -118,9 +171,9 @@ const TechStackForm = ({
         register={register}
         errors={errors}
         frontendFrameworks={getFrontendFrameworks()}
-        uiLibraryOptions={uiLibraryOptions}
-        stateManagementOptions={stateManagementOptions}
-        frontend={frontend}
+        uiLibraryOptions={getFrontendUILibraries()}
+        stateManagementOptions={getFrontendStateManagement()}
+        control={control}
       />
 
       {/* Backend Section */}
@@ -147,6 +200,19 @@ const TechStackForm = ({
         backend={backend}
         authOptions={authOptions}
       />
+
+      {/* Navigation buttons */}
+      {onBack && (
+        <div className="flex justify-between mt-4">
+          <button
+            type="button"
+            onClick={onBack}
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+          >
+            Back
+          </button>
+        </div>
+      )}
     </form>
   );
 };

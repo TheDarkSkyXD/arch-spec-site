@@ -1,9 +1,11 @@
-import { UseFormRegister, FormState } from "react-hook-form";
+import { UseFormRegister, FormState, FieldError } from "react-hook-form";
 import { Technology } from "../../../types/techStack";
+import { TechStackFormData } from "../tech-stack/techStackSchema";
+import { ReactNode } from "react";
 
 interface BackendSectionProps {
-  register: UseFormRegister<any>;
-  errors: FormState<any>["errors"];
+  register: UseFormRegister<TechStackFormData>;
+  errors: FormState<TechStackFormData>["errors"];
   backendFrameworks: Technology[];
 }
 
@@ -12,6 +14,11 @@ const BackendSection = ({
   errors,
   backendFrameworks,
 }: BackendSectionProps) => {
+  // Helper function to safely get error message
+  const getErrorMessage = (error: FieldError | undefined): ReactNode => {
+    return error?.message as ReactNode;
+  };
+
   return (
     <div>
       <h3 className="text-lg font-medium text-slate-800 dark:text-slate-100 mb-4">
@@ -33,15 +40,19 @@ const BackendSection = ({
             }`}
           >
             <option value="">Select Backend Framework</option>
-            {backendFrameworks.map((framework) => (
-              <option key={framework.name} value={framework.name}>
-                {framework.name}
-              </option>
-            ))}
+            {backendFrameworks.map((framework, index) => {
+              // Use the id property added in TechStackForm
+              const id = (framework as any).id || `backend-framework-${index}`;
+              return (
+                <option key={id} value={id}>
+                  {id}
+                </option>
+              );
+            })}
           </select>
           {errors.backend && (
             <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-              {errors.backend.message}
+              {getErrorMessage(errors.backend)}
             </p>
           )}
         </div>

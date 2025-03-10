@@ -1,9 +1,11 @@
-import { UseFormRegister, FormState } from "react-hook-form";
+import { UseFormRegister, FormState, FieldError } from "react-hook-form";
 import { Technology } from "../../../types/techStack";
+import { TechStackFormData } from "../tech-stack/techStackSchema";
+import { ReactNode } from "react";
 
 interface DatabaseSectionProps {
-  register: UseFormRegister<any>;
-  errors: FormState<any>["errors"];
+  register: UseFormRegister<TechStackFormData>;
+  errors: FormState<TechStackFormData>["errors"];
   backend: string | undefined;
   database: string | undefined;
   databaseOptions: string[];
@@ -20,6 +22,11 @@ const DatabaseSection = ({
   ormOptions,
   allDatabases,
 }: DatabaseSectionProps) => {
+  // Helper function to safely get error message
+  const getErrorMessage = (error: FieldError | undefined): ReactNode => {
+    return error?.message as ReactNode;
+  };
+
   return (
     <div>
       <h3 className="text-lg font-medium text-slate-800 dark:text-slate-100 mb-4">
@@ -48,15 +55,19 @@ const DatabaseSection = ({
                     {db}
                   </option>
                 ))
-              : allDatabases.map((db) => (
-                  <option key={db.name} value={db.name}>
-                    {db.name}
-                  </option>
-                ))}
+              : allDatabases.map((db, index) => {
+                  // Use the id property added in TechStackForm
+                  const id = (db as any).id || `database-${index}`;
+                  return (
+                    <option key={id} value={id}>
+                      {id}
+                    </option>
+                  );
+                })}
           </select>
           {errors.database && (
             <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-              {errors.database.message}
+              {getErrorMessage(errors.database)}
             </p>
           )}
         </div>

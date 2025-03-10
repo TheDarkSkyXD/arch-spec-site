@@ -66,6 +66,7 @@ export interface RealtimeCompatibility {
 
 // Technology interfaces for different types
 export interface FrontendFramework {
+  id?: string;
   type: "frontend";
   description: string;
   languages?: string[];
@@ -73,6 +74,7 @@ export interface FrontendFramework {
 }
 
 export interface BackendFramework {
+  id?: string;
   type: "backend";
   description: string;
   language?: string;
@@ -80,82 +82,97 @@ export interface BackendFramework {
 }
 
 export interface BaaS {
+  id?: string;
   type: "backend";
   description: string;
   compatibleWith: BaaSCompatibility;
 }
 
 export interface Database {
+  id?: string;
   type: string;
   description: string;
   compatibleWith: DatabaseCompatibility;
 }
 
 export interface StateManagement {
+  id?: string;
   description: string;
   compatibleWith: string[] | Record<string, string[]>;
 }
 
 export interface UILibrary {
+  id?: string;
   description: string;
   compatibleWith: string[] | Record<string, string[]>;
 }
 
 export interface FormHandling {
+  id?: string;
   description: string;
   compatibleWith: string[] | Record<string, string[]>;
 }
 
 export interface Routing {
+  id?: string;
   description: string;
   compatibleWith: string[] | Record<string, string[]>;
 }
 
 export interface APIClient {
+  id?: string;
   description: string;
   compatibleWith: string[] | Record<string, string[]>;
 }
 
 export interface MetaFramework {
+  id?: string;
   description: string;
   compatibleWith: string[] | Record<string, string[]>;
 }
 
 export interface ORM {
+  id?: string;
   description: string;
   compatibleWith: Record<string, string[]>;
 }
 
 export interface Auth {
+  id?: string;
   description: string;
   compatibleWith: Record<string, string[]>;
 }
 
 export interface Hosting {
+  id?: string;
   type: string;
   description: string;
   compatibleWith: string[] | Record<string, string[]>;
 }
 
 export interface Testing {
+  id?: string;
   type: string;
   description: string;
   compatibleWith: Record<string, string[]>;
 }
 
 export interface Storage {
+  id?: string;
   type: string;
   description: string;
   compatibleWith: Record<string, string[]>;
 }
 
 export interface Serverless {
+  id?: string;
   type: string;
   description: string;
   compatibleWith: Record<string, string[]>;
 }
 
 export interface Realtime {
+  id?: string;
   type: string;
   description: string;
   compatibleWith: Record<string, string[]>;
@@ -246,6 +263,26 @@ export interface Technologies {
   serverless: Record<string, Serverless>;
   realtime: Record<string, Realtime>;
 }
+
+// Technology type alias to represent any technology
+export type Technology =
+  | FrontendFramework
+  | BackendFramework
+  | BaaS
+  | Database
+  | StateManagement
+  | UILibrary
+  | FormHandling
+  | Routing
+  | APIClient
+  | MetaFramework
+  | ORM
+  | Auth
+  | Hosting
+  | Testing
+  | Storage
+  | Serverless
+  | Realtime;
 
 // Main tech stack data interface
 export interface TechStackData {

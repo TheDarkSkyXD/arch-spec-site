@@ -1,7 +1,8 @@
 import { UseFormRegister } from "react-hook-form";
+import { TechStackFormData } from "../tech-stack/techStackSchema";
 
 interface AuthenticationSectionProps {
-  register: UseFormRegister<any>;
+  register: UseFormRegister<TechStackFormData>;
   backend: string | undefined;
   authOptions: string[];
 }
