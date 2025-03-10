@@ -53,62 +53,13 @@ async def seed_templates(db, clean_all: bool = False):
             result = await templates_collection.insert_many(PROJECT_TEMPLATES)
             logger.info(f"Inserted {len(result.inserted_ids)} project templates")
         else:
-            # Templates already exist, check for updates
-            logger.info(f"Template collection already has {count} documents. Checking for updates...")
+            # Templates already exist, skip seeding
+            logger.info(f"Template collection already has {count} documents. Skipping seeding...")
             
-            # Get existing template IDs from database
-            existing_templates = await templates_collection.find({}, {"id": 1}).to_list(length=100)
-            existing_template_ids = {t["id"] for t in existing_templates}
-            
-            # Compare with current templates
-            current_template_ids = {t["id"] for t in PROJECT_TEMPLATES}
-            
-            # Find templates to add or update
-            templates_to_add = []
-            templates_to_update = []
-            
-            for template in PROJECT_TEMPLATES:
-                if template["id"] not in existing_template_ids:
-                    templates_to_add.append(template)
-                else:
-                    # Template exists, check if it's changed
-                    templates_to_update.append(template)
-            
-            # Add new templates
-            if templates_to_add:
-                result = await templates_collection.insert_many(templates_to_add)
-                logger.info(f"Added {len(result.inserted_ids)} new templates")
-            
-            # Update existing templates 
-            for template in templates_to_update:
-                # Add a last_updated field
-                if "metadata" not in template:
-                    template["metadata"] = {}
-                template["metadata"]["last_updated"] = datetime.datetime.now(datetime.UTC)
-                
-                result = await templates_collection.replace_one(
-                    {"id": template["id"]},
-                    template
-                )
-                if result.modified_count > 0:
-                    logger.info(f"Updated template: {template['template']['name']}")
-            
-            # Check for templates to remove (templates in DB but not in code)
-            templates_to_remove = existing_template_ids - current_template_ids
-            if templates_to_remove:
-                logger.info(f"Found {len(templates_to_remove)} templates to remove")
-                # Option 1: Actually delete them
-                # result = await templates_collection.delete_many({"id": {"$in": list(templates_to_remove)}})
-                # logger.info(f"Removed {result.deleted_count} templates")
-                
-                # Option 2: Mark them as deprecated but don't delete
-                for template_id in templates_to_remove:
-                    result = await templates_collection.update_one(
-                        {"id": template_id},
-                        {"$set": {"metadata.deprecated": True, "metadata.last_updated": datetime.datetime.now(datetime.UTC)}}
-                    )
-                    if result.modified_count > 0:
-                        logger.info(f"Marked template {template_id} as deprecated")
+        # Get all templates from the database
+        templates = await get_templates_from_db(db)
+        logger.info(f"Retrieved {len(templates)} templates from the database")
+        
         print("Project templates seeded successfully")
     except Exception as e:
         logger.error(f"Error seeding templates: {str(e)}")
