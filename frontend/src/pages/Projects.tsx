@@ -7,7 +7,6 @@ import {
   FolderPlus,
   Filter,
   MoreVertical,
-  Users,
   CheckCircle,
   AlertCircle,
 } from "lucide-react";
@@ -35,51 +34,12 @@ const Projects = () => {
             project.name.toLowerCase().includes(query) ||
             project.description.toLowerCase().includes(query) ||
             project.domain?.toLowerCase().includes(query) ||
-            project.organization?.toLowerCase().includes(query) ||
-            project.business_goals.some((goal) =>
-              goal.toLowerCase().includes(query)
-            ) ||
-            project.target_users.some((user) =>
-              user.toLowerCase().includes(query)
-            )
+            project.business_goals?.toLowerCase().includes(query) ||
+            project.target_users?.toLowerCase().includes(query)
         )
       );
     }
   }, [searchQuery, projects]);
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "draft":
-        return "bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-300";
-      case "in_progress":
-        return "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300";
-      case "completed":
-        return "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300";
-      default:
-        return "bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-300";
-    }
-  };
-
-  const getStatusDot = (status: string) => {
-    switch (status) {
-      case "draft":
-        return (
-          <span className="w-1.5 h-1.5 rounded-full bg-slate-500 mr-1.5"></span>
-        );
-      case "in_progress":
-        return (
-          <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mr-1.5"></span>
-        );
-      case "completed":
-        return (
-          <span className="w-1.5 h-1.5 rounded-full bg-green-500 mr-1.5"></span>
-        );
-      default:
-        return (
-          <span className="w-1.5 h-1.5 rounded-full bg-slate-500 mr-1.5"></span>
-        );
-    }
-  };
 
   return (
     <MainLayout>
