@@ -2,6 +2,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import NewProject from "./pages/NewProject";
 import Projects from "./pages/Projects";
+import ProjectDetails from "./pages/ProjectDetails";
 import Templates from "./pages/Templates";
 import Settings from "./pages/Settings";
 import Profile from "./pages/Profile";
@@ -33,7 +34,7 @@ const router = createBrowserRouter([
     path: "/reset-password",
     element: <ResetPassword />,
   },
-  
+
   // Protected routes (require authentication)
   {
     path: "/",
@@ -56,6 +57,14 @@ const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <Projects />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/projects/:id",
+    element: (
+      <ProtectedRoute>
+        <ProjectDetails />
       </ProtectedRoute>
     ),
   },
