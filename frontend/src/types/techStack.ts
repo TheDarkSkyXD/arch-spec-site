@@ -98,84 +98,84 @@ export interface Database {
 export interface StateManagement {
   id?: string;
   description: string;
-  compatibleWith: string[] | Record<string, string[]>;
+  compatibleWith: SimpleCompatibility;
 }
 
 export interface UILibrary {
   id?: string;
   description: string;
-  compatibleWith: string[] | Record<string, string[]>;
+  compatibleWith: SimpleCompatibility;
 }
 
 export interface FormHandling {
   id?: string;
   description: string;
-  compatibleWith: string[] | Record<string, string[]>;
+  compatibleWith: SimpleCompatibility;
 }
 
 export interface Routing {
   id?: string;
   description: string;
-  compatibleWith: string[] | Record<string, string[]>;
+  compatibleWith: SimpleCompatibility;
 }
 
 export interface APIClient {
   id?: string;
   description: string;
-  compatibleWith: string[] | Record<string, string[]>;
+  compatibleWith: SimpleCompatibility;
 }
 
 export interface MetaFramework {
   id?: string;
   description: string;
-  compatibleWith: string[] | Record<string, string[]>;
+  compatibleWith: SimpleCompatibility;
 }
 
 export interface ORM {
   id?: string;
   description: string;
-  compatibleWith: Record<string, string[]>;
+  compatibleWith: SimpleCompatibility;
 }
 
 export interface Auth {
   id?: string;
   description: string;
-  compatibleWith: Record<string, string[]>;
+  compatibleWith: SimpleCompatibility;
 }
 
 export interface Hosting {
   id?: string;
   type: string;
   description: string;
-  compatibleWith: string[] | Record<string, string[]>;
+  compatibleWith: HostingCompatibility;
 }
 
 export interface Testing {
   id?: string;
   type: string;
   description: string;
-  compatibleWith: Record<string, string[]>;
+  compatibleWith: TestingCompatibility;
 }
 
 export interface Storage {
   id?: string;
   type: string;
   description: string;
-  compatibleWith: Record<string, string[]>;
+  compatibleWith: StorageCompatibility;
 }
 
 export interface Serverless {
   id?: string;
   type: string;
   description: string;
-  compatibleWith: Record<string, string[]>;
+  compatibleWith: ServerlessCompatibility;
 }
 
 export interface Realtime {
   id?: string;
   type: string;
   description: string;
-  compatibleWith: Record<string, string[]>;
+  compatibleWith: RealtimeCompatibility;
 }
 
 // Categories for hierarchical navigation

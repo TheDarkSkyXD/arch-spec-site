@@ -1485,6 +1485,11 @@ TECH_STACK_DATA = {
         "type": "database",
         "description": "Database embedded in the application",
         "compatibleWith": ["SQLite"]
+      },
+      "Supabase": {
+        "type": "database",
+        "description": "Database as a service",
+        "compatibleWith": ["PostgreSQL"]
       }
     },
     

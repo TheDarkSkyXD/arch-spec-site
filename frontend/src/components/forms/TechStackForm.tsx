@@ -140,7 +140,8 @@ const TechStackForm = ({
         .map(([name, framework]) => ({
           ...framework,
           id: name,
-        })) as Technology[]
+        }))
+        .sort((a, b) => a.id.localeCompare(b.id)) as Technology[]
     );
   };
 
@@ -148,65 +149,90 @@ const TechStackForm = ({
     // Get all BaaS and filter to only return backend BaaS
     const baas = techStackOptions?.technologies?.baas || {};
 
-    return Object.entries(baas).map(([name, baas]) => ({
-      ...baas,
-      id: name,
-    })) as Technology[];
+    return Object.entries(baas)
+      .map(([name, baas]) => ({
+        ...baas,
+        id: name,
+      }))
+      .sort((a, b) => a.id.localeCompare(b.id)) as Technology[];
   };
 
   const getBackendRealtime = (): Technology[] => {
     // Get all realtime and filter to only return backend realtime
     const realtime = techStackOptions?.technologies?.realtime || {};
 
-    return Object.entries(realtime).map(([name, realtime]) => ({
-      ...realtime,
-      id: name,
-    })) as Technology[];
+    return Object.entries(realtime)
+      .map(([name, realtime]) => ({
+        ...realtime,
+        id: name,
+      }))
+      .sort((a, b) => a.id.localeCompare(b.id)) as Technology[];
   };
 
   const getBackendFunctions = (): Technology[] => {
     // Get all functions and filter to only return backend functions
     const functions = techStackOptions?.technologies?.serverless || {};
 
-    return Object.entries(functions).map(([name, functions]) => ({
-      ...functions,
-      id: name,
-    })) as Technology[];
+    return Object.entries(functions)
+      .map(([name, functions]) => ({
+        ...functions,
+        id: name,
+      }))
+      .sort((a, b) => a.id.localeCompare(b.id)) as Technology[];
   };
 
   const getBackendServerless = (): Technology[] => {
     // Get all serverless options
     const serverless = techStackOptions?.technologies?.serverless || {};
 
-    return Object.entries(serverless).map(([name, service]) => ({
-      ...service,
-      id: name,
-    })) as Technology[];
+    return Object.entries(serverless)
+      .map(([name, service]) => ({
+        ...service,
+        id: name,
+      }))
+      .sort((a, b) => a.id.localeCompare(b.id)) as Technology[];
   };
 
   const getAllDatabases = (): Technology[] => {
     // Get all databases
     const databases = techStackOptions?.technologies?.databases || {};
 
-    return Object.entries(databases).map(([name, database]) => ({
-      ...database,
-      id: name,
-    })) as Technology[];
+    return Object.entries(databases)
+      .map(([name, database]) => ({
+        ...database,
+        id: name,
+      }))
+      .sort((a, b) => a.id.localeCompare(b.id)) as Technology[];
   };
 
-  const getAllDatabaseHosting = (): string[] => {
+  const getAllDatabaseHosting = (): Technology[] => {
     // Get all database hosting
-    return techStackOptions?.categories?.database?.hosting || [];
+    const hosting = techStackOptions?.technologies?.hosting || {};
+
+    console.log("hosting", hosting);
+
+    return (
+      Object.entries(hosting)
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        .filter(([_, hosting]) => hosting.type === "database")
+        .map(([name, hosting]) => ({
+          ...hosting,
+          id: name,
+        }))
+        .sort((a, b) => a.id.localeCompare(b.id)) as Technology[]
+    );
   };
 
   const getAllOrms = (): Technology[] => {
     // Get all ORMs
     const orms = techStackOptions?.technologies?.orms || {};
 
-    return Object.entries(orms).map(([name, orm]) => ({
-      ...orm,
-      id: name,
-    })) as Technology[];
+    return Object.entries(orms)
+      .map(([name, orm]) => ({
+        ...orm,
+        id: name,
+      }))
+      .sort((a, b) => a.id.localeCompare(b.id)) as Technology[];
   };
 
   if (isLoading || !techStackOptions) {
