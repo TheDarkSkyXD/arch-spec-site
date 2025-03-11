@@ -14,15 +14,9 @@ type ProjectBasicsFormData = z.infer<typeof projectBasicsSchema>;
 
 interface ProjectBasicsFormProps {
   initialData?: Partial<ProjectBasicsFormData>;
-  onSubmit: (data: ProjectBasicsFormData) => void;
-  onBack?: () => void;
 }
 
-const ProjectBasicsForm = ({
-  initialData,
-  onSubmit,
-  onBack,
-}: ProjectBasicsFormProps) => {
+const ProjectBasicsForm = ({ initialData }: ProjectBasicsFormProps) => {
   const {
     register,
     handleSubmit,
@@ -37,6 +31,10 @@ const ProjectBasicsForm = ({
       domain: "",
     },
   });
+
+  const onSubmit = (data: ProjectBasicsFormData) => {
+    console.log(data);
+  };
 
   return (
     <form

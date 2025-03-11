@@ -42,11 +42,11 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
 
   const getFeaturesText = () => {
     // Add null checks to avoid accessing properties of undefined
-    if (!template.features || !template.features.core_modules) {
+    if (!template.features || !template.features.coreModules) {
       return "No features available";
     }
 
-    const enabledFeatures = template.features.core_modules
+    const enabledFeatures = template.features.coreModules
       .filter((feature) => feature.enabled)
       .map((feature) => feature.name);
 
@@ -86,19 +86,23 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
       </p>
 
       <div className="mt-3 flex flex-wrap gap-1">
-        {template.techStack?.frontend && (
+        {template.techStack?.frontend.framework && (
           <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200">
-            {String(template.techStack.frontend)}
+            {String(template.techStack.frontend.framework)}
           </span>
         )}
         {template.techStack?.backend && (
           <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200">
-            {String(template.techStack.backend)}
+            {String(
+              template.techStack.backend.type === "framework"
+                ? template.techStack.backend.framework
+                : template.techStack.backend.service
+            )}
           </span>
         )}
-        {template.techStack?.database && (
+        {template.techStack?.database.system && (
           <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200">
-            {String(template.techStack.database)}
+            {String(template.techStack.database.system)}
           </span>
         )}
       </div>
@@ -150,23 +154,6 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
       }
     }
   }, [templates, selectedTemplateId, onTemplateSelect]);
-
-  const handleTemplateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const templateId = e.target.value;
-    if (!templateId) {
-      setSelectedTemplate(null);
-      onTemplateSelect(null);
-      return;
-    }
-
-    const template = templates.find(
-      (t) => t.id === templateId || t.version === templateId
-    );
-    if (template) {
-      setSelectedTemplate(template);
-      onTemplateSelect(template);
-    }
-  };
 
   const handleCustomProject = () => {
     setSelectedTemplate(null);

@@ -100,7 +100,6 @@ const NewProject = () => {
                   target_users: formData.target_users?.join(", ") || "",
                   domain: formData.domain || "",
                 }}
-                onSubmit={handleBasicsSubmit}
               />
               <div className="mt-4 flex justify-end">
                 <button
