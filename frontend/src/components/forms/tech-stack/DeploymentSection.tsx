@@ -1,62 +1,64 @@
 import { UseFormRegister, Control, UseFormSetValue } from "react-hook-form";
-import { TechStackFormData } from "../tech-stack/techStackSchema";
+import { TechStackFormData } from "./techStackSchema";
 import { useEffect, useRef } from "react";
 import { ProjectTechStack } from "../../../types/templates";
-interface AuthenticationSectionProps {
+
+interface DeploymentSectionProps {
   register: UseFormRegister<TechStackFormData>;
-  authProviders: string[];
-  authMethods: string[];
+  deploymentCICDOptions: string[];
+  deploymentContainerizationOptions: string[];
   control: Control<TechStackFormData>;
   setValue: UseFormSetValue<TechStackFormData>;
   initialData?: ProjectTechStack;
 }
 
-const AuthenticationSection = ({
+const DeploymentSection = ({
   register,
-  authProviders,
-  authMethods,
+  deploymentCICDOptions,
+  deploymentContainerizationOptions,
   setValue,
   initialData,
-}: AuthenticationSectionProps) => {
+}: DeploymentSectionProps) => {
   // Create a ref to track whether we've applied initial data
   const initialDataAppliedRef = useRef<boolean>(false);
 
   // Set initial values if they exist
   useEffect(() => {
-    if (!initialData) return;
+    if (!initialData || !initialData.deployment) return;
 
     console.log(
-      "Checking initial data for authentication section:",
-      initialData
+      "Checking initial data for deployment section:",
+      initialData.deployment
     );
 
     // Track values that were successfully set
     let valuesWereSet = false;
 
-    // Check and set auth provider
-    if (initialData.authentication.provider) {
-      // For simplicity, we're not validating auth_provider against a list of options
-      setValue("auth_provider", initialData.authentication.provider, {
+    // Check and set CI/CD
+    if (initialData.deployment.ci_cd) {
+      setValue("deployment_ci_cd", initialData.deployment.ci_cd, {
         shouldDirty: true,
       });
       console.log(
-        "Setting initial auth provider:",
-        initialData.authentication.provider
+        "Setting initial deployment CI/CD:",
+        initialData.deployment.ci_cd
       );
       valuesWereSet = true;
     }
 
-    // Check and set auth methods
-    if (
-      initialData.authentication.methods &&
-      initialData.authentication.methods.length > 0
-    ) {
-      // get the first method
-      const firstMethod = initialData.authentication.methods[0];
-      setValue("auth_methods", firstMethod, {
-        shouldDirty: true,
-      });
-      console.log("Setting initial auth methods:", firstMethod);
+    // Check and set containerization
+    if (initialData.deployment.containerization) {
+      setValue(
+        "deployment_containerization",
+        initialData.deployment.containerization,
+        {
+          shouldDirty: true,
+        }
+      );
+      console.log(
+        "Setting initial deployment containerization:",
+        initialData.deployment.containerization
+      );
       valuesWereSet = true;
     }
 
@@ -69,25 +71,25 @@ const AuthenticationSection = ({
   return (
     <div>
       <h3 className="text-lg font-medium text-slate-800 dark:text-slate-100 mb-4">
-        Authentication
+        Deployment
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label
-            htmlFor="auth_provider"
+            htmlFor="deployment_ci_cd"
             className="block text-sm font-medium text-slate-700 dark:text-slate-300"
           >
-            Provider
+            CI/CD
           </label>
           <select
-            id="auth_provider"
-            {...register("auth_provider")}
+            id="deployment_ci_cd"
+            {...register("deployment_ci_cd")}
             className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
           >
-            <option value="">Select Auth Provider</option>
-            {authProviders.map((auth) => (
-              <option key={auth} value={auth}>
-                {auth}
+            <option value="">Select CI/CD</option>
+            {deploymentCICDOptions.map((option) => (
+              <option key={option} value={option}>
+                {option}
               </option>
             ))}
           </select>
@@ -95,20 +97,20 @@ const AuthenticationSection = ({
 
         <div>
           <label
-            htmlFor="auth_methods"
+            htmlFor="deployment_containerization"
             className="block text-sm font-medium text-slate-700 dark:text-slate-300"
           >
-            Methods
+            Containerization
           </label>
           <select
-            id="auth_methods"
-            {...register("auth_methods")}
+            id="deployment_containerization"
+            {...register("deployment_containerization")}
             className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
           >
-            <option value="">Select Auth Methods</option>
-            {authMethods.map((auth) => (
-              <option key={auth} value={auth}>
-                {auth}
+            <option value="">Select Containerization</option>
+            {deploymentContainerizationOptions.map((option) => (
+              <option key={option} value={option}>
+                {option}
               </option>
             ))}
           </select>
@@ -118,4 +120,4 @@ const AuthenticationSection = ({
   );
 };
 
-export default AuthenticationSection;
+export default DeploymentSection;

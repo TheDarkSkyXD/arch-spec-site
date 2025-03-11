@@ -27,6 +27,18 @@ export const techStackSchema = z
     // Auth fields
     auth_provider: z.string().optional(),
     auth_methods: z.string().optional(),
+
+    // Hosting fields
+    hosting_frontend: z.string().optional(),
+    hosting_backend: z.string().optional(),
+
+    // Storage fields
+    storage_type: z.string().optional(),
+    storage_service: z.string().optional(),
+
+    // Deployment fields
+    deployment_ci_cd: z.string().optional(),
+    deployment_containerization: z.string().optional(),
   })
   .refine(
     (data) => {

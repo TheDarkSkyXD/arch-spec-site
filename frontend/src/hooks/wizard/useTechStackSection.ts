@@ -1,5 +1,8 @@
 import { Dispatch, SetStateAction } from "react";
-import { ProjectWizardFormData, TechStackFormData } from "../../components/project/ProjectWizardTypes";
+import {
+  ProjectWizardFormData,
+  TechStackFormData,
+} from "../../components/project/ProjectWizardTypes";
 
 interface TechStackSectionProps {
   formData: ProjectWizardFormData;
@@ -12,10 +15,9 @@ export function useTechStackSection({
   setFormData,
   setCurrentStep,
 }: TechStackSectionProps) {
-  
   const handleTechStackSubmit = (data: TechStackFormData) => {
     // Update form data with tech stack choices
-    setFormData(prevData => ({
+    setFormData((prevData) => ({
       ...prevData,
       tech_stack: {
         ...(prevData.tech_stack || {}),
@@ -29,7 +31,13 @@ export function useTechStackSection({
         database_provider: data.database_provider,
         auth_provider: data.auth_provider,
         auth_methods: data.auth_methods,
-      }
+        hosting_frontend: data.hosting_frontend,
+        hosting_backend: data.hosting_backend,
+        storage_type: data.storage_type,
+        storage_service: data.storage_service,
+        deployment_ci_cd: data.deployment_ci_cd,
+        deployment_containerization: data.deployment_containerization,
+      },
     }));
 
     // Move to the next step
@@ -49,6 +57,13 @@ export function useTechStackSection({
       database_provider: formData.tech_stack?.database_provider || "",
       auth_provider: formData.tech_stack?.auth_provider || "",
       auth_methods: formData.tech_stack?.auth_methods || "",
-    }
+      hosting_frontend: formData.tech_stack?.hosting_frontend || "",
+      hosting_backend: formData.tech_stack?.hosting_backend || "",
+      storage_type: formData.tech_stack?.storage_type || "",
+      storage_service: formData.tech_stack?.storage_service || "",
+      deployment_ci_cd: formData.tech_stack?.deployment_ci_cd || "",
+      deployment_containerization:
+        formData.tech_stack?.deployment_containerization || "",
+    },
   };
 }

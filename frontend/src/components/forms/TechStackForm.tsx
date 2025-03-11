@@ -20,6 +20,9 @@ import FrontendSection from "./tech-stack/FrontendSection";
 import BackendSection from "./tech-stack/BackendSection";
 import DatabaseSection from "./tech-stack/DatabaseSection";
 import AuthenticationSection from "./tech-stack/AuthenticationSection";
+import HostingSection from "./tech-stack/HostingSection";
+import StorageSection from "./tech-stack/StorageSection";
+import DeploymentSection from "./tech-stack/DeploymentSection";
 import { ProjectTechStack } from "../../types/templates";
 
 interface TechStackFormProps {
@@ -37,9 +40,6 @@ const TechStackForm = ({
   const [techStackOptions, setTechStackOptions] =
     useState<TechStackData | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  // State for filtered options
-  const [authOptions] = useState<string[]>([]);
 
   const defaultValues: TechStackFormData = {
     frontend: "",
@@ -235,6 +235,71 @@ const TechStackForm = ({
       .sort((a, b) => a.id.localeCompare(b.id)) as Technology[];
   };
 
+  const getAuthProviders = (): string[] => {
+    const auth = techStackOptions?.categories?.authentication?.providers || [];
+
+    return auth.sort();
+  };
+
+  const getAuthMethods = (): string[] => {
+    const auth = techStackOptions?.categories?.authentication?.methods || [];
+
+    return auth.sort();
+  };
+
+  const getAllHostingFrontend = (): Technology[] => {
+    const hosting = techStackOptions?.technologies?.hosting || {};
+
+    return Object.entries(hosting)
+      .map(([name, hosting]) => ({
+        ...hosting,
+        id: name,
+      }))
+      .sort((a, b) => a.id.localeCompare(b.id)) as Technology[];
+  };
+
+  const getAllHostingBackend = (): Technology[] => {
+    const hosting = techStackOptions?.technologies?.hosting || {};
+
+    return Object.entries(hosting)
+      .map(([name, hosting]) => ({
+        ...hosting,
+        id: name,
+      }))
+      .sort((a, b) => a.id.localeCompare(b.id)) as Technology[];
+  };
+
+  const getAllStorageServices = (): Technology[] => {
+    const storage = techStackOptions?.technologies?.storage || {};
+
+    return Object.entries(storage)
+      .map(([name, storage]) => ({
+        ...storage,
+        id: name,
+      }))
+      .sort((a, b) => a.id.localeCompare(b.id)) as Technology[];
+  };
+
+  const getAllDeploymentServices = (): string[] => {
+    const deployment =
+      techStackOptions?.categories?.deployment?.platforms || [];
+
+    return deployment.sort();
+  };
+
+  const getAllDeploymentContainerization = (): string[] => {
+    const containerization =
+      techStackOptions?.categories?.deployment?.containerization || [];
+
+    return containerization.sort();
+  };
+
+  const getAllDeploymentCICD = (): string[] => {
+    const ci_cd = techStackOptions?.categories?.deployment?.ci_cd || [];
+
+    return ci_cd.sort();
+  };
+
   if (isLoading || !techStackOptions) {
     return <div className="p-4">Loading tech stack options...</div>;
   }
@@ -286,8 +351,37 @@ const TechStackForm = ({
       {/* Authentication Section */}
       <AuthenticationSection
         register={register}
-        backend=""
-        authOptions={authOptions}
+        authProviders={getAuthProviders()}
+        authMethods={getAuthMethods()}
+        initialData={initialData}
+        control={control}
+        setValue={setTechStackValue}
+      />
+
+      {/* Hosting Section */}
+      <HostingSection
+        register={register}
+        hostingFrontendOptions={getAllHostingFrontend()}
+        hostingBackendOptions={getAllHostingBackend()}
+        initialData={initialData}
+        control={control}
+        setValue={setTechStackValue}
+      />
+
+      {/* Storage Section */}
+      <StorageSection
+        register={register}
+        storageOptions={getAllStorageServices()}
+        initialData={initialData}
+        control={control}
+        setValue={setTechStackValue}
+      />
+
+      {/* Deployment Section */}
+      <DeploymentSection
+        register={register}
+        deploymentCICDOptions={getAllDeploymentCICD()}
+        deploymentContainerizationOptions={getAllDeploymentContainerization()}
         initialData={initialData}
         control={control}
         setValue={setTechStackValue}

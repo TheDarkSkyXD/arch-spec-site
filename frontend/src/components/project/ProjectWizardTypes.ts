@@ -1,4 +1,8 @@
-import { ProjectCreate, ProjectTemplate, Requirement } from "../../types/project";
+import {
+  ProjectCreate,
+  ProjectTemplate,
+  Requirement,
+} from "../../types/project";
 
 // Type definitions for form data
 export interface FeatureModule {
@@ -70,6 +74,12 @@ export interface TechStackFormData {
   database_provider: string;
   auth_provider: string;
   auth_methods: string;
+  hosting_frontend: string;
+  hosting_backend: string;
+  storage_type: string;
+  storage_service: string;
+  deployment_ci_cd: string;
+  deployment_containerization: string;
 }
 
 export interface RequirementsFormData {

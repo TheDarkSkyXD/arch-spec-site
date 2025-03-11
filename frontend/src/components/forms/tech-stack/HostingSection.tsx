@@ -1,23 +1,25 @@
 import { UseFormRegister, Control, UseFormSetValue } from "react-hook-form";
-import { TechStackFormData } from "../tech-stack/techStackSchema";
+import { TechStackFormData } from "./techStackSchema";
 import { useEffect, useRef } from "react";
 import { ProjectTechStack } from "../../../types/templates";
-interface AuthenticationSectionProps {
+import { Technology } from "../../../types/techStack";
+
+interface HostingSectionProps {
   register: UseFormRegister<TechStackFormData>;
-  authProviders: string[];
-  authMethods: string[];
+  hostingFrontendOptions: Technology[];
+  hostingBackendOptions: Technology[];
   control: Control<TechStackFormData>;
   setValue: UseFormSetValue<TechStackFormData>;
   initialData?: ProjectTechStack;
 }
 
-const AuthenticationSection = ({
+const HostingSection = ({
   register,
-  authProviders,
-  authMethods,
+  hostingFrontendOptions,
+  hostingBackendOptions,
   setValue,
   initialData,
-}: AuthenticationSectionProps) => {
+}: HostingSectionProps) => {
   // Create a ref to track whether we've applied initial data
   const initialDataAppliedRef = useRef<boolean>(false);
 
@@ -25,38 +27,32 @@ const AuthenticationSection = ({
   useEffect(() => {
     if (!initialData) return;
 
-    console.log(
-      "Checking initial data for authentication section:",
-      initialData
-    );
+    console.log("Checking initial data for hosting section:", initialData);
 
     // Track values that were successfully set
     let valuesWereSet = false;
 
-    // Check and set auth provider
-    if (initialData.authentication.provider) {
-      // For simplicity, we're not validating auth_provider against a list of options
-      setValue("auth_provider", initialData.authentication.provider, {
+    // Check and set frontend hosting
+    if (initialData.hosting?.frontend) {
+      setValue("hosting_frontend", initialData.hosting.frontend, {
         shouldDirty: true,
       });
       console.log(
-        "Setting initial auth provider:",
-        initialData.authentication.provider
+        "Setting initial frontend hosting:",
+        initialData.hosting.frontend
       );
       valuesWereSet = true;
     }
 
-    // Check and set auth methods
-    if (
-      initialData.authentication.methods &&
-      initialData.authentication.methods.length > 0
-    ) {
-      // get the first method
-      const firstMethod = initialData.authentication.methods[0];
-      setValue("auth_methods", firstMethod, {
+    // Check and set backend hosting
+    if (initialData.hosting?.backend) {
+      setValue("hosting_backend", initialData.hosting.backend, {
         shouldDirty: true,
       });
-      console.log("Setting initial auth methods:", firstMethod);
+      console.log(
+        "Setting initial backend hosting:",
+        initialData.hosting.backend
+      );
       valuesWereSet = true;
     }
 
@@ -69,25 +65,25 @@ const AuthenticationSection = ({
   return (
     <div>
       <h3 className="text-lg font-medium text-slate-800 dark:text-slate-100 mb-4">
-        Authentication
+        Hosting
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label
-            htmlFor="auth_provider"
+            htmlFor="hosting_frontend"
             className="block text-sm font-medium text-slate-700 dark:text-slate-300"
           >
-            Provider
+            Frontend Hosting
           </label>
           <select
-            id="auth_provider"
-            {...register("auth_provider")}
+            id="hosting_frontend"
+            {...register("hosting_frontend")}
             className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
           >
-            <option value="">Select Auth Provider</option>
-            {authProviders.map((auth) => (
-              <option key={auth} value={auth}>
-                {auth}
+            <option value="">Select Frontend Hosting</option>
+            {hostingFrontendOptions.map((option) => (
+              <option key={option.id} value={option.id}>
+                {option.id}
               </option>
             ))}
           </select>
@@ -95,20 +91,20 @@ const AuthenticationSection = ({
 
         <div>
           <label
-            htmlFor="auth_methods"
+            htmlFor="hosting_backend"
             className="block text-sm font-medium text-slate-700 dark:text-slate-300"
           >
-            Methods
+            Backend Hosting
           </label>
           <select
-            id="auth_methods"
-            {...register("auth_methods")}
+            id="hosting_backend"
+            {...register("hosting_backend")}
             className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
           >
-            <option value="">Select Auth Methods</option>
-            {authMethods.map((auth) => (
-              <option key={auth} value={auth}>
-                {auth}
+            <option value="">Select Backend Hosting</option>
+            {hostingBackendOptions.map((option) => (
+              <option key={option.id} value={option.id}>
+                {option.id}
               </option>
             ))}
           </select>
@@ -118,4 +114,4 @@ const AuthenticationSection = ({
   );
 };
 
-export default AuthenticationSection;
+export default HostingSection;
