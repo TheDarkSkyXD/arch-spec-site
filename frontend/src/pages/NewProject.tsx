@@ -99,8 +99,6 @@ const NewProject = () => {
                   business_goals: formData.business_goals?.join(", ") || "",
                   target_users: formData.target_users?.join(", ") || "",
                   domain: formData.domain || "",
-                  organization: formData.organization || "",
-                  project_lead: formData.project_lead || "",
                 }}
                 onSubmit={handleBasicsSubmit}
               />

@@ -59,8 +59,6 @@ export interface BasicsFormData {
   business_goals: string | string[];
   target_users: string | string[];
   domain: string;
-  organization: string;
-  project_lead: string;
 }
 
 export interface TechStackFormData {

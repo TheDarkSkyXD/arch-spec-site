@@ -8,8 +8,6 @@ const projectBasicsSchema = z.object({
   business_goals: z.string().optional(),
   target_users: z.string().optional(),
   domain: z.string().optional(),
-  organization: z.string().optional(),
-  project_lead: z.string().optional(),
 });
 
 type ProjectBasicsFormData = z.infer<typeof projectBasicsSchema>;
@@ -37,8 +35,6 @@ const ProjectBasicsForm = ({
       business_goals: "",
       target_users: "",
       domain: "",
-      organization: "",
-      project_lead: "",
     },
   });
 
@@ -142,38 +138,6 @@ const ProjectBasicsForm = ({
             placeholder="e.g. Healthcare, Finance, Education"
           />
         </div>
-
-        <div>
-          <label
-            htmlFor="organization"
-            className="block text-sm font-medium text-slate-700 dark:text-slate-300"
-          >
-            Organization
-          </label>
-          <input
-            id="organization"
-            type="text"
-            {...register("organization")}
-            className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
-            placeholder="Your organization name"
-          />
-        </div>
-      </div>
-
-      <div>
-        <label
-          htmlFor="project_lead"
-          className="block text-sm font-medium text-slate-700 dark:text-slate-300"
-        >
-          Project Lead
-        </label>
-        <input
-          id="project_lead"
-          type="text"
-          {...register("project_lead")}
-          className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
-          placeholder="Name of project lead"
-        />
       </div>
     </form>
   );

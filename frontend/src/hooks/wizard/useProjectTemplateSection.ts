@@ -127,8 +127,6 @@ export function useProjectTemplateSection({
       business_goals: [],
       target_users: [],
       domain: "",
-      organization: "",
-      project_lead: "",
       functional_requirements: [],
       non_functional_requirements: [],
       template_id: undefined,

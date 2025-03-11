@@ -3,8 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContextDefinition";
 import { useProjectStore } from "../store/projectStore";
 import { ProjectCreate } from "../types/project";
-import {
-  ProjectWizardFormData} from "../components/project/ProjectWizardTypes";
+import { ProjectWizardFormData } from "../components/project/ProjectWizardTypes";
 import { projectWizardSteps } from "../components/project/ProjectWizardSteps";
 import { useProjectTemplateSection } from "./wizard/useProjectTemplateSection";
 import { useProjectBasicsSection } from "./wizard/useProjectBasicsSection";
@@ -13,7 +12,6 @@ import { useFeaturesSection } from "./wizard/useFeaturesSection";
 import { usePagesSection } from "./wizard/usePagesSection";
 import { useRequirementsSection } from "./wizard/useRequirementsSection";
 import { useTechStackSection } from "./wizard/useTechStackSection";
-
 
 export function useProjectWizard() {
   const navigate = useNavigate();
@@ -32,8 +30,6 @@ export function useProjectWizard() {
     business_goals: [],
     target_users: [],
     domain: "",
-    organization: "",
-    project_lead: "",
     functional_requirements: [],
     non_functional_requirements: [],
   });
@@ -45,43 +41,43 @@ export function useProjectWizard() {
     setFormData,
     setCurrentStep,
     setLoading,
-    setError
+    setError,
   });
 
   const basicsSection = useProjectBasicsSection({
     formData,
     setFormData,
-    setCurrentStep
+    setCurrentStep,
   });
 
   const techStackSection = useTechStackSection({
     formData,
     setFormData,
-    setCurrentStep
+    setCurrentStep,
   });
 
   const requirementsSection = useRequirementsSection({
     formData,
     setFormData,
-    setCurrentStep
+    setCurrentStep,
   });
 
   const featuresSection = useFeaturesSection({
     formData,
     setFormData,
-    setCurrentStep
+    setCurrentStep,
   });
 
   const pagesSection = usePagesSection({
     formData,
     setFormData,
-    setCurrentStep
+    setCurrentStep,
   });
 
   const apiEndpointsSection = useApiEndpointsSection({
     formData,
     setFormData,
-    setCurrentStep
+    setCurrentStep,
   });
 
   const handleCreateProject = async () => {
@@ -104,8 +100,6 @@ export function useProjectWizard() {
         business_goals: formData.business_goals || [],
         target_users: formData.target_users || [],
         domain: formData.domain,
-        organization: formData.organization,
-        project_lead: formData.project_lead,
         functional_requirements: formData.functional_requirements || [],
         non_functional_requirements: formData.non_functional_requirements || [],
       };
@@ -164,8 +158,12 @@ export function useProjectWizard() {
 
   const handleStepClick = (stepId: string) => {
     // Only allow going back to previous steps or to the next step
-    const currentIndex = projectWizardSteps.findIndex((step) => step.id === currentStep);
-    const targetIndex = projectWizardSteps.findIndex((step) => step.id === stepId);
+    const currentIndex = projectWizardSteps.findIndex(
+      (step) => step.id === currentStep
+    );
+    const targetIndex = projectWizardSteps.findIndex(
+      (step) => step.id === stepId
+    );
 
     if (targetIndex <= currentIndex || targetIndex === currentIndex + 1) {
       setCurrentStep(stepId);
@@ -196,14 +194,18 @@ export function useProjectWizard() {
 
   // Navigation helpers
   const goToNextStep = () => {
-    const currentIndex = projectWizardSteps.findIndex((step) => step.id === currentStep);
+    const currentIndex = projectWizardSteps.findIndex(
+      (step) => step.id === currentStep
+    );
     if (currentIndex < projectWizardSteps.length - 1) {
       setCurrentStep(projectWizardSteps[currentIndex + 1].id);
     }
   };
 
   const goToPreviousStep = () => {
-    const currentIndex = projectWizardSteps.findIndex((step) => step.id === currentStep);
+    const currentIndex = projectWizardSteps.findIndex(
+      (step) => step.id === currentStep
+    );
     if (currentIndex > 0) {
       setCurrentStep(projectWizardSteps[currentIndex - 1].id);
     } else {
@@ -212,7 +214,9 @@ export function useProjectWizard() {
   };
 
   // Check if we can continue from the template step
-  const canContinueFromTemplate = templateSection.isBlankProject || (currentStep === "template" && templateSection.selectedTemplate !== null);
+  const canContinueFromTemplate =
+    templateSection.isBlankProject ||
+    (currentStep === "template" && templateSection.selectedTemplate !== null);
 
   return {
     currentStep,

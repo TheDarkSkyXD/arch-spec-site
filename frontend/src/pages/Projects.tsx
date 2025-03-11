@@ -178,21 +178,6 @@ const Projects = () => {
                           {project.domain}
                         </div>
                       )}
-                      {project.organization && (
-                        <div className="flex items-center text-xs text-slate-500 dark:text-slate-400">
-                          <span className="font-medium mr-2">
-                            Organization:
-                          </span>
-                          {project.organization}
-                        </div>
-                      )}
-                      {project.project_lead && (
-                        <div className="flex items-center text-xs text-slate-500 dark:text-slate-400">
-                          <Users size={12} className="mr-1" />
-                          <span className="font-medium mr-2">Lead:</span>
-                          {project.project_lead}
-                        </div>
-                      )}
                       {project.functional_requirements && (
                         <div className="flex items-center text-xs text-slate-500 dark:text-slate-400">
                           <CheckCircle size={12} className="mr-1" />

@@ -39,8 +39,6 @@ export interface Project {
   business_goals: string[];
   target_users: string[];
   domain?: string;
-  organization?: string;
-  project_lead?: string;
   functional_requirements: Requirement[];
   non_functional_requirements: Requirement[];
   metadata: Record<string, unknown>;
@@ -198,15 +196,17 @@ export interface ProjectTemplate {
 }
 
 export interface ProjectCreate {
-  metadata?: { version: string; author: string; template?: { name: string; version: string; }; };
+  metadata?: {
+    version: string;
+    author: string;
+    template?: { name: string; version: string };
+  };
   name: string;
   description: string;
   template_type: string;
   business_goals: string[];
   target_users: string[];
   domain?: string;
-  organization?: string;
-  project_lead?: string;
   timeline?: Record<string, TimelineItem>;
   budget?: Record<string, BudgetItem>;
   functional_requirements?: Requirement[];
@@ -223,8 +223,6 @@ export interface ProjectUpdate {
   business_goals?: string[];
   target_users?: string[];
   domain?: string;
-  organization?: string;
-  project_lead?: string;
   timeline?: Record<string, TimelineItem>;
   budget?: Record<string, BudgetItem>;
   functional_requirements?: Requirement[];

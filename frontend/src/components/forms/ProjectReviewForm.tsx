@@ -117,26 +117,6 @@ export default function ProjectReviewForm({
                   </span>
                 </div>
               )}
-              {projectData.organization && (
-                <div>
-                  <span className="block text-xs text-slate-500 dark:text-slate-400">
-                    Organization
-                  </span>
-                  <span className="block text-sm text-slate-800 dark:text-slate-200">
-                    {projectData.organization}
-                  </span>
-                </div>
-              )}
-              {projectData.project_lead && (
-                <div>
-                  <span className="block text-xs text-slate-500 dark:text-slate-400">
-                    Project Lead
-                  </span>
-                  <span className="block text-sm text-slate-800 dark:text-slate-200">
-                    {projectData.project_lead}
-                  </span>
-                </div>
-              )}
             </div>
           </div>
         </div>
