@@ -3,16 +3,6 @@ from typing import Dict, List, Optional, Any, Union
 
 from .shared_schemas import ProjectTechStack
 
-class ProjectDefaults(BaseModel):
-    """Project default information."""
-    name: str = ""
-    description: str = ""
-    business_goals: List[str] = Field(default_factory=list, alias="businessGoals")
-    target_users: List[str] = Field(default_factory=list, alias="targetUsers")
-
-    class Config:
-        populate_by_name = True
-
 class FeatureModule(BaseModel):
     """Feature module configuration."""
     name: str
@@ -139,7 +129,9 @@ class ProjectTemplate(BaseModel):
     name: str
     version: str
     description: str
-    project_defaults: ProjectDefaults = Field(alias="projectDefaults")
+    business_goals: str
+    target_users: str
+    domain: str
     tech_stack: ProjectTechStack = Field(alias="techStack")  # Using TechStackData directly
     features: Features
     pages: Pages

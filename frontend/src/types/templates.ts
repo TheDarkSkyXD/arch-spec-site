@@ -2,13 +2,6 @@
  * Types for project templates.
  */
 
-export interface ProjectDefaults {
-  name: string;
-  description: string;
-  businessGoals: string[];
-  targetUsers: string[];
-}
-
 // Frontend Types
 export interface FrontendTechStack {
   framework: string;
@@ -229,7 +222,9 @@ export interface ProjectTemplate {
   version: string;
   description: string;
   tags?: string[];
-  projectDefaults: ProjectDefaults;
+  businessGoals: string;
+  targetUsers: string;
+  domain: string;
   techStack: ProjectTechStack;
   features: Features;
   pages: Pages;

@@ -30,6 +30,30 @@ const TemplateDetails: React.FC<TemplateDetailsProps> = ({ template }) => {
         </div>
       </div>
 
+      <div className="bg-white dark:bg-slate-800 rounded-lg p-5 border border-slate-200 dark:border-slate-700">
+        <h3 className="font-medium text-slate-800 dark:text-slate-100 mb-3">
+          Project Details
+        </h3>
+
+        <div className="space-y-3">
+          <div>
+            <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+              Business Goals
+            </h4>
+            <p className="text-sm text-slate-600 dark:text-slate-400">
+              {template.businessGoals}
+            </p>
+          </div>
+
+          <div>
+            <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+              Target Users
+            </h4>
+            <ul className="list-disc pl-5 space-y-1">{template.targetUsers}</ul>
+          </div>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Tech Stack */}
         <div className="bg-white dark:bg-slate-800 rounded-lg p-5 border border-slate-200 dark:border-slate-700">
@@ -619,53 +643,6 @@ const TemplateDetails: React.FC<TemplateDetailsProps> = ({ template }) => {
             </div>
           </div>
         )}
-
-      {/* Project Defaults */}
-      {template.projectDefaults && (
-        <div className="bg-white dark:bg-slate-800 rounded-lg p-5 border border-slate-200 dark:border-slate-700">
-          <h3 className="font-medium text-slate-800 dark:text-slate-100 mb-3">
-            Project Defaults
-          </h3>
-
-          <div className="space-y-3">
-            {template.projectDefaults.businessGoals.length > 0 && (
-              <div>
-                <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                  Business Goals
-                </h4>
-                <ul className="list-disc pl-5 space-y-1">
-                  {template.projectDefaults.businessGoals.map((goal, index) => (
-                    <li
-                      key={index}
-                      className="text-sm text-slate-600 dark:text-slate-400"
-                    >
-                      {goal}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {template.projectDefaults.targetUsers.length > 0 && (
-              <div>
-                <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                  Target Users
-                </h4>
-                <ul className="list-disc pl-5 space-y-1">
-                  {template.projectDefaults.targetUsers.map((user, index) => (
-                    <li
-                      key={index}
-                      className="text-sm text-slate-600 dark:text-slate-400"
-                    >
-                      {user}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 };

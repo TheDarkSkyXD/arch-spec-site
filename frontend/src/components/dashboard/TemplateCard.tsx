@@ -34,13 +34,6 @@ const TemplateCard = ({ template, onSelect }: TemplateCardProps) => {
 
   return (
     <div className="card overflow-hidden transition-all hover:shadow-xl group relative">
-      <div className="absolute top-3 right-3 z-10">
-        <div className="bg-white/80 backdrop-blur-sm rounded-full px-2.5 py-1 flex items-center text-xs font-semibold text-amber-600 shadow-lg">
-          <Star className="h-3 w-3 mr-1 fill-amber-500 text-amber-500" />
-          {getTemplateRating()}
-        </div>
-      </div>
-
       <div
         className="h-48 bg-gradient-to-br from-primary-600 to-primary-700 relative"
         style={{
