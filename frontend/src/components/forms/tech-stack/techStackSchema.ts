@@ -9,7 +9,7 @@ export const techStackSchema = z
     state_management: z.string().optional(),
 
     // Backend fields
-    backend_type: z.enum(["framework", "baas", "serverless"], {
+    backend_type: z.enum(["framework", "baas", "serverless", ""], {
       required_error: "Backend type is required",
     }),
     backend_framework: z.string().optional(),
@@ -19,9 +19,10 @@ export const techStackSchema = z
     backend_functions: z.string().optional(),
 
     // Database fields
-    database: z.string().min(1, "Database type is required"),
-    orm: z.string().optional(),
-    database_provider: z.string().optional(),
+    database_type: z.string().optional(),
+    database_system: z.string().optional(),
+    database_hosting: z.string().optional(),
+    database_orm: z.string().optional(),
 
     // Auth fields
     auth_provider: z.string().optional(),

@@ -76,7 +76,6 @@ const AuthenticationSection = ({
             id="auth_provider"
             {...register("auth_provider")}
             className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
-            disabled={!backend || authOptions.length === 0}
           >
             <option value="">Select Auth Provider</option>
             {authOptions.map((auth) => (

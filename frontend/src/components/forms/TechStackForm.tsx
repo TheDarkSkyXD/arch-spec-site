@@ -1,4 +1,4 @@
-import { useForm, useWatch } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import {
@@ -39,24 +39,24 @@ const TechStackForm = ({
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // State for filtered options
-  const [databaseOptions] = useState<string[]>([]);
-  const [ormOptions] = useState<string[]>([]);
   const [authOptions] = useState<string[]>([]);
 
   const defaultValues: TechStackFormData = {
-    frontend: initialData?.frontend.framework || "",
-    frontend_language: initialData?.frontend.language || "",
-    ui_library: initialData?.frontend.uiLibrary || "",
-    state_management: initialData?.frontend.stateManagement || "",
-    backend: initialData?.backend.provider || "",
-    backend_provider: initialData?.backend.provider || "",
-    database: initialData?.database.provider || "",
-    database_provider: initialData?.database.provider || "",
-    auth_provider: initialData?.authentication.provider || "",
-    auth_methods:
-      initialData && initialData?.authentication?.methods?.length > 0
-        ? initialData?.authentication.methods[0]
-        : "",
+    frontend: "",
+    frontend_language: "",
+    ui_library: "",
+    state_management: "",
+    backend_type: "",
+    backend_framework: "",
+    backend_language: "",
+    backend_service: "",
+    backend_realtime: "",
+    database_type: "",
+    database_system: "",
+    database_hosting: "",
+    database_orm: "",
+    auth_provider: "",
+    auth_methods: "",
   };
 
   const {
@@ -73,14 +73,6 @@ const TechStackForm = ({
   useEffect(() => {
     console.log("initialData", initialData);
   }, [initialData]);
-
-  // Watch for form value changes
-  const watchedValues = useWatch({
-    control,
-    name: ["frontend", "backend", "database"],
-  });
-
-  const [backend, database] = watchedValues;
 
   // Use the data query hook instead of direct service call
   const { data: techStackData, isLoading: isTechStackLoading } = useTechStack();
@@ -202,6 +194,21 @@ const TechStackForm = ({
     })) as Technology[];
   };
 
+  const getAllDatabaseHosting = (): string[] => {
+    // Get all database hosting
+    return techStackOptions?.categories?.database?.hosting || [];
+  };
+
+  const getAllOrms = (): Technology[] => {
+    // Get all ORMs
+    const orms = techStackOptions?.technologies?.orms || {};
+
+    return Object.entries(orms).map(([name, orm]) => ({
+      ...orm,
+      id: name,
+    })) as Technology[];
+  };
+
   if (isLoading || !techStackOptions) {
     return <div className="p-4">Loading tech stack options...</div>;
   }
@@ -242,11 +249,9 @@ const TechStackForm = ({
       <DatabaseSection
         register={register}
         errors={errors}
-        backend={backend}
-        database={database}
-        databaseOptions={databaseOptions}
-        ormOptions={ormOptions}
         allDatabases={getAllDatabases()}
+        allDatabaseHosting={getAllDatabaseHosting()}
+        allOrms={getAllOrms()}
         initialData={initialData}
         control={control}
         setValue={setTechStackValue}
@@ -255,7 +260,7 @@ const TechStackForm = ({
       {/* Authentication Section */}
       <AuthenticationSection
         register={register}
-        backend={backend}
+        backend=""
         authOptions={authOptions}
         initialData={initialData}
         control={control}

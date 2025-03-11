@@ -116,8 +116,7 @@ TECH_STACK_DATA = {
         "Aurora", "RDS", "Azure SQL", "Google Cloud SQL", "Neon"
       ],
       "nosql": [
-        "MongoDB", "Firestore", "DynamoDB", "Redis", "Cassandra", "Elasticsearch",
-        "Redis Labs", "AWS ElastiCache", "Upstash", "Realtime Database"
+        "MongoDB", "Firestore", "DynamoDB", "Redis", "Realtime Database", "Cassandra", "Elasticsearch"
       ],
       "hosting": [
         "Supabase", "Firebase", "MongoDB Atlas", "AWS RDS", "PlanetScale", "Fauna",
