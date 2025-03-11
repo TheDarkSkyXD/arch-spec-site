@@ -6,7 +6,7 @@ This module provides functions to seed and retrieve tech stack compatibility dat
 import logging
 import datetime
 from typing import Dict, Any, Optional
-
+from datetime import timezone
 from app.seed.tech_stack_data import TECH_STACK_DATA
 
 logger = logging.getLogger(__name__)
@@ -33,7 +33,7 @@ async def seed_tech_stack(db, clean_all: bool = False):
         # Prepare the data in a format suitable for the database
         tech_stack_data = {
             "version": "1.0.0",
-            "last_updated": datetime.datetime.now(datetime.UTC),
+            "last_updated": datetime.datetime.now(timezone.utc),
             "data": TECH_STACK_DATA
         }
         

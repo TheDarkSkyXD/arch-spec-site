@@ -1,6 +1,9 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useState, useEffect } from "react";
+import { projectsService } from "../../services/projectsService";
+import { useToast } from "../../contexts/ToastContext";
 
 const projectBasicsSchema = z.object({
   name: z.string().min(3, "Project name must be at least 3 characters"),
@@ -13,27 +16,106 @@ const projectBasicsSchema = z.object({
 type ProjectBasicsFormData = z.infer<typeof projectBasicsSchema>;
 
 interface ProjectBasicsFormProps {
-  initialData?: Partial<ProjectBasicsFormData>;
+  initialData?: Partial<ProjectBasicsFormData> & { id?: string };
+  onSuccess?: (projectId: string) => void;
 }
 
-const ProjectBasicsForm = ({ initialData }: ProjectBasicsFormProps) => {
+const ProjectBasicsForm = ({
+  initialData,
+  onSuccess,
+}: ProjectBasicsFormProps) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { showToast } = useToast();
+  // Track the project ID internally for subsequent updates
+  const [projectId, setProjectId] = useState<string | undefined>(
+    initialData?.id
+  );
+  const isEditMode = Boolean(projectId);
+
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
+    reset,
   } = useForm<ProjectBasicsFormData>({
     resolver: zodResolver(projectBasicsSchema),
-    defaultValues: initialData || {
-      name: "",
-      description: "",
-      business_goals: "",
-      target_users: "",
-      domain: "",
+    defaultValues: {
+      name: initialData?.name || "",
+      description: initialData?.description || "",
+      business_goals: initialData?.business_goals || "",
+      target_users: initialData?.target_users || "",
+      domain: initialData?.domain || "",
     },
   });
 
-  const onSubmit = (data: ProjectBasicsFormData) => {
-    console.log(data);
+  // Update form values if initialData changes
+  useEffect(() => {
+    if (initialData) {
+      reset({
+        name: initialData.name || "",
+        description: initialData.description || "",
+        business_goals: initialData.business_goals || "",
+        target_users: initialData.target_users || "",
+        domain: initialData.domain || "",
+      });
+
+      if (initialData.id) {
+        setProjectId(initialData.id);
+      }
+    }
+  }, [initialData, reset]);
+
+  const onSubmit = async (data: ProjectBasicsFormData) => {
+    setIsSubmitting(true);
+    try {
+      let project;
+
+      if (isEditMode && projectId) {
+        // Update existing project
+        project = await projectsService.updateProject(projectId, data);
+      } else {
+        // Create new project
+        project = await projectsService.createProject(data);
+        // Store the new project ID for future updates
+        if (project) {
+          setProjectId(project.id);
+        }
+      }
+
+      if (project) {
+        showToast({
+          title: "Success",
+          description: isEditMode
+            ? "Project updated successfully"
+            : "Project created successfully",
+          type: "success",
+        });
+
+        if (onSuccess) {
+          onSuccess(project.id);
+        }
+      } else {
+        showToast({
+          title: "Error",
+          description: isEditMode
+            ? "Failed to update project"
+            : "Failed to create project",
+          type: "error",
+        });
+      }
+    } catch (error) {
+      console.error(
+        `Error ${isEditMode ? "updating" : "creating"} project:`,
+        error
+      );
+      showToast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        type: "error",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -136,6 +218,20 @@ const ProjectBasicsForm = ({ initialData }: ProjectBasicsFormProps) => {
             placeholder="e.g. Healthcare, Finance, Education"
           />
         </div>
+      </div>
+
+      <div className="flex justify-end">
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isSubmitting
+            ? "Saving..."
+            : isEditMode
+            ? "Update Project"
+            : "Save Project"}
+        </button>
       </div>
     </form>
   );

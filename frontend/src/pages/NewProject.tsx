@@ -20,7 +20,6 @@ const NewProject = () => {
     formData,
     handleTemplateSelect,
     handleBlankProjectSelect,
-    handleBasicsSubmit,
     handleTechStackSubmit,
     handleRequirementsSubmit,
     handleFeaturesSubmit,
@@ -93,23 +92,15 @@ const NewProject = () => {
             </div>
             <div className="p-6">
               <ProjectBasicsForm
-                initialData={{
-                  name: formData.name || "",
-                  description: formData.description || "",
-                  business_goals: formData.business_goals?.join(", ") || "",
-                  target_users: formData.target_users?.join(", ") || "",
-                  domain: formData.domain || "",
+                onSuccess={(projectId) => {
+                  // Store the project ID in the form data or state if needed
+                  console.log(
+                    "Project created/updated successfully with ID:",
+                    projectId
+                  );
+                  // You might want to navigate or update other components here
                 }}
               />
-              <div className="mt-4 flex justify-end">
-                <button
-                  type="submit"
-                  form="project-basics-form"
-                  className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
-                >
-                  Save Project Basics
-                </button>
-              </div>
             </div>
           </div>
 

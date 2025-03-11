@@ -129,9 +129,9 @@ class ProjectTemplate(BaseModel):
     name: str
     version: str
     description: str
-    business_goals: str
-    target_users: str
-    domain: str
+    business_goals: str = Field(default="", alias="businessGoals")
+    target_users: str = Field(default="", alias="targetUsers")
+    domain: str = Field(default="")
     tech_stack: ProjectTechStack = Field(alias="techStack")  # Using TechStackData directly
     features: Features
     pages: Pages

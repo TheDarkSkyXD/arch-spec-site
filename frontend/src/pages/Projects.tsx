@@ -151,14 +151,6 @@ const Projects = () => {
                 >
                   <div className="p-4">
                     <div className="flex justify-between items-start mb-2">
-                      <div
-                        className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                          project.status
-                        )}`}
-                      >
-                        {getStatusDot(project.status)}
-                        {project.status.replace("_", " ")}
-                      </div>
                       <button className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700">
                         <MoreVertical size={16} />
                       </button>

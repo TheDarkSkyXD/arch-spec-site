@@ -5,18 +5,21 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { queryClient } from "./lib/query-client";
 import { AuthProvider } from "./contexts/AuthContextProvider";
 import { ThemeProvider } from "./contexts/ThemeContextProvider";
-import { Toaster } from "react-hot-toast";
+import { ToastProvider } from "./contexts/ToastContext";
+import ToastContainer from "./components/ui/ToastContainer";
 
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <AuthProvider>
-          <Router />
-          <Toaster position="top-right" />
-          {import.meta.env.MODE !== "production" && (
-            <ReactQueryDevtools initialIsOpen={false} />
-          )}
+          <ToastProvider>
+            <Router />
+            <ToastContainer />
+            {import.meta.env.MODE !== "production" && (
+              <ReactQueryDevtools initialIsOpen={false} />
+            )}
+          </ToastProvider>
         </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>

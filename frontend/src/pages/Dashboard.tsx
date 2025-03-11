@@ -70,9 +70,14 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
           <div className="bg-white dark:bg-slate-900 p-4 rounded-lg shadow-sm border border-slate-200 dark:border-slate-800">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100">Projects</h3>
+              <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100">
+                Projects
+              </h3>
               <div className="w-8 h-8 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
-                <FileCode size={16} className="text-primary-600 dark:text-primary-400" />
+                <FileCode
+                  size={16}
+                  className="text-primary-600 dark:text-primary-400"
+                />
               </div>
             </div>
             <div className="text-2xl font-bold text-slate-900 dark:text-white mb-1">
@@ -98,13 +103,18 @@ const Dashboard = () => {
                 Templates
               </h3>
               <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-                <Package size={16} className="text-blue-600 dark:text-blue-400" />
+                <Package
+                  size={16}
+                  className="text-blue-600 dark:text-blue-400"
+                />
               </div>
             </div>
             {templatesLoading ? (
               <div className="flex items-center gap-2">
                 <Loader className="animate-spin h-4 w-4 text-blue-600 dark:text-blue-400" />
-                <span className="text-slate-500 dark:text-slate-400 text-sm">Loading...</span>
+                <span className="text-slate-500 dark:text-slate-400 text-sm">
+                  Loading...
+                </span>
               </div>
             ) : queryError ? (
               <div className="text-red-500 dark:text-red-400 text-sm">
@@ -137,7 +147,10 @@ const Dashboard = () => {
                 Documentation
               </h3>
               <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
-                <LayoutDashboard size={16} className="text-purple-600 dark:text-purple-400" />
+                <LayoutDashboard
+                  size={16}
+                  className="text-purple-600 dark:text-purple-400"
+                />
               </div>
             </div>
             <div className="text-sm mb-1 text-slate-500 dark:text-slate-400">
@@ -158,7 +171,9 @@ const Dashboard = () => {
         {/* Templates section */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100">Templates</h2>
+            <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100">
+              Templates
+            </h2>
             <button
               onClick={() => navigate("/templates")}
               className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium text-sm flex items-center gap-1"
@@ -196,7 +211,10 @@ const Dashboard = () => {
                 >
                   <div className="h-32 bg-gradient-to-r from-primary-100 to-blue-100 dark:from-primary-900/30 dark:to-blue-900/30 flex items-center justify-center">
                     <div className="bg-white dark:bg-slate-800 rounded-lg p-3">
-                      <Package size={24} className="text-primary-600 dark:text-primary-400" />
+                      <Package
+                        size={24}
+                        className="text-primary-600 dark:text-primary-400"
+                      />
                     </div>
                   </div>
                   <div className="p-4">
@@ -231,7 +249,9 @@ const Dashboard = () => {
             </div>
           ) : (
             <div className="text-center py-8 bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-slate-200 dark:border-slate-800">
-              <p className="text-slate-600 dark:text-slate-300 mb-2">No templates available</p>
+              <p className="text-slate-600 dark:text-slate-300 mb-2">
+                No templates available
+              </p>
               <button
                 onClick={() => navigate("/new-project")}
                 className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium"
@@ -273,18 +293,6 @@ const Dashboard = () => {
                     className="bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden hover:shadow-md transition-shadow duration-200"
                   >
                     <div className="p-4">
-                      <div className="inline-flex items-center px-2 py-1 mb-2 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
-                        {project.status === "in_progress" && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-blue-500 dark:bg-blue-400 mr-1.5"></span>
-                        )}
-                        {project.status === "completed" && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-green-500 dark:bg-green-400 mr-1.5"></span>
-                        )}
-                        {project.status === "draft" && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-slate-500 dark:bg-slate-400 mr-1.5"></span>
-                        )}
-                        {project.status.replace("_", " ")}
-                      </div>
                       <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-1">
                         {project.name}
                       </h3>
@@ -311,7 +319,10 @@ const Dashboard = () => {
             ) : (
               <div className="text-center py-16 bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-slate-200 dark:border-slate-800">
                 <div className="mx-auto w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4">
-                  <Calendar size={24} className="text-slate-400 dark:text-slate-300" />
+                  <Calendar
+                    size={24}
+                    className="text-slate-400 dark:text-slate-300"
+                  />
                 </div>
                 <h3 className="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-2">
                   No projects yet

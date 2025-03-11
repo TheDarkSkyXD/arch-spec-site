@@ -190,14 +190,14 @@ class TemplatesService:
         Returns:
             Template with all required fields
         """
-        # Ensure projectDefaults is present
-        if "projectDefaults" not in template:
-            template["projectDefaults"] = {
-                "name": "",
-                "description": "",
-                "businessGoals": [],
-                "targetUsers": []
-            }
+        # Ensure required fields have at least empty string values
+        for field in ["name", "version", "description", "businessGoals", "targetUsers", "domain"]:
+            if field not in template or template[field] is None:
+                template[field] = ""
+        
+        # Remove projectDefaults if it exists
+        if "projectDefaults" in template:
+            del template["projectDefaults"]
         
         # Ensure techStack is present with the new schema format
         if "techStack" not in template:
@@ -287,10 +287,4 @@ class TemplatesService:
                 "diagrams": []
             }
         
-        # Ensure required top-level fields are present
-        required_fields = ["name", "version", "description"]
-        for field in required_fields:
-            if field not in template:
-                template[field] = ""
-                
         return template 
