@@ -163,10 +163,10 @@ class DeploymentTechStack(BaseModel):
 
 # Complete Project Tech Stack
 class ProjectTechStack(BaseModel):
-    frontend: FrontendTechStack
-    backend: BackendTechStack
-    database: DatabaseTechStack
-    authentication: AuthenticationTechStack
-    hosting: HostingTechStack
+    frontend: Optional[FrontendTechStack] = None
+    backend: Optional[BackendTechStack] = None
+    database: Optional[DatabaseTechStack] = None
+    authentication: Optional[AuthenticationTechStack] = None
+    hosting: Optional[HostingTechStack] = None
     storage: Optional[StorageTechStack] = None
     deployment: Optional[DeploymentTechStack] = None

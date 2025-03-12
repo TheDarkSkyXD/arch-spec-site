@@ -4,7 +4,6 @@ import { ProjectTemplate } from "../../types/templates";
 
 interface TemplateSelectionStepProps {
   selectedTemplate: ProjectTemplate | null;
-  templateId?: string;
   onTemplateSelect: (template: ProjectTemplate | null) => void;
   onBlankProjectSelect: () => void;
   loading?: boolean;
@@ -13,7 +12,6 @@ interface TemplateSelectionStepProps {
 
 const TemplateSelectionStep = ({
   selectedTemplate,
-  templateId,
   onTemplateSelect,
   onBlankProjectSelect,
   loading = false,
@@ -72,10 +70,7 @@ const TemplateSelectionStep = ({
         </div>
       </div>
 
-      <TemplateSelector
-        onTemplateSelect={onTemplateSelect}
-        selectedTemplateId={templateId}
-      />
+      <TemplateSelector onTemplateSelect={onTemplateSelect} />
 
       {selectedTemplate && (
         <div className="mt-8 border-t border-slate-200 dark:border-slate-700 pt-6">

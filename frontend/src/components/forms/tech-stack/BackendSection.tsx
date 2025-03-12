@@ -78,6 +78,19 @@ const BackendSection = ({
     backendFunctionsValue,
   ] = watchedValues;
 
+  // Reset form values if templateId is null
+  useEffect(() => {
+    if (!initialData) {
+      console.log("Resetting backend section form values");
+      setValue("backend_type", "", { shouldDirty: false });
+      setValue("backend_framework", "", { shouldDirty: false });
+      setValue("backend_language", "", { shouldDirty: false });
+      setValue("backend_service", "", { shouldDirty: false });
+      setValue("backend_realtime", "", { shouldDirty: false });
+      setValue("backend_functions", "", { shouldDirty: false });
+    }
+  }, [initialData, setValue]);
+
   console.log("Selected Backend values:", {
     type: backendType,
     framework: backendFramework,

@@ -90,47 +90,47 @@ class MetadataSectionUpdate(BaseModel):
 
 class TechStackSection(ProjectSection):
     """Tech stack section of a project."""
-    data: ProjectTechStack = Field(default_factory=dict)
+    data: Optional[ProjectTechStack] = None
 
 
 class FeaturesSection(ProjectSection):
     """Features section of a project."""
-    data: Features = Field(default_factory=dict)
+    data: Optional[Features] = None
 
 
 class PagesSection(ProjectSection):
     """Pages section of a project."""
-    data: Pages = Field(default_factory=dict)
+    data: Optional[Pages] = None
 
 
 class DataModelSection(ProjectSection):
     """Data model section of a project."""
-    data: DataModel = Field(default_factory=dict)
+    data: Optional[DataModel] = None
 
 
 class ApiSection(ProjectSection):
     """API section of a project."""
-    data: Api = Field(default_factory=dict)
+    data: Optional[Api] = None
 
 
 class TestingSection(ProjectSection):
     """Testing section of a project."""
-    data: Testing = Field(default_factory=dict)
+    data: Optional[Testing] = None
 
 
 class ProjectStructureSection(ProjectSection):
     """Project structure section of a project."""
-    data: ProjectStructure = Field(default_factory=dict)
+    data: Optional[ProjectStructure] = None
 
 
 class DeploymentSection(ProjectSection):
     """Deployment section of a project."""
-    data: Deployment = Field(default_factory=dict)
+    data: Optional[Deployment] = None
 
 
 class DocumentationSection(ProjectSection):
     """Documentation section of a project."""
-    data: Documentation = Field(default_factory=dict)
+    data: Optional[Documentation] = None
 
 
 # Update DTOs for core architecture sections

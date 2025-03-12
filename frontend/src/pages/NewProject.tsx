@@ -5,45 +5,26 @@ import RequirementsForm from "../components/forms/RequirementsForm";
 import FeaturesForm from "../components/forms/FeaturesForm";
 import PagesForm from "../components/forms/PagesForm";
 import ApiEndpointsForm from "../components/forms/ApiEndpointsForm";
-import { useProjectWizard } from "../hooks/useProjectWizard";
 import TemplateSelectionStep from "../components/project/TemplateSelectionStep";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
-import { ProjectTechStack } from "../types/templates";
+import { useProjectTemplateSection } from "../hooks/useProjectTemplateSection";
 
 const NewProject = () => {
   const navigate = useNavigate();
   const [projectId, setProjectId] = useState<string | undefined>(undefined);
-  const [techStack, setTechStack] = useState<ProjectTechStack | undefined>(
-    undefined
-  );
 
   const {
     selectedTemplate,
     loading,
     error,
-    formData,
     handleTemplateSelect,
     handleBlankProjectSelect,
-    handleTechStackSubmit,
-    handleRequirementsSubmit,
-    handleFeaturesSubmit,
-    handlePagesSubmit,
-    handleApiEndpointsSubmit,
-    handleCreateProject,
-  } = useProjectWizard();
+  } = useProjectTemplateSection();
   useEffect(() => {
     console.log("Selected Template:", selectedTemplate);
   }, [selectedTemplate]);
-
-  // Handle tech stack updates
-  const handleTechStackUpdated = (updatedTechStack: ProjectTechStack) => {
-    setTechStack(updatedTechStack);
-    if (handleTechStackSubmit) {
-      handleTechStackSubmit(updatedTechStack);
-    }
-  };
 
   return (
     <MainLayout showSidebar={false}>
@@ -81,7 +62,6 @@ const NewProject = () => {
             <div className="p-6">
               <TemplateSelectionStep
                 selectedTemplate={selectedTemplate}
-                templateId={formData.template_id}
                 onTemplateSelect={handleTemplateSelect}
                 onBlankProjectSelect={handleBlankProjectSelect}
                 loading={loading}
@@ -131,9 +111,11 @@ const NewProject = () => {
             </div>
             <div className="p-6">
               <TechStackForm
-                initialData={techStack || selectedTemplate?.techStack}
+                initialData={selectedTemplate?.techStack}
                 projectId={projectId}
-                onSuccess={handleTechStackUpdated}
+                onSuccess={() => {
+                  console.log("Tech stack updated");
+                }}
               />
             </div>
           </div>
@@ -151,12 +133,12 @@ const NewProject = () => {
             <div className="p-6">
               <RequirementsForm
                 initialData={{
-                  functional_requirements:
-                    formData.functional_requirements || [],
-                  non_functional_requirements:
-                    formData.non_functional_requirements || [],
+                  functional_requirements: [],
+                  non_functional_requirements: [],
                 }}
-                onSubmit={handleRequirementsSubmit}
+                onSubmit={() => {
+                  console.log("Requirements updated");
+                }}
               />
               <div className="mt-4 flex justify-end">
                 <button
@@ -183,10 +165,11 @@ const NewProject = () => {
             <div className="p-6">
               <FeaturesForm
                 initialData={{
-                  core_modules:
-                    formData.template_data?.features?.core_modules || [],
+                  core_modules: [],
                 }}
-                onSubmit={handleFeaturesSubmit}
+                onSubmit={() => {
+                  console.log("Features updated");
+                }}
               />
               <div className="mt-4 flex justify-end">
                 <button
@@ -213,12 +196,13 @@ const NewProject = () => {
             <div className="p-6">
               <PagesForm
                 initialData={{
-                  public: formData.template_data?.pages?.public || [],
-                  authenticated:
-                    formData.template_data?.pages?.authenticated || [],
-                  admin: formData.template_data?.pages?.admin || [],
+                  public: [],
+                  authenticated: [],
+                  admin: [],
                 }}
-                onSubmit={handlePagesSubmit}
+                onSubmit={() => {
+                  console.log("Pages updated");
+                }}
               />
               <div className="mt-4 flex justify-end">
                 <button
@@ -245,9 +229,11 @@ const NewProject = () => {
             <div className="p-6">
               <ApiEndpointsForm
                 initialData={{
-                  endpoints: formData.template_data?.api?.endpoints || [],
+                  endpoints: [],
                 }}
-                onSubmit={handleApiEndpointsSubmit}
+                onSubmit={() => {
+                  console.log("API Endpoints updated");
+                }}
               />
               <div className="mt-4 flex justify-end">
                 <button
@@ -256,33 +242,6 @@ const NewProject = () => {
                   className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
                 >
                   Save API Endpoints
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Create Project Button (enabled only when basics are filled) */}
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-            <div className="p-6">
-              <div className="flex flex-col items-center justify-center py-6">
-                <h2 className="text-xl font-medium text-slate-800 dark:text-slate-100 mb-2">
-                  Ready to create your project?
-                </h2>
-                <p className="text-slate-500 dark:text-slate-400 mb-6 text-center max-w-md">
-                  {projectId
-                    ? "Your project has the required information. Click below to create it."
-                    : "Please fill in the Project Basics section (required) before creating your project."}
-                </p>
-                <button
-                  onClick={handleCreateProject}
-                  disabled={!projectId}
-                  className={`px-6 py-3 rounded-md text-white font-medium ${
-                    projectId
-                      ? "bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-                      : "bg-gray-400 cursor-not-allowed"
-                  }`}
-                >
-                  Create Project
                 </button>
               </div>
             </div>

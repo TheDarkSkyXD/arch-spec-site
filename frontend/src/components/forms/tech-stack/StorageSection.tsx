@@ -21,6 +21,15 @@ const StorageSection = ({
   // Create a ref to track whether we've applied initial data
   const initialDataAppliedRef = useRef<boolean>(false);
 
+  // Reset form values if templateId is null
+  useEffect(() => {
+    if (!initialData) {
+      console.log("Resetting storage section form values");
+      setValue("storage_type", "", { shouldDirty: false });
+      setValue("storage_service", "", { shouldDirty: false });
+    }
+  }, [initialData, setValue]);
+
   // Set initial values if they exist
   useEffect(() => {
     if (!initialData || !initialData.storage) return;

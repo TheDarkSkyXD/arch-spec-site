@@ -62,6 +62,17 @@ const DatabaseSection = ({
     selectedDatabaseOrm,
   ] = watchedValues;
 
+  // Reset form values if templateId is null
+  useEffect(() => {
+    if (!initialData) {
+      console.log("Resetting database section form values");
+      setValue("database_type", "", { shouldDirty: false });
+      setValue("database_system", "", { shouldDirty: false });
+      setValue("database_hosting", "", { shouldDirty: false });
+      setValue("database_orm", "", { shouldDirty: false });
+    }
+  }, [initialData, setValue]);
+
   // Filter database systems based on selections
   const filteredDatabases = useMemo(
     () =>

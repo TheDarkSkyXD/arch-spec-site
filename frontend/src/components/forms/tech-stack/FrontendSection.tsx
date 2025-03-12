@@ -63,6 +63,17 @@ const FrontendSection = ({
     selectedStateManagement,
   ] = watchedValues;
 
+  // Reset form values if templateId is null
+  useEffect(() => {
+    if (!initialData) {
+      console.log("Resetting frontend section form values");
+      setValue("frontend", "", { shouldDirty: false });
+      setValue("frontend_language", "", { shouldDirty: false });
+      setValue("ui_library", "", { shouldDirty: false });
+      setValue("state_management", "", { shouldDirty: false });
+    }
+  }, [initialData, setValue]);
+
   // Debug log for watched values
   useEffect(() => {
     console.log("Selected Frontend values:", {

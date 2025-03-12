@@ -261,8 +261,7 @@ async def get_tech_stack_section(
     section = await ProjectSectionsService.get_tech_stack_section(project_id, database)
     if section is None:
         # Return an empty section structure instead of 404
-        empty_data = ProjectTechStack(frontend=None, backend=None, database=None)
-        section = TechStackSection(project_id=project_id, data=empty_data)
+        section = TechStackSection(project_id=project_id, data=None)
     
     return section
 

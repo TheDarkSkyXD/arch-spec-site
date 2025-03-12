@@ -10,13 +10,11 @@ interface RequirementsFormProps {
     functional_requirements: string[];
     non_functional_requirements: string[];
   }) => void;
-  onBack?: () => void;
 }
 
 export default function RequirementsForm({
   initialData,
   onSubmit,
-  onBack,
 }: RequirementsFormProps) {
   const [functionalReqs, setFunctionalReqs] = useState<string[]>(
     initialData.functional_requirements || []

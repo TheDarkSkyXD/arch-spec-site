@@ -22,6 +22,15 @@ const DeploymentSection = ({
   // Create a ref to track whether we've applied initial data
   const initialDataAppliedRef = useRef<boolean>(false);
 
+  // Reset form values if templateId is null
+  useEffect(() => {
+    if (!initialData) {
+      console.log("Resetting deployment section form values");
+      setValue("deployment_ci_cd", "", { shouldDirty: false });
+      setValue("deployment_containerization", "", { shouldDirty: false });
+    }
+  }, [initialData, setValue]);
+
   // Set initial values if they exist
   useEffect(() => {
     if (!initialData || !initialData.deployment) return;
