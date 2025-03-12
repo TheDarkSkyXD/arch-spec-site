@@ -50,14 +50,14 @@ const Dashboard = () => {
             <div className="flex flex-col sm:flex-row gap-3">
               <button
                 onClick={() => navigate("/new-project")}
-                className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 shadow-sm"
+                className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 shadow-sm whitespace-nowrap"
               >
                 <PlusCircle size={18} />
                 <span>New Project</span>
               </button>
               <button
                 onClick={() => navigate("/templates")}
-                className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 px-4 py-2 rounded-lg flex items-center justify-center gap-2 shadow-sm"
+                className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 px-4 py-2 rounded-lg flex items-center justify-center gap-2 shadow-sm whitespace-nowrap"
               >
                 <Package size={18} />
                 <span>Browse Templates</span>

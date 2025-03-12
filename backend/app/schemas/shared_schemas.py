@@ -55,9 +55,18 @@ class DataModel(BaseModel):
     class Config:
         populate_by_name = True
 
+
+class ApiEndpoint(BaseModel):
+    """Schema for API endpoint"""
+    path: str
+    description: str
+    methods: List[str]
+    auth: bool
+    roles: Optional[List[str]] = Field(default_factory=list)
+
 class Api(BaseModel):
     """Schema for API section"""
-    endpoints: Dict[str, Any] = Field(default_factory=dict)
+    endpoints: List[ApiEndpoint] = Field(default_factory=list)
     
     class Config:
         populate_by_name = True

@@ -6,6 +6,8 @@ import { featuresService, FeaturesData } from "../services/featuresService";
 import { pagesService, PagesData } from "../services/pagesService";
 import { useState, useEffect } from "react";
 import { RequirementsData } from "../types/project";
+import { apiEndpointsService } from "../services/apiEndpointsService";
+import { Api } from "../types/templates";
 
 // Query keys for different types of data
 export const QUERY_KEYS = {
@@ -182,6 +184,45 @@ export const usePages = (projectId?: string) => {
     };
 
     fetchPages();
+  }, [projectId]);
+
+  return { data, isLoading, error };
+};
+
+// API Endpoints hook
+export const useApiEndpoints = (projectId?: string) => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  const [data, setData] = useState<Api | null>(null);
+
+  useEffect(() => {
+    const fetchApiEndpoints = async () => {
+      if (!projectId) {
+        setIsLoading(false);
+        return;
+      }
+
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const apiEndpoints = await apiEndpointsService.getApiEndpoints(
+          projectId
+        );
+        setData(apiEndpoints);
+      } catch (err) {
+        console.error("Error fetching API endpoints:", err);
+        setError(
+          err instanceof Error
+            ? err
+            : new Error("Failed to fetch API endpoints")
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchApiEndpoints();
   }, [projectId]);
 
   return { data, isLoading, error };

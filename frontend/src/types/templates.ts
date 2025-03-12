@@ -236,7 +236,6 @@ export interface ProjectTemplate {
   pages: Pages;
   dataModel: DataModel;
   api: Api;
-  api_endpoints?: { endpoints: Array<any> };
   testing: Testing;
   projectStructure: ProjectStructure;
   deployment: Deployment;

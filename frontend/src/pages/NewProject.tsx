@@ -27,7 +27,7 @@ const NewProject = () => {
   }, [selectedTemplate]);
 
   return (
-    <MainLayout showSidebar={false}>
+    <MainLayout>
       <div className="max-w-4xl mx-auto">
         {/* Header with back button */}
         <div className="mb-6">
@@ -211,23 +211,15 @@ const NewProject = () => {
             <div className="p-6">
               <ApiEndpointsForm
                 initialData={
-                  selectedTemplate?.api_endpoints || {
+                  selectedTemplate?.api || {
                     endpoints: [],
                   }
                 }
-                onSubmit={() => {
-                  console.log("API Endpoints updated");
+                projectId={projectId}
+                onSuccess={(updatedApiEndpoints) => {
+                  console.log("API Endpoints updated:", updatedApiEndpoints);
                 }}
               />
-              <div className="mt-4 flex justify-end">
-                <button
-                  type="submit"
-                  form="api-endpoints-form"
-                  className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
-                >
-                  Save API Endpoints
-                </button>
-              </div>
             </div>
           </div>
         </div>
