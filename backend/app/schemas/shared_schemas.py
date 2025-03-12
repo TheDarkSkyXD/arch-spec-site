@@ -14,9 +14,18 @@ class Requirements(BaseModel):
     class Config:
         populate_by_name = True
 
+class FeatureModule(BaseModel):
+    """Schema for feature module"""
+    name: str
+    description: str
+    enabled: bool = True
+    optional: Optional[bool] = False
+    providers: Optional[List[str]] = Field(default_factory=list)
+
 class Features(BaseModel):
     """Schema for features section"""
-    features: Dict[str, Any] = Field(default_factory=dict)
+    coreModules: List[FeatureModule] = Field(default_factory=list)
+    optionalModules: Optional[List[FeatureModule]] = Field(default_factory=list)
     
     class Config:
         populate_by_name = True
