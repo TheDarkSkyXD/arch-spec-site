@@ -38,8 +38,8 @@ export const requirementsService = {
       }
 
       return {
-        functional_requirements: response.data.functional || [],
-        non_functional_requirements: response.data.non_functional || [],
+        functional: response.data.functional || [],
+        non_functional: response.data.non_functional || [],
       };
     } catch (error) {
       console.error(
@@ -64,8 +64,8 @@ export const requirementsService = {
     try {
       // Create the payload in the correct format for the backend
       const payload = {
-        functional: data.functional_requirements,
-        non_functional: data.non_functional_requirements,
+        functional: data.functional,
+        non_functional: data.non_functional,
       };
 
       const response = await apiClient.put<RequirementsSection>(
@@ -79,8 +79,8 @@ export const requirementsService = {
       }
 
       return {
-        functional_requirements: response.data.functional || [],
-        non_functional_requirements: response.data.non_functional || [],
+        functional: response.data.functional || [],
+        non_functional: response.data.non_functional || [],
       };
     } catch (error) {
       console.error(

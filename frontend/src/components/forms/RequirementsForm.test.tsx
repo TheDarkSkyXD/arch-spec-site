@@ -32,8 +32,8 @@ describe("RequirementsForm", () => {
       <ToastProvider>
         <RequirementsForm
           initialData={{
-            functional_requirements: ["User authentication", "Dashboard view"],
-            non_functional_requirements: ["Performance", "Security"],
+            functional: ["User authentication", "Dashboard view"],
+            non_functional: ["Performance", "Security"],
           }}
         />
       </ToastProvider>
@@ -51,8 +51,8 @@ describe("RequirementsForm", () => {
       <ToastProvider>
         <RequirementsForm
           initialData={{
-            functional_requirements: [],
-            non_functional_requirements: [],
+            functional: [],
+            non_functional: [],
           }}
         />
       </ToastProvider>
@@ -83,8 +83,8 @@ describe("RequirementsForm", () => {
       <ToastProvider>
         <RequirementsForm
           initialData={{
-            functional_requirements: [],
-            non_functional_requirements: [],
+            functional: [],
+            non_functional: [],
           }}
         />
       </ToastProvider>
@@ -113,8 +113,8 @@ describe("RequirementsForm", () => {
   test("submits form with requirements data", async () => {
     // Mock the save requirements function
     const mockSaveRequirements = vi.fn().mockResolvedValue({
-      functional_requirements: ["User authentication"],
-      non_functional_requirements: ["Performance"],
+      functional: ["User authentication"],
+      non_functional: ["Performance"],
     });
     requirementsService.saveRequirements = mockSaveRequirements;
 
@@ -124,8 +124,8 @@ describe("RequirementsForm", () => {
       <ToastProvider>
         <RequirementsForm
           initialData={{
-            functional_requirements: ["User authentication"],
-            non_functional_requirements: ["Performance"],
+            functional: ["User authentication"],
+            non_functional: ["Performance"],
           }}
           projectId="test-project-id"
           onSuccess={onSuccessMock}
@@ -140,8 +140,8 @@ describe("RequirementsForm", () => {
     // Verify service was called
     await waitFor(() => {
       expect(mockSaveRequirements).toHaveBeenCalledWith("test-project-id", {
-        functional_requirements: ["User authentication"],
-        non_functional_requirements: ["Performance"],
+        functional: ["User authentication"],
+        non_functional: ["Performance"],
       });
       expect(onSuccessMock).toHaveBeenCalled();
     });
@@ -153,8 +153,8 @@ describe("RequirementsForm", () => {
       return new Promise((resolve) => {
         setTimeout(() => {
           resolve({
-            functional_requirements: ["User authentication"],
-            non_functional_requirements: ["Performance"],
+            functional: ["User authentication"],
+            non_functional: ["Performance"],
           });
         }, 100);
       });
@@ -185,8 +185,8 @@ describe("RequirementsForm", () => {
       <ToastProvider>
         <RequirementsForm
           initialData={{
-            functional_requirements: ["User authentication"],
-            non_functional_requirements: ["Performance"],
+            functional: ["User authentication"],
+            non_functional: ["Performance"],
           }}
         />
       </ToastProvider>

@@ -38,8 +38,8 @@ describe("requirementsService", () => {
         "/api/project-sections/project-123/requirements"
       );
       expect(result).toEqual({
-        functional_requirements: ["User authentication", "Dashboard view"],
-        non_functional_requirements: ["Performance", "Security"],
+        functional: ["User authentication", "Dashboard view"],
+        non_functional: ["Performance", "Security"],
       });
     });
 
@@ -88,8 +88,8 @@ describe("requirementsService", () => {
       });
 
       const requirementsData = {
-        functional_requirements: ["User authentication", "Dashboard view"],
-        non_functional_requirements: ["Performance", "Security"],
+        functional: ["User authentication", "Dashboard view"],
+        non_functional: ["Performance", "Security"],
       };
 
       const result = await requirementsService.saveRequirements(
@@ -106,8 +106,8 @@ describe("requirementsService", () => {
       );
 
       expect(result).toEqual({
-        functional_requirements: ["User authentication", "Dashboard view"],
-        non_functional_requirements: ["Performance", "Security"],
+        functional: ["User authentication", "Dashboard view"],
+        non_functional: ["Performance", "Security"],
       });
     });
 
@@ -116,8 +116,8 @@ describe("requirementsService", () => {
       (apiClient.put as any).mockRejectedValueOnce(new Error("API error"));
 
       const requirementsData = {
-        functional_requirements: ["User authentication"],
-        non_functional_requirements: ["Performance"],
+        functional: ["User authentication"],
+        non_functional: ["Performance"],
       };
 
       const result = await requirementsService.saveRequirements(
@@ -143,8 +143,8 @@ describe("requirementsService", () => {
       });
 
       const requirementsData = {
-        functional_requirements: ["User authentication"],
-        non_functional_requirements: ["Performance"],
+        functional: ["User authentication"],
+        non_functional: ["Performance"],
       };
 
       const result = await requirementsService.saveRequirements(

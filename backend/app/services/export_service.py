@@ -76,15 +76,15 @@ class ExportService:
             if specification['requirements'].get('project_type'):
                 readme += f"### Project Type\n\n{specification['requirements']['project_type']}\n\n"
             
-            if specification['requirements'].get('functional_requirements'):
+            if specification['requirements'].get('functional'):
                 readme += "### Functional Requirements\n\n"
-                for req in specification['requirements']['functional_requirements']:
+                for req in specification['requirements']['functional']:
                     readme += f"- {req}\n"
                 readme += "\n"
             
-            if specification['requirements'].get('non_functional_requirements'):
+            if specification['requirements'].get('non_functional'):
                 readme += "### Non-Functional Requirements\n\n"
-                for req in specification['requirements']['non_functional_requirements']:
+                for req in specification['requirements']['non_functional']:
                     readme += f"- {req}\n"
                 readme += "\n"
             

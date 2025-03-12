@@ -220,10 +220,9 @@ export default function ProjectReviewForm({
         )}
 
         {/* Requirements */}
-        {((projectData.functional_requirements &&
-          projectData.functional_requirements.length > 0) ||
-          (projectData.non_functional_requirements &&
-            projectData.non_functional_requirements.length > 0)) && (
+        {((projectData.functional && projectData.functional.length > 0) ||
+          (projectData.non_functional &&
+            projectData.non_functional.length > 0)) && (
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
             <div className="flex justify-between items-center p-4 bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
               <div className="flex items-center">
@@ -245,44 +244,40 @@ export default function ProjectReviewForm({
             </div>
             <div className="p-4">
               <div className="space-y-4">
-                {projectData.functional_requirements &&
-                  projectData.functional_requirements.length > 0 && (
+                {projectData.functional &&
+                  projectData.functional.length > 0 && (
                     <div>
                       <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                         Functional Requirements
                       </h4>
                       <ul className="list-disc pl-5 space-y-1">
-                        {projectData.functional_requirements.map(
-                          (req, index) => (
-                            <li
-                              key={index}
-                              className="text-sm text-slate-800 dark:text-slate-200"
-                            >
-                              {req.description}
-                            </li>
-                          )
-                        )}
+                        {projectData.functional.map((req, index) => (
+                          <li
+                            key={index}
+                            className="text-sm text-slate-800 dark:text-slate-200"
+                          >
+                            {req.description}
+                          </li>
+                        ))}
                       </ul>
                     </div>
                   )}
 
-                {projectData.non_functional_requirements &&
-                  projectData.non_functional_requirements.length > 0 && (
+                {projectData.non_functional &&
+                  projectData.non_functional.length > 0 && (
                     <div>
                       <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                         Non-Functional Requirements
                       </h4>
                       <ul className="list-disc pl-5 space-y-1">
-                        {projectData.non_functional_requirements.map(
-                          (req, index) => (
-                            <li
-                              key={index}
-                              className="text-sm text-slate-800 dark:text-slate-200"
-                            >
-                              {req.description}
-                            </li>
-                          )
-                        )}
+                        {projectData.non_functional.map((req, index) => (
+                          <li
+                            key={index}
+                            className="text-sm text-slate-800 dark:text-slate-200"
+                          >
+                            {req.description}
+                          </li>
+                        ))}
                       </ul>
                     </div>
                   )}

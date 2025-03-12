@@ -26,7 +26,6 @@ const HostingSection = ({
   // Reset form values if templateId is null
   useEffect(() => {
     if (!initialData) {
-      console.log("Resetting hosting section form values");
       setValue("hosting_frontend", "", { shouldDirty: false });
       setValue("hosting_backend", "", { shouldDirty: false });
     }

@@ -57,17 +57,17 @@ export default function FeaturesForm({
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Add debug logging for initialData
-  useEffect(() => {
-    console.log("FeaturesForm initialData:", initialData);
-  }, [initialData]);
+  // useEffect(() => {
+  //   console.log("FeaturesForm initialData:", initialData);
+  // }, [initialData]);
 
   // Effect to update local state when initial data changes
   useEffect(() => {
     if (initialData) {
-      console.log(
-        "Setting core modules from initialData:",
-        initialData.coreModules
-      );
+      // console.log(
+      //   "Setting core modules from initialData:",
+      //   initialData.coreModules
+      // );
       setCoreModules(initialData.coreModules || []);
     }
   }, [initialData]);

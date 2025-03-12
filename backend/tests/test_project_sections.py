@@ -400,13 +400,13 @@ def test_full_project_with_sections(mock_get_db, mock_sections_service, client):
     assert result["budget"]["budget1"]["category"] == "Marketing"
     
     # Check the requirements section
-    assert "functional_requirements" in result
-    assert len(result["functional_requirements"]) == 1
-    assert result["functional_requirements"][0]["description"] == "User registration"
+    assert "functional" in result
+    assert len(result["functional"]) == 1
+    assert result["functional"][0]["description"] == "User registration"
     
-    assert "non_functional_requirements" in result
-    assert len(result["non_functional_requirements"]) == 1
-    assert result["non_functional_requirements"][0]["description"] == "Page load time under 2 seconds"
+    assert "non_functional" in result
+    assert len(result["non_functional"]) == 1
+    assert result["non_functional"][0]["description"] == "Page load time under 2 seconds"
     
     # Check the metadata section
     assert "metadata" in result

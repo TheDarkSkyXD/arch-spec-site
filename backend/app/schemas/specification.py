@@ -14,8 +14,8 @@ class TechStack(BaseModel):
 class Requirements(BaseModel):
     """Requirements specification."""
     project_type: str
-    functional_requirements: List[str]
-    non_functional_requirements: List[str]
+    functional: List[str]
+    non_functional: List[str]
     tech_stack: TechStack
 
 

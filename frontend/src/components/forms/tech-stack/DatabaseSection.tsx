@@ -65,7 +65,6 @@ const DatabaseSection = ({
   // Reset form values if templateId is null
   useEffect(() => {
     if (!initialData) {
-      console.log("Resetting database section form values");
       setValue("database_type", "", { shouldDirty: false });
       setValue("database_system", "", { shouldDirty: false });
       setValue("database_hosting", "", { shouldDirty: false });
@@ -184,19 +183,19 @@ const DatabaseSection = ({
     setValue,
   ]);
 
-  useEffect(() => {
-    console.log("Selected database values:", {
-      database_type: selectedDatabaseType,
-      database_system: selectedDatabaseSystem,
-      database_hosting: selectedDatabaseHosting,
-      database_orm: selectedDatabaseOrm,
-    });
-  }, [
-    selectedDatabaseType,
-    selectedDatabaseSystem,
-    selectedDatabaseHosting,
-    selectedDatabaseOrm,
-  ]);
+  // useEffect(() => {
+  //   console.log("Selected database values:", {
+  //     database_type: selectedDatabaseType,
+  //     database_system: selectedDatabaseSystem,
+  //     database_hosting: selectedDatabaseHosting,
+  //     database_orm: selectedDatabaseOrm,
+  //   });
+  // }, [
+  //   selectedDatabaseType,
+  //   selectedDatabaseSystem,
+  //   selectedDatabaseHosting,
+  //   selectedDatabaseOrm,
+  // ]);
 
   // Set initial values if they exist in the available options
   useEffect(() => {

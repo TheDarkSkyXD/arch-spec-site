@@ -154,10 +154,7 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
       };
 
       // Determine which requirements list to update
-      const field =
-        type === "functional"
-          ? "functional_requirements"
-          : "non_functional_requirements";
+      const field = type === "functional" ? "functional" : "non_functional";
       const requirements = [...(currentProject[field] || []), newRequirement];
 
       // Update the project
@@ -177,10 +174,7 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
       if (!currentProject) throw new Error("No project selected");
 
       // Determine which requirements list to update
-      const field =
-        type === "functional"
-          ? "functional_requirements"
-          : "non_functional_requirements";
+      const field = type === "functional" ? "functional" : "non_functional";
       const requirements = currentProject[field] || [];
 
       // Update the specific requirement
@@ -205,10 +199,7 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
       if (!currentProject) throw new Error("No project selected");
 
       // Determine which requirements list to update
-      const field =
-        type === "functional"
-          ? "functional_requirements"
-          : "non_functional_requirements";
+      const field = type === "functional" ? "functional" : "non_functional";
       const requirements = currentProject[field] || [];
 
       // Filter out the requirement to delete

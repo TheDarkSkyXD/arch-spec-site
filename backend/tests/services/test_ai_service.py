@@ -76,8 +76,8 @@ async def test_process_specification(mock_generate_response):
     spec = {
         "requirements": {
             "project_type": "Web Application",
-            "functional_requirements": ["Test requirement"],
-            "non_functional_requirements": ["Test non-functional requirement"],
+            "functional": ["Test requirement"],
+            "non_functional": ["Test non-functional requirement"],
             "tech_stack": {
                 "frontend": "React",
                 "backend": "FastAPI",
@@ -110,8 +110,8 @@ def test_generate_prompt():
     spec = {
         "requirements": {
             "project_type": "Web Application",
-            "functional_requirements": ["Test requirement"],
-            "non_functional_requirements": ["Test non-functional requirement"],
+            "functional": ["Test requirement"],
+            "non_functional": ["Test non-functional requirement"],
             "tech_stack": {
                 "frontend": "React",
                 "backend": "FastAPI",

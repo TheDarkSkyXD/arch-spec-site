@@ -24,7 +24,6 @@ const AuthenticationSection = ({
   // Reset form values if templateId is null
   useEffect(() => {
     if (!initialData) {
-      console.log("Resetting authentication section form values");
       setValue("auth_provider", "", { shouldDirty: false });
       setValue("auth_methods", "", { shouldDirty: false });
     }

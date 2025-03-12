@@ -130,14 +130,14 @@ const Projects = () => {
                           {project.domain}
                         </div>
                       )}
-                      {project.functional_requirements && (
+                      {project.functional && (
                         <div className="flex items-center text-xs text-slate-500 dark:text-slate-400">
                           <CheckCircle size={12} className="mr-1" />
                           <span className="font-medium mr-2">
                             Requirements:
                           </span>
-                          {project.functional_requirements.length +
-                            (project.non_functional_requirements?.length || 0)}
+                          {project.functional.length +
+                            (project.non_functional?.length || 0)}
                         </div>
                       )}
                     </div>

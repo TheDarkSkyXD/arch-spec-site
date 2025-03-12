@@ -81,7 +81,6 @@ const BackendSection = ({
   // Reset form values if templateId is null
   useEffect(() => {
     if (!initialData) {
-      console.log("Resetting backend section form values");
       setValue("backend_type", "", { shouldDirty: false });
       setValue("backend_framework", "", { shouldDirty: false });
       setValue("backend_language", "", { shouldDirty: false });
@@ -91,14 +90,14 @@ const BackendSection = ({
     }
   }, [initialData, setValue]);
 
-  console.log("Selected Backend values:", {
-    type: backendType,
-    framework: backendFramework,
-    language: backendLanguage,
-    service: backendService,
-    realtime: backendRealtimeValue,
-    functions: backendFunctionsValue,
-  });
+  // console.log("Selected Backend values:", {
+  //   type: backendType,
+  //   framework: backendFramework,
+  //   language: backendLanguage,
+  //   service: backendService,
+  //   realtime: backendRealtimeValue,
+  //   functions: backendFunctionsValue,
+  // });
 
   // Filter options based on selections using memoized values for performance
   const filteredFrameworks = useMemo(
@@ -146,24 +145,24 @@ const BackendSection = ({
   );
 
   // Debug log for filtered options
-  useEffect(() => {
-    console.log("Filtered backend options:", {
-      frameworks: filteredFrameworks.map((f) => f.id),
-      selectedFramework: backendFramework,
-      realtime: filteredRealtime.map((r) => r.id),
-      functions: filteredFunctions.map((f) => f.id),
-      baas: filteredBaaS.map((b) => b.id),
-      services: serviceOptions.map((s) => s.id),
-    });
-  }, [
-    filteredFrameworks,
-    backendFramework,
-    filteredRealtime,
-    filteredFunctions,
-    filteredBaaS,
-    serviceOptions,
-    backendFrameworks,
-  ]);
+  // useEffect(() => {
+  //   console.log("Filtered backend options:", {
+  //     frameworks: filteredFrameworks.map((f) => f.id),
+  //     selectedFramework: backendFramework,
+  //     realtime: filteredRealtime.map((r) => r.id),
+  //     functions: filteredFunctions.map((f) => f.id),
+  //     baas: filteredBaaS.map((b) => b.id),
+  //     services: serviceOptions.map((s) => s.id),
+  //   });
+  // }, [
+  //   filteredFrameworks,
+  //   backendFramework,
+  //   filteredRealtime,
+  //   filteredFunctions,
+  //   filteredBaaS,
+  //   serviceOptions,
+  //   backendFrameworks,
+  // ]);
 
   // Set initial values from the project template
   useEffect(() => {

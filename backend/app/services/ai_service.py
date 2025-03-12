@@ -245,10 +245,10 @@ class AnthropicClient(LLMAdapter):
         Project Type: {spec_data.get('requirements', {}).get('project_type', 'Web Application')}
 
         Functional Requirements:
-        {json.dumps(spec_data.get('requirements', {}).get('functional_requirements', []), indent=2, cls=SetEncoder)}
+        {json.dumps(spec_data.get('requirements', {}).get('functional', []), indent=2, cls=SetEncoder)}
 
         Non-Functional Requirements:
-        {json.dumps(spec_data.get('requirements', {}).get('non_functional_requirements', []), indent=2, cls=SetEncoder)}
+        {json.dumps(spec_data.get('requirements', {}).get('non_functional', []), indent=2, cls=SetEncoder)}
 
         Tech Stack:
         {json.dumps(spec_data.get('requirements', {}).get('tech_stack', {}), indent=2, cls=SetEncoder)}

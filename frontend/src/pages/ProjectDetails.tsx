@@ -104,11 +104,13 @@ const ProjectDetails = () => {
   const handleRequirementsUpdate = (_updatedRequirements: RequirementsData) => {
     // Update is handled by refetching from the backend
     // We could implement a more sophisticated state management approach if needed
+    console.log("Requirements updated:", _updatedRequirements);
   };
 
   const handleFeaturesUpdate = (_updatedFeatures: FeaturesData) => {
     // Update is handled by refetching from the backend
     // We could implement a more sophisticated state management approach if needed
+    console.log("Features updated:", _updatedFeatures);
   };
 
   // Process arrays from the backend's comma-separated strings

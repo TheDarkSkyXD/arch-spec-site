@@ -213,8 +213,6 @@ const TechStackForm = ({
     // Get all database hosting
     const hosting = techStackOptions?.technologies?.hosting || {};
 
-    console.log("hosting", hosting);
-
     return (
       Object.entries(hosting)
         // eslint-disable-next-line @typescript-eslint/no-unused-vars

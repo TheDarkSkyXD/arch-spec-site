@@ -24,7 +24,6 @@ const StorageSection = ({
   // Reset form values if templateId is null
   useEffect(() => {
     if (!initialData) {
-      console.log("Resetting storage section form values");
       setValue("storage_type", "", { shouldDirty: false });
       setValue("storage_service", "", { shouldDirty: false });
     }
