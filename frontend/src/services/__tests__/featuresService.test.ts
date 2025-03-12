@@ -50,7 +50,7 @@ describe("featuresService", () => {
       const result = await featuresService.getFeatures("project-123");
 
       expect(apiClient.get).toHaveBeenCalledWith(
-        "/api/project-sections/project-123/features"
+        "/api/project-specs/project-123/features"
       );
       expect(result).toEqual({
         coreModules: [
@@ -79,7 +79,7 @@ describe("featuresService", () => {
       const result = await featuresService.getFeatures("project-123");
 
       expect(apiClient.get).toHaveBeenCalledWith(
-        "/api/project-sections/project-123/features"
+        "/api/project-specs/project-123/features"
       );
       expect(result).toBeNull();
     });
@@ -93,7 +93,7 @@ describe("featuresService", () => {
       const result = await featuresService.getFeatures("project-123");
 
       expect(apiClient.get).toHaveBeenCalledWith(
-        "/api/project-sections/project-123/features"
+        "/api/project-specs/project-123/features"
       );
       expect(result).toBeNull();
     });
@@ -141,7 +141,7 @@ describe("featuresService", () => {
       );
 
       expect(apiClient.put).toHaveBeenCalledWith(
-        "/api/project-sections/project-123/features",
+        "/api/project-specs/project-123/features",
         {
           data: {
             coreModules: [
@@ -191,7 +191,7 @@ describe("featuresService", () => {
       );
 
       expect(apiClient.put).toHaveBeenCalledWith(
-        "/api/project-sections/project-123/features",
+        "/api/project-specs/project-123/features",
         {
           data: {
             coreModules: [
@@ -233,7 +233,7 @@ describe("featuresService", () => {
       );
 
       expect(apiClient.put).toHaveBeenCalledWith(
-        "/api/project-sections/project-123/features",
+        "/api/project-specs/project-123/features",
         {
           data: {
             coreModules: [

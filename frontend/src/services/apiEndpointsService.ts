@@ -18,7 +18,7 @@ export interface ApiEndpointsData {
 }
 
 // Interface to match the backend response format
-interface ApiEndpointsSection {
+interface ApiEndpointsSpec {
   id: string;
   project_id: string;
   created_at: string;
@@ -42,8 +42,8 @@ export const apiEndpointsService = {
    */
   async getApiEndpoints(projectId: string): Promise<ApiEndpointsData | null> {
     try {
-      const response = await apiClient.get<ApiEndpointsSection>(
-        `${API_BASE_URL}/project-sections/${projectId}/api`
+      const response = await apiClient.get<ApiEndpointsSpec>(
+        `${API_BASE_URL}/project-specs/${projectId}/api`
       );
 
       if (!response.data || !response.data.data) {
@@ -81,8 +81,8 @@ export const apiEndpointsService = {
         },
       };
 
-      const response = await apiClient.put<ApiEndpointsSection>(
-        `${API_BASE_URL}/project-sections/${projectId}/api`,
+      const response = await apiClient.put<ApiEndpointsSpec>(
+        `${API_BASE_URL}/project-specs/${projectId}/api`,
         payload
       );
 

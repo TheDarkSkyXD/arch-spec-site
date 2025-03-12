@@ -6,10 +6,13 @@ import uuid
 
 class ArtifactBase(BaseModel):
     """Base model for Artifact data."""
-    specification_id: str
+    project_id: str
     type: str  # diagram, schema, document
     format: str  # mermaid, json, markdown
     content: str
+    name: str
+    spec: str
+    description: str
 
 
 class ArtifactCreate(ArtifactBase):
@@ -22,6 +25,9 @@ class ArtifactUpdate(BaseModel):
     type: Optional[str] = None
     format: Optional[str] = None
     content: Optional[str] = None
+    name: Optional[str] = None
+    spec: Optional[str] = None
+    description: Optional[str] = None
 
 
 class ArtifactInDB(ArtifactBase):

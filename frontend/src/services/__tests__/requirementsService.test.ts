@@ -35,7 +35,7 @@ describe("requirementsService", () => {
       const result = await requirementsService.getRequirements("project-123");
 
       expect(apiClient.get).toHaveBeenCalledWith(
-        "/api/project-sections/project-123/requirements"
+        "/api/project-specs/project-123/requirements"
       );
       expect(result).toEqual({
         functional: ["User authentication", "Dashboard view"],
@@ -50,7 +50,7 @@ describe("requirementsService", () => {
       const result = await requirementsService.getRequirements("project-123");
 
       expect(apiClient.get).toHaveBeenCalledWith(
-        "/api/project-sections/project-123/requirements"
+        "/api/project-specs/project-123/requirements"
       );
       expect(result).toBeNull();
     });
@@ -64,7 +64,7 @@ describe("requirementsService", () => {
       const result = await requirementsService.getRequirements("project-123");
 
       expect(apiClient.get).toHaveBeenCalledWith(
-        "/api/project-sections/project-123/requirements"
+        "/api/project-specs/project-123/requirements"
       );
       expect(result).toBeNull();
     });
@@ -98,7 +98,7 @@ describe("requirementsService", () => {
       );
 
       expect(apiClient.put).toHaveBeenCalledWith(
-        "/api/project-sections/project-123/requirements",
+        "/api/project-specs/project-123/requirements",
         {
           functional: ["User authentication", "Dashboard view"],
           non_functional: ["Performance", "Security"],
@@ -126,7 +126,7 @@ describe("requirementsService", () => {
       );
 
       expect(apiClient.put).toHaveBeenCalledWith(
-        "/api/project-sections/project-123/requirements",
+        "/api/project-specs/project-123/requirements",
         {
           functional: ["User authentication"],
           non_functional: ["Performance"],
@@ -153,7 +153,7 @@ describe("requirementsService", () => {
       );
 
       expect(apiClient.put).toHaveBeenCalledWith(
-        "/api/project-sections/project-123/requirements",
+        "/api/project-specs/project-123/requirements",
         {
           functional: ["User authentication"],
           non_functional: ["Performance"],

@@ -181,7 +181,7 @@ async def delete_project(
     database: AsyncIOMotorDatabase = Depends(get_db),
     current_user: Dict[str, Any] = Depends(get_current_user)
 ):
-    """Delete a project by ID and all its associated sections.
+    """Delete a project by ID and all its associated specs.
     
     Args:
         id: The project ID.
@@ -198,25 +198,25 @@ async def delete_project(
     if existing_project is None:
         raise HTTPException(status_code=404, detail="Project not found")
     
-    # Define collections that store project sections
-    section_collections = [
-        "timeline_sections",
-        "budget_sections",
-        "requirements_sections",
-        "metadata_sections",
-        "tech_stack_sections",
-        "features_sections",
-        "pages_sections",
-        "data_model_sections",
-        "api_sections",
-        "testing_sections",
-        "project_structure_sections",
-        "deployment_sections",
-        "documentation_sections"
+    # Define collections that store project specs
+    spec_collections = [
+        "timeline_specs",
+        "budget_specs",
+        "requirements_specs",
+        "metadata_specs",
+        "tech_stack_specs",
+        "features_specs",
+        "pages_specs",
+        "data_model_specs",
+        "api_specs",
+        "testing_specs",
+        "project_structure_specs",
+        "deployment_specs",
+        "documentation_specs"
     ]
     
-    # Delete all sections associated with the project
-    for collection_name in section_collections:
+    # Delete all specs associated with the project
+    for collection_name in spec_collections:
         if hasattr(database, collection_name):
             collection = getattr(database, collection_name)
             await collection.delete_many({"project_id": id})

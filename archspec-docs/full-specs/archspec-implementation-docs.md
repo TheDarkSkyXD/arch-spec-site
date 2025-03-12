@@ -33,14 +33,14 @@ flowchart TB
         StateM[State Management]
         APIClient[API Client]
     end
-    
+
     subgraph "Backend (FastAPI)"
         API[API Layer]
         AIProcessor[AI Processing Engine]
         SpecGen[Specification Generator]
         AuthService[Authentication Service]
     end
-    
+
     subgraph "Data Layer"
         MongoDB[(MongoDB)]
         Redis[(Redis Cache)]
@@ -63,29 +63,29 @@ flowchart TB
 
 ### 1.2 System Components
 
-| Component | Purpose | Technology | Description |
-|-----------|---------|------------|-------------|
-| User Interface | Provides user interaction | React, TypeScript | Wizard-based UI for specification creation |
-| State Management | Manages application state | TanStack Query | Data fetching and state management with automatic caching and synchronization |
-| API Client | Handles API communication | Axios | Wrapper for HTTP requests with interceptors for auth |
-| API Layer | Exposes backend functionality | FastAPI | RESTful API endpoints for all system operations |
-| AI Processing Engine | Processes and generates specs | LangChain + OpenAI | Orchestrates AI operations for specification generation |
-| Specification Generator | Creates spec artifacts | Python + Jinja2 | Generates documentation, diagrams, and spec files |
-| Authentication Service | Handles user authentication | JWT + OAuth2 | Manages user sessions and authorization |
-| MongoDB | Primary database | MongoDB | Stores user data, projects, and specifications |
-| Redis Cache | Caching layer | Redis | Caches frequent operations and AI results |
-| File Storage | Stores generated artifacts | MinIO/S3 | Object storage for specification artifacts |
+| Component               | Purpose                       | Technology         | Description                                                                   |
+| ----------------------- | ----------------------------- | ------------------ | ----------------------------------------------------------------------------- |
+| User Interface          | Provides user interaction     | React, TypeScript  | Wizard-based UI for specification creation                                    |
+| State Management        | Manages application state     | TanStack Query     | Data fetching and state management with automatic caching and synchronization |
+| API Client              | Handles API communication     | Axios              | Wrapper for HTTP requests with interceptors for auth                          |
+| API Layer               | Exposes backend functionality | FastAPI            | RESTful API endpoints for all system operations                               |
+| AI Processing Engine    | Processes and generates specs | LangChain + OpenAI | Orchestrates AI operations for specification generation                       |
+| Specification Generator | Creates spec artifacts        | Python + Jinja2    | Generates documentation, diagrams, and spec files                             |
+| Authentication Service  | Handles user authentication   | JWT + OAuth2       | Manages user sessions and authorization                                       |
+| MongoDB                 | Primary database              | MongoDB            | Stores user data, projects, and specifications                                |
+| Redis Cache             | Caching layer                 | Redis              | Caches frequent operations and AI results                                     |
+| File Storage            | Stores generated artifacts    | MinIO/S3           | Object storage for specification artifacts                                    |
 
 ### 1.3 Technology Selection Rationale
 
-| Technology | Selection Justification |
-|------------|-------------------------|
-| React | Component-based architecture ideal for complex UI with reusable elements; large ecosystem; TypeScript support for type safety |
-| FastAPI | High-performance Python framework; automatic OpenAPI documentation; async support for AI operations |
-| MongoDB | Schema flexibility for evolving specification models; document-oriented structure matches specification artifacts |
-| Redis | Low-latency caching for AI operations; pub/sub capabilities for real-time updates |
-| LangChain | Framework for AI orchestration; simplifies prompt management and context handling |
-| MinIO/S3 | Object storage compatible with cloud deployment; versioning support for specification artifacts |
+| Technology | Selection Justification                                                                                                       |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| React      | Component-based architecture ideal for complex UI with reusable elements; large ecosystem; TypeScript support for type safety |
+| FastAPI    | High-performance Python framework; automatic OpenAPI documentation; async support for AI operations                           |
+| MongoDB    | Schema flexibility for evolving specification models; document-oriented structure matches specification artifacts             |
+| Redis      | Low-latency caching for AI operations; pub/sub capabilities for real-time updates                                             |
+| LangChain  | Framework for AI orchestration; simplifies prompt management and context handling                                             |
+| MinIO/S3   | Object storage compatible with cloud deployment; versioning support for specification artifacts                               |
 
 ---
 
@@ -154,7 +154,7 @@ flowchart TB
   "updatedAt": "Date",
   "status": "string (enum: draft, in-progress, completed)",
   "completionPercentage": "number",
-  "sections": {
+  "specs": {
     "requirements": {
       "status": "string (enum: not-started, in-progress, completed)",
       "data": "Object (requirements data model)",
@@ -199,9 +199,9 @@ flowchart TB
 ```json
 {
   "_id": "ObjectId",
-  "specificationId": "ObjectId (ref: Specifications)",
+  "projectId": "ObjectId (ref: projects)",
   "type": "string (enum: diagram, document, schema, code)",
-  "section": "string (enum: requirements, architecture, ...)",
+  "specification": "string (enum: requirements, architecture, ...)",
   "name": "string",
   "description": "string",
   "fileKey": "string (path in object storage)",
@@ -234,13 +234,13 @@ flowchart TB
 
 #### 2.2.1 Cache Keys
 
-| Key Pattern | Purpose | TTL | Data Structure |
-|-------------|---------|-----|----------------|
-| `user:{userId}:session` | User session data | 24 hours | Hash |
-| `project:{projectId}:summary` | Project summary data | 1 hour | Hash |
-| `spec:{specId}:section:{sectionId}:status` | Section completion status | 10 minutes | String |
-| `ai:request:{requestId}:status` | AI request status tracking | 30 minutes | Hash |
-| `ai:prompt:{promptType}:template` | Cached prompt templates | 24 hours | String |
+| Key Pattern                       | Purpose                         | TTL        | Data Structure |
+| --------------------------------- | ------------------------------- | ---------- | -------------- |
+| `user:{userId}:session`           | User session data               | 24 hours   | Hash           |
+| `project:{projectId}:summary`     | Project summary data            | 1 hour     | Hash           |
+| `spec:{specId}:status`            | Specification completion status | 10 minutes | String         |
+| `ai:request:{requestId}:status`   | AI request status tracking      | 30 minutes | Hash           |
+| `ai:prompt:{promptType}:template` | Cached prompt templates         | 24 hours   | String         |
 
 ---
 
@@ -267,7 +267,7 @@ flowchart TB
     "lastName": "string"
   }
   ```
-- **Response:** 
+- **Response:**
   ```json
   {
     "userId": "string",
@@ -294,7 +294,7 @@ flowchart TB
     "password": "string"
   }
   ```
-- **Response:** 
+- **Response:**
   ```json
   {
     "userId": "string",
@@ -331,7 +331,7 @@ flowchart TB
     "tags": ["string"]
   }
   ```
-- **Response:** 
+- **Response:**
   ```json
   {
     "projectId": "string",
@@ -389,7 +389,7 @@ flowchart TB
 
 #### 3.4.1 Create/Initialize Specification
 
-- **URL:** `/projects/{projectId}/specifications`
+- **URL:** `/projects/{projectId}/specs`
 - **Method:** `POST`
 - **Auth:** Required
 - **Request Body:**
@@ -411,12 +411,12 @@ flowchart TB
 - **Response:**
   ```json
   {
-    "specificationId": "string",
+    "projectId": "string",
     "projectId": "string",
     "version": "string",
     "createdAt": "string (ISO date)",
     "status": "string (draft)",
-    "sections": {
+    "specs": {
       "requirements": {
         "status": "string (in-progress)"
       },
@@ -446,44 +446,44 @@ flowchart TB
   - `400 Bad Request` - Validation error
   - `404 Not Found` - Project not found
 
-#### 3.4.2 Update Specification Section
+#### 3.4.2 Update Specification
 
-- **URL:** `/specifications/{specificationId}/sections/{sectionId}`
+- **URL:** `/projects/{projectId}/specs/{specificationId}`
 - **Method:** `PUT`
 - **Auth:** Required
 - **Request Body:**
   ```json
   {
-    "data": "Object (section-specific data model)",
+    "data": "Object (specification-specific data model)",
     "status": "string (enum: in-progress, completed)"
   }
   ```
 - **Response:**
   ```json
   {
-    "specificationId": "string",
-    "sectionId": "string",
+    "projectId": "string",
+    "specId": "string",
     "status": "string",
     "updatedAt": "string (ISO date)",
     "completionPercentage": "number"
   }
   ```
 - **Status Codes:**
-  - `200 OK` - Section updated
+  - `200 OK` - Specification updated
   - `400 Bad Request` - Validation error
-  - `404 Not Found` - Specification or section not found
+  - `404 Not Found` - Specification not found
 
 ### 3.5 AI Processing Endpoints
 
 #### 3.5.1 Generate Section Content
 
-- **URL:** `/ai/generate/section/{specificationId}/{sectionId}`
+- **URL:** `/ai/generate/specification/{projectId}/{specificationId}`
 - **Method:** `POST`
 - **Auth:** Required
 - **Request Body:**
   ```json
   {
-    "inputData": "Object (section-specific data)",
+    "inputData": "Object (specification-specific data)",
     "generationOptions": {
       "detailLevel": "string (enum: high, medium, low)",
       "focus": ["string (aspects to focus on)"],
@@ -523,7 +523,7 @@ flowchart TB
           "name": "string"
         }
       ],
-      "sectionData": "Object (generated section data)"
+      "specificationData": "Object (generated specification data)"
     }
   }
   ```
@@ -551,8 +551,8 @@ flowchart TB
 - **Request Body:**
   ```json
   {
-    "specificationId": "string",
-    "section": "string",
+    "projectId": "string",
+    "specification": "string",
     "type": "string (enum: diagram, document, schema, code)",
     "name": "string",
     "options": "Object (generation options)"
@@ -574,16 +574,16 @@ flowchart TB
 
 ### 3.7 Export Endpoints
 
-#### 3.7.1 Export Complete Specification
+#### 3.7.1 Export Complete Project
 
-- **URL:** `/export/specification/{specificationId}`
+- **URL:** `/export/project/{projectId}`
 - **Method:** `POST`
 - **Auth:** Required
 - **Request Body:**
   ```json
   {
     "format": "string (enum: zip, pdf, markdown, html)",
-    "sections": ["string (section IDs to include)"],
+    "specs": ["string (specification IDs to include)"],
     "includeArtifacts": "boolean"
   }
   ```
@@ -623,34 +623,34 @@ graph TD
     LayoutWrapper --> Sidebar
     LayoutWrapper --> MainContent
     LayoutWrapper --> Footer
-    
+
     MainContent --> Routes
     Routes --> Dashboard
     Routes --> ProjectModule
     Routes --> SpecificationModule
     Routes --> ExportModule
     Routes --> SettingsModule
-    
+
     ProjectModule --> ProjectList
     ProjectModule --> ProjectCreate
     ProjectModule --> ProjectDetail
-    
+
     SpecificationModule --> SpecWizard
-    SpecWizard --> RequirementsSection
-    SpecWizard --> ArchitectureSection
-    SpecWizard --> DataDesignSection
-    SpecWizard --> APIDesignSection
-    SpecWizard --> UIDesignSection
-    SpecWizard --> TestingSection
-    SpecWizard --> ImplementationSection
-    
+    SpecWizard --> RequirementsSpecification
+    SpecWizard --> ArchitectureSpecification
+    SpecWizard --> DataDesignSpecification
+    SpecWizard --> APIDesignSpecification
+    SpecWizard --> UIDesignSpecification
+    SpecWizard --> TestingSpecification
+    SpecWizard --> ImplementationSpecification
+
     SpecificationModule --> SpecReview
     SpecificationModule --> ArtifactViewer
-    
+
     ExportModule --> ExportOptions
     ExportModule --> ExportStatus
     ExportModule --> ExportDownload
-    
+
     SettingsModule --> UserProfile
     SettingsModule --> Preferences
     SettingsModule --> APIKeys
@@ -665,7 +665,7 @@ graph TD
     /common           # Common UI components (buttons, forms, etc.)
     /layout           # Layout components (navbar, sidebar, etc.)
     /diagrams         # Diagram rendering components
-    /editors          # Specialized editors for different specification sections
+    /editors          # Specialized editors for different project specifications
     /viewers          # Content and artifact viewers
   /context            # React context providers
   /hooks              # Custom React hooks
@@ -703,51 +703,53 @@ const queryClient = new QueryClient({
       staleTime: 60000, // 1 minute
       cacheTime: 900000, // 15 minutes
       refetchOnWindowFocus: false,
-      retry: 1
+      retry: 1,
     },
     mutations: {
-      retry: 1
-    }
-  }
+      retry: 1,
+    },
+  },
 });
 
 // Example query hook for fetching a project
 export function useProject(projectId: string) {
   return useQuery({
-    queryKey: ['project', projectId],
+    queryKey: ["project", projectId],
     queryFn: () => api.getProject(projectId),
-    enabled: !!projectId
+    enabled: !!projectId,
   });
 }
 
 // Example mutation hook for updating a project
 export function useUpdateProject() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (data: UpdateProjectDto) => api.updateProject(data),
     onSuccess: (result, variables) => {
       // Invalidate and refetch
-      queryClient.invalidateQueries({ queryKey: ['project', variables.projectId] });
+      queryClient.invalidateQueries({
+        queryKey: ["project", variables.projectId],
+      });
       // Optimistic update for projects list
-      queryClient.setQueryData(['projects'], (old: Project[] | undefined) =>
-        old?.map(p => p.id === result.id ? result : p)
+      queryClient.setQueryData(["projects"], (old: Project[] | undefined) =>
+        old?.map((p) => (p.id === result.id ? result : p))
       );
-    }
+    },
   });
 }
 ```
 
 #### 4.3.2 Key Query Categories
 
-| Category | Purpose | Examples |
-|----------|---------|----------|
-| `Auth Queries` | Authentication state | `useUser`, `useLogin`, `useRegister` |
-| `Project Queries` | Project management | `useProjects`, `useProject`, `useCreateProject` |
-| `Specification Queries` | Specification data | `useSpecification`, `useSpecificationSection`, `useSaveSection` |
-| `Artifact Queries` | Artifact management | `useArtifacts`, `useArtifact`, `useGenerateArtifact` |
-| `AI Queries` | AI operations | `useGenerateContent`, `useRequestStatus` |
-| `UI State` | Local UI state | `useThemePreference`, `useSidebarState` |
+| Category                | Purpose              | Examples                                                       |
+| ----------------------- | -------------------- | -------------------------------------------------------------- |
+| `Auth Queries`          | Authentication state | `useUser`, `useLogin`, `useRegister`                           |
+| `Project Queries`       | Project management   | `useProjects`, `useProject`, `useCreateProject`                |
+| `Specification Queries` | Specification data   | `useSpecification`, `useSpecification`, `useSaveSpecification` |
+| `Artifact Queries`      | Artifact management  | `useArtifacts`, `useArtifact`, `useGenerateArtifact`           |
+| `AI Queries`            | AI operations        | `useGenerateContent`, `useRequestStatus`                       |
+| `UI State`              | Local UI state       | `useThemePreference`, `useSidebarState`                        |
 
 #### 4.3.3 Global State Management
 
@@ -755,11 +757,11 @@ For global UI state that doesn't fit the query/mutation model, a simple React Co
 
 ```typescript
 // UIContext.tsx
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState } from "react";
 
 interface UIContextType {
-  theme: 'light' | 'dark';
-  setTheme: (theme: 'light' | 'dark') => void;
+  theme: "light" | "dark";
+  setTheme: (theme: "light" | "dark") => void;
   sidebarOpen: boolean;
   toggleSidebar: () => void;
   notifications: Notification[];
@@ -769,31 +771,35 @@ interface UIContextType {
 
 const UIContext = createContext<UIContextType | undefined>(undefined);
 
-export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+export const UIProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const [theme, setTheme] = useState<"light" | "dark">("light");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  
+
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
-  
+
   const addNotification = (notification: Notification) => {
     setNotifications([...notifications, notification]);
   };
-  
+
   const clearNotification = (id: string) => {
-    setNotifications(notifications.filter(n => n.id !== id));
+    setNotifications(notifications.filter((n) => n.id !== id));
   };
-  
+
   return (
-    <UIContext.Provider value={{
-      theme,
-      setTheme,
-      sidebarOpen,
-      toggleSidebar,
-      notifications,
-      addNotification,
-      clearNotification
-    }}>
+    <UIContext.Provider
+      value={{
+        theme,
+        setTheme,
+        sidebarOpen,
+        toggleSidebar,
+        notifications,
+        addNotification,
+        clearNotification,
+      }}
+    >
       {children}
     </UIContext.Provider>
   );
@@ -802,7 +808,7 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 export const useUI = () => {
   const context = useContext(UIContext);
   if (context === undefined) {
-    throw new Error('useUI must be used within a UIProvider');
+    throw new Error("useUI must be used within a UIProvider");
   }
   return context;
 };
@@ -814,16 +820,16 @@ export const useUI = () => {
 
 ```typescript
 interface SpecWizardProps {
-  specificationId: string;
-  initialSection?: string;
-  onComplete?: (specificationId: string) => void;
+  projectId: string;
+  initialSpecification?: string;
+  onComplete?: (projectId: string) => void;
 }
 
 // Component handles:
-// 1. Navigation between specification sections
+// 1. Navigation between project specifications
 // 2. Tracking overall completion status
 // 3. Coordinating AI-assisted content generation
-// 4. Saving section data
+// 4. Saving specification data
 ```
 
 #### 4.4.2 ArtifactViewer Component
@@ -831,7 +837,7 @@ interface SpecWizardProps {
 ```typescript
 interface ArtifactViewerProps {
   artifactId: string;
-  type: 'diagram' | 'document' | 'schema' | 'code';
+  type: "diagram" | "document" | "schema" | "code";
   editable?: boolean;
   onEdit?: (artifactId: string, content: any) => void;
 }
@@ -846,7 +852,7 @@ interface ArtifactViewerProps {
 
 ```typescript
 interface DiagramRendererProps {
-  type: 'flowchart' | 'sequence' | 'class' | 'entity-relationship';
+  type: "flowchart" | "sequence" | "class" | "entity-relationship";
   data: string; // Mermaid syntax
   title?: string;
   interactive?: boolean;
@@ -872,29 +878,29 @@ graph TD
     APILayer --> AIModule[AI Module]
     APILayer --> ArtifactModule[Artifact Module]
     APILayer --> ExportModule[Export Module]
-    
+
     AuthModule --> UserService[User Service]
     AuthModule --> JWTService[JWT Service]
-    
+
     ProjectModule --> ProjectService[Project Service]
-    
+
     SpecificationModule --> SpecService[Specification Service]
     SpecificationModule --> ValidationService[Validation Service]
-    
+
     AIModule --> LLMService[LLM Service]
     AIModule --> PromptService[Prompt Service]
     AIModule --> GenerationQueue[Generation Queue]
-    
+
     ArtifactModule --> ArtifactService[Artifact Service]
     ArtifactModule --> DiagramService[Diagram Service]
     ArtifactModule --> DocumentService[Document Service]
-    
+
     ExportModule --> ExportService[Export Service]
     ExportModule --> TemplateService[Template Service]
-    
+
     LLMService --> ModelRegistry[Model Registry]
     LLMService --> ContextBuilder[Context Builder]
-    
+
     PromptService --> PromptRegistry[Prompt Registry]
 ```
 
@@ -911,7 +917,7 @@ graph TD
     /__init__.py
     /auth.py            # Authentication routes
     /projects.py        # Project management routes
-    /specifications.py  # Specification routes
+    /project_specs.py   # Specification routes
     /ai.py              # AI processing routes
     /artifacts.py       # Artifact management routes
     /export.py          # Export functionality routes
@@ -920,7 +926,7 @@ graph TD
     /auth_service.py    # Authentication services
     /user_service.py    # User management services
     /project_service.py # Project services
-    /spec_service.py    # Specification services
+    /project_specs.py   # Specification services
     /llm_service.py     # LLM interaction services
     /prompt_service.py  # Prompt management services
     /artifact_service.py # Artifact generation services
@@ -981,13 +987,13 @@ class LLMService:
     ) -> dict:
         """
         Generate content using specified LLM model
-        
+
         Args:
             prompt_template: ID of prompt template to use
             context: Context data for prompt template
             model_id: Optional specific model to use
             parameters: Model-specific parameters
-            
+
         Returns:
             Generated content with metadata
         """
@@ -1005,34 +1011,34 @@ class SpecificationService:
     ) -> dict:
         """
         Create a new specification for a project
-        
+
         Args:
             project_id: Project ID
-            initial_data: Optional initial section data
-            
+            initial_data: Optional initial specification data
+
         Returns:
             Created specification data
         """
         # Implementation details
-        
-    async def update_section(
+
+    async def update_specification(
         self,
-        specification_id: str,
-        section_id: str,
+        project_id: str,
+        spec_id: str,
         data: dict,
         status: str = None
     ) -> dict:
         """
-        Update a section of a specification
-        
+        Update a specification of a project
+
         Args:
-            specification_id: Specification ID
-            section_id: Section ID
-            data: Section data
+            project_id: Project ID
+            spec_id: Specification ID
+            data: Specification data
             status: Optional new status
-            
+
         Returns:
-            Updated section info
+            Updated specification info
         """
         # Implementation details
 ```
@@ -1043,37 +1049,37 @@ class SpecificationService:
 class ArtifactService:
     async def generate_artifact(
         self,
-        specification_id: str,
-        section: str,
+        project_id: str,
+        spec_id: str,
         artifact_type: str,
         name: str,
         options: dict = None
     ) -> dict:
         """
         Generate a new artifact
-        
+
         Args:
-            specification_id: Specification ID
-            section: Section ID
+            project_id: Project ID
+            spec_id: Specification ID
             artifact_type: Type of artifact
             name: Artifact name
             options: Generation options
-            
+
         Returns:
             Generated artifact metadata
         """
         # Implementation details
-        
+
     async def get_artifact(
         self,
         artifact_id: str
     ) -> tuple:
         """
         Get artifact content
-        
+
         Args:
             artifact_id: Artifact ID
-            
+
         Returns:
             Tuple of (content, content_type)
         """
@@ -1091,25 +1097,25 @@ sequenceDiagram
     participant LLM as LLM Service
     participant DB as MongoDB
     participant Storage as File Storage
-    
+
     Client->>API: Request generation
     API->>DB: Get specification context
     API->>Queue: Enqueue generation task
     API-->>Client: 202 Accepted (requestId)
-    
+
     Queue->>Worker: Process task
     Worker->>DB: Get additional context
     Worker->>LLM: Send prompt with context
     LLM-->>Worker: Generated content
-    
+
     alt Artifact generation needed
         Worker->>Worker: Process content into artifacts
         Worker->>Storage: Store artifact files
         Worker->>DB: Store artifact metadata
     end
-    
+
     Worker->>DB: Update status & result
-    
+
     Client->>API: Check status
     API->>DB: Get request status
     API-->>Client: Status + results if complete
@@ -1128,11 +1134,11 @@ sequenceDiagram
     participant API
     participant JWT as JWT Service
     participant DB as User Database
-    
+
     User->>Frontend: Enter credentials
     Frontend->>API: POST /auth/login
     API->>DB: Verify credentials
-    
+
     alt Invalid credentials
         DB-->>API: Authentication failed
         API-->>Frontend: 401 Unauthorized
@@ -1149,13 +1155,13 @@ sequenceDiagram
 
 ### 6.2 Authorization Strategy
 
-| Role | Permissions |
-|------|-------------|
-| Anonymous | Access landing page, register, login |
-| User | Create/edit own projects, export specifications |
+| Role                          | Permissions                                     |
+| ----------------------------- | ----------------------------------------------- |
+| Anonymous                     | Access landing page, register, login            |
+| User                          | Create/edit own projects, export specifications |
 | Project Collaborator (Editor) | Edit project specifications, generate artifacts |
 | Project Collaborator (Viewer) | View project specifications, download artifacts |
-| Admin | Manage all projects, users, and system settings |
+| Admin                         | Manage all projects, users, and system settings |
 
 ### 6.3 JWT Implementation
 
@@ -1168,26 +1174,26 @@ class JWTHandler:
     ) -> str:
         """
         Create JWT access token
-        
+
         Args:
             user_id: User ID
             expires_delta: Optional custom expiration
-            
+
         Returns:
             JWT token string
         """
         # Implementation details
-        
+
     def verify_token(
         self,
         token: str
     ) -> dict:
         """
         Verify and decode JWT token
-        
+
         Args:
             token: JWT token string
-            
+
         Returns:
             Decoded token payload
         """
@@ -1204,24 +1210,24 @@ class JWTHandler:
 graph TD
     Landing[Landing Page] --> Register[Register]
     Landing --> Login[Login]
-    
+
     Login --> Dashboard[Dashboard]
     Register --> Dashboard
-    
+
     Dashboard --> ProjectList[Project List]
     Dashboard --> NewProject[New Project]
     Dashboard --> UserSettings[User Settings]
-    
+
     ProjectList --> ProjectDetail[Project Detail]
     NewProject --> ProjectDetail
-    
+
     ProjectDetail --> EditProject[Edit Project]
     ProjectDetail --> StartSpec[Start Specification]
     ProjectDetail --> ViewSpec[View Specifications]
-    
+
     StartSpec --> SpecWizard[Specification Wizard]
     ViewSpec --> SpecDetail[Specification Detail]
-    
+
     SpecWizard --> RequirementsEditor[Requirements Editor]
     SpecWizard --> ArchitectureEditor[Architecture Editor]
     SpecWizard --> DataModelEditor[Data Model Editor]
@@ -1229,11 +1235,11 @@ graph TD
     SpecWizard --> UIEditor[UI Editor]
     SpecWizard --> TestEditor[Testing Editor]
     SpecWizard --> ImplementationEditor[Implementation Editor]
-    
+
     SpecDetail --> SpecExport[Export Specification]
     SpecDetail --> SpecReview[Review Specification]
     SpecDetail --> ArtifactList[Artifact List]
-    
+
     ArtifactList --> ArtifactViewer[Artifact Viewer]
 ```
 
@@ -1314,7 +1320,7 @@ graph TD
 
 #### 7.2.3 Artifact Viewer - API Specification
 
-```
+````
 +-------------------------------------------------------+
 |  Logo   < Back to Specification   [Download] [Share]  |
 +-------------------------------------------------------+
@@ -1351,32 +1357,32 @@ graph TD
 | +---------------------------------------------------+ |
 |                                                       |
 +-------------------------------------------------------+
-```
+````
 
 ### 7.3 Color Palette
 
-| Color | Hex Code | Usage |
-|-------|----------|-------|
-| Primary Blue | `#2563EB` | Primary actions, buttons, links |
-| Secondary Teal | `#0D9488` | Secondary actions, highlights, accents |
-| Dark Gray | `#1F2937` | Text, headers |
-| Medium Gray | `#6B7280` | Secondary text, icons |
-| Light Gray | `#F3F4F6` | Backgrounds, dividers |
-| Success Green | `#10B981` | Success messages, completion indicators |
-| Warning Yellow | `#F59E0B` | Warnings, attention indicators |
-| Error Red | `#EF4444` | Error messages, destructive actions |
-| White | `#FFFFFF` | Backgrounds, text on dark colors |
+| Color          | Hex Code  | Usage                                   |
+| -------------- | --------- | --------------------------------------- |
+| Primary Blue   | `#2563EB` | Primary actions, buttons, links         |
+| Secondary Teal | `#0D9488` | Secondary actions, highlights, accents  |
+| Dark Gray      | `#1F2937` | Text, headers                           |
+| Medium Gray    | `#6B7280` | Secondary text, icons                   |
+| Light Gray     | `#F3F4F6` | Backgrounds, dividers                   |
+| Success Green  | `#10B981` | Success messages, completion indicators |
+| Warning Yellow | `#F59E0B` | Warnings, attention indicators          |
+| Error Red      | `#EF4444` | Error messages, destructive actions     |
+| White          | `#FFFFFF` | Backgrounds, text on dark colors        |
 
 ### 7.4 Typography
 
-| Element | Font | Size | Weight | Color |
-|---------|------|------|--------|-------|
-| Main Headings | Inter | 24px | Bold (700) | Dark Gray (#1F2937) |
-| Section Headings | Inter | 18px | SemiBold (600) | Dark Gray (#1F2937) |
-| Body Text | Inter | 14px | Regular (400) | Dark Gray (#1F2937) |
-| Small Text | Inter | 12px | Regular (400) | Medium Gray (#6B7280) |
-| Buttons | Inter | 14px | Medium (500) | White (#FFFFFF) |
-| Code | Fira Code | 14px | Regular (400) | Dark Gray (#1F2937) |
+| Element          | Font      | Size | Weight         | Color                 |
+| ---------------- | --------- | ---- | -------------- | --------------------- |
+| Main Headings    | Inter     | 24px | Bold (700)     | Dark Gray (#1F2937)   |
+| Section Headings | Inter     | 18px | SemiBold (600) | Dark Gray (#1F2937)   |
+| Body Text        | Inter     | 14px | Regular (400)  | Dark Gray (#1F2937)   |
+| Small Text       | Inter     | 12px | Regular (400)  | Medium Gray (#6B7280) |
+| Buttons          | Inter     | 14px | Medium (500)   | White (#FFFFFF)       |
+| Code             | Fira Code | 14px | Regular (400)  | Dark Gray (#1F2937)   |
 
 ---
 
@@ -1384,34 +1390,34 @@ graph TD
 
 ### 8.1 Testing Levels
 
-| Level | Purpose | Tools | Coverage Target |
-|-------|---------|-------|----------------|
-| Unit Testing | Test individual functions/components | Python: pytest, JS: Jest | 80% code coverage |
-| Integration Testing | Test component interactions | pytest, Jest/React Testing Library | Key integration points |
-| API Testing | Test API endpoints | pytest, Postman | 100% endpoint coverage |
-| End-to-End Testing | Test complete user flows | Cypress | Critical user journeys |
-| Load Testing | Test system under load | Locust | Key API endpoints |
+| Level               | Purpose                              | Tools                              | Coverage Target        |
+| ------------------- | ------------------------------------ | ---------------------------------- | ---------------------- |
+| Unit Testing        | Test individual functions/components | Python: pytest, JS: Jest           | 80% code coverage      |
+| Integration Testing | Test component interactions          | pytest, Jest/React Testing Library | Key integration points |
+| API Testing         | Test API endpoints                   | pytest, Postman                    | 100% endpoint coverage |
+| End-to-End Testing  | Test complete user flows             | Cypress                            | Critical user journeys |
+| Load Testing        | Test system under load               | Locust                             | Key API endpoints      |
 
 ### 8.2 Frontend Testing Plan
 
 #### 8.2.1 Component Tests
 
 ```typescript
-// Example component test for SpecificationSection component
-describe('SpecificationSection', () => {
-  it('renders section content when provided', () => {
+// Example component test for Specification component
+describe("Specification", () => {
+  it("renders section content when provided", () => {
     // Test implementation
   });
-  
-  it('shows loading state during content generation', () => {
+
+  it("shows loading state during content generation", () => {
     // Test implementation
   });
-  
-  it('displays error message when API call fails', () => {
+
+  it("displays error message when API call fails", () => {
     // Test implementation
   });
-  
-  it('calls update function when save button clicked', () => {
+
+  it("calls update function when save button clicked", () => {
     // Test implementation
   });
 });
@@ -1421,59 +1427,59 @@ describe('SpecificationSection', () => {
 
 ```typescript
 // Example test for project query hooks
-describe('projectQueries', () => {
-  it('useProject returns project data on successful fetch', async () => {
+describe("projectQueries", () => {
+  it("useProject returns project data on successful fetch", async () => {
     // Mock server response
     server.use(
-      rest.get('/api/v1/projects/123', (req, res, ctx) => {
-        return res(ctx.json({ id: '123', name: 'Test Project' }));
+      rest.get("/api/v1/projects/123", (req, res, ctx) => {
+        return res(ctx.json({ id: "123", name: "Test Project" }));
       })
     );
-    
+
     // Render hook
-    const { result, waitFor } = renderHook(() => useProject('123'), {
+    const { result, waitFor } = renderHook(() => useProject("123"), {
       wrapper: QueryClientProvider,
       initialProps: {
         client: new QueryClient({
-          defaultOptions: { queries: { retry: false } }
-        })
-      }
+          defaultOptions: { queries: { retry: false } },
+        }),
+      },
     });
-    
+
     // Wait for query to complete
     await waitFor(() => result.current.isSuccess);
-    
+
     // Assertions
-    expect(result.current.data).toEqual({ id: '123', name: 'Test Project' });
+    expect(result.current.data).toEqual({ id: "123", name: "Test Project" });
   });
-  
-  it('useUpdateProject mutates and updates cache', async () => {
+
+  it("useUpdateProject mutates and updates cache", async () => {
     // Setup test cache with initial data
     const queryClient = new QueryClient();
-    queryClient.setQueryData(['projects'], [{ id: '123', name: 'Old Name' }]);
-    
+    queryClient.setQueryData(["projects"], [{ id: "123", name: "Old Name" }]);
+
     // Render mutation hook
     const { result, waitFor } = renderHook(() => useUpdateProject(), {
       wrapper: QueryClientProvider,
-      initialProps: { client: queryClient }
+      initialProps: { client: queryClient },
     });
-    
+
     // Setup mock response
     server.use(
-      rest.put('/api/v1/projects/123', (req, res, ctx) => {
-        return res(ctx.json({ id: '123', name: 'New Name' }));
+      rest.put("/api/v1/projects/123", (req, res, ctx) => {
+        return res(ctx.json({ id: "123", name: "New Name" }));
       })
     );
-    
+
     // Execute mutation
-    result.current.mutate({ projectId: '123', name: 'New Name' });
-    
+    result.current.mutate({ projectId: "123", name: "New Name" });
+
     // Wait for mutation to complete
     await waitFor(() => result.current.isSuccess);
-    
+
     // Verify cache was updated
-    const cachedData = queryClient.getQueryData(['projects']);
-    expect(cachedData[0].name).toBe('New Name');
+    const cachedData = queryClient.getQueryData(["projects"]);
+    expect(cachedData[0].name).toBe("New Name");
   });
 });
 ```
@@ -1491,14 +1497,14 @@ async def test_create_project():
         "description": "Project for testing",
         "projectType": "web"
     }
-    
+
     # Execute request
     response = await client.post(
         "/api/v1/projects",
         json=project_data,
         headers={"Authorization": f"Bearer {token}"}
     )
-    
+
     # Assertions
     assert response.status_code == 201
     assert response.json()["name"] == project_data["name"]
@@ -1520,18 +1526,18 @@ async def test_specification_service_create():
             "userStories": ["As a user, I want to login"]
         }
     }
-    
+
     # Execute service method
     result = await specification_service.create_specification(
         project_id=project_id,
         initial_data=initial_data
     )
-    
+
     # Assertions
     assert result["projectId"] == project_id
     assert result["status"] == "draft"
-    assert result["sections"]["requirements"]["status"] == "in-progress"
-    assert "specificationId" in result
+    assert result["specifications"]["requirements"]["status"] == "in-progress"
+    assert "projectId" in result
 ```
 
 ### 8.4 AI Component Testing
@@ -1545,14 +1551,14 @@ class PromptTestCase:
         self.prompt_id = prompt_id
         self.context = context
         self.expected_outputs = expected_outputs or []
-        
+
     async def execute(self, llm_service):
         result = await llm_service.generate_content(
             prompt_template=self.prompt_id,
             context=self.context
         )
         return self.validate(result)
-        
+
     def validate(self, result):
         validation_results = []
         for expected in self.expected_outputs:
@@ -1568,17 +1574,19 @@ class PromptTestCase:
 ### 8.5 End-to-End Test Cases
 
 1. **Complete Project Specification Flow**
+
    - Create new project
    - Initialize specification
-   - Complete all section forms
-   - Generate artifacts for each section
+   - Complete all specification forms
+   - Generate artifacts for each specification
    - Export complete specification
    - Verify exported content
 
 2. **AI-Assisted Specification Generation**
+
    - Create new project
    - Provide minimal information
-   - Request AI to generate missing sections
+   - Request AI to generate missing specifications
    - Review and modify AI suggestions
    - Finalize specification
    - Export specification
@@ -1586,7 +1594,7 @@ class PromptTestCase:
 3. **Collaborative Specification Editing**
    - Create new project
    - Add collaborator
-   - Simultaneously edit different sections
+   - Simultaneously edit different specifications
    - Resolve any conflicts
    - Finalize specification
    - Verify changes by both users
@@ -1599,45 +1607,45 @@ class PromptTestCase:
 
 #### 9.1.1 Phase 1: Core Infrastructure (Weeks 1-3)
 
-| Task | Description | Priority | Estimated Effort |
-|------|-------------|----------|------------------|
-| Project setup | Initialize frontend and backend repos, CI/CD | High | 3 days |
-| Database setup | Configure MongoDB and Redis, create schemas | High | 2 days |
-| Auth system | Implement user registration, login, JWT | High | 5 days |
-| Basic API | Create core API endpoints structure | High | 4 days |
-| Project management | Project CRUD operations | High | 3 days |
-| Frontend foundation | Set up React app with routing and state | High | 5 days |
+| Task                | Description                                  | Priority | Estimated Effort |
+| ------------------- | -------------------------------------------- | -------- | ---------------- |
+| Project setup       | Initialize frontend and backend repos, CI/CD | High     | 3 days           |
+| Database setup      | Configure MongoDB and Redis, create schemas  | High     | 2 days           |
+| Auth system         | Implement user registration, login, JWT      | High     | 5 days           |
+| Basic API           | Create core API endpoints structure          | High     | 4 days           |
+| Project management  | Project CRUD operations                      | High     | 3 days           |
+| Frontend foundation | Set up React app with routing and state      | High     | 5 days           |
 
 #### 9.1.2 Phase 2: Specification Engine (Weeks 4-7)
 
-| Task | Description | Priority | Estimated Effort |
-|------|-------------|----------|------------------|
-| Specification model | Implement specification data model | High | 3 days |
-| Section editors | Create UI for editing specification sections | High | 8 days |
-| AI integration | Connect to LLM API, implement prompt handling | High | 5 days |
-| Artifact generation | Create basic artifact generation system | Medium | 6 days |
-| Diagram rendering | Implement Mermaid diagram rendering | Medium | 4 days |
-| Validation system | Implement specification validation | Medium | 4 days |
+| Task                  | Description                                   | Priority | Estimated Effort |
+| --------------------- | --------------------------------------------- | -------- | ---------------- |
+| Specification model   | Implement specification data model            | High     | 3 days           |
+| Specification editors | Create UI for editing specifications          | High     | 8 days           |
+| AI integration        | Connect to LLM API, implement prompt handling | High     | 5 days           |
+| Artifact generation   | Create basic artifact generation system       | Medium   | 6 days           |
+| Diagram rendering     | Implement Mermaid diagram rendering           | Medium   | 4 days           |
+| Validation system     | Implement specification validation            | Medium   | 4 days           |
 
 #### 9.1.3 Phase 3: AI Enhancement (Weeks 8-10)
 
-| Task | Description | Priority | Estimated Effort |
-|------|-------------|----------|------------------|
-| Advanced prompting | Improve prompt engineering for better results | High | 5 days |
-| Context building | Enhance context building for AI requests | High | 4 days |
-| AI suggestions | Implement real-time AI suggestions | Medium | 6 days |
-| Consistency checking | Add AI-powered consistency validation | Medium | 5 days |
-| Gap analysis | Implement missing information detection | Medium | 4 days |
+| Task                 | Description                                   | Priority | Estimated Effort |
+| -------------------- | --------------------------------------------- | -------- | ---------------- |
+| Advanced prompting   | Improve prompt engineering for better results | High     | 5 days           |
+| Context building     | Enhance context building for AI requests      | High     | 4 days           |
+| AI suggestions       | Implement real-time AI suggestions            | Medium   | 6 days           |
+| Consistency checking | Add AI-powered consistency validation         | Medium   | 5 days           |
+| Gap analysis         | Implement missing information detection       | Medium   | 4 days           |
 
 #### 9.1.4 Phase 4: Export and Integration (Weeks 11-12)
 
-| Task | Description | Priority | Estimated Effort |
-|------|-------------|----------|------------------|
-| Export system | Create specification export functionality | High | 5 days |
-| Document generation | Generate comprehensive documentation | High | 4 days |
-| Integration hooks | Create hooks for dev tool integration | Medium | 3 days |
-| Template system | Implement customizable templates | Medium | 4 days |
-| Final testing | End-to-end testing of complete system | High | 5 days |
+| Task                | Description                               | Priority | Estimated Effort |
+| ------------------- | ----------------------------------------- | -------- | ---------------- |
+| Export system       | Create specification export functionality | High     | 5 days           |
+| Document generation | Generate comprehensive documentation      | High     | 4 days           |
+| Integration hooks   | Create hooks for dev tool integration     | Medium   | 3 days           |
+| Template system     | Implement customizable templates          | Medium   | 4 days           |
+| Final testing       | End-to-end testing of complete system     | High     | 5 days           |
 
 ### 9.2 Dependency Graph
 
@@ -1650,7 +1658,7 @@ graph TD
     E --> F[Project Management]
     F --> G[Specification Model]
     C --> H[UI Components]
-    H --> I[Section Editors]
+    H --> I[Specification Editors]
     G --> I
     I --> J[Validation System]
     G --> K[AI Integration]
@@ -1672,13 +1680,13 @@ graph TD
 
 ### 9.3 Technical Debt Mitigation
 
-| Category | Strategy | Implementation |
-|----------|----------|----------------|
-| Code Quality | Enforce code standards | Set up ESLint, Prettier, Black, isort; require PR reviews |
-| Test Coverage | Maintain high coverage | Set up coverage reporting; fail builds below threshold |
-| Documentation | Keep docs current | Document alongside code; automated doc generation |
-| Dependencies | Manage vulnerabilities | Regular dependency updates; security scanning |
-| Refactoring | Identify refactoring needs | Regular code review sessions; refactoring sprints |
+| Category      | Strategy                   | Implementation                                            |
+| ------------- | -------------------------- | --------------------------------------------------------- |
+| Code Quality  | Enforce code standards     | Set up ESLint, Prettier, Black, isort; require PR reviews |
+| Test Coverage | Maintain high coverage     | Set up coverage reporting; fail builds below threshold    |
+| Documentation | Keep docs current          | Document alongside code; automated doc generation         |
+| Dependencies  | Manage vulnerabilities     | Regular dependency updates; security scanning             |
+| Refactoring   | Identify refactoring needs | Regular code review sessions; refactoring sprints         |
 
 ---
 
@@ -1691,15 +1699,15 @@ graph TB
     subgraph "User"
         Browser[Web Browser]
     end
-    
+
     subgraph "CDN"
         CloudFront[CloudFront/CDN]
     end
-    
+
     subgraph "Frontend"
         S3[S3/Static Hosting]
     end
-    
+
     subgraph "Backend Services"
         ALB[Load Balancer]
         API1[API Container 1]
@@ -1707,17 +1715,17 @@ graph TB
         Worker1[Worker Container 1]
         Worker2[Worker Container 2]
     end
-    
+
     subgraph "Data Storage"
         MongoDB[(MongoDB Atlas)]
         Redis[(Redis)]
         ObjectStorage[(MinIO/S3)]
     end
-    
+
     subgraph "External Services"
         LLMProvider[LLM Provider API]
     end
-    
+
     Browser --> CloudFront
     CloudFront --> S3
     Browser --> ALB
@@ -1775,12 +1783,12 @@ CMD ["python", "-m", "app.tasks.worker"]
 
 ### 10.3 Scaling Strategy
 
-| Component | Scaling Approach | Metrics | Thresholds |
-|-----------|------------------|---------|------------|
-| API Service | Horizontal scaling | CPU >70%, Memory >80%, Request latency >500ms | Min: 2, Max: 10 instances |
-| Worker Service | Horizontal scaling | Queue depth >100, CPU >70% | Min: 2, Max: 8 instances |
-| MongoDB | Vertical + Horizontal | Storage >70%, Read/write latency >50ms | Automatic scaling with Atlas |
-| Redis | Cluster + Replicas | Memory >70%, Connections >5000 | Min: 3 nodes |
+| Component      | Scaling Approach      | Metrics                                       | Thresholds                   |
+| -------------- | --------------------- | --------------------------------------------- | ---------------------------- |
+| API Service    | Horizontal scaling    | CPU >70%, Memory >80%, Request latency >500ms | Min: 2, Max: 10 instances    |
+| Worker Service | Horizontal scaling    | Queue depth >100, CPU >70%                    | Min: 2, Max: 8 instances     |
+| MongoDB        | Vertical + Horizontal | Storage >70%, Read/write latency >50ms        | Automatic scaling with Atlas |
+| Redis          | Cluster + Replicas    | Memory >70%, Connections >5000                | Min: 3 nodes                 |
 
 ### 10.4 CI/CD Pipeline
 
@@ -1800,11 +1808,11 @@ graph TD
 
 ### 10.5 Monitoring & Observability
 
-| Component | Tool | Metrics/Logs | Alerts |
-|-----------|------|-------------|--------|
-| API Service | Prometheus, Grafana | Request rate, latency, errors | Error rate >1%, P95 latency >1s |
-| Worker Service | Prometheus, Grafana | Queue depth, processing time | Queue depth >200, job failures |
-| MongoDB | MongoDB Atlas Monitoring | Query performance, connection count | Slow queries, high connection count |
-| Redis | Redis Insights | Memory usage, hit rate | Memory >80%, eviction rate high |
-| LLM Service | Custom metrics | Request count, response time, token usage | Failed requests >5%, response time >5s |
-| Frontend | Google Analytics, Sentry | Page load time, error tracking | JS errors, slow page loads |
+| Component      | Tool                     | Metrics/Logs                              | Alerts                                 |
+| -------------- | ------------------------ | ----------------------------------------- | -------------------------------------- |
+| API Service    | Prometheus, Grafana      | Request rate, latency, errors             | Error rate >1%, P95 latency >1s        |
+| Worker Service | Prometheus, Grafana      | Queue depth, processing time              | Queue depth >200, job failures         |
+| MongoDB        | MongoDB Atlas Monitoring | Query performance, connection count       | Slow queries, high connection count    |
+| Redis          | Redis Insights           | Memory usage, hit rate                    | Memory >80%, eviction rate high        |
+| LLM Service    | Custom metrics           | Request count, response time, token usage | Failed requests >5%, response time >5s |
+| Frontend       | Google Analytics, Sentry | Page load time, error tracking            | JS errors, slow page loads             |

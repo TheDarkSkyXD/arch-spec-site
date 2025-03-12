@@ -7,7 +7,7 @@ from datetime import datetime
 
 
 class Requirements(BaseModel):
-    """Schema for requirements section"""
+    """Schema for requirements spec"""
     functional: List[str] = Field(default_factory=list)
     non_functional: List[str] = Field(default_factory=list) 
     
@@ -23,7 +23,7 @@ class FeatureModule(BaseModel):
     providers: Optional[List[str]] = Field(default_factory=list)
 
 class Features(BaseModel):
-    """Schema for features section"""
+    """Schema for features spec"""
     coreModules: List[FeatureModule] = Field(default_factory=list)
     optionalModules: Optional[List[FeatureModule]] = Field(default_factory=list)
     
@@ -40,7 +40,7 @@ class PageComponent(BaseModel):
 
 
 class Pages(BaseModel):
-    """Schema for pages section"""
+    """Schema for pages spec"""
     public: List[PageComponent] = Field(default_factory=list)
     authenticated: List[PageComponent] = Field(default_factory=list)
     admin: List[PageComponent] = Field(default_factory=list)
@@ -85,7 +85,7 @@ class Relationship(BaseModel):
 
 
 class DataModel(BaseModel):
-    """Schema for data model section"""
+    """Schema for data model spec"""
     entities: List[Entity] = Field(default_factory=list)
     relationships: List[Relationship] = Field(default_factory=list)
 
@@ -102,35 +102,35 @@ class ApiEndpoint(BaseModel):
     roles: Optional[List[str]] = Field(default_factory=list)
 
 class Api(BaseModel):
-    """Schema for API section"""
+    """Schema for API spec"""
     endpoints: List[ApiEndpoint] = Field(default_factory=list)
     
     class Config:
         populate_by_name = True
 
 class Testing(BaseModel):
-    """Schema for testing section"""
+    """Schema for testing spec"""
     strategy: Dict[str, Any] = Field(default_factory=dict)
     
     class Config:
         populate_by_name = True
 
 class ProjectStructure(BaseModel):
-    """Schema for project structure section"""
+    """Schema for project structure spec"""
     structure: Dict[str, Any] = Field(default_factory=dict)
     
     class Config:
         populate_by_name = True
 
 class Deployment(BaseModel):
-    """Schema for deployment section"""
+    """Schema for deployment spec"""
     config: Dict[str, Any] = Field(default_factory=dict)
     
     class Config:
         populate_by_name = True
 
 class Documentation(BaseModel):
-    """Schema for documentation section"""
+    """Schema for documentation spec"""
     content: Dict[str, Any] = Field(default_factory=dict)
     
     class Config:

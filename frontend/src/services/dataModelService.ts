@@ -5,7 +5,7 @@ import apiClient from "../api/apiClient";
 import { DataModel } from "../types/templates";
 
 // Interface to match the backend response format
-interface DataModelSection {
+interface DataModelSpec {
   id: string;
   project_id: string;
   created_at: string;
@@ -27,8 +27,8 @@ export const dataModelService = {
    */
   async getDataModel(projectId: string): Promise<DataModel | null> {
     try {
-      const response = await apiClient.get<DataModelSection>(
-        `${API_BASE_URL}/project-sections/${projectId}/data-model`
+      const response = await apiClient.get<DataModelSpec>(
+        `${API_BASE_URL}/project-specs/${projectId}/data-model`
       );
 
       if (!response.data || !response.data.data) {
@@ -62,8 +62,8 @@ export const dataModelService = {
         data: data,
       };
 
-      const response = await apiClient.put<DataModelSection>(
-        `${API_BASE_URL}/project-sections/${projectId}/data-model`,
+      const response = await apiClient.put<DataModelSpec>(
+        `${API_BASE_URL}/project-specs/${projectId}/data-model`,
         payload
       );
 

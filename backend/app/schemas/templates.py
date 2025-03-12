@@ -121,7 +121,7 @@ class Diagram(BaseModel):
 
 class Documentation(BaseModel):
     """Documentation configuration."""
-    sections: List[str] = Field(default_factory=list)
+    specs: List[str] = Field(default_factory=list)
     diagrams: List[Diagram] = Field(default_factory=list)
 
 class ProjectTemplate(BaseModel):

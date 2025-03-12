@@ -15,7 +15,7 @@ The wireframes show a user-friendly interface for ArchSpec with four main screen
 ## Project Basics Screen
 
 - **Progress Tracking**: Top bar showing completion progress
-- **Tab Navigation**: Easy movement between specification sections
+- **Tab Navigation**: Easy movement between project specifications
 - **Form Fields**: Structured inputs for project name, description, business goals, and target users
 - **Navigation Controls**: Back/Next buttons for wizard-style progression
 

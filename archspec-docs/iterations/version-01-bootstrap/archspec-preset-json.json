@@ -15,13 +15,13 @@
       "build_tool": "Vite",
       "styling": "TailwindCSS",
       "key_libraries": [
-        {"name": "react-router-dom", "version": "^6.8.0"},
-        {"name": "axios", "version": "^1.3.0"},
-        {"name": "mermaid", "version": "^10.0.0"},
-        {"name": "react-hook-form", "version": "^7.43.0"},
-        {"name": "react-query", "version": "^3.39.0"},
-        {"name": "react-markdown", "version": "^8.0.0"},
-        {"name": "file-saver", "version": "^2.0.5"}
+        { "name": "react-router-dom", "version": "^6.8.0" },
+        { "name": "axios", "version": "^1.3.0" },
+        { "name": "mermaid", "version": "^10.0.0" },
+        { "name": "react-hook-form", "version": "^7.43.0" },
+        { "name": "react-query", "version": "^3.39.0" },
+        { "name": "react-markdown", "version": "^8.0.0" },
+        { "name": "file-saver", "version": "^2.0.5" }
       ]
     },
     "backend": {
@@ -29,15 +29,15 @@
       "language": "Python",
       "runtime": "Python 3.9+",
       "key_libraries": [
-        {"name": "fastapi", "version": "^0.95.0"},
-        {"name": "uvicorn", "version": "^0.22.0"},
-        {"name": "pydantic", "version": "^1.10.0"},
-        {"name": "openai", "version": "^1.0.0"},
-        {"name": "python-multipart", "version": "^0.0.6"},
-        {"name": "pymongo", "version": "^4.3.0"},
-        {"name": "motor", "version": "^3.1.0"},
-        {"name": "pytest", "version": "^7.3.0"},
-        {"name": "pytest-asyncio", "version": "^0.21.0"}
+        { "name": "fastapi", "version": "^0.95.0" },
+        { "name": "uvicorn", "version": "^0.22.0" },
+        { "name": "pydantic", "version": "^1.10.0" },
+        { "name": "openai", "version": "^1.0.0" },
+        { "name": "python-multipart", "version": "^0.0.6" },
+        { "name": "pymongo", "version": "^4.3.0" },
+        { "name": "motor", "version": "^3.1.0" },
+        { "name": "pytest", "version": "^7.3.0" },
+        { "name": "pytest-asyncio", "version": "^0.21.0" }
       ]
     },
     "database": {
@@ -112,7 +112,12 @@
         "type": "forms",
         "path": "src/components/forms/FormContainer.js",
         "description": "Container for form inputs",
-        "dependencies": ["TextInput", "TextArea", "SelectInput", "CheckboxGroup"]
+        "dependencies": [
+          "TextInput",
+          "TextArea",
+          "SelectInput",
+          "CheckboxGroup"
+        ]
       },
       {
         "name": "TextInput",
@@ -160,7 +165,7 @@
         "name": "TabNavigator",
         "type": "review",
         "path": "src/components/review/TabNavigator.js",
-        "description": "Navigation tabs for specification sections",
+        "description": "Navigation tabs for specification",
         "dependencies": []
       },
       {
@@ -212,8 +217,15 @@
         "path": "src/services/api.js",
         "description": "API client service",
         "methods": [
-          "getProjects", "createProject", "getProject", "updateProject", "deleteProject",
-          "getSpecification", "updateSpecification", "generateArtifacts", "exportProject"
+          "getProjects",
+          "createProject",
+          "getProject",
+          "updateProject",
+          "deleteProject",
+          "getSpecification",
+          "updateSpecification",
+          "generateArtifacts",
+          "exportProject"
         ]
       },
       {
@@ -278,19 +290,31 @@
         "name": "AIService",
         "file": "app/services/ai_service.py",
         "description": "Handles interactions with OpenAI API",
-        "methods": ["process_specification", "_generate_prompt", "_parse_ai_content"]
+        "methods": [
+          "process_specification",
+          "_generate_prompt",
+          "_parse_ai_content"
+        ]
       },
       {
         "name": "GeneratorService",
         "file": "app/services/generator_service.py",
         "description": "Generates artifacts from specifications",
-        "methods": ["generate_artifacts", "_generate_api_doc", "_generate_implementation_doc"]
+        "methods": [
+          "generate_artifacts",
+          "_generate_api_doc",
+          "_generate_implementation_doc"
+        ]
       },
       {
         "name": "ExportService",
         "file": "app/services/export_service.py",
         "description": "Handles exporting specifications",
-        "methods": ["export_specification", "_generate_markdown", "_create_zip_file"]
+        "methods": [
+          "export_specification",
+          "_generate_markdown",
+          "_create_zip_file"
+        ]
       }
     ],
     "models": [
@@ -299,14 +323,14 @@
         "file": "app/schemas/project.py",
         "description": "Project data model",
         "fields": [
-          {"name": "id", "type": "str", "optional": false},
-          {"name": "name", "type": "str", "optional": false},
-          {"name": "description", "type": "str", "optional": true},
-          {"name": "created_at", "type": "datetime", "optional": false},
-          {"name": "updated_at", "type": "datetime", "optional": false},
-          {"name": "template_type", "type": "str", "optional": false},
-          {"name": "status", "type": "str", "optional": false},
-          {"name": "metadata", "type": "dict", "optional": true}
+          { "name": "id", "type": "str", "optional": false },
+          { "name": "name", "type": "str", "optional": false },
+          { "name": "description", "type": "str", "optional": true },
+          { "name": "created_at", "type": "datetime", "optional": false },
+          { "name": "updated_at", "type": "datetime", "optional": false },
+          { "name": "template_type", "type": "str", "optional": false },
+          { "name": "status", "type": "str", "optional": false },
+          { "name": "metadata", "type": "dict", "optional": true }
         ]
       },
       {
@@ -314,15 +338,15 @@
         "file": "app/schemas/specification.py",
         "description": "Specification data model",
         "fields": [
-          {"name": "id", "type": "str", "optional": false},
-          {"name": "project_id", "type": "str", "optional": false},
-          {"name": "requirements", "type": "dict", "optional": false},
-          {"name": "architecture", "type": "dict", "optional": true},
-          {"name": "data_model", "type": "dict", "optional": true},
-          {"name": "api_endpoints", "type": "list", "optional": true},
-          {"name": "implementation", "type": "dict", "optional": true},
-          {"name": "created_at", "type": "datetime", "optional": false},
-          {"name": "updated_at", "type": "datetime", "optional": false}
+          { "name": "id", "type": "str", "optional": false },
+          { "name": "project_id", "type": "str", "optional": false },
+          { "name": "requirements", "type": "dict", "optional": false },
+          { "name": "architecture", "type": "dict", "optional": true },
+          { "name": "data_model", "type": "dict", "optional": true },
+          { "name": "api_endpoints", "type": "list", "optional": true },
+          { "name": "implementation", "type": "dict", "optional": true },
+          { "name": "created_at", "type": "datetime", "optional": false },
+          { "name": "updated_at", "type": "datetime", "optional": false }
         ]
       },
       {
@@ -330,12 +354,12 @@
         "file": "app/schemas/artifact.py",
         "description": "Generated artifact data model",
         "fields": [
-          {"name": "id", "type": "str", "optional": false},
-          {"name": "specification_id", "type": "str", "optional": false},
-          {"name": "type", "type": "str", "optional": false},
-          {"name": "format", "type": "str", "optional": false},
-          {"name": "content", "type": "str", "optional": false},
-          {"name": "created_at", "type": "datetime", "optional": false}
+          { "name": "id", "type": "str", "optional": false },
+          { "name": "specification_id", "type": "str", "optional": false },
+          { "name": "type", "type": "str", "optional": false },
+          { "name": "format", "type": "str", "optional": false },
+          { "name": "content", "type": "str", "optional": false },
+          { "name": "created_at", "type": "datetime", "optional": false }
         ]
       }
     ],
@@ -373,41 +397,129 @@
         "name": "projects",
         "description": "Project collection",
         "fields": [
-          {"name": "_id", "type": "ObjectId", "description": "Unique identifier"},
-          {"name": "name", "type": "string", "description": "Project name"},
-          {"name": "description", "type": "string", "description": "Project description"},
-          {"name": "created_at", "type": "datetime", "description": "Creation date"},
-          {"name": "updated_at", "type": "datetime", "description": "Last update date"},
-          {"name": "template_type", "type": "string", "description": "Project template type"},
-          {"name": "status", "type": "string", "description": "Project status"},
-          {"name": "metadata", "type": "object", "description": "Additional metadata"}
+          {
+            "name": "_id",
+            "type": "ObjectId",
+            "description": "Unique identifier"
+          },
+          { "name": "name", "type": "string", "description": "Project name" },
+          {
+            "name": "description",
+            "type": "string",
+            "description": "Project description"
+          },
+          {
+            "name": "created_at",
+            "type": "datetime",
+            "description": "Creation date"
+          },
+          {
+            "name": "updated_at",
+            "type": "datetime",
+            "description": "Last update date"
+          },
+          {
+            "name": "template_type",
+            "type": "string",
+            "description": "Project template type"
+          },
+          {
+            "name": "status",
+            "type": "string",
+            "description": "Project status"
+          },
+          {
+            "name": "metadata",
+            "type": "object",
+            "description": "Additional metadata"
+          }
         ]
       },
       {
         "name": "specifications",
         "description": "Project specifications collection",
         "fields": [
-          {"name": "_id", "type": "ObjectId", "description": "Unique identifier"},
-          {"name": "project_id", "type": "ObjectId", "description": "Reference to project"},
-          {"name": "requirements", "type": "object", "description": "Project requirements"},
-          {"name": "architecture", "type": "object", "description": "Architecture definitions"},
-          {"name": "data_model", "type": "object", "description": "Data model definitions"},
-          {"name": "api_endpoints", "type": "array", "description": "API endpoint definitions"},
-          {"name": "implementation", "type": "object", "description": "Implementation details"},
-          {"name": "created_at", "type": "datetime", "description": "Creation date"},
-          {"name": "updated_at", "type": "datetime", "description": "Last update date"}
+          {
+            "name": "_id",
+            "type": "ObjectId",
+            "description": "Unique identifier"
+          },
+          {
+            "name": "project_id",
+            "type": "ObjectId",
+            "description": "Reference to project"
+          },
+          {
+            "name": "requirements",
+            "type": "object",
+            "description": "Project requirements"
+          },
+          {
+            "name": "architecture",
+            "type": "object",
+            "description": "Architecture definitions"
+          },
+          {
+            "name": "data_model",
+            "type": "object",
+            "description": "Data model definitions"
+          },
+          {
+            "name": "api_endpoints",
+            "type": "array",
+            "description": "API endpoint definitions"
+          },
+          {
+            "name": "implementation",
+            "type": "object",
+            "description": "Implementation details"
+          },
+          {
+            "name": "created_at",
+            "type": "datetime",
+            "description": "Creation date"
+          },
+          {
+            "name": "updated_at",
+            "type": "datetime",
+            "description": "Last update date"
+          }
         ]
       },
       {
         "name": "artifacts",
         "description": "Generated artifacts collection",
         "fields": [
-          {"name": "_id", "type": "ObjectId", "description": "Unique identifier"},
-          {"name": "specification_id", "type": "ObjectId", "description": "Reference to specification"},
-          {"name": "type", "type": "string", "description": "Artifact type (diagram, schema, document)"},
-          {"name": "format", "type": "string", "description": "Artifact format (mermaid, json, markdown)"},
-          {"name": "content", "type": "string", "description": "Artifact content"},
-          {"name": "created_at", "type": "datetime", "description": "Creation date"}
+          {
+            "name": "_id",
+            "type": "ObjectId",
+            "description": "Unique identifier"
+          },
+          {
+            "name": "specification_id",
+            "type": "ObjectId",
+            "description": "Reference to specification"
+          },
+          {
+            "name": "type",
+            "type": "string",
+            "description": "Artifact type (diagram, schema, document)"
+          },
+          {
+            "name": "format",
+            "type": "string",
+            "description": "Artifact format (mermaid, json, markdown)"
+          },
+          {
+            "name": "content",
+            "type": "string",
+            "description": "Artifact content"
+          },
+          {
+            "name": "created_at",
+            "type": "datetime",
+            "description": "Creation date"
+          }
         ]
       }
     ],
@@ -473,21 +585,41 @@
           {
             "name": "User",
             "attributes": [
-              {"name": "id", "type": "string", "constraints": ["primary_key"]},
-              {"name": "username", "type": "string", "constraints": ["unique", "indexed"]},
-              {"name": "email", "type": "string", "constraints": ["unique", "indexed"]},
-              {"name": "password_hash", "type": "string", "constraints": []},
-              {"name": "created_at", "type": "datetime", "constraints": []}
+              {
+                "name": "id",
+                "type": "string",
+                "constraints": ["primary_key"]
+              },
+              {
+                "name": "username",
+                "type": "string",
+                "constraints": ["unique", "indexed"]
+              },
+              {
+                "name": "email",
+                "type": "string",
+                "constraints": ["unique", "indexed"]
+              },
+              { "name": "password_hash", "type": "string", "constraints": [] },
+              { "name": "created_at", "type": "datetime", "constraints": [] }
             ]
           },
           {
             "name": "Project",
             "attributes": [
-              {"name": "id", "type": "string", "constraints": ["primary_key"]},
-              {"name": "name", "type": "string", "constraints": []},
-              {"name": "description", "type": "string", "constraints": []},
-              {"name": "owner_id", "type": "string", "constraints": ["foreign_key:User.id"]},
-              {"name": "created_at", "type": "datetime", "constraints": []}
+              {
+                "name": "id",
+                "type": "string",
+                "constraints": ["primary_key"]
+              },
+              { "name": "name", "type": "string", "constraints": [] },
+              { "name": "description", "type": "string", "constraints": [] },
+              {
+                "name": "owner_id",
+                "type": "string",
+                "constraints": ["foreign_key:User.id"]
+              },
+              { "name": "created_at", "type": "datetime", "constraints": [] }
             ]
           }
         ]

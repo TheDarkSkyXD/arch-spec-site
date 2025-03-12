@@ -1,6 +1,6 @@
 """
-Schemas for project sections that will be stored as separate documents in MongoDB.
-This approach allows for partial updates to specific sections of a project.
+Schemas for project specs that will be stored as separate documents in MongoDB.
+This approach allows for partial updates to specific specs of a project.
 """
 
 from datetime import datetime
@@ -13,8 +13,8 @@ from .shared_schemas import (
 )
 
 
-class ProjectSection(BaseModel):
-    """Base model for a project section stored separately in MongoDB."""
+class ProjectSpec(BaseModel):
+    """Base model for a project spec stored separately in MongoDB."""
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     project_id: str
     created_at: datetime = Field(default_factory=datetime.utcnow)
@@ -26,31 +26,31 @@ class ProjectSection(BaseModel):
         populate_by_name = True
 
 
-class TimelineSection(ProjectSection):
-    """Timeline section of a project."""
+class TimelineSpec(ProjectSpec):
+    """Timeline spec of a project."""
     items: Dict[str, TimelineItem] = Field(default_factory=dict)
 
 
-class BudgetSection(ProjectSection):
-    """Budget section of a project."""
+class BudgetSpec(ProjectSpec):
+    """Budget spec of a project."""
     items: Dict[str, BudgetItem] = Field(default_factory=dict)
 
 
-class RequirementsSection(ProjectSection):
-    """Requirements section of a project."""
+class RequirementsSpec(ProjectSpec):
+    """Requirements spec of a project."""
     functional: List[str] = Field(default_factory=list)
     non_functional: List[str] = Field(default_factory=list)
 
 
-class MetadataSection(ProjectSection):
-    """Metadata section of a project."""
+class MetadataSpec(ProjectSpec):
+    """Metadata spec of a project."""
     data: Dict[str, Any] = Field(default_factory=dict)
 
 
-# DTO models for section updates
+# DTO models for spec updates
 
-class TimelineSectionUpdate(BaseModel):
-    """Model for updating timeline section."""
+class TimelineSpecUpdate(BaseModel):
+    """Model for updating timeline spec."""
     items: Optional[Dict[str, TimelineItem]] = None
     last_modified_by: Optional[str] = None
 
@@ -58,8 +58,8 @@ class TimelineSectionUpdate(BaseModel):
         populate_by_name = True
 
 
-class BudgetSectionUpdate(BaseModel):
-    """Model for updating budget section."""
+class BudgetSpecUpdate(BaseModel):
+    """Model for updating budget spec."""
     items: Optional[Dict[str, BudgetItem]] = None
     last_modified_by: Optional[str] = None
 
@@ -67,8 +67,8 @@ class BudgetSectionUpdate(BaseModel):
         populate_by_name = True
 
 
-class RequirementsSectionUpdate(BaseModel):
-    """Model for updating requirements section."""
+class RequirementsSpecUpdate(BaseModel):
+    """Model for updating requirements spec."""
     functional: Optional[List[str]] = None
     non_functional: Optional[List[str]] = None
     last_modified_by: Optional[str] = None
@@ -77,8 +77,8 @@ class RequirementsSectionUpdate(BaseModel):
         populate_by_name = True
 
 
-class MetadataSectionUpdate(BaseModel):
-    """Model for updating metadata section."""
+class MetadataSpecUpdate(BaseModel):
+    """Model for updating metadata spec."""
     data: Optional[Dict[str, Any]] = None
     last_modified_by: Optional[str] = None
 
@@ -86,57 +86,57 @@ class MetadataSectionUpdate(BaseModel):
         populate_by_name = True
 
 
-# Core architecture sections derived from template data
+# Core architecture specs derived from template data
 
-class TechStackSection(ProjectSection):
-    """Tech stack section of a project."""
+class TechStackSpec(ProjectSpec):
+    """Tech stack spec of a project."""
     data: Optional[ProjectTechStack] = None
 
 
-class FeaturesSection(ProjectSection):
-    """Features section of a project."""
+class FeaturesSpec(ProjectSpec):
+    """Features spec of a project."""
     data: Optional[Features] = None
 
 
-class PagesSection(ProjectSection):
-    """Pages section of a project."""
+class PagesSpec(ProjectSpec):
+    """Pages spec of a project."""
     data: Optional[Pages] = None
 
 
-class DataModelSection(ProjectSection):
-    """Data model section of a project."""
+class DataModelSpec(ProjectSpec):
+    """Data model spec of a project."""
     data: Optional[DataModel] = None
 
 
-class ApiSection(ProjectSection):
-    """API section of a project."""
+class ApiSpec(ProjectSpec):
+    """API spec of a project."""
     data: Optional[Api] = None
 
 
-class TestingSection(ProjectSection):
-    """Testing section of a project."""
+class TestingSpec(ProjectSpec):
+    """Testing spec of a project."""
     data: Optional[Testing] = None
 
 
-class ProjectStructureSection(ProjectSection):
-    """Project structure section of a project."""
+class ProjectStructureSpec(ProjectSpec):
+    """Project structure spec of a project."""
     data: Optional[ProjectStructure] = None
 
 
-class DeploymentSection(ProjectSection):
-    """Deployment section of a project."""
+class DeploymentSpec(ProjectSpec):
+    """Deployment spec of a project."""
     data: Optional[Deployment] = None
 
 
-class DocumentationSection(ProjectSection):
-    """Documentation section of a project."""
+class DocumentationSpec(ProjectSpec):
+    """Documentation spec of a project."""
     data: Optional[Documentation] = None
 
 
-# Update DTOs for core architecture sections
+# Update DTOs for core architecture specs
 
-class TechStackSectionUpdate(BaseModel):
-    """Model for updating tech stack section."""
+class TechStackSpecUpdate(BaseModel):
+    """Model for updating tech stack spec."""
     data: Optional[ProjectTechStack] = None
     last_modified_by: Optional[str] = None
 
@@ -144,8 +144,8 @@ class TechStackSectionUpdate(BaseModel):
         populate_by_name = True
 
 
-class FeaturesSectionUpdate(BaseModel):
-    """Model for updating features section."""
+class FeaturesSpecUpdate(BaseModel):
+    """Model for updating features spec."""
     data: Optional[Features] = None
     last_modified_by: Optional[str] = None
 
@@ -153,8 +153,8 @@ class FeaturesSectionUpdate(BaseModel):
         populate_by_name = True
 
 
-class PagesSectionUpdate(BaseModel):
-    """Model for updating pages section."""
+class PagesSpecUpdate(BaseModel):
+    """Model for updating pages spec."""
     data: Optional[Pages] = None
     last_modified_by: Optional[str] = None
 
@@ -162,8 +162,8 @@ class PagesSectionUpdate(BaseModel):
         populate_by_name = True
 
 
-class DataModelSectionUpdate(BaseModel):
-    """Model for updating data model section."""
+class DataModelSpecUpdate(BaseModel):
+    """Model for updating data model spec."""
     data: Optional[DataModel] = None
     last_modified_by: Optional[str] = None
 
@@ -171,8 +171,8 @@ class DataModelSectionUpdate(BaseModel):
         populate_by_name = True
 
 
-class ApiSectionUpdate(BaseModel):
-    """Model for updating API section."""
+class ApiSpecUpdate(BaseModel):
+    """Model for updating API spec."""
     data: Optional[Api] = None
     last_modified_by: Optional[str] = None
 
@@ -180,8 +180,8 @@ class ApiSectionUpdate(BaseModel):
         populate_by_name = True
 
 
-class TestingSectionUpdate(BaseModel):
-    """Model for updating testing section."""
+class TestingSpecUpdate(BaseModel):
+    """Model for updating testing spec."""
     data: Optional[Testing] = None
     last_modified_by: Optional[str] = None
 
@@ -189,8 +189,8 @@ class TestingSectionUpdate(BaseModel):
         populate_by_name = True
 
 
-class ProjectStructureSectionUpdate(BaseModel):
-    """Model for updating project structure section."""
+class ProjectStructureSpecUpdate(BaseModel):
+    """Model for updating project structure spec."""
     data: Optional[ProjectStructure] = None
     last_modified_by: Optional[str] = None
 
@@ -198,8 +198,8 @@ class ProjectStructureSectionUpdate(BaseModel):
         populate_by_name = True
 
 
-class DeploymentSectionUpdate(BaseModel):
-    """Model for updating deployment section."""
+class DeploymentSpecUpdate(BaseModel):
+    """Model for updating deployment spec."""
     data: Optional[Deployment] = None
     last_modified_by: Optional[str] = None
 
@@ -207,8 +207,8 @@ class DeploymentSectionUpdate(BaseModel):
         populate_by_name = True
 
 
-class DocumentationSectionUpdate(BaseModel):
-    """Model for updating documentation section."""
+class DocumentationSpecUpdate(BaseModel):
+    """Model for updating documentation spec."""
     data: Optional[Documentation] = None
     last_modified_by: Optional[str] = None
 

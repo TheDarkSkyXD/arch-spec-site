@@ -5,7 +5,7 @@ import apiClient from "../api/apiClient";
 import { RequirementsData } from "../types/project";
 
 // Interface to match the backend response format
-interface RequirementsSection {
+interface RequirementsSpec {
   id: string;
   project_id: string;
   created_at: string;
@@ -28,8 +28,8 @@ export const requirementsService = {
    */
   async getRequirements(projectId: string): Promise<RequirementsData | null> {
     try {
-      const response = await apiClient.get<RequirementsSection>(
-        `${API_BASE_URL}/project-sections/${projectId}/requirements`
+      const response = await apiClient.get<RequirementsSpec>(
+        `${API_BASE_URL}/project-specs/${projectId}/requirements`
       );
 
       if (!response.data) {
@@ -68,8 +68,8 @@ export const requirementsService = {
         non_functional: data.non_functional,
       };
 
-      const response = await apiClient.put<RequirementsSection>(
-        `${API_BASE_URL}/project-sections/${projectId}/requirements`,
+      const response = await apiClient.put<RequirementsSpec>(
+        `${API_BASE_URL}/project-specs/${projectId}/requirements`,
         payload
       );
 

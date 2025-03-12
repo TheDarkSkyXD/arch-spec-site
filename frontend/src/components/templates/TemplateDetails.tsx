@@ -516,7 +516,7 @@ const TemplateDetails: React.FC<TemplateDetailsProps> = ({ template }) => {
         </div>
       </div>
 
-      {/* Pages Section */}
+      {/* Pages */}
       {template.pages && (
         <div className="bg-white dark:bg-slate-800 rounded-lg p-5 border border-slate-200 dark:border-slate-700">
           <h3 className="font-medium text-slate-800 dark:text-slate-100 mb-3">
@@ -588,7 +588,7 @@ const TemplateDetails: React.FC<TemplateDetailsProps> = ({ template }) => {
         </div>
       )}
 
-      {/* API Section */}
+      {/* API */}
       {template.api &&
         template.api.endpoints &&
         template.api.endpoints.length > 0 && (

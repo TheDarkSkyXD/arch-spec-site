@@ -19,7 +19,7 @@ export interface FeaturesData {
 }
 
 // Interface to match the backend response format
-interface FeaturesSection {
+interface FeaturesSpec {
   id: string;
   project_id: string;
   created_at: string;
@@ -44,8 +44,8 @@ export const featuresService = {
    */
   async getFeatures(projectId: string): Promise<FeaturesData | null> {
     try {
-      const response = await apiClient.get<FeaturesSection>(
-        `${API_BASE_URL}/project-sections/${projectId}/features`
+      const response = await apiClient.get<FeaturesSpec>(
+        `${API_BASE_URL}/project-specs/${projectId}/features`
       );
 
       if (!response.data || !response.data.data) {
@@ -84,8 +84,8 @@ export const featuresService = {
         },
       };
 
-      const response = await apiClient.put<FeaturesSection>(
-        `${API_BASE_URL}/project-sections/${projectId}/features`,
+      const response = await apiClient.put<FeaturesSpec>(
+        `${API_BASE_URL}/project-specs/${projectId}/features`,
         payload
       );
 

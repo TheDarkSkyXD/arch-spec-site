@@ -266,7 +266,7 @@ graph TD
 
 #### Review Screen
 
-- Tabbed interface for specification sections
+- Tabbed interface for specification
 - Edit buttons for each section
 - Export button
 

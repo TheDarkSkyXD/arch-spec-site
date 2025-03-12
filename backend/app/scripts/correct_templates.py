@@ -197,9 +197,7 @@ def correct_template_data() -> List[Dict]:
                                     logger.info(f"Correcting frontend option: {option} -> {closest_match}")
                                     corrected_templates[i]["template"]["techStack"]["frontend"]["options"][j] = closest_match
                                     corrections_made += 1
-            
-            # Process other sections in old format...
-            # (keeping the existing code for backward compatibility)
+
     
     logger.info(f"Made {corrections_made} corrections to template data")
     

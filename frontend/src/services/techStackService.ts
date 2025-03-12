@@ -7,7 +7,7 @@ import { TechStackFormData } from "../components/forms/tech-stack/techStackSchem
 import { ProjectTechStack } from "../types/templates";
 
 // Interface to match the backend response format
-interface TechStackSection {
+interface TechStackSpec {
   id: string;
   project_id: string;
   created_at: string;
@@ -49,8 +49,8 @@ export const techStackService = {
    */
   async getTechStack(projectId: string): Promise<ProjectTechStack | null> {
     try {
-      const response = await apiClient.get<TechStackSection>(
-        `${API_BASE_URL}/project-sections/${projectId}/tech-stack`
+      const response = await apiClient.get<TechStackSpec>(
+        `${API_BASE_URL}/project-specs/${projectId}/tech-stack`
       );
 
       return response.data.data;
@@ -79,14 +79,14 @@ export const techStackService = {
       const apiData = convertFormToApiFormat(techStackData);
 
       // Create the payload in the correct format for the backend
-      // The backend expects a TechStackSectionUpdate object with data field
+      // The backend expects a TechStackSpecUpdate object with data field
       const payload = {
         data: apiData,
       };
 
       // Because of how the routers are set up in the backend, the path is doubled
-      const response = await apiClient.put<TechStackSection>(
-        `${API_BASE_URL}/project-sections/${projectId}/tech-stack`,
+      const response = await apiClient.put<TechStackSpec>(
+        `${API_BASE_URL}/project-specs/${projectId}/tech-stack`,
         payload
       );
 
@@ -107,7 +107,7 @@ export const techStackService = {
  * Convert form data to API format
  */
 function convertFormToApiFormat(formData: TechStackFormData): ProjectTechStack {
-  // Create the frontend section
+  // Create the frontend spec
   const frontend = {
     framework: formData.frontend,
     language: formData.frontend_language,
@@ -115,7 +115,7 @@ function convertFormToApiFormat(formData: TechStackFormData): ProjectTechStack {
     stateManagement: formData.state_management || undefined,
   };
 
-  // Create the backend section based on type
+  // Create the backend spec based on type
   let backend;
   if (formData.backend_type === "framework") {
     backend = {
@@ -146,7 +146,7 @@ function convertFormToApiFormat(formData: TechStackFormData): ProjectTechStack {
     };
   }
 
-  // Create database section
+  // Create database spec
   const database = {
     type: (formData.database_type as "sql" | "nosql") || "sql",
     system: formData.database_system || "",
@@ -154,19 +154,19 @@ function convertFormToApiFormat(formData: TechStackFormData): ProjectTechStack {
     orm: formData.database_orm || undefined,
   };
 
-  // Create authentication section
+  // Create authentication spec
   const authentication = {
     provider: formData.auth_provider || "",
     methods: formData.auth_methods ? [formData.auth_methods] : [],
   };
 
-  // Create hosting section
+  // Create hosting spec
   const hosting = {
     frontend: formData.hosting_frontend || "",
     backend: formData.hosting_backend || "",
   };
 
-  // Create storage section if values provided
+  // Create storage spec if values provided
   const storage = formData.storage_service
     ? {
         type: formData.storage_type || "objectStorage",
@@ -174,7 +174,7 @@ function convertFormToApiFormat(formData: TechStackFormData): ProjectTechStack {
       }
     : undefined;
 
-  // Create deployment section if values provided
+  // Create deployment spec if values provided
   const deployment =
     formData.deployment_ci_cd || formData.deployment_containerization
       ? {

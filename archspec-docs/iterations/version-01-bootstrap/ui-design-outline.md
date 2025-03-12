@@ -10,7 +10,7 @@
 
 ### 2. Project Wizard Interface
 
-Tabbed interface with the following sections:
+Tabbed interface with the following specfications:
 
 #### Tab 1: Project Basics
 

@@ -24,13 +24,6 @@ try:
         logger.error(f"Failed to load projects router: {str(e)}")
     
     try:
-        from .routes import specifications
-        api_router.include_router(specifications.router, tags=["specifications"])
-        logger.info("Specifications router loaded successfully")
-    except Exception as e:
-        logger.error(f"Failed to load specifications router: {str(e)}")
-    
-    try:
         from .routes import export
         api_router.include_router(export.router, tags=["export"])
         logger.info("Export router loaded successfully") 
@@ -52,11 +45,18 @@ try:
         logger.error(f"Failed to load templates router: {str(e)}")
     
     try:
-        from .routes import project_sections
-        api_router.include_router(project_sections.router, prefix="/project-sections", tags=["project-sections"])
-        logger.info("Project Sections router loaded successfully")
+        from .routes import project_specs
+        api_router.include_router(project_specs.router, prefix="/project-specs", tags=["project-specs"])
+        logger.info("Project Specs router loaded successfully")
     except Exception as e:
-        logger.error(f"Failed to load project sections router: {str(e)}")
+        logger.error(f"Failed to load project specs router: {str(e)}")
+    
+    try:
+        from .routes import artifacts
+        api_router.include_router(artifacts.router, tags=["artifacts"])
+        logger.info("Artifacts router loaded successfully")
+    except Exception as e:
+        logger.error(f"Failed to load artifacts router: {str(e)}")
     
     try:
         from .routes import users

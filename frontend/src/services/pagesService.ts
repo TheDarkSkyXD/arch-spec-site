@@ -17,7 +17,7 @@ export class PagesService {
   static async getPages(projectId: string): Promise<PagesData | null> {
     try {
       const response = await apiClient.get<Pages>(
-        `${API_BASE_URL}/project-sections/${projectId}/pages`
+        `${API_BASE_URL}/project-specs/${projectId}/pages`
       );
 
       if (!response.data) {
@@ -46,7 +46,7 @@ export class PagesService {
   ): Promise<PagesData | null> {
     try {
       const response = await apiClient.put<Pages>(
-        `${API_BASE_URL}/project-sections/${projectId}/pages`,
+        `${API_BASE_URL}/project-specs/${projectId}/pages`,
         {
           data: pagesData,
         }
