@@ -24,6 +24,10 @@ import { FeaturesData } from "../services/featuresService";
 import { PagesData } from "../services/pagesService";
 import { DataModel } from "../types/templates";
 
+// Import shadcn UI components
+import Button from "../components/ui/Button";
+import Card from "../components/ui/Card";
+
 // Define section IDs for consistency
 enum SectionId {
   BASICS = "basics",
@@ -227,12 +231,13 @@ const ProjectDetails = () => {
     <MainLayout>
       <div className="container max-w-6xl mx-auto px-4 py-8">
         <div className="flex items-center mb-6">
-          <button
+          <Button
             onClick={() => navigate("/projects")}
+            variant="ghost"
             className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 mr-3"
           >
             <ChevronLeft size={20} />
-          </button>
+          </Button>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
             {loading
               ? "Loading Project..."
@@ -241,14 +246,14 @@ const ProjectDetails = () => {
         </div>
 
         {loading ? (
-          <div className="flex justify-center items-center py-16 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
+          <Card className="flex justify-center items-center py-16">
             <Loader2 className="h-8 w-8 text-primary-600 animate-spin mr-3" />
             <span className="text-slate-600 dark:text-slate-300 font-medium">
               Loading project details...
             </span>
-          </div>
+          </Card>
         ) : error ? (
-          <div className="flex justify-center items-center py-16 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
+          <Card className="flex justify-center items-center py-16">
             <div className="text-center">
               <div className="text-red-500 mb-4">
                 <svg
@@ -272,18 +277,18 @@ const ProjectDetails = () => {
               <p className="text-slate-500 dark:text-slate-400 mb-6">
                 There was a problem loading the project details.
               </p>
-              <button
+              <Button
                 onClick={() => navigate("/projects")}
                 className="px-5 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg shadow-sm"
               >
                 Return to Projects
-              </button>
+              </Button>
             </div>
-          </div>
+          </Card>
         ) : project ? (
           <div className="space-y-6">
             {/* Project Basics */}
-            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+            <Card className="overflow-hidden">
               <SectionHeader
                 title="Project Details"
                 description="Update the basic information about your project"
@@ -298,10 +303,10 @@ const ProjectDetails = () => {
                   />
                 </div>
               )}
-            </div>
+            </Card>
 
             {/* Tech Stack */}
-            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+            <Card className="overflow-hidden">
               <SectionHeader
                 title="Technology Stack"
                 description="Configure the technology stack for your project"
@@ -326,10 +331,10 @@ const ProjectDetails = () => {
                   )}
                 </div>
               )}
-            </div>
+            </Card>
 
             {/* Requirements Section */}
-            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+            <Card className="overflow-hidden">
               <SectionHeader
                 title="Requirements"
                 description="Define functional and non-functional requirements for your project"
@@ -354,10 +359,10 @@ const ProjectDetails = () => {
                   )}
                 </div>
               )}
-            </div>
+            </Card>
 
             {/* Features Section */}
-            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+            <Card className="overflow-hidden">
               <SectionHeader
                 title="Features"
                 description="Configure the features and modules for your project"
@@ -382,10 +387,10 @@ const ProjectDetails = () => {
                   )}
                 </div>
               )}
-            </div>
+            </Card>
 
             {/* Pages Section */}
-            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+            <Card className="overflow-hidden">
               <SectionHeader
                 title="Pages"
                 description="Configure the pages for your application"
@@ -410,10 +415,10 @@ const ProjectDetails = () => {
                   )}
                 </div>
               )}
-            </div>
+            </Card>
 
             {/* Data Model Section */}
-            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+            <Card className="overflow-hidden">
               <SectionHeader
                 title="Data Model"
                 description="Configure the database entities and relationships"
@@ -438,10 +443,10 @@ const ProjectDetails = () => {
                   )}
                 </div>
               )}
-            </div>
+            </Card>
 
             {/* API Endpoints Section */}
-            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+            <Card className="overflow-hidden">
               <SectionHeader
                 title="API Endpoints"
                 description="Configure the API endpoints for your application"
@@ -466,7 +471,7 @@ const ProjectDetails = () => {
                   )}
                 </div>
               )}
-            </div>
+            </Card>
 
             {/* More project sections can be added here later */}
           </div>

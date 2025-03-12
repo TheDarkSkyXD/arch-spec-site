@@ -12,6 +12,10 @@ import { ArrowLeft, ChevronDown, ChevronUp } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useProjectTemplateSection } from "../hooks/useProjectTemplateSection";
 
+// Import shadcn UI components
+import Button from "../components/ui/Button";
+import Card from "../components/ui/Card";
+
 // Define section IDs for consistency
 enum SectionId {
   TEMPLATE = "template",
@@ -109,13 +113,14 @@ const NewProject = () => {
       <div className="max-w-4xl mx-auto">
         {/* Header with back button */}
         <div className="mb-6">
-          <button
+          <Button
             onClick={() => navigate("/")}
+            variant="ghost"
             className="flex items-center text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 mb-2 text-sm font-medium"
           >
             <ArrowLeft size={16} className="mr-1" />
             Back to Dashboard
-          </button>
+          </Button>
           <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 font-heading">
             Create New Project
           </h1>
@@ -128,7 +133,7 @@ const NewProject = () => {
         {/* Project Sections */}
         <div className="space-y-8">
           {/* Template Selection */}
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+          <Card className="overflow-hidden">
             <SectionHeader
               title="Template Selection"
               description="Choose a template or start from scratch"
@@ -146,10 +151,10 @@ const NewProject = () => {
                 />
               </div>
             )}
-          </div>
+          </Card>
 
           {/* Project Basics (Required) */}
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+          <Card className="overflow-hidden">
             <SectionHeader
               title="Project Basics"
               description="Required information about your project"
@@ -171,10 +176,10 @@ const NewProject = () => {
                 />
               </div>
             )}
-          </div>
+          </Card>
 
           {/* Tech Stack (Optional) */}
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+          <Card className="overflow-hidden">
             <SectionHeader
               title="Tech Stack"
               description="Define your project's technology stack"
@@ -193,10 +198,10 @@ const NewProject = () => {
                 />
               </div>
             )}
-          </div>
+          </Card>
 
           {/* Requirements (Optional) */}
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+          <Card className="overflow-hidden">
             <SectionHeader
               title="Requirements"
               description="Define functional and non-functional requirements"
@@ -220,10 +225,10 @@ const NewProject = () => {
                 />
               </div>
             )}
-          </div>
+          </Card>
 
           {/* Features (Optional) */}
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+          <Card className="overflow-hidden">
             <SectionHeader
               title="Features"
               description="Define core modules and features"
@@ -246,10 +251,10 @@ const NewProject = () => {
                 />
               </div>
             )}
-          </div>
+          </Card>
 
           {/* Pages (Optional) */}
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+          <Card className="overflow-hidden">
             <SectionHeader
               title="Pages"
               description="Define pages for your application"
@@ -274,10 +279,10 @@ const NewProject = () => {
                 />
               </div>
             )}
-          </div>
+          </Card>
 
           {/* Data Model (Optional) */}
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+          <Card className="overflow-hidden">
             <SectionHeader
               title="Data Model"
               description="Define database entities and relationships"
@@ -301,10 +306,10 @@ const NewProject = () => {
                 />
               </div>
             )}
-          </div>
+          </Card>
 
           {/* API Endpoints (Optional) */}
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+          <Card className="overflow-hidden">
             <SectionHeader
               title="API Endpoints"
               description="Define API endpoints for your application"
@@ -327,7 +332,7 @@ const NewProject = () => {
                 />
               </div>
             )}
-          </div>
+          </Card>
         </div>
       </div>
     </MainLayout>
