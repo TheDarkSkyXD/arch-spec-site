@@ -32,6 +32,9 @@ export default function RequirementsForm({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  // Add state for form-level error and success messages
+  const [formError, setFormError] = useState<string>("");
+  const [formSuccess, setFormSuccess] = useState<string>("");
 
   // Effect to update local state when initial data changes
   useEffect(() => {
@@ -98,14 +101,20 @@ export default function RequirementsForm({
     // }
 
     setErrors(newErrors);
+    // Clear previous form-level messages
+    setFormError("");
+    setFormSuccess("");
 
     if (Object.keys(newErrors).length === 0) {
       if (!projectId) {
+        const errorMessage =
+          "Project must be saved before requirements can be saved";
         showToast({
           title: "Error",
-          description: "Project must be saved before requirements can be saved",
+          description: errorMessage,
           type: "error",
         });
+        setFormError(errorMessage);
         return;
       }
 
@@ -122,29 +131,35 @@ export default function RequirementsForm({
         );
 
         if (result) {
+          const successMessage = "Requirements saved successfully";
           showToast({
             title: "Success",
-            description: "Requirements saved successfully",
+            description: successMessage,
             type: "success",
           });
+          setFormSuccess(successMessage);
 
           if (onSuccess) {
             onSuccess(result);
           }
         } else {
+          const errorMessage = "Failed to save requirements";
           showToast({
             title: "Error",
-            description: "Failed to save requirements",
+            description: errorMessage,
             type: "error",
           });
+          setFormError(errorMessage);
         }
       } catch (error) {
         console.error("Error saving requirements:", error);
+        const errorMessage = "An unexpected error occurred";
         showToast({
           title: "Error",
-          description: "An unexpected error occurred",
+          description: errorMessage,
           type: "error",
         });
+        setFormError(errorMessage);
       } finally {
         setIsSubmitting(false);
       }
@@ -164,6 +179,18 @@ export default function RequirementsForm({
 
   return (
     <form id="requirements-form" onSubmit={handleSubmit} className="space-y-8">
+      {/* Error and Success Messages */}
+      {formError && (
+        <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-md mb-4">
+          {formError}
+        </div>
+      )}
+      {formSuccess && (
+        <div className="bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 p-3 rounded-md mb-4">
+          {formSuccess}
+        </div>
+      )}
+
       <div>
         <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-4">
           Project Requirements

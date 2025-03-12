@@ -50,6 +50,9 @@ export default function PagesForm({
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  // Add state for error and success messages
+  const [error, setError] = useState<string>("");
+  const [success, setSuccess] = useState<string>("");
 
   // Editing state
   const [isEditing, setIsEditing] = useState(false);
@@ -430,12 +433,18 @@ export default function PagesForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Clear previous messages
+    setError("");
+    setSuccess("");
+
     if (!projectId) {
+      const errorMessage = "Project must be saved before pages can be saved";
       showToast({
         title: "Error",
-        description: "Project must be saved before pages can be saved",
+        description: errorMessage,
         type: "error",
       });
+      setError(errorMessage);
       return;
     }
 
@@ -450,29 +459,35 @@ export default function PagesForm({
       const result = await pagesService.savePages(projectId, data);
 
       if (result) {
+        const successMessage = "Pages saved successfully";
         showToast({
           title: "Success",
-          description: "Pages saved successfully",
+          description: successMessage,
           type: "success",
         });
+        setSuccess(successMessage);
 
         if (onSuccess) {
           onSuccess(result);
         }
       } else {
+        const errorMessage = "Failed to save pages";
         showToast({
           title: "Error",
-          description: "Failed to save pages",
+          description: errorMessage,
           type: "error",
         });
+        setError(errorMessage);
       }
     } catch (error) {
       console.error("Error saving pages:", error);
+      const errorMessage = "An unexpected error occurred";
       showToast({
         title: "Error",
-        description: "An unexpected error occurred",
+        description: errorMessage,
         type: "error",
       });
+      setError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -679,6 +694,18 @@ export default function PagesForm({
 
   return (
     <form id="pages-form" onSubmit={handleSubmit} className="space-y-8">
+      {/* Error and Success Messages */}
+      {error && (
+        <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-md mb-4">
+          {error}
+        </div>
+      )}
+      {success && (
+        <div className="bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 p-3 rounded-md mb-4">
+          {success}
+        </div>
+      )}
+
       <div className="space-y-6">
         <div>
           <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-4">

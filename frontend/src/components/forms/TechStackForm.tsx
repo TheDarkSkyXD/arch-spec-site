@@ -48,6 +48,9 @@ const TechStackForm = ({
     useState<TechStackData | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  // Add state for error and success messages
+  const [error, setError] = useState<string>("");
+  const [success, setSuccess] = useState<string>("");
 
   const defaultValues: TechStackFormData = {
     frontend: "",
@@ -307,10 +310,15 @@ const TechStackForm = ({
         description: "Project must be saved before tech stack can be saved",
         type: "error",
       });
+      setError("Project must be saved before tech stack can be saved");
       return;
     }
 
     setIsSubmitting(true);
+    // Clear previous messages
+    setError("");
+    setSuccess("");
+
     try {
       const result = await techStackService.saveTechStack(projectId, data);
 
@@ -320,6 +328,7 @@ const TechStackForm = ({
           description: "Tech stack saved successfully",
           type: "success",
         });
+        setSuccess("Tech stack saved successfully");
 
         if (onSuccess) {
           onSuccess(result);
@@ -330,6 +339,7 @@ const TechStackForm = ({
           description: "Failed to save tech stack",
           type: "error",
         });
+        setError("Failed to save tech stack");
       }
     } catch (error) {
       console.error("Error saving tech stack:", error);
@@ -338,6 +348,7 @@ const TechStackForm = ({
         description: "An unexpected error occurred",
         type: "error",
       });
+      setError("An unexpected error occurred while saving tech stack");
     } finally {
       setIsSubmitting(false);
     }
@@ -349,6 +360,18 @@ const TechStackForm = ({
       onSubmit={handleSubmit(onSubmit)}
       className="space-y-8"
     >
+      {/* Error and Success Messages */}
+      {error && (
+        <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-md mb-4">
+          {error}
+        </div>
+      )}
+      {success && (
+        <div className="bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 p-3 rounded-md mb-4">
+          {success}
+        </div>
+      )}
+
       {/* Frontend Section */}
       <Card className="p-6">
         <FrontendSection

@@ -42,6 +42,9 @@ export default function FeaturesForm({
   );
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  // Add state for form-level error and success messages
+  const [error, setError] = useState<string>("");
+  const [success, setSuccess] = useState<string>("");
 
   // State for feature form - used for both adding and editing
   const [isAddingFeature, setIsAddingFeature] = useState(false);
@@ -274,12 +277,18 @@ export default function FeaturesForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Clear previous messages
+    setError("");
+    setSuccess("");
+
     if (!projectId) {
+      const errorMessage = "Project must be saved before features can be saved";
       showToast({
         title: "Error",
-        description: "Project must be saved before features can be saved",
+        description: errorMessage,
         type: "error",
       });
+      setError(errorMessage);
       return;
     }
 
@@ -292,29 +301,35 @@ export default function FeaturesForm({
       const result = await featuresService.saveFeatures(projectId, data);
 
       if (result) {
+        const successMessage = "Features saved successfully";
         showToast({
           title: "Success",
-          description: "Features saved successfully",
+          description: successMessage,
           type: "success",
         });
+        setSuccess(successMessage);
 
         if (onSuccess) {
           onSuccess(result);
         }
       } else {
+        const errorMessage = "Failed to save features";
         showToast({
           title: "Error",
-          description: "Failed to save features",
+          description: errorMessage,
           type: "error",
         });
+        setError(errorMessage);
       }
     } catch (error) {
       console.error("Error saving features:", error);
+      const errorMessage = "An unexpected error occurred";
       showToast({
         title: "Error",
-        description: "An unexpected error occurred",
+        description: errorMessage,
         type: "error",
       });
+      setError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -333,6 +348,18 @@ export default function FeaturesForm({
 
   return (
     <form id="features-form" onSubmit={handleSubmit} className="space-y-8">
+      {/* Error and Success Messages */}
+      {error && (
+        <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-md mb-4">
+          {error}
+        </div>
+      )}
+      {success && (
+        <div className="bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 p-3 rounded-md mb-4">
+          {success}
+        </div>
+      )}
+
       <div className="space-y-6">
         <div>
           <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-4">

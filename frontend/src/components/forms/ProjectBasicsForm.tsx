@@ -36,6 +36,10 @@ const ProjectBasicsForm = ({
   const [projectId, setProjectId] = useState<string | undefined>(
     initialData?.id
   );
+  // Add state for error and success messages
+  const [error, setError] = useState<string>("");
+  const [success, setSuccess] = useState<string>("");
+
   const isEditMode = Boolean(projectId);
 
   const {
@@ -73,6 +77,10 @@ const ProjectBasicsForm = ({
 
   const onSubmit = async (data: ProjectBasicsFormData) => {
     setIsSubmitting(true);
+    // Clear previous messages
+    setError("");
+    setSuccess("");
+
     try {
       let project;
 
@@ -89,36 +97,47 @@ const ProjectBasicsForm = ({
       }
 
       if (project) {
+        const successMessage = isEditMode
+          ? "Project updated successfully"
+          : "Project created successfully";
+
         showToast({
           title: "Success",
-          description: isEditMode
-            ? "Project updated successfully"
-            : "Project created successfully",
+          description: successMessage,
           type: "success",
         });
+
+        setSuccess(successMessage);
 
         if (onSuccess) {
           onSuccess(project.id);
         }
       } else {
+        const errorMessage = isEditMode
+          ? "Failed to update project"
+          : "Failed to create project";
+
         showToast({
           title: "Error",
-          description: isEditMode
-            ? "Failed to update project"
-            : "Failed to create project",
+          description: errorMessage,
           type: "error",
         });
+
+        setError(errorMessage);
       }
     } catch (error) {
       console.error(
         `Error ${isEditMode ? "updating" : "creating"} project:`,
         error
       );
+
       showToast({
         title: "Error",
         description: "An unexpected error occurred",
         type: "error",
       });
+
+      setError("An unexpected error occurred");
     } finally {
       setIsSubmitting(false);
     }
@@ -130,6 +149,18 @@ const ProjectBasicsForm = ({
       onSubmit={handleSubmit(onSubmit)}
       className="space-y-6"
     >
+      {/* Error and Success Messages */}
+      {error && (
+        <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-md mb-4">
+          {error}
+        </div>
+      )}
+      {success && (
+        <div className="bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 p-3 rounded-md mb-4">
+          {success}
+        </div>
+      )}
+
       <div>
         <Label htmlFor="name">Project Name</Label>
         <Input
