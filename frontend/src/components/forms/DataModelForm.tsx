@@ -255,6 +255,21 @@ export default function DataModelForm({
 
   // Field form handlers
   const handleFieldFormChange = (field: string, value: any) => {
+    // Convert numeric default value to string if needed
+    if (field === "default" && typeof value === "number") {
+      value = value.toString();
+    }
+
+    // Ensure all non-string default values are converted to strings
+    if (
+      field === "default" &&
+      value !== null &&
+      value !== undefined &&
+      typeof value !== "string"
+    ) {
+      value = String(value);
+    }
+
     setFieldForm({
       ...fieldForm,
       [field]: value,
@@ -782,34 +797,25 @@ export default function DataModelForm({
                   <Accordion type="single" collapsible className="w-full">
                     {dataModel.entities.map((entity, idx) => (
                       <AccordionItem key={idx} value={`entity-${idx}`}>
-                        <AccordionTrigger className="px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-800">
-                          <div className="flex items-center space-x-2">
-                            <span>{entity.name}</span>
-                            <Badge variant="outline" className="ml-2">
-                              {entity.fields?.length || 0} fields
-                            </Badge>
-                          </div>
-                          <div className="flex ml-auto mr-6 space-x-2">
+                        <div className="flex items-center">
+                          <AccordionTrigger className="flex-grow px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-800">
+                            <div className="flex items-center space-x-2">
+                              <span>{entity.name}</span>
+                              <Badge variant="outline" className="ml-2">
+                                {entity.fields?.length || 0} fields
+                              </Badge>
+                            </div>
+                          </AccordionTrigger>
+                          <div className="flex mr-4 space-x-2">
                             <Button
                               type="button"
                               variant="ghost"
                               size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleStartEditEntity(idx);
-                              }}
+                              onClick={() => handleStartEditEntity(idx)}
                             >
                               <Edit size={16} />
                             </Button>
-                            <AlertDialog
-                              open={
-                                isDeleteDialogOpen && entityToDelete === idx
-                              }
-                              onOpenChange={(open) => {
-                                setIsDeleteDialogOpen(open);
-                                if (!open) setEntityToDelete(null);
-                              }}
-                            >
+                            <AlertDialog>
                               <AlertDialogTrigger asChild>
                                 <Button
                                   type="button"
@@ -824,34 +830,44 @@ export default function DataModelForm({
                                   <Trash2 size={16} />
                                 </Button>
                               </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>
-                                    Delete {entity.name}?
-                                  </AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    This will permanently delete the entity and
-                                    cannot be undone. Make sure this entity is
-                                    not used in any relationships.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction
-                                    onClick={() => {
-                                      if (entityToDelete !== null) {
-                                        handleDeleteEntity(entityToDelete);
-                                      }
-                                      setIsDeleteDialogOpen(false);
-                                    }}
-                                  >
-                                    Delete
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
+                              {isDeleteDialogOpen && entityToDelete === idx && (
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>
+                                      Delete {entity.name}?
+                                    </AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      This will permanently delete the entity
+                                      and cannot be undone. Make sure this
+                                      entity is not used in any relationships.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel
+                                      onClick={() => {
+                                        setIsDeleteDialogOpen(false);
+                                        setEntityToDelete(null);
+                                      }}
+                                    >
+                                      Cancel
+                                    </AlertDialogCancel>
+                                    <AlertDialogAction
+                                      onClick={() => {
+                                        if (entityToDelete !== null) {
+                                          handleDeleteEntity(entityToDelete);
+                                        }
+                                        setIsDeleteDialogOpen(false);
+                                        setEntityToDelete(null);
+                                      }}
+                                    >
+                                      Delete
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              )}
                             </AlertDialog>
                           </div>
-                        </AccordionTrigger>
+                        </div>
                         <AccordionContent className="px-4 py-2">
                           <div className="text-slate-600 dark:text-slate-300 mb-2">
                             {entity.description}
@@ -998,7 +1014,7 @@ export default function DataModelForm({
                         <Select
                           value={relationshipForm.from_entity}
                           onValueChange={(value) =>
-                            handleRelationshipFormChange("from", value)
+                            handleRelationshipFormChange("from_entity", value)
                           }
                         >
                           <SelectTrigger>
@@ -1019,7 +1035,7 @@ export default function DataModelForm({
                         <Select
                           value={relationshipForm.to_entity}
                           onValueChange={(value) =>
-                            handleRelationshipFormChange("to", value)
+                            handleRelationshipFormChange("to_entity", value)
                           }
                         >
                           <SelectTrigger>

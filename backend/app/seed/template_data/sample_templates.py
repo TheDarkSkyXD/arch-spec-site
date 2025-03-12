@@ -322,14 +322,14 @@ PROJECT_TEMPLATES = [
                 "relationships": [
                     {
                         "type": "oneToOne",
-                        "from": "User",
-                        "to": "Profile",
+                        "from_entity": "User",
+                        "to_entity": "Profile",
                         "field": "user_id"
                     },
                     {
                         "type": "oneToMany",
-                        "from": "User",
-                        "to": "Item",
+                        "from_entity": "User",
+                        "to_entity": "Item",
                         "field": "user_id"
                     }
                 ]

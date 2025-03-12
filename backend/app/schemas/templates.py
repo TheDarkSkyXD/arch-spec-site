@@ -52,8 +52,8 @@ class Entity(BaseModel):
 class Relationship(BaseModel):
     """Data model relationship."""
     type: str
-    from_entity: str = Field(alias="from")
-    to: str
+    from_entity: str
+    to_entity: str
     field: str
 
     class Config:

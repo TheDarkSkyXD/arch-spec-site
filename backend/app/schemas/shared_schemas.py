@@ -1,8 +1,8 @@
 """
 Shared schema definitions to avoid circular imports.
 """
-from pydantic import BaseModel, Field
-from typing import Dict, Any, List, Optional, Union, Literal
+from pydantic import BaseModel, Field, model_validator
+from typing import Dict, Any, List, Optional, Union, Literal, Self
 from datetime import datetime
 
 
@@ -58,6 +58,15 @@ class EntityField(BaseModel):
     required: Optional[bool] = False
     default: Optional[str] = None
     enum: Optional[List[str]] = Field(default_factory=list)
+
+    @model_validator(mode='before')
+    @classmethod
+    def validate_default_value(cls, data: Any) -> Any:
+        """Convert non-string default values to strings."""
+        if isinstance(data, dict) and 'default' in data and data['default'] is not None:
+            if not isinstance(data['default'], str):
+                data['default'] = str(data['default'])
+        return data
 
 
 class Entity(BaseModel):
