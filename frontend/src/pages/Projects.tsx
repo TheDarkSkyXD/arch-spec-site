@@ -6,18 +6,31 @@ import {
   Search,
   FolderPlus,
   Filter,
-  MoreVertical,
   CheckCircle,
   AlertCircle,
+  Trash2,
 } from "lucide-react";
 import MainLayout from "../layouts/MainLayout";
 import { useProjectStore } from "../store/projectStore";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "../components/ui/alert-dialog";
 
 const Projects = () => {
   const navigate = useNavigate();
-  const { projects, fetchProjects, isLoading, error } = useProjectStore();
+  const { projects, fetchProjects, deleteProject, isLoading, error } =
+    useProjectStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredProjects, setFilteredProjects] = useState(projects);
+  const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchProjects();
@@ -40,6 +53,19 @@ const Projects = () => {
       );
     }
   }, [searchQuery, projects]);
+
+  const handleDeleteConfirm = async () => {
+    if (projectToDelete) {
+      await deleteProject(projectToDelete);
+      setIsDeleteDialogOpen(false);
+      setProjectToDelete(null);
+    }
+  };
+
+  const openDeleteDialog = (projectId: string) => {
+    setProjectToDelete(projectId);
+    setIsDeleteDialogOpen(true);
+  };
 
   return (
     <MainLayout>
@@ -86,6 +112,31 @@ const Projects = () => {
           </div>
         </div>
 
+        {/* Delete confirmation dialog */}
+        <AlertDialog>
+          <AlertDialogContent
+            isOpen={isDeleteDialogOpen}
+            onClose={() => setIsDeleteDialogOpen(false)}
+          >
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Project?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will permanently delete the project and all its associated
+                data including requirements, specifications, and diagrams. This
+                action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setIsDeleteDialogOpen(false)}>
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction onClick={handleDeleteConfirm}>
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
         {/* Projects content */}
         <div className="w-full">
           {isLoading ? (
@@ -110,11 +161,6 @@ const Projects = () => {
                   className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden hover:shadow-md transition-shadow duration-200"
                 >
                   <div className="p-4">
-                    <div className="flex justify-between items-start mb-2">
-                      <button className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700">
-                        <MoreVertical size={16} />
-                      </button>
-                    </div>
                     <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-1">
                       {project.name}
                     </h3>
@@ -147,12 +193,21 @@ const Projects = () => {
                         Updated{" "}
                         {new Date(project.updated_at).toLocaleDateString()}
                       </span>
-                      <button
-                        onClick={() => navigate(`/projects/${project.id}`)}
-                        className="text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1"
-                      >
-                        View Project
-                      </button>
+                      <div className="flex space-x-3">
+                        <button
+                          onClick={() => openDeleteDialog(project.id)}
+                          className="text-red-500 hover:text-red-600 font-medium flex items-center gap-1"
+                        >
+                          <Trash2 size={14} />
+                          Delete
+                        </button>
+                        <button
+                          onClick={() => navigate(`/projects/${project.id}`)}
+                          className="text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1"
+                        >
+                          View Project
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>

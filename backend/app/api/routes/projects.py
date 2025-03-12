@@ -173,4 +173,57 @@ async def get_project_detail(
         del project["_id"]
         
     return project
+
+
+@router.delete("/{id}", status_code=204)
+async def delete_project(
+    id: str,
+    database: AsyncIOMotorDatabase = Depends(get_db),
+    current_user: Dict[str, Any] = Depends(get_current_user)
+):
+    """Delete a project by ID and all its associated sections.
+    
+    Args:
+        id: The project ID.
+        database: The database instance.
+        current_user: The authenticated user.
+        
+    Raises:
+        HTTPException: If the project is not found or doesn't belong to the user.
+    """
+    user_id = str(current_user["_id"])
+    
+    # Check if project exists and belongs to the user
+    existing_project = await database.projects.find_one({"id": id, "user_id": user_id})
+    if existing_project is None:
+        raise HTTPException(status_code=404, detail="Project not found")
+    
+    # Define collections that store project sections
+    section_collections = [
+        "timeline_sections",
+        "budget_sections",
+        "requirements_sections",
+        "metadata_sections",
+        "tech_stack_sections",
+        "features_sections",
+        "pages_sections",
+        "data_model_sections",
+        "api_sections",
+        "testing_sections",
+        "project_structure_sections",
+        "deployment_sections",
+        "documentation_sections"
+    ]
+    
+    # Delete all sections associated with the project
+    for collection_name in section_collections:
+        if hasattr(database, collection_name):
+            collection = getattr(database, collection_name)
+            await collection.delete_many({"project_id": id})
+    
+    # Delete the project itself
+    await database.projects.delete_one({"id": id, "user_id": user_id})
+    
+    # No content to return
+    return None
     
