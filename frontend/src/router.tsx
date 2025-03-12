@@ -8,14 +8,15 @@ import Settings from "./pages/Settings";
 import Profile from "./pages/Profile";
 import UserSettings from "./pages/UserSettings";
 import SecuritySettings from "./pages/SecuritySettings";
+import Documentation from "./pages/Documentation";
 import ProtectedRoute from "./components/ProtectedRoute";
-
 // Auth pages
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
 
+// Router configuration
 const router = createBrowserRouter([
   // Auth routes (public)
   {
@@ -34,7 +35,6 @@ const router = createBrowserRouter([
     path: "/reset-password",
     element: <ResetPassword />,
   },
-
   // Protected routes (require authentication)
   {
     path: "/",
@@ -81,6 +81,14 @@ const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <Settings />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/docs",
+    element: (
+      <ProtectedRoute>
+        <Documentation />
       </ProtectedRoute>
     ),
   },
