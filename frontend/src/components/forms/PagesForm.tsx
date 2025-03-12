@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 import {
-  PlusCircle,
   Trash2,
   ToggleLeft,
   ToggleRight,
@@ -15,6 +14,12 @@ import {
 import { PageComponent } from "../../types/templates";
 import { pagesService, PagesData } from "../../services/pagesService";
 import { useToast } from "../../contexts/ToastContext";
+
+// Import shadcn UI components
+import Button from "../ui/Button";
+import Input from "../ui/Input";
+import Card from "../ui/Card";
+import { Label } from "../ui/label";
 
 interface PagesFormProps {
   initialData?: PagesData;
@@ -684,16 +689,17 @@ export default function PagesForm({
           </p>
         </div>
 
-        <div className="border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
+        <Card className="overflow-hidden">
+          {/* Tab Navigation */}
           <div className="flex border-b border-slate-200 dark:border-slate-700">
             <button
               type="button"
               onClick={() => setActiveTab("public")}
               className={`px-4 py-3 text-sm font-medium ${
                 activeTab === "public"
-                  ? "bg-white dark:bg-slate-800 text-primary-600 border-b-2 border-primary-600"
-                  : "bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
-              } flex-1`}
+                  ? "border-b-2 border-primary-500 text-primary-600 dark:text-primary-400"
+                  : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300"
+              }`}
             >
               Public Pages
             </button>
@@ -702,9 +708,9 @@ export default function PagesForm({
               onClick={() => setActiveTab("authenticated")}
               className={`px-4 py-3 text-sm font-medium ${
                 activeTab === "authenticated"
-                  ? "bg-white dark:bg-slate-800 text-primary-600 border-b-2 border-primary-600"
-                  : "bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
-              } flex-1`}
+                  ? "border-b-2 border-primary-500 text-primary-600 dark:text-primary-400"
+                  : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300"
+              }`}
             >
               Authenticated Pages
             </button>
@@ -713,64 +719,59 @@ export default function PagesForm({
               onClick={() => setActiveTab("admin")}
               className={`px-4 py-3 text-sm font-medium ${
                 activeTab === "admin"
-                  ? "bg-white dark:bg-slate-800 text-primary-600 border-b-2 border-primary-600"
-                  : "bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
-              } flex-1`}
+                  ? "border-b-2 border-primary-500 text-primary-600 dark:text-primary-400"
+                  : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300"
+              }`}
             >
               Admin Pages
             </button>
           </div>
 
-          <div className="p-4 bg-white dark:bg-slate-900">
-            {activeTab === "public" && (
-              <div className="space-y-4">
-                {publicPages.length === 0 ? (
-                  <div className="p-6 bg-slate-50 dark:bg-slate-800 rounded-lg text-center">
-                    <p className="text-slate-600 dark:text-slate-400">
-                      No public pages defined
-                    </p>
-                  </div>
-                ) : (
-                  publicPages.map((page, index) =>
+          {/* Tab Contents */}
+          <div className="p-4">
+            <div className={activeTab === "public" ? "block" : "hidden"}>
+              {publicPages.length === 0 ? (
+                <p className="text-center text-slate-500 dark:text-slate-400 py-4">
+                  No public pages defined yet
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {publicPages.map((page, index) =>
                     renderPageCard(page, index, "public")
-                  )
-                )}
-              </div>
-            )}
+                  )}
+                </div>
+              )}
+            </div>
 
-            {activeTab === "authenticated" && (
-              <div className="space-y-4">
-                {authenticatedPages.length === 0 ? (
-                  <div className="p-6 bg-slate-50 dark:bg-slate-800 rounded-lg text-center">
-                    <p className="text-slate-600 dark:text-slate-400">
-                      No authenticated pages defined
-                    </p>
-                  </div>
-                ) : (
-                  authenticatedPages.map((page, index) =>
+            <div className={activeTab === "authenticated" ? "block" : "hidden"}>
+              {authenticatedPages.length === 0 ? (
+                <p className="text-center text-slate-500 dark:text-slate-400 py-4">
+                  No authenticated pages defined yet
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {authenticatedPages.map((page, index) =>
                     renderPageCard(page, index, "authenticated")
-                  )
-                )}
-              </div>
-            )}
+                  )}
+                </div>
+              )}
+            </div>
 
-            {activeTab === "admin" && (
-              <div className="space-y-4">
-                {adminPages.length === 0 ? (
-                  <div className="p-6 bg-slate-50 dark:bg-slate-800 rounded-lg text-center">
-                    <p className="text-slate-600 dark:text-slate-400">
-                      No admin pages defined
-                    </p>
-                  </div>
-                ) : (
-                  adminPages.map((page, index) =>
+            <div className={activeTab === "admin" ? "block" : "hidden"}>
+              {adminPages.length === 0 ? (
+                <p className="text-center text-slate-500 dark:text-slate-400 py-4">
+                  No admin pages defined yet
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {adminPages.map((page, index) =>
                     renderPageCard(page, index, "admin")
-                  )
-                )}
-              </div>
-            )}
+                  )}
+                </div>
+              )}
+            </div>
 
-            {/* Add/Edit page form */}
+            {/* Add/Edit Page Form */}
             <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
               <div className="flex justify-between items-center mb-3">
                 <h3 className="text-sm font-medium text-slate-700 dark:text-slate-300">
@@ -781,120 +782,106 @@ export default function PagesForm({
                       } Page`}
                 </h3>
                 {isEditing && (
-                  <button
+                  <Button
                     type="button"
+                    variant="ghost"
+                    size="sm"
                     onClick={resetPageForm}
                     className="text-slate-400 hover:text-slate-500 dark:text-slate-500 dark:hover:text-slate-400"
                   >
                     <X size={18} />
-                  </button>
+                  </Button>
                 )}
               </div>
-              <div className="grid grid-cols-2 gap-3">
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label
-                    htmlFor="pageName"
-                    className="block text-xs text-slate-500 dark:text-slate-400 mb-1"
-                  >
-                    Page Name
-                  </label>
-                  <input
+                  <Label htmlFor="pageName">Page Name</Label>
+                  <Input
                     id="pageName"
                     type="text"
                     value={newPageName}
-                    onChange={(e) => {
-                      setNewPageName(e.target.value);
-                      if (errors.name) {
-                        setErrors({ ...errors, name: "" });
-                      }
-                    }}
-                    placeholder="e.g. Dashboard"
-                    className={`w-full p-2 border ${
-                      errors.name
-                        ? "border-red-500"
-                        : "border-slate-300 dark:border-slate-600"
-                    } rounded focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100`}
+                    onChange={(e) => setNewPageName(e.target.value)}
+                    placeholder="e.g. Home, About, Dashboard"
+                    error={errors.name}
                   />
-                  {errors.name && (
-                    <p className="mt-1 text-sm text-red-500">{errors.name}</p>
-                  )}
                 </div>
+
                 <div>
-                  <label
-                    htmlFor="pagePath"
-                    className="block text-xs text-slate-500 dark:text-slate-400 mb-1"
-                  >
-                    Path
-                  </label>
-                  <input
+                  <Label htmlFor="pagePath">Page Path</Label>
+                  <Input
                     id="pagePath"
                     type="text"
                     value={newPagePath}
-                    onChange={(e) => {
-                      setNewPagePath(e.target.value);
-                      if (errors.path) {
-                        setErrors({ ...errors, path: "" });
-                      }
-                    }}
-                    placeholder="e.g. /dashboard"
-                    className={`w-full p-2 border ${
-                      errors.path
-                        ? "border-red-500"
-                        : "border-slate-300 dark:border-slate-600"
-                    } rounded focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100`}
+                    onChange={(e) => setNewPagePath(e.target.value)}
+                    placeholder="e.g. /, /about, /dashboard"
+                    error={errors.path}
                   />
-                  {errors.path && (
-                    <p className="mt-1 text-sm text-red-500">{errors.path}</p>
-                  )}
                 </div>
               </div>
-              <div className="mt-3 flex justify-end space-x-2">
-                {isEditing && (
-                  <button
+
+              <div className="mt-4 flex justify-end">
+                {isEditing ? (
+                  <div className="space-x-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={resetPageForm}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={handleEditPage}
+                      disabled={!newPageName || !newPagePath}
+                      variant={
+                        !newPageName || !newPagePath ? "outline" : "default"
+                      }
+                      className={
+                        !newPageName || !newPagePath
+                          ? "opacity-50 cursor-not-allowed"
+                          : ""
+                      }
+                    >
+                      Save Changes
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
                     type="button"
-                    onClick={resetPageForm}
-                    className="px-3 py-1.5 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-md hover:bg-slate-50 dark:hover:bg-slate-700"
+                    onClick={handleAddPage}
+                    disabled={!newPageName || !newPagePath}
+                    variant={
+                      !newPageName || !newPagePath ? "outline" : "default"
+                    }
+                    className={
+                      !newPageName || !newPagePath
+                        ? "opacity-50 cursor-not-allowed"
+                        : ""
+                    }
                   >
-                    Cancel
-                  </button>
+                    Add Page
+                  </Button>
                 )}
-                <button
-                  type="button"
-                  onClick={isEditing ? handleEditPage : handleAddPage}
-                  disabled={!newPageName.trim() || !newPagePath.trim()}
-                  className={`flex items-center gap-1 px-3 py-1.5 rounded text-sm ${
-                    !newPageName.trim() || !newPagePath.trim()
-                      ? "bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed"
-                      : "bg-primary-600 text-white hover:bg-primary-700 dark:hover:bg-primary-500"
-                  }`}
-                >
-                  {isEditing ? (
-                    <>Save Changes</>
-                  ) : (
-                    <>
-                      <PlusCircle size={14} />
-                      Add Page
-                    </>
-                  )}
-                </button>
               </div>
             </div>
           </div>
-        </div>
+        </Card>
       </div>
 
       <div className="mt-6 flex justify-end">
-        <button
+        <Button
           type="submit"
           disabled={isSubmitting || !projectId}
-          className={`px-4 py-2 rounded-md text-white ${
+          variant={!projectId || isSubmitting ? "outline" : "default"}
+          className={
             !projectId || isSubmitting
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-primary-600 hover:bg-primary-700"
-          } focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2`}
+              ? "bg-gray-400 text-white hover:bg-gray-400"
+              : ""
+          }
         >
           {isSubmitting ? "Saving..." : "Save Pages"}
-        </button>
+        </Button>
       </div>
     </form>
   );

@@ -4,6 +4,11 @@ import { requirementsService } from "../../services/requirementsService";
 import { useToast } from "../../contexts/ToastContext";
 import { RequirementsData } from "../../types/project";
 
+// Import shadcn UI components
+import Button from "../ui/Button";
+import Input from "../ui/Input";
+import Card from "../ui/Card";
+
 interface RequirementsFormProps {
   initialData?: RequirementsData;
   projectId?: string;
@@ -187,42 +192,41 @@ export default function RequirementsForm({
 
         <div className="space-y-2">
           {functionalReqs.map((req, index) => (
-            <div
+            <Card
               key={index}
-              className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md"
+              className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
             >
               <p className="dark:text-slate-300">{req}</p>
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="sm"
                 onClick={() => removeFunctionalRequirement(index)}
                 className="text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400"
               >
                 <Trash2 size={18} />
-              </button>
-            </div>
+              </Button>
+            </Card>
           ))}
         </div>
 
         <div className="flex gap-2">
-          <input
+          <Input
             type="text"
             value={newFunctionalReq}
             onChange={(e) => setNewFunctionalReq(e.target.value)}
             placeholder="Enter a functional requirement"
-            className="flex-1 p-2 border border-slate-300 dark:border-slate-600 rounded focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+            className="flex-1"
           />
-          <button
+          <Button
             type="button"
             onClick={addFunctionalRequirement}
             disabled={!newFunctionalReq.trim()}
-            className={`p-2 rounded-md flex items-center ${
-              !newFunctionalReq.trim()
-                ? "bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed"
-                : "bg-primary-600 text-white hover:bg-primary-700"
-            }`}
+            variant={!newFunctionalReq.trim() ? "outline" : "default"}
+            className={!newFunctionalReq.trim() ? "cursor-not-allowed" : ""}
           >
             <PlusCircle size={20} />
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -238,57 +242,57 @@ export default function RequirementsForm({
 
         <div className="space-y-2">
           {nonFunctionalReqs.map((req, index) => (
-            <div
+            <Card
               key={index}
-              className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md"
+              className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
             >
               <p className="dark:text-slate-300">{req}</p>
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="sm"
                 onClick={() => removeNonFunctionalRequirement(index)}
                 className="text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400"
               >
                 <Trash2 size={18} />
-              </button>
-            </div>
+              </Button>
+            </Card>
           ))}
         </div>
 
         <div className="flex gap-2">
-          <input
+          <Input
             type="text"
             value={newNonFunctionalReq}
             onChange={(e) => setNewNonFunctionalReq(e.target.value)}
             placeholder="Enter a non-functional requirement"
-            className="flex-1 p-2 border border-slate-300 dark:border-slate-600 rounded focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+            className="flex-1"
           />
-          <button
+          <Button
             type="button"
             onClick={addNonFunctionalRequirement}
             disabled={!newNonFunctionalReq.trim()}
-            className={`p-2 rounded-md flex items-center ${
-              !newNonFunctionalReq.trim()
-                ? "bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed"
-                : "bg-primary-600 text-white hover:bg-primary-700"
-            }`}
+            variant={!newNonFunctionalReq.trim() ? "outline" : "default"}
+            className={!newNonFunctionalReq.trim() ? "cursor-not-allowed" : ""}
           >
             <PlusCircle size={20} />
-          </button>
+          </Button>
         </div>
       </div>
 
       <div className="mt-6 flex justify-end">
-        <button
+        <Button
           type="submit"
           disabled={isSubmitting || !projectId}
-          className={`px-4 py-2 rounded-md text-white ${
+          variant={!projectId || isSubmitting ? "outline" : "default"}
+          className={
             !projectId || isSubmitting
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-primary-600 hover:bg-primary-700"
-          } focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2`}
+              ? "bg-gray-400 text-white hover:bg-gray-400"
+              : ""
+          }
         >
           {isSubmitting ? "Saving..." : "Save Requirements"}
-        </button>
+        </Button>
       </div>
     </form>
   );
