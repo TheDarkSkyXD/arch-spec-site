@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts";
 import UserAccountDropdown from "./UserAccountDropdown";
-import { Settings } from "lucide-react";
 
 const Navigation = () => {
   const { currentUser } = useAuth();
@@ -15,7 +14,6 @@ const Navigation = () => {
     { name: "Dashboard", path: "/", icon: null },
     { name: "Projects", path: "/projects", icon: null },
     { name: "Templates", path: "/templates", icon: null },
-    { name: "Settings", path: "/settings", icon: Settings },
   ];
 
   return (

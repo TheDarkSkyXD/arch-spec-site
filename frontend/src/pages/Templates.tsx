@@ -103,7 +103,10 @@ const Templates = () => {
         {isLoading && (
           <div className="text-center py-16 bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-slate-200 dark:border-slate-800">
             <div className="mx-auto w-16 h-16 flex items-center justify-center mb-4">
-              <Loader2 size={32} className="text-primary-600 dark:text-primary-400 animate-spin" />
+              <Loader2
+                size={32}
+                className="text-primary-600 dark:text-primary-400 animate-spin"
+              />
             </div>
             <h3 className="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-2">
               Loading templates
@@ -123,7 +126,9 @@ const Templates = () => {
             <h3 className="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-2">
               Error loading templates
             </h3>
-            <p className="text-slate-500 dark:text-slate-400 max-w-md mx-auto">{error}</p>
+            <p className="text-slate-500 dark:text-slate-400 max-w-md mx-auto">
+              {error}
+            </p>
           </div>
         )}
 
@@ -143,15 +148,11 @@ const Templates = () => {
                   className="bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden hover:shadow-md transition-shadow duration-200"
                 >
                   <div className="h-32 bg-gradient-to-r from-primary-100 to-blue-100 dark:from-primary-900/30 dark:to-blue-900/30 flex items-center justify-center relative">
-                    <div className="absolute top-3 right-3 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm px-2 py-1 rounded-full flex items-center gap-1 text-xs font-medium text-amber-600 dark:text-amber-400">
-                      <Star
-                        size={12}
-                        className="fill-amber-500 text-amber-500 dark:fill-amber-400 dark:text-amber-400"
-                      />
-                      <span>4.8</span>
-                    </div>
                     <div className="bg-white dark:bg-slate-800 rounded-lg p-3">
-                      <Package size={24} className="text-primary-600 dark:text-primary-400" />
+                      <Package
+                        size={24}
+                        className="text-primary-600 dark:text-primary-400"
+                      />
                     </div>
                   </div>
                   <div className="p-4">
@@ -196,7 +197,10 @@ const Templates = () => {
                 >
                   <div className="flex items-start gap-4">
                     <div className="shrink-0 w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
-                      <Package size={20} className="text-primary-600 dark:text-primary-400" />
+                      <Package
+                        size={20}
+                        className="text-primary-600 dark:text-primary-400"
+                      />
                     </div>
                     <div className="flex-1">
                       <div className="flex justify-between">
@@ -249,7 +253,10 @@ const Templates = () => {
         ) : !isLoading && !error ? (
           <div className="text-center py-16 bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-slate-200 dark:border-slate-800">
             <div className="mx-auto w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4">
-              <Package size={24} className="text-slate-500 dark:text-slate-400" />
+              <Package
+                size={24}
+                className="text-slate-500 dark:text-slate-400"
+              />
             </div>
             <h3 className="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-2">
               {searchQuery
