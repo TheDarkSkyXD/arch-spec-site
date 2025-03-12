@@ -3,21 +3,7 @@ Shared schema definitions to avoid circular imports.
 """
 from pydantic import BaseModel, Field
 from typing import Dict, Any, List, Optional, Union, Literal
-
-# TODO Review the TechStackData schema and remove it in favor of the ProjectTechStack schema below
-
-class TechStackData(BaseModel):
-    """Schema for the complete tech stack data."""
-    frontend: Dict[str, Any] = Field(default_factory=dict)
-    backend: Dict[str, Any] = Field(default_factory=dict)
-    database: Dict[str, Any] = Field(default_factory=dict)
-    hosting: Dict[str, Any] = Field(default_factory=dict)
-    authentication: Dict[str, Any] = Field(default_factory=dict)
-    
-    class Config:
-        populate_by_name = True
-
-# These are still in use in the project templates
+from datetime import datetime
 
 class Features(BaseModel):
     """Schema for features section"""
@@ -76,7 +62,48 @@ class Documentation(BaseModel):
         populate_by_name = True 
 
 
-# THIS IS THE LATEST PROJECT TECH STACK SCHEMA COMPATIBLE WITH THE TECH STACK SCHEMA
+# Timeline-related schemas
+class TimelineItem(BaseModel):
+    """Model for a timeline item."""
+    title: str
+    description: Optional[str] = None
+    start_date: Optional[datetime] = None
+    end_date: Optional[datetime] = None
+    status: Optional[str] = None
+    order: Optional[int] = None
+    
+    class Config:
+        populate_by_name = True
+        json_encoders = {
+            datetime: lambda dt: dt.isoformat() if dt else None
+        }
+
+
+# Budget-related schemas
+class BudgetItem(BaseModel):
+    """Model for a budget item."""
+    name: str
+    amount: float
+    category: Optional[str] = None
+    description: Optional[str] = None
+    order: Optional[int] = None
+    
+    class Config:
+        populate_by_name = True
+
+
+# Requirements-related schemas
+class Requirement(BaseModel):
+    """Model for a project requirement."""
+    id: Optional[str] = None
+    title: str
+    description: Optional[str] = None
+    priority: Optional[str] = None  # e.g., "high", "medium", "low"
+    status: Optional[str] = None  # e.g., "pending", "approved", "implemented"
+    order: Optional[int] = None
+    
+    class Config:
+        populate_by_name = True
 
 # Frontend Types
 class FrontendTechStack(BaseModel):

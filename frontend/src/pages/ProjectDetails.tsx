@@ -1,16 +1,21 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { projectsService } from "../services/projectsService";
+import { techStackService } from "../services/techStackService";
 import { ProjectBase } from "../types/project";
 import ProjectBasicsForm from "../components/forms/ProjectBasicsForm";
+import TechStackForm from "../components/forms/TechStackForm";
 import { ChevronLeft, Loader2 } from "lucide-react";
 import MainLayout from "../layouts/MainLayout";
+import { ProjectTechStack } from "../types/templates";
 
 const ProjectDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [project, setProject] = useState<ProjectBase | null>(null);
+  const [techStack, setTechStack] = useState<ProjectTechStack | null>(null);
   const [loading, setLoading] = useState(true);
+  const [techStackLoading, setTechStackLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -42,6 +47,27 @@ const ProjectDetails = () => {
     fetchProject();
   }, [id]);
 
+  // Fetch tech stack data when project ID is available
+  useEffect(() => {
+    const fetchTechStack = async () => {
+      if (!id) return;
+
+      setTechStackLoading(true);
+      try {
+        const techStackData = await techStackService.getTechStack(id);
+        setTechStack(techStackData);
+      } catch (err) {
+        console.error("Error fetching tech stack:", err);
+        // Not setting an error state here as the project should still display
+        // even if tech stack data fails to load
+      } finally {
+        setTechStackLoading(false);
+      }
+    };
+
+    fetchTechStack();
+  }, [id]);
+
   const handleProjectUpdate = (projectId: string) => {
     // Refresh project data after successful update
     projectsService.getProjectById(projectId).then((data) => {
@@ -49,6 +75,20 @@ const ProjectDetails = () => {
         setProject(data);
       }
     });
+  };
+
+  const handleTechStackUpdate = (updatedTechStack: ProjectTechStack) => {
+    // Update local state with new tech stack data
+    setTechStack(updatedTechStack);
+
+    // Refresh project data after successful tech stack update
+    if (id) {
+      projectsService.getProjectById(id).then((data) => {
+        if (data) {
+          setProject(data);
+        }
+      });
+    }
   };
 
   // Process arrays from the backend's comma-separated strings
@@ -140,6 +180,34 @@ const ProjectDetails = () => {
                   initialData={processProjectData(project)}
                   onSuccess={handleProjectUpdate}
                 />
+              </div>
+            </div>
+
+            {/* Tech Stack */}
+            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+              <div className="p-4 border-b border-slate-100 dark:border-slate-700">
+                <h2 className="text-lg font-medium text-slate-800 dark:text-slate-100">
+                  Technology Stack
+                </h2>
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  Configure the technology stack for your project
+                </p>
+              </div>
+              <div className="p-6">
+                {techStackLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-6 w-6 text-primary-600 animate-spin mr-3" />
+                    <span className="text-slate-600 dark:text-slate-300">
+                      Loading tech stack data...
+                    </span>
+                  </div>
+                ) : (
+                  <TechStackForm
+                    initialData={techStack}
+                    projectId={id}
+                    onSuccess={handleTechStackUpdate}
+                  />
+                )}
               </div>
             </div>
 

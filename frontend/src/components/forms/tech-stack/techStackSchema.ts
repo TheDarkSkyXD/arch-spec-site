@@ -42,17 +42,17 @@ export const techStackSchema = z
   })
   .refine(
     (data) => {
-      // If backend type is framework, require framework and language
+      // If backend type is framework, require framework
       if (data.backend_type === "framework") {
-        return !!data.backend_framework && !!data.backend_language;
+        return !!data.backend_framework;
       }
       // If backend type is baas, require service
       else if (data.backend_type === "baas") {
         return !!data.backend_service;
       }
-      // If backend type is serverless, require service and language
+      // If backend type is serverless, require service
       else if (data.backend_type === "serverless") {
-        return !!data.backend_service && !!data.backend_language;
+        return !!data.backend_service;
       }
       return true;
     },

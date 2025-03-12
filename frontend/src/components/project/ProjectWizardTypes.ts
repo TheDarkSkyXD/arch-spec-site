@@ -3,6 +3,9 @@ import {
   ProjectTemplate,
   Requirement,
 } from "../../types/project";
+import { ProjectTechStack } from "../../types/templates";
+
+// TODO These types should no longer be needed
 
 // Type definitions for form data
 export interface FeatureModule {
@@ -51,6 +54,10 @@ export interface ProjectWizardFormData extends Partial<ProjectCreate> {
       endpoints: ApiEndpoint[];
     };
   };
+  // Old tech stack format (kept for backward compatibility)
+  tech_stack?: TechStackFormData;
+  // New structured tech stack format
+  tech_stack_data?: ProjectTechStack;
 }
 
 export interface BasicsFormData {

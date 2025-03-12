@@ -9,10 +9,16 @@ import { useProjectWizard } from "../hooks/useProjectWizard";
 import TemplateSelectionStep from "../components/project/TemplateSelectionStep";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { ProjectTechStack } from "../types/templates";
 
 const NewProject = () => {
   const navigate = useNavigate();
+  const [projectId, setProjectId] = useState<string | undefined>(undefined);
+  const [techStack, setTechStack] = useState<ProjectTechStack | undefined>(
+    undefined
+  );
+
   const {
     selectedTemplate,
     loading,
@@ -27,13 +33,17 @@ const NewProject = () => {
     handleApiEndpointsSubmit,
     handleCreateProject,
   } = useProjectWizard();
-
-  // Check if we have the minimum required data (basics)
-  const hasBasicData = formData.name && formData.description;
-
   useEffect(() => {
     console.log("Selected Template:", selectedTemplate);
   }, [selectedTemplate]);
+
+  // Handle tech stack updates
+  const handleTechStackUpdated = (updatedTechStack: ProjectTechStack) => {
+    setTechStack(updatedTechStack);
+    if (handleTechStackSubmit) {
+      handleTechStackSubmit(updatedTechStack);
+    }
+  };
 
   return (
     <MainLayout showSidebar={false}>
@@ -92,13 +102,13 @@ const NewProject = () => {
             </div>
             <div className="p-6">
               <ProjectBasicsForm
-                onSuccess={(projectId) => {
-                  // Store the project ID in the form data or state if needed
+                onSuccess={(newProjectId) => {
+                  // Store the project ID in state
+                  setProjectId(newProjectId);
                   console.log(
                     "Project created/updated successfully with ID:",
-                    projectId
+                    newProjectId
                   );
-                  // You might want to navigate or update other components here
                 }}
               />
             </div>
@@ -112,22 +122,19 @@ const NewProject = () => {
               </h2>
               <p className="text-sm text-slate-500 dark:text-slate-400">
                 Define your project's technology stack
+                {!projectId && (
+                  <span className="ml-1 text-amber-500">
+                    (Save project basics first to enable)
+                  </span>
+                )}
               </p>
             </div>
             <div className="p-6">
               <TechStackForm
-                initialData={selectedTemplate?.techStack}
-                onSubmit={handleTechStackSubmit}
+                initialData={techStack || selectedTemplate?.techStack}
+                projectId={projectId}
+                onSuccess={handleTechStackUpdated}
               />
-              <div className="mt-4 flex justify-end">
-                <button
-                  type="submit"
-                  form="tech-stack-form"
-                  className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
-                >
-                  Save Tech Stack
-                </button>
-              </div>
             </div>
           </div>
 
@@ -262,15 +269,15 @@ const NewProject = () => {
                   Ready to create your project?
                 </h2>
                 <p className="text-slate-500 dark:text-slate-400 mb-6 text-center max-w-md">
-                  {hasBasicData
+                  {projectId
                     ? "Your project has the required information. Click below to create it."
                     : "Please fill in the Project Basics section (required) before creating your project."}
                 </p>
                 <button
                   onClick={handleCreateProject}
-                  disabled={!hasBasicData}
+                  disabled={!projectId}
                   className={`px-6 py-3 rounded-md text-white font-medium ${
-                    hasBasicData
+                    projectId
                       ? "bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
                       : "bg-gray-400 cursor-not-allowed"
                   }`}

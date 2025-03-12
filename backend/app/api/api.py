@@ -53,7 +53,7 @@ try:
     
     try:
         from .routes import project_sections
-        api_router.include_router(project_sections.router, tags=["project-sections"])
+        api_router.include_router(project_sections.router, prefix="/project-sections", tags=["project-sections"])
         logger.info("Project Sections router loaded successfully")
     except Exception as e:
         logger.error(f"Failed to load project sections router: {str(e)}")

@@ -8,10 +8,9 @@ from typing import Dict, List, Optional, Any
 from pydantic import BaseModel, Field
 import uuid
 
-from .project import TimelineItem, BudgetItem, Requirement
 from .shared_schemas import (
-    TechStackData, Features, Pages, DataModel, Api, 
-    Testing, ProjectStructure, Deployment, Documentation
+    BudgetItem, ProjectTechStack, Features, Pages, DataModel, Api, Requirement, 
+    Testing, ProjectStructure, Deployment, Documentation, TimelineItem
 )
 
 
@@ -92,7 +91,7 @@ class MetadataSectionUpdate(BaseModel):
 
 class TechStackSection(ProjectSection):
     """Tech stack section of a project."""
-    data: TechStackData = Field(default_factory=dict)
+    data: ProjectTechStack = Field(default_factory=dict)
 
 
 class FeaturesSection(ProjectSection):
@@ -139,7 +138,7 @@ class DocumentationSection(ProjectSection):
 
 class TechStackSectionUpdate(BaseModel):
     """Model for updating tech stack section."""
-    data: Optional[TechStackData] = None
+    data: Optional[ProjectTechStack] = None
     last_modified_by: Optional[str] = None
 
     class Config:

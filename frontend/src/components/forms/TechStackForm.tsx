@@ -8,6 +8,7 @@ import {
   UILibrary,
 } from "../../types/techStack";
 import { useTechStack } from "../../hooks/useDataQueries";
+import { techStackService } from "../../services/techStackService";
 
 // Import schema
 import {
@@ -24,22 +25,25 @@ import HostingSection from "./tech-stack/HostingSection";
 import StorageSection from "./tech-stack/StorageSection";
 import DeploymentSection from "./tech-stack/DeploymentSection";
 import { ProjectTechStack } from "../../types/templates";
+import { useToast } from "../../contexts/ToastContext";
 
 interface TechStackFormProps {
   initialData?: ProjectTechStack;
-  onSubmit: (data: TechStackFormData) => void;
-  onBack?: () => void;
+  projectId?: string;
+  onSuccess?: (techStackData: ProjectTechStack) => void;
 }
 
 const TechStackForm = ({
   initialData,
-  onSubmit,
-  onBack,
+  projectId,
+  onSuccess,
 }: TechStackFormProps) => {
+  const { showToast } = useToast();
   // State for options
   const [techStackOptions, setTechStackOptions] =
     useState<TechStackData | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const defaultValues: TechStackFormData = {
     frontend: "",
@@ -280,13 +284,6 @@ const TechStackForm = ({
       .sort((a, b) => a.id.localeCompare(b.id)) as Technology[];
   };
 
-  const getAllDeploymentServices = (): string[] => {
-    const deployment =
-      techStackOptions?.categories?.deployment?.platforms || [];
-
-    return deployment.sort();
-  };
-
   const getAllDeploymentContainerization = (): string[] => {
     const containerization =
       techStackOptions?.categories?.deployment?.containerization || [];
@@ -303,6 +300,50 @@ const TechStackForm = ({
   if (isLoading || !techStackOptions) {
     return <div className="p-4">Loading tech stack options...</div>;
   }
+
+  const onSubmit = async (data: TechStackFormData) => {
+    // If no project ID, can't save
+    if (!projectId) {
+      showToast({
+        title: "Error",
+        description: "Project must be saved before tech stack can be saved",
+        type: "error",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const result = await techStackService.saveTechStack(projectId, data);
+
+      if (result) {
+        showToast({
+          title: "Success",
+          description: "Tech stack saved successfully",
+          type: "success",
+        });
+
+        if (onSuccess) {
+          onSuccess(result);
+        }
+      } else {
+        showToast({
+          title: "Error",
+          description: "Failed to save tech stack",
+          type: "error",
+        });
+      }
+    } catch (error) {
+      console.error("Error saving tech stack:", error);
+      showToast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        type: "error",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <form
@@ -387,18 +428,19 @@ const TechStackForm = ({
         setValue={setTechStackValue}
       />
 
-      {/* Navigation buttons */}
-      {onBack && (
-        <div className="flex justify-between mt-4">
-          <button
-            type="button"
-            onClick={onBack}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-          >
-            Back
-          </button>
-        </div>
-      )}
+      <div className="mt-6 flex justify-end">
+        <button
+          type="submit"
+          disabled={isSubmitting || !projectId}
+          className={`px-4 py-2 rounded-md text-white ${
+            !projectId || isSubmitting
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-primary-600 hover:bg-primary-700"
+          } focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2`}
+        >
+          {isSubmitting ? "Saving..." : "Save Tech Stack"}
+        </button>
+      </div>
     </form>
   );
 };

@@ -37,10 +37,9 @@ from ..schemas.project_sections import (
     DeploymentSectionUpdate,
     DocumentationSectionUpdate
 )
-from ..schemas.project import TimelineItem, BudgetItem, Requirement
 from ..schemas.shared_schemas import (
-    TechStackData, Features, Pages, DataModel, Api, 
-    Testing, ProjectStructure, Deployment, Documentation
+    BudgetItem, ProjectTechStack, Features, Pages, DataModel, Api, 
+    Testing, ProjectStructure, Deployment, Documentation, TimelineItem
 )
 
 logger = logging.getLogger(__name__)
@@ -299,7 +298,7 @@ class ProjectSectionsService:
     @staticmethod
     async def create_or_update_tech_stack_section(
         project_id: str, 
-        data: Union[TechStackData, TechStackSectionUpdate], 
+        data: Union[ProjectTechStack, TechStackSectionUpdate], 
         user_id: Optional[str],
         database: AsyncIOMotorDatabase
     ) -> TechStackSection:

@@ -5,7 +5,8 @@ This module provides API routes for managing project sections.
 
 from fastapi import APIRouter, HTTPException, Depends, Path, Body
 from motor.motor_asyncio import AsyncIOMotorDatabase
-from typing import Dict, Any, Optional, Type
+from typing import Dict, Any, Type
+import logging
 
 from ...db.base import db
 from ...schemas.project_sections import (
@@ -38,18 +39,40 @@ from ...schemas.project_sections import (
 )
 from ...services.project_sections_service import ProjectSectionsService
 from ...schemas.shared_schemas import (
-    TechStackData, Features, Pages, DataModel, Api,
-    Testing, ProjectStructure, Deployment, Documentation
+    ProjectTechStack, Features
 )
 from ...core.firebase_auth import get_current_user
 
 router = APIRouter()
-
+logger = logging.getLogger(__name__)
 
 def get_db():
     """Get database instance."""
     return db.get_db()
 
+# Debug endpoint to help diagnose issues
+@router.get("/debug/{project_id}")
+async def debug_project_lookup(
+    project_id: str = Path(..., description="The project ID"),
+    database: AsyncIOMotorDatabase = Depends(get_db)
+):
+    """Debug endpoint to check project existence."""
+    # Try different lookup methods
+    project1 = await database.projects.find_one({"id": project_id})
+    project2 = await database.projects.find_one({"_id": project_id})
+    
+    return {
+        "project_id": project_id,
+        "lookup_by_id": {
+            "exists": project1 is not None,
+            "fields": list(project1.keys()) if project1 else None
+        },
+        "lookup_by__id": {
+            "exists": project2 is not None,
+            "fields": list(project2.keys()) if project2 else None
+        },
+        "collection_names": await database.list_collection_names()
+    }
 
 async def validate_project_exists_and_owned(
     project_id: str, 
@@ -71,14 +94,16 @@ async def validate_project_exists_and_owned(
         HTTPException: If the project doesn't exist or isn't owned by the user
     """
     user_id = str(current_user["_id"])
+    logger.debug(f"Validating project {project_id} for user {user_id}")
     project = await database.projects.find_one({"id": project_id, "user_id": user_id})
+    logger.debug(f"Project lookup result: {project is not None}")
     if project is None:
         raise HTTPException(status_code=404, detail="Project not found")
     return project
 
 
 # Timeline section routes
-@router.get("/projects/{project_id}/timeline", response_model=TimelineSection)
+@router.get("/{project_id}/timeline", response_model=TimelineSection)
 async def get_timeline_section(
     project_id: str = Path(..., description="The project ID"),
     database: AsyncIOMotorDatabase = Depends(get_db),
@@ -95,7 +120,7 @@ async def get_timeline_section(
     return section
 
 
-@router.put("/projects/{project_id}/timeline", response_model=TimelineSection)
+@router.put("/{project_id}/timeline", response_model=TimelineSection)
 async def update_timeline_section(
     update_data: TimelineSectionUpdate = Body(..., description="The timeline section update data"),
     project_id: str = Path(..., description="The project ID"),
@@ -114,7 +139,7 @@ async def update_timeline_section(
 
 
 # Budget section routes
-@router.get("/projects/{project_id}/budget", response_model=BudgetSection)
+@router.get("/{project_id}/budget", response_model=BudgetSection)
 async def get_budget_section(
     project_id: str = Path(..., description="The project ID"),
     database: AsyncIOMotorDatabase = Depends(get_db),
@@ -131,7 +156,7 @@ async def get_budget_section(
     return section
 
 
-@router.put("/projects/{project_id}/budget", response_model=BudgetSection)
+@router.put("/{project_id}/budget", response_model=BudgetSection)
 async def update_budget_section(
     update_data: BudgetSectionUpdate = Body(..., description="The budget section update data"),
     project_id: str = Path(..., description="The project ID"),
@@ -150,7 +175,7 @@ async def update_budget_section(
 
 
 # Requirements section routes
-@router.get("/projects/{project_id}/requirements", response_model=RequirementsSection)
+@router.get("/{project_id}/requirements", response_model=RequirementsSection)
 async def get_requirements_section(
     project_id: str = Path(..., description="The project ID"),
     database: AsyncIOMotorDatabase = Depends(get_db),
@@ -167,7 +192,7 @@ async def get_requirements_section(
     return section
 
 
-@router.put("/projects/{project_id}/requirements", response_model=RequirementsSection)
+@router.put("/{project_id}/requirements", response_model=RequirementsSection)
 async def update_requirements_section(
     update_data: RequirementsSectionUpdate = Body(..., description="The requirements section update data"),
     project_id: str = Path(..., description="The project ID"),
@@ -186,7 +211,7 @@ async def update_requirements_section(
 
 
 # Metadata section routes
-@router.get("/projects/{project_id}/metadata", response_model=MetadataSection)
+@router.get("/{project_id}/metadata", response_model=MetadataSection)
 async def get_metadata_section(
     project_id: str = Path(..., description="The project ID"),
     database: AsyncIOMotorDatabase = Depends(get_db),
@@ -203,7 +228,7 @@ async def get_metadata_section(
     return section
 
 
-@router.put("/projects/{project_id}/metadata", response_model=MetadataSection)
+@router.put("/{project_id}/metadata", response_model=MetadataSection)
 async def update_metadata_section(
     update_data: MetadataSectionUpdate = Body(..., description="The metadata section update data"),
     project_id: str = Path(..., description="The project ID"),
@@ -224,7 +249,7 @@ async def update_metadata_section(
 # Architecture sections routes
 
 # Tech stack section
-@router.get("/projects/{project_id}/tech-stack", response_model=TechStackSection)
+@router.get("/{project_id}/tech-stack", response_model=TechStackSection)
 async def get_tech_stack_section(
     project_id: str = Path(..., description="The project ID"),
     database: AsyncIOMotorDatabase = Depends(get_db),
@@ -236,13 +261,13 @@ async def get_tech_stack_section(
     section = await ProjectSectionsService.get_tech_stack_section(project_id, database)
     if section is None:
         # Return an empty section structure instead of 404
-        empty_data = TechStackData(frontend=None, backend=None, database=None)
+        empty_data = ProjectTechStack(frontend=None, backend=None, database=None)
         section = TechStackSection(project_id=project_id, data=empty_data)
     
     return section
 
 
-@router.put("/projects/{project_id}/tech-stack", response_model=TechStackSection)
+@router.put("/{project_id}/tech-stack", response_model=TechStackSection)
 async def update_tech_stack_section(
     update_data: TechStackSectionUpdate = Body(..., description="The tech stack section update data"),
     project_id: str = Path(..., description="The project ID"),
@@ -261,7 +286,7 @@ async def update_tech_stack_section(
 
 
 # Features section
-@router.get("/projects/{project_id}/features", response_model=FeaturesSection)
+@router.get("/{project_id}/features", response_model=FeaturesSection)
 async def get_features_section(
     project_id: str = Path(..., description="The project ID"),
     database: AsyncIOMotorDatabase = Depends(get_db),
@@ -279,7 +304,7 @@ async def get_features_section(
     return section
 
 
-@router.put("/projects/{project_id}/features", response_model=FeaturesSection)
+@router.put("/{project_id}/features", response_model=FeaturesSection)
 async def update_features_section(
     update_data: FeaturesSectionUpdate = Body(..., description="The features section update data"),
     project_id: str = Path(..., description="The project ID"),
@@ -309,7 +334,7 @@ def add_section_routes(
 ):
     """Add routes for a project section."""
     
-    @router.get(f"/projects/{{project_id}}/{route_path}", response_model=section_class)
+    @router.get(f"/{{project_id}}/{route_path}", response_model=section_class)
     async def get_section(
         project_id: str = Path(..., description="The project ID"),
         database: AsyncIOMotorDatabase = Depends(get_db),
@@ -325,7 +350,7 @@ def add_section_routes(
         
         return section
     
-    @router.put(f"/projects/{{project_id}}/{route_path}", response_model=section_class)
+    @router.put(f"/{{project_id}}/{route_path}", response_model=section_class)
     async def update_section(
         update_data: update_class = Body(..., description=f"The {description} section update data"),
         project_id: str = Path(..., description="The project ID"),
