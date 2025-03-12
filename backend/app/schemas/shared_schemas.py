@@ -5,6 +5,15 @@ from pydantic import BaseModel, Field
 from typing import Dict, Any, List, Optional, Union, Literal
 from datetime import datetime
 
+
+class Requirements(BaseModel):
+    """Schema for requirements section"""
+    functional: List[str] = Field(default_factory=list)
+    non_functional: List[str] = Field(default_factory=list) 
+    
+    class Config:
+        populate_by_name = True
+
 class Features(BaseModel):
     """Schema for features section"""
     features: Dict[str, Any] = Field(default_factory=dict)

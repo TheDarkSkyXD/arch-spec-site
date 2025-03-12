@@ -17,10 +17,10 @@ export default function RequirementsForm({
 }: RequirementsFormProps) {
   const { showToast } = useToast();
   const [functionalReqs, setFunctionalReqs] = useState<string[]>(
-    initialData?.functional_requirements || []
+    initialData?.functional || []
   );
   const [nonFunctionalReqs, setNonFunctionalReqs] = useState<string[]>(
-    initialData?.non_functional_requirements || []
+    initialData?.non_functional || []
   );
   const [newFunctionalReq, setNewFunctionalReq] = useState("");
   const [newNonFunctionalReq, setNewNonFunctionalReq] = useState("");
@@ -30,9 +30,10 @@ export default function RequirementsForm({
 
   // Effect to update local state when initial data changes
   useEffect(() => {
+    console.log("RequirementsForm initialData:", initialData);
     if (initialData) {
-      setFunctionalReqs(initialData.functional_requirements || []);
-      setNonFunctionalReqs(initialData.non_functional_requirements || []);
+      setFunctionalReqs(initialData.functional || []);
+      setNonFunctionalReqs(initialData.non_functional || []);
     }
   }, [initialData]);
 
@@ -46,10 +47,8 @@ export default function RequirementsForm({
             projectId
           );
           if (requirementsData) {
-            setFunctionalReqs(requirementsData.functional_requirements || []);
-            setNonFunctionalReqs(
-              requirementsData.non_functional_requirements || []
-            );
+            setFunctionalReqs(requirementsData.functional || []);
+            setNonFunctionalReqs(requirementsData.non_functional || []);
           }
         } catch (error) {
           console.error("Error fetching requirements:", error);
@@ -109,8 +108,8 @@ export default function RequirementsForm({
       setIsSubmitting(true);
       try {
         const data = {
-          functional_requirements: functionalReqs,
-          non_functional_requirements: nonFunctionalReqs,
+          functional: functionalReqs,
+          non_functional: nonFunctionalReqs,
         };
 
         const result = await requirementsService.saveRequirements(

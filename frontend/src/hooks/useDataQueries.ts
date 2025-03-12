@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { templatesService } from "../services/templatesService";
 import { techStackService } from "../services/techStackService";
 import { requirementsService } from "../services/requirementsService";
+import { featuresService, FeaturesData } from "../services/featuresService";
 import { useState, useEffect } from "react";
 import { RequirementsData } from "../types/project";
 
@@ -110,6 +111,41 @@ export const useRequirements = (projectId?: string) => {
     };
 
     fetchRequirements();
+  }, [projectId]);
+
+  return { data, isLoading, error };
+};
+
+// Features hook
+export const useFeatures = (projectId?: string) => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  const [data, setData] = useState<FeaturesData | null>(null);
+
+  useEffect(() => {
+    const fetchFeatures = async () => {
+      if (!projectId) {
+        setIsLoading(false);
+        return;
+      }
+
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const features = await featuresService.getFeatures(projectId);
+        setData(features);
+      } catch (err) {
+        console.error("Error fetching features:", err);
+        setError(
+          err instanceof Error ? err : new Error("Failed to fetch features")
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchFeatures();
   }, [projectId]);
 
   return { data, isLoading, error };

@@ -9,6 +9,6 @@ export interface ProjectBase {
 }
 
 export interface RequirementsData {
-  functional_requirements: string[];
-  non_functional_requirements: string[];
+  functional: string[];
+  non_functional: string[];
 }

@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import Dict, List, Optional, Any, Union
 
-from .shared_schemas import ProjectTechStack
+from .shared_schemas import ProjectTechStack, Requirements
 
 class FeatureModule(BaseModel):
     """Feature module configuration."""
@@ -13,7 +13,7 @@ class FeatureModule(BaseModel):
 
 class Features(BaseModel):
     """Features configuration."""
-    core_modules: List[FeatureModule] = Field(default_factory=list, alias="coreModules")
+    coreModules: List[FeatureModule] = Field(default_factory=list, alias="coreModules")
 
     class Config:
         populate_by_name = True
@@ -132,7 +132,8 @@ class ProjectTemplate(BaseModel):
     business_goals: str = Field(default="", alias="businessGoals")
     target_users: str = Field(default="", alias="targetUsers")
     domain: str = Field(default="")
-    tech_stack: ProjectTechStack = Field(alias="techStack")  # Using TechStackData directly
+    tech_stack: ProjectTechStack = Field(alias="techStack")
+    requirements: Requirements = Field(alias="requirements")
     features: Features
     pages: Pages
     data_model: DataModel = Field(alias="dataModel")

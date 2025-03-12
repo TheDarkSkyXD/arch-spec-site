@@ -6,10 +6,12 @@ import { ProjectBase, RequirementsData } from "../types/project";
 import ProjectBasicsForm from "../components/forms/ProjectBasicsForm";
 import TechStackForm from "../components/forms/TechStackForm";
 import RequirementsForm from "../components/forms/RequirementsForm";
+import FeaturesForm from "../components/forms/FeaturesForm";
 import { ChevronLeft, Loader2 } from "lucide-react";
 import MainLayout from "../layouts/MainLayout";
 import { ProjectTechStack } from "../types/templates";
-import { useRequirements } from "../hooks/useDataQueries";
+import { useRequirements, useFeatures } from "../hooks/useDataQueries";
+import { FeaturesData } from "../services/featuresService";
 
 const ProjectDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -20,9 +22,11 @@ const ProjectDetails = () => {
   const [techStackLoading, setTechStackLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Use the requirements hook
+  // Use the hooks
   const { data: requirements, isLoading: requirementsLoading } =
     useRequirements(id);
+
+  const { data: features, isLoading: featuresLoading } = useFeatures(id);
 
   useEffect(() => {
     const fetchProject = async () => {
@@ -98,6 +102,11 @@ const ProjectDetails = () => {
   };
 
   const handleRequirementsUpdate = (_updatedRequirements: RequirementsData) => {
+    // Update is handled by refetching from the backend
+    // We could implement a more sophisticated state management approach if needed
+  };
+
+  const handleFeaturesUpdate = (_updatedFeatures: FeaturesData) => {
     // Update is handled by refetching from the backend
     // We could implement a more sophisticated state management approach if needed
   };
@@ -246,6 +255,34 @@ const ProjectDetails = () => {
                     initialData={requirements || undefined}
                     projectId={id}
                     onSuccess={handleRequirementsUpdate}
+                  />
+                )}
+              </div>
+            </div>
+
+            {/* Features Section */}
+            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+              <div className="p-4 border-b border-slate-100 dark:border-slate-700">
+                <h2 className="text-lg font-medium text-slate-800 dark:text-slate-100">
+                  Features
+                </h2>
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  Configure the features and modules for your project
+                </p>
+              </div>
+              <div className="p-6">
+                {featuresLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-6 w-6 text-primary-600 animate-spin mr-3" />
+                    <span className="text-slate-600 dark:text-slate-300">
+                      Loading features data...
+                    </span>
+                  </div>
+                ) : (
+                  <FeaturesForm
+                    initialData={features || undefined}
+                    projectId={id}
+                    onSuccess={handleFeaturesUpdate}
                   />
                 )}
               </div>

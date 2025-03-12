@@ -216,6 +216,13 @@ class TemplatesService:
                 "hosting": {},
                 "authentication": {}
             }
+
+        # Ensure requirements are present
+        if "requirements" not in template:
+            template["requirements"] = {
+                "functional": [],
+                "non_functional": []
+            }
         
         # Ensure features is present
         if "features" not in template:

@@ -196,7 +196,7 @@ export default function ProjectReviewForm({
             </div>
             <div className="p-4">
               <div className="space-y-3">
-                {projectData.template_data.features.core_modules
+                {projectData.template_data.features.coreModules
                   .filter((module) => module.enabled)
                   .map((module, index) => (
                     <div key={index} className="flex items-start">

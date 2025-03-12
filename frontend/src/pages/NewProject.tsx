@@ -132,10 +132,12 @@ const NewProject = () => {
             </div>
             <div className="p-6">
               <RequirementsForm
-                initialData={{
-                  functional_requirements: [],
-                  non_functional_requirements: [],
-                }}
+                initialData={
+                  selectedTemplate?.requirements || {
+                    functional: [],
+                    non_functional: [],
+                  }
+                }
                 projectId={projectId}
                 onSuccess={(updatedRequirements) => {
                   console.log("Requirements updated:", updatedRequirements);
@@ -156,22 +158,16 @@ const NewProject = () => {
             </div>
             <div className="p-6">
               <FeaturesForm
-                initialData={{
-                  core_modules: [],
-                }}
-                onSubmit={() => {
-                  console.log("Features updated");
+                initialData={
+                  selectedTemplate?.features || {
+                    coreModules: [],
+                  }
+                }
+                projectId={projectId}
+                onSuccess={(updatedFeatures) => {
+                  console.log("Features updated:", updatedFeatures);
                 }}
               />
-              <div className="mt-4 flex justify-end">
-                <button
-                  type="submit"
-                  form="features-form"
-                  className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
-                >
-                  Save Features
-                </button>
-              </div>
             </div>
           </div>
 
@@ -187,11 +183,13 @@ const NewProject = () => {
             </div>
             <div className="p-6">
               <PagesForm
-                initialData={{
-                  public: [],
-                  authenticated: [],
-                  admin: [],
-                }}
+                initialData={
+                  selectedTemplate?.pages || {
+                    public: [],
+                    authenticated: [],
+                    admin: [],
+                  }
+                }
                 onSubmit={() => {
                   console.log("Pages updated");
                 }}
@@ -220,9 +218,11 @@ const NewProject = () => {
             </div>
             <div className="p-6">
               <ApiEndpointsForm
-                initialData={{
-                  endpoints: [],
-                }}
+                initialData={
+                  selectedTemplate?.api_endpoints || {
+                    endpoints: [],
+                  }
+                }
                 onSubmit={() => {
                   console.log("API Endpoints updated");
                 }}
