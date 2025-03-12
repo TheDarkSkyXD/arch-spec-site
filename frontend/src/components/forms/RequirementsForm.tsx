@@ -1,15 +1,14 @@
 import { useState } from "react";
 import { PlusCircle, Trash2, AlertCircle } from "lucide-react";
-import { Requirement } from "../../types/project";
 
 interface RequirementsFormProps {
   initialData: {
-    functional_requirements: Requirement[];
-    non_functional_requirements: Requirement[];
+    functional_requirements: string[];
+    non_functional_requirements: string[];
   };
   onSubmit: (data: {
-    functional_requirements: Requirement[];
-    non_functional_requirements: Requirement[];
+    functional_requirements: string[];
+    non_functional_requirements: string[];
   }) => void;
   onBack?: () => void;
 }
@@ -19,48 +18,36 @@ export default function RequirementsForm({
   onSubmit,
   onBack,
 }: RequirementsFormProps) {
-  const [functionalReqs, setFunctionalReqs] = useState<Requirement[]>(
+  const [functionalReqs, setFunctionalReqs] = useState<string[]>(
     initialData.functional_requirements || []
   );
-  const [nonFunctionalReqs, setNonFunctionalReqs] = useState<Requirement[]>(
+  const [nonFunctionalReqs, setNonFunctionalReqs] = useState<string[]>(
     initialData.non_functional_requirements || []
   );
   const [newFunctionalReq, setNewFunctionalReq] = useState("");
   const [newNonFunctionalReq, setNewNonFunctionalReq] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const createRequirement = (description: string): Requirement => ({
-    id: `temp-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-    description,
-    priority: "medium",
-    status: "proposed",
-    tags: [],
-    category: undefined,
-  });
-
   const addFunctionalRequirement = () => {
     if (!newFunctionalReq.trim()) return;
 
-    setFunctionalReqs([...functionalReqs, createRequirement(newFunctionalReq)]);
+    setFunctionalReqs([...functionalReqs, newFunctionalReq]);
     setNewFunctionalReq("");
   };
 
   const addNonFunctionalRequirement = () => {
     if (!newNonFunctionalReq.trim()) return;
 
-    setNonFunctionalReqs([
-      ...nonFunctionalReqs,
-      createRequirement(newNonFunctionalReq),
-    ]);
+    setNonFunctionalReqs([...nonFunctionalReqs, newNonFunctionalReq]);
     setNewNonFunctionalReq("");
   };
 
-  const removeFunctionalRequirement = (id: string) => {
-    setFunctionalReqs(functionalReqs.filter((req) => req.id !== id));
+  const removeFunctionalRequirement = (index: number) => {
+    setFunctionalReqs(functionalReqs.filter((_, i) => i !== index));
   };
 
-  const removeNonFunctionalRequirement = (id: string) => {
-    setNonFunctionalReqs(nonFunctionalReqs.filter((req) => req.id !== id));
+  const removeNonFunctionalRequirement = (index: number) => {
+    setNonFunctionalReqs(nonFunctionalReqs.filter((_, i) => i !== index));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -79,21 +66,6 @@ export default function RequirementsForm({
         functional_requirements: functionalReqs,
         non_functional_requirements: nonFunctionalReqs,
       });
-    }
-  };
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "low":
-        return "bg-green-100 text-green-800";
-      case "medium":
-        return "bg-blue-100 text-blue-800";
-      case "high":
-        return "bg-orange-100 text-orange-800";
-      case "critical":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-slate-100 text-slate-800";
     }
   };
 
@@ -126,24 +98,15 @@ export default function RequirementsForm({
         )}
 
         <div className="space-y-2">
-          {functionalReqs.map((req) => (
+          {functionalReqs.map((req, index) => (
             <div
-              key={req.id}
+              key={index}
               className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md"
             >
-              <div className="flex gap-2 items-center">
-                <span
-                  className={`inline-flex px-2 py-1 text-xs rounded-full ${getPriorityColor(
-                    req.priority
-                  )}`}
-                >
-                  {req.priority}
-                </span>
-                <p className="dark:text-slate-300">{req.description}</p>
-              </div>
+              <p className="dark:text-slate-300">{req}</p>
               <button
                 type="button"
-                onClick={() => removeFunctionalRequirement(req.id)}
+                onClick={() => removeFunctionalRequirement(index)}
                 className="text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400"
               >
                 <Trash2 size={18} />
@@ -186,24 +149,15 @@ export default function RequirementsForm({
         </p>
 
         <div className="space-y-2">
-          {nonFunctionalReqs.map((req) => (
+          {nonFunctionalReqs.map((req, index) => (
             <div
-              key={req.id}
+              key={index}
               className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md"
             >
-              <div className="flex gap-2 items-center">
-                <span
-                  className={`inline-flex px-2 py-1 text-xs rounded-full ${getPriorityColor(
-                    req.priority
-                  )}`}
-                >
-                  {req.priority}
-                </span>
-                <p className="dark:text-slate-300">{req.description}</p>
-              </div>
+              <p className="dark:text-slate-300">{req}</p>
               <button
                 type="button"
-                onClick={() => removeNonFunctionalRequirement(req.id)}
+                onClick={() => removeNonFunctionalRequirement(index)}
                 className="text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400"
               >
                 <Trash2 size={18} />

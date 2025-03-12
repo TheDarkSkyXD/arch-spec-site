@@ -92,19 +92,6 @@ class BudgetItem(BaseModel):
         populate_by_name = True
 
 
-# Requirements-related schemas
-class Requirement(BaseModel):
-    """Model for a project requirement."""
-    id: Optional[str] = None
-    title: str
-    description: Optional[str] = None
-    priority: Optional[str] = None  # e.g., "high", "medium", "low"
-    status: Optional[str] = None  # e.g., "pending", "approved", "implemented"
-    order: Optional[int] = None
-    
-    class Config:
-        populate_by_name = True
-
 # Frontend Types
 class FrontendTechStack(BaseModel):
     framework: str

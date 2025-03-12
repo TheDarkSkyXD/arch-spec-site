@@ -95,6 +95,11 @@ export interface ProjectTechStack {
   deployment?: DeploymentTechStack;
 }
 
+export interface Requirements {
+  functional: string[];
+  non_functional: string[];
+}
+
 export interface FeatureModule {
   name: string;
   description: string;
@@ -226,6 +231,7 @@ export interface ProjectTemplate {
   targetUsers: string;
   domain: string;
   techStack: ProjectTechStack;
+  requirements: Requirements;
   features: Features;
   pages: Pages;
   dataModel: DataModel;

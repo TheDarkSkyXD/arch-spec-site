@@ -9,8 +9,7 @@ from pydantic import BaseModel, Field
 import uuid
 
 from .shared_schemas import (
-    BudgetItem, ProjectTechStack, Features, Pages, DataModel, Api, Requirement, 
-    Testing, ProjectStructure, Deployment, Documentation, TimelineItem
+    BudgetItem, ProjectTechStack, Features, Pages, DataModel, Api, Testing, ProjectStructure, Deployment, Documentation, TimelineItem
 )
 
 
@@ -39,8 +38,8 @@ class BudgetSection(ProjectSection):
 
 class RequirementsSection(ProjectSection):
     """Requirements section of a project."""
-    functional: List[Requirement] = Field(default_factory=list)
-    non_functional: List[Requirement] = Field(default_factory=list)
+    functional: List[str] = Field(default_factory=list)
+    non_functional: List[str] = Field(default_factory=list)
 
 
 class MetadataSection(ProjectSection):
@@ -70,8 +69,8 @@ class BudgetSectionUpdate(BaseModel):
 
 class RequirementsSectionUpdate(BaseModel):
     """Model for updating requirements section."""
-    functional: Optional[List[Requirement]] = None
-    non_functional: Optional[List[Requirement]] = None
+    functional: Optional[List[str]] = None
+    non_functional: Optional[List[str]] = None
     last_modified_by: Optional[str] = None
 
     class Config:

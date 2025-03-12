@@ -49,6 +49,22 @@ PROJECT_TEMPLATES = [
                     "ci_cd": "GitHub Actions",
                 }
             },
+            "requirements": {
+                "functional": [
+                    "User Authentication System: Implement comprehensive authentication flows including registration, login, password reset, and social logins (Google, GitHub) through Supabase Auth. The system should maintain session state and handle token refresh automatically.",
+                    "Role-Based Access Control: Provide differentiated access levels for regular users and administrators. Admin users should have access to user management functionalities and system settings, while regular users should only access their own data and profile.",
+                    "Data Management Operations: Support complete CRUD operations for application items, with appropriate validation, error handling, and real-time updates. Items should be user-scoped to ensure data privacy.",
+                    "User Profile Management: Allow users to view and update their profile information, including personal details, preferences, and account settings. Profile changes should be persisted to the database immediately.",
+                    "Admin Dashboard & Analytics: Provide administrators with a dashboard showing key metrics, user statistics, and system health indicators. Include user management tools with the ability to view, edit, and manage user accounts."
+                ],
+                "non_functional": [
+                  "Security: Implement proper authentication mechanisms, data encryption, protection against common web vulnerabilities (XSS, CSRF, SQL injection), and secure API access. Follow security best practices for handling user data and credentials.",
+                  "Performance: Ensure application responsiveness with page load times under 2 seconds, efficient database queries, and optimized frontend rendering. Implement caching strategies for frequently accessed data.",
+                  "Usability & Accessibility: Create a responsive interface that works across desktop and mobile devices. Follow WCAG 2.1 AA standards for accessibility, ensuring the application is usable by people with various disabilities.",
+                  "Scalability: Design the application to handle increasing user loads without performance degradation. Implement database indexing strategies and optimize query patterns for large datasets.",
+                  "Maintainability: Structure code with clear organization, consistent naming conventions, and comprehensive documentation. Implement testing at unit, integration, and E2E levels to ensure code quality and facilitate future changes."
+                ]
+            },
             "features": {
                 "coreModules": [
                     {
