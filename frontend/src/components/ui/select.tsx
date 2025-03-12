@@ -1,11 +1,11 @@
-import * as React from "react"
-import { cn } from "../../lib/utils"
-import { ChevronDown } from "lucide-react"
+import * as React from "react";
+import { cn } from "../../lib/utils";
+import { ChevronDown } from "lucide-react";
 
 export interface SelectProps
   extends React.SelectHTMLAttributes<HTMLSelectElement> {
-  label?: string
-  error?: string
+  label?: string;
+  error?: string;
 }
 
 const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
@@ -23,11 +23,12 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
         <div className="relative">
           <select
             className={cn(
-              "block w-full rounded-md border border-slate-300 px-3 py-2 pr-8", 
+              "block w-full rounded-md border border-slate-300 px-3 py-2 pr-8",
               "shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500",
               "text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100",
               "disabled:cursor-not-allowed disabled:opacity-50",
               "dark:border-slate-600",
+              "appearance-none",
               error ? "border-red-500 focus:ring-red-500" : "",
               className
             )}
@@ -41,15 +42,13 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           </div>
         </div>
         {error && (
-          <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-            {error}
-          </p>
+          <p className="mt-1 text-sm text-red-600 dark:text-red-400">{error}</p>
         )}
       </div>
-    )
+    );
   }
-)
+);
 
-Select.displayName = "Select"
+Select.displayName = "Select";
 
-export { Select }
+export { Select };

@@ -3,6 +3,10 @@ import { TechStackFormData } from "./techStackSchema";
 import { useEffect, useRef } from "react";
 import { ProjectTechStack } from "../../../types/templates";
 
+// Import shadcn UI components
+import { Label } from "../../ui/label";
+import { Select } from "../../ui/select";
+
 interface DeploymentSectionProps {
   register: UseFormRegister<TechStackFormData>;
   deploymentCICDOptions: string[];
@@ -83,37 +87,22 @@ const DeploymentSection = ({
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label
-            htmlFor="deployment_ci_cd"
-            className="block text-sm font-medium text-slate-700 dark:text-slate-300"
-          >
-            CI/CD
-          </label>
-          <select
-            id="deployment_ci_cd"
-            {...register("deployment_ci_cd")}
-            className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
-          >
+          <Label htmlFor="deployment_ci_cd">CI/CD</Label>
+          <Select id="deployment_ci_cd" {...register("deployment_ci_cd")}>
             <option value="">Select CI/CD</option>
             {deploymentCICDOptions.map((option) => (
               <option key={option} value={option}>
                 {option}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
 
         <div>
-          <label
-            htmlFor="deployment_containerization"
-            className="block text-sm font-medium text-slate-700 dark:text-slate-300"
-          >
-            Containerization
-          </label>
-          <select
+          <Label htmlFor="deployment_containerization">Containerization</Label>
+          <Select
             id="deployment_containerization"
             {...register("deployment_containerization")}
-            className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
           >
             <option value="">Select Containerization</option>
             {deploymentContainerizationOptions.map((option) => (
@@ -121,7 +110,7 @@ const DeploymentSection = ({
                 {option}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
       </div>
     </div>

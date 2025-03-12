@@ -10,6 +10,10 @@ import {
 import { useTechStack } from "../../hooks/useDataQueries";
 import { techStackService } from "../../services/techStackService";
 
+// Import shadcn UI components
+import Button from "../ui/Button";
+import Card from "../ui/Card";
+
 // Import schema
 import {
   techStackSchema,
@@ -292,7 +296,7 @@ const TechStackForm = ({
   };
 
   if (isLoading || !techStackOptions) {
-    return <div className="p-4">Loading tech stack options...</div>;
+    return <Card className="p-4">Loading tech stack options...</Card>;
   }
 
   const onSubmit = async (data: TechStackFormData) => {
@@ -346,94 +350,109 @@ const TechStackForm = ({
       className="space-y-8"
     >
       {/* Frontend Section */}
-      <FrontendSection
-        register={register}
-        errors={errors}
-        frontendFrameworks={getFrontendFrameworks()}
-        uiLibraryOptions={getFrontendUILibraries()}
-        stateManagementOptions={getFrontendStateManagement()}
-        control={control}
-        setValue={setTechStackValue}
-        initialData={initialData}
-      />
+      <Card className="p-6">
+        <FrontendSection
+          register={register}
+          errors={errors}
+          frontendFrameworks={getFrontendFrameworks()}
+          uiLibraryOptions={getFrontendUILibraries()}
+          stateManagementOptions={getFrontendStateManagement()}
+          control={control}
+          setValue={setTechStackValue}
+          initialData={initialData}
+        />
+      </Card>
 
       {/* Backend Section */}
-      <BackendSection
-        register={register}
-        errors={errors}
-        backendFrameworks={getBackendFrameworks()}
-        backendBaaS={getBackendBaaS()}
-        backendRealtime={getBackendRealtime()}
-        backendFunctions={getBackendFunctions()}
-        backendServerless={getBackendServerless()}
-        initialData={initialData}
-        control={control}
-        setValue={setTechStackValue}
-      />
+      <Card className="p-6">
+        <BackendSection
+          register={register}
+          errors={errors}
+          backendFrameworks={getBackendFrameworks()}
+          backendBaaS={getBackendBaaS()}
+          backendRealtime={getBackendRealtime()}
+          backendFunctions={getBackendFunctions()}
+          backendServerless={getBackendServerless()}
+          initialData={initialData}
+          control={control}
+          setValue={setTechStackValue}
+        />
+      </Card>
 
       {/* Database Section */}
-      <DatabaseSection
-        register={register}
-        errors={errors}
-        allDatabases={getAllDatabases()}
-        allDatabaseHosting={getAllDatabaseHosting()}
-        allOrms={getAllOrms()}
-        initialData={initialData}
-        control={control}
-        setValue={setTechStackValue}
-      />
+      <Card className="p-6">
+        <DatabaseSection
+          register={register}
+          errors={errors}
+          allDatabases={getAllDatabases()}
+          allDatabaseHosting={getAllDatabaseHosting()}
+          allOrms={getAllOrms()}
+          initialData={initialData}
+          control={control}
+          setValue={setTechStackValue}
+        />
+      </Card>
 
       {/* Authentication Section */}
-      <AuthenticationSection
-        register={register}
-        authProviders={getAuthProviders()}
-        authMethods={getAuthMethods()}
-        initialData={initialData}
-        control={control}
-        setValue={setTechStackValue}
-      />
+      <Card className="p-6">
+        <AuthenticationSection
+          register={register}
+          authProviders={getAuthProviders()}
+          authMethods={getAuthMethods()}
+          initialData={initialData}
+          control={control}
+          setValue={setTechStackValue}
+        />
+      </Card>
 
       {/* Hosting Section */}
-      <HostingSection
-        register={register}
-        hostingFrontendOptions={getAllHostingFrontend()}
-        hostingBackendOptions={getAllHostingBackend()}
-        initialData={initialData}
-        control={control}
-        setValue={setTechStackValue}
-      />
+      <Card className="p-6">
+        <HostingSection
+          register={register}
+          hostingFrontendOptions={getAllHostingFrontend()}
+          hostingBackendOptions={getAllHostingBackend()}
+          initialData={initialData}
+          control={control}
+          setValue={setTechStackValue}
+        />
+      </Card>
 
       {/* Storage Section */}
-      <StorageSection
-        register={register}
-        storageOptions={getAllStorageServices()}
-        initialData={initialData}
-        control={control}
-        setValue={setTechStackValue}
-      />
+      <Card className="p-6">
+        <StorageSection
+          register={register}
+          storageOptions={getAllStorageServices()}
+          initialData={initialData}
+          control={control}
+          setValue={setTechStackValue}
+        />
+      </Card>
 
       {/* Deployment Section */}
-      <DeploymentSection
-        register={register}
-        deploymentCICDOptions={getAllDeploymentCICD()}
-        deploymentContainerizationOptions={getAllDeploymentContainerization()}
-        initialData={initialData}
-        control={control}
-        setValue={setTechStackValue}
-      />
+      <Card className="p-6">
+        <DeploymentSection
+          register={register}
+          deploymentCICDOptions={getAllDeploymentCICD()}
+          deploymentContainerizationOptions={getAllDeploymentContainerization()}
+          initialData={initialData}
+          control={control}
+          setValue={setTechStackValue}
+        />
+      </Card>
 
       <div className="mt-6 flex justify-end">
-        <button
+        <Button
           type="submit"
           disabled={isSubmitting || !projectId}
-          className={`px-4 py-2 rounded-md text-white ${
+          variant={!projectId || isSubmitting ? "outline" : "default"}
+          className={
             !projectId || isSubmitting
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-primary-600 hover:bg-primary-700"
-          } focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2`}
+              ? "bg-gray-400 text-white hover:bg-gray-400"
+              : ""
+          }
         >
           {isSubmitting ? "Saving..." : "Save Tech Stack"}
-        </button>
+        </Button>
       </div>
     </form>
   );

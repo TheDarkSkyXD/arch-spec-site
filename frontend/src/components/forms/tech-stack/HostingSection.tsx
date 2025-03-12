@@ -4,6 +4,10 @@ import { useEffect, useRef } from "react";
 import { ProjectTechStack } from "../../../types/templates";
 import { Technology } from "../../../types/techStack";
 
+// Import shadcn UI components
+import { Label } from "../../ui/label";
+import { Select } from "../../ui/select";
+
 interface HostingSectionProps {
   register: UseFormRegister<TechStackFormData>;
   hostingFrontendOptions: Technology[];
@@ -77,45 +81,27 @@ const HostingSection = ({
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label
-            htmlFor="hosting_frontend"
-            className="block text-sm font-medium text-slate-700 dark:text-slate-300"
-          >
-            Frontend Hosting
-          </label>
-          <select
-            id="hosting_frontend"
-            {...register("hosting_frontend")}
-            className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
-          >
+          <Label htmlFor="hosting_frontend">Frontend Hosting</Label>
+          <Select id="hosting_frontend" {...register("hosting_frontend")}>
             <option value="">Select Frontend Hosting</option>
             {hostingFrontendOptions.map((option) => (
               <option key={option.id} value={option.id}>
                 {option.id}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
 
         <div>
-          <label
-            htmlFor="hosting_backend"
-            className="block text-sm font-medium text-slate-700 dark:text-slate-300"
-          >
-            Backend Hosting
-          </label>
-          <select
-            id="hosting_backend"
-            {...register("hosting_backend")}
-            className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
-          >
+          <Label htmlFor="hosting_backend">Backend Hosting</Label>
+          <Select id="hosting_backend" {...register("hosting_backend")}>
             <option value="">Select Backend Hosting</option>
             {hostingBackendOptions.map((option) => (
               <option key={option.id} value={option.id}>
                 {option.id}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
       </div>
     </div>

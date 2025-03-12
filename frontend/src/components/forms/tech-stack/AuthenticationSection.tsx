@@ -2,6 +2,11 @@ import { UseFormRegister, Control, UseFormSetValue } from "react-hook-form";
 import { TechStackFormData } from "../tech-stack/techStackSchema";
 import { useEffect, useRef } from "react";
 import { ProjectTechStack } from "../../../types/templates";
+
+// Import shadcn UI components
+import { Label } from "../../ui/label";
+import { Select } from "../../ui/select";
+
 interface AuthenticationSectionProps {
   register: UseFormRegister<TechStackFormData>;
   authProviders: string[];
@@ -81,45 +86,27 @@ const AuthenticationSection = ({
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label
-            htmlFor="auth_provider"
-            className="block text-sm font-medium text-slate-700 dark:text-slate-300"
-          >
-            Provider
-          </label>
-          <select
-            id="auth_provider"
-            {...register("auth_provider")}
-            className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
-          >
+          <Label htmlFor="auth_provider">Provider</Label>
+          <Select id="auth_provider" {...register("auth_provider")}>
             <option value="">Select Auth Provider</option>
             {authProviders.map((auth) => (
               <option key={auth} value={auth}>
                 {auth}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
 
         <div>
-          <label
-            htmlFor="auth_methods"
-            className="block text-sm font-medium text-slate-700 dark:text-slate-300"
-          >
-            Methods
-          </label>
-          <select
-            id="auth_methods"
-            {...register("auth_methods")}
-            className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
-          >
+          <Label htmlFor="auth_methods">Methods</Label>
+          <Select id="auth_methods" {...register("auth_methods")}>
             <option value="">Select Auth Methods</option>
             {authMethods.map((auth) => (
               <option key={auth} value={auth}>
                 {auth}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
       </div>
     </div>

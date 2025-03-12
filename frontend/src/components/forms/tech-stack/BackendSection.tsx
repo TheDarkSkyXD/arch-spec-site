@@ -23,6 +23,10 @@ import {
   getBackendServiceOptions,
 } from "../../../utils/backendTechStackFilterUtils";
 
+// Import shadcn UI components
+import { Label } from "../../ui/label";
+import { Select } from "../../ui/select";
+
 interface BackendSectionProps {
   register: UseFormRegister<TechStackFormData>;
   errors: FormState<TechStackFormData>["errors"];
@@ -90,15 +94,6 @@ const BackendSection = ({
     }
   }, [initialData, setValue]);
 
-  // console.log("Selected Backend values:", {
-  //   type: backendType,
-  //   framework: backendFramework,
-  //   language: backendLanguage,
-  //   service: backendService,
-  //   realtime: backendRealtimeValue,
-  //   functions: backendFunctionsValue,
-  // });
-
   // Filter options based on selections using memoized values for performance
   const filteredFrameworks = useMemo(
     () => filterBackendFrameworkOptions(backendLanguage, backendFrameworks),
@@ -143,26 +138,6 @@ const BackendSection = ({
       getBackendServiceOptions(backendType, filteredBaaS, backendServerless),
     [backendType, filteredBaaS, backendServerless]
   );
-
-  // Debug log for filtered options
-  // useEffect(() => {
-  //   console.log("Filtered backend options:", {
-  //     frameworks: filteredFrameworks.map((f) => f.id),
-  //     selectedFramework: backendFramework,
-  //     realtime: filteredRealtime.map((r) => r.id),
-  //     functions: filteredFunctions.map((f) => f.id),
-  //     baas: filteredBaaS.map((b) => b.id),
-  //     services: serviceOptions.map((s) => s.id),
-  //   });
-  // }, [
-  //   filteredFrameworks,
-  //   backendFramework,
-  //   filteredRealtime,
-  //   filteredFunctions,
-  //   filteredBaaS,
-  //   serviceOptions,
-  //   backendFrameworks,
-  // ]);
 
   // Set initial values from the project template
   useEffect(() => {
@@ -320,29 +295,17 @@ const BackendSection = ({
 
       {/* Backend Type Selection */}
       <div className="mb-4">
-        <label
-          htmlFor="backend_type"
-          className="block text-sm font-medium text-slate-700 dark:text-slate-300"
-        >
-          Backend Type
-        </label>
-        <select
+        <Label htmlFor="backend_type">Backend Type</Label>
+        <Select
           id="backend_type"
           {...register("backend_type")}
-          className={`mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 ${
-            errors.backend_type ? "border-red-500 focus:ring-red-500" : ""
-          }`}
+          error={errors.backend_type?.message?.toString()}
         >
           <option value="">Select Backend Type</option>
           <option value="framework">Framework</option>
           <option value="baas">Backend as a Service (BaaS)</option>
           <option value="serverless">Serverless</option>
-        </select>
-        {errors.backend_type && (
-          <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-            {getErrorMessage(errors.backend_type)}
-          </p>
-        )}
+        </Select>
       </div>
 
       {/* Dynamic Fields Based on Backend Type */}
@@ -351,45 +314,29 @@ const BackendSection = ({
         {backendType === "framework" && (
           <>
             <div>
-              <label
-                htmlFor="backend_framework"
-                className="block text-sm font-medium text-slate-700 dark:text-slate-300"
-              >
-                Framework
-              </label>
-              <select
-                id="backend_framework"
-                {...register("backend_framework")}
-                className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
-              >
+              <Label htmlFor="backend_framework">Framework</Label>
+              <Select id="backend_framework" {...register("backend_framework")}>
                 <option value="">Select Framework</option>
                 {filteredFrameworks.map((framework) => (
                   <option key={framework.id} value={framework.id}>
                     {framework.id}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
 
             <div>
-              <label
-                htmlFor="backend_realtime"
-                className="block text-sm font-medium text-slate-700 dark:text-slate-300"
-              >
+              <Label htmlFor="backend_realtime">
                 Realtime Support (Optional)
-              </label>
-              <select
-                id="backend_realtime"
-                {...register("backend_realtime")}
-                className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
-              >
+              </Label>
+              <Select id="backend_realtime" {...register("backend_realtime")}>
                 <option value="">None</option>
                 {filteredRealtime.map((realtime) => (
                   <option key={realtime.id} value={realtime.id}>
                     {realtime.id}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
           </>
         )}
@@ -398,66 +345,43 @@ const BackendSection = ({
         {backendType === "baas" && (
           <>
             <div>
-              <label
-                htmlFor="backend_service"
-                className="block text-sm font-medium text-slate-700 dark:text-slate-300"
-              >
-                BaaS Service
-              </label>
-              <select
-                id="backend_service"
-                {...register("backend_service")}
-                className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
-              >
+              <Label htmlFor="backend_service">BaaS Service</Label>
+              <Select id="backend_service" {...register("backend_service")}>
                 <option value="">Select BaaS Service</option>
                 {serviceOptions.map((service) => (
                   <option key={service.id} value={service.id}>
                     {service.id}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
 
             <div>
-              <label
-                htmlFor="backend_functions"
-                className="block text-sm font-medium text-slate-700 dark:text-slate-300"
-              >
+              <Label htmlFor="backend_functions">
                 Serverless Functions (Optional)
-              </label>
-              <select
-                id="backend_functions"
-                {...register("backend_functions")}
-                className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
-              >
+              </Label>
+              <Select id="backend_functions" {...register("backend_functions")}>
                 <option value="">None</option>
                 {filteredFunctions.map((functions) => (
                   <option key={functions.id} value={functions.id}>
                     {functions.id}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
 
             <div>
-              <label
-                htmlFor="backend_realtime"
-                className="block text-sm font-medium text-slate-700 dark:text-slate-300"
-              >
+              <Label htmlFor="backend_realtime">
                 Realtime Support (Optional)
-              </label>
-              <select
-                id="backend_realtime"
-                {...register("backend_realtime")}
-                className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
-              >
+              </Label>
+              <Select id="backend_realtime" {...register("backend_realtime")}>
                 <option value="">None</option>
                 {filteredRealtime.map((realtime) => (
                   <option key={realtime.id} value={realtime.id}>
                     {realtime.id}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
           </>
         )}
@@ -466,24 +390,15 @@ const BackendSection = ({
         {backendType === "serverless" && (
           <>
             <div>
-              <label
-                htmlFor="backend_service"
-                className="block text-sm font-medium text-slate-700 dark:text-slate-300"
-              >
-                Serverless Service
-              </label>
-              <select
-                id="backend_service"
-                {...register("backend_service")}
-                className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
-              >
+              <Label htmlFor="backend_service">Serverless Service</Label>
+              <Select id="backend_service" {...register("backend_service")}>
                 <option value="">Select Serverless Service</option>
                 {serviceOptions.map((service) => (
                   <option key={service.id} value={service.id}>
                     {service.id}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
           </>
         )}

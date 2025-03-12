@@ -15,6 +15,11 @@ import {
   filterDatabaseHosting,
   filterOrmOptions,
 } from "../../../utils/databaseTechStackFilterUtils";
+
+// Import shadcn UI components
+import { Label } from "../../ui/label";
+import { Select } from "../../ui/select";
+
 interface DatabaseSectionProps {
   register: UseFormRegister<TechStackFormData>;
   errors: FormState<TechStackFormData>["errors"];
@@ -139,7 +144,7 @@ const DatabaseSection = ({
   useEffect(() => {
     // Auto-select database type if only one option is available in filtered databases
     if (filteredDatabases.length > 0 && !selectedDatabaseType) {
-      const types = [...new Set(filteredDatabases.map((db) => db.type))];
+      const types = [...new Set(filteredDatabases.map((db) => db.type || ""))];
       if (types.length === 1) {
         setValue("database_type", types[0], { shouldDirty: true });
         console.log("Auto-selected database type:", types[0]);
@@ -182,20 +187,6 @@ const DatabaseSection = ({
     selectedDatabaseOrm,
     setValue,
   ]);
-
-  // useEffect(() => {
-  //   console.log("Selected database values:", {
-  //     database_type: selectedDatabaseType,
-  //     database_system: selectedDatabaseSystem,
-  //     database_hosting: selectedDatabaseHosting,
-  //     database_orm: selectedDatabaseOrm,
-  //   });
-  // }, [
-  //   selectedDatabaseType,
-  //   selectedDatabaseSystem,
-  //   selectedDatabaseHosting,
-  //   selectedDatabaseOrm,
-  // ]);
 
   // Set initial values if they exist in the available options
   useEffect(() => {
@@ -270,84 +261,48 @@ const DatabaseSection = ({
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label
-            htmlFor="database_type"
-            className="block text-sm font-medium text-slate-700 dark:text-slate-300"
-          >
-            Type
-          </label>
-          <select
+          <Label htmlFor="database_type">Type</Label>
+          <Select
             id="database_type"
             {...register("database_type")}
-            className={`mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 ${
-              errors.database_type ? "border-red-500 focus:ring-red-500" : ""
-            }`}
+            error={errors.database_type?.message?.toString()}
           >
             <option value="">Select Database Type</option>
             <option value="sql">SQL</option>
             <option value="nosql">NoSQL</option>
-          </select>
-          {errors.database_type && (
-            <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-              {getErrorMessage(errors.database_type)}
-            </p>
-          )}
+          </Select>
         </div>
 
         <div>
-          <label
-            htmlFor="database_system"
-            className="block text-sm font-medium text-slate-700 dark:text-slate-300"
-          >
-            Database System
-          </label>
-          <select
-            id="database_system"
-            {...register("database_system")}
-            className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
-          >
+          <Label htmlFor="database_system">Database System</Label>
+          <Select id="database_system" {...register("database_system")}>
             <option value="">Select Database System</option>
             {filteredDatabases.map((db) => (
               <option key={db.id} value={db.id}>
                 {db.id}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
 
         <div>
-          <label
-            htmlFor="database_hosting"
-            className="block text-sm font-medium text-slate-700 dark:text-slate-300"
-          >
-            Database Hosting
-          </label>
-          <select
-            id="database_hosting"
-            {...register("database_hosting")}
-            className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
-          >
+          <Label htmlFor="database_hosting">Database Hosting</Label>
+          <Select id="database_hosting" {...register("database_hosting")}>
             <option value="">Select Database Hosting</option>
             {filteredDatabaseHosting.map((hosting) => (
               <option key={hosting.id} value={hosting.id}>
                 {hosting.id}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
 
         {/* ORM/Database Access dropdown */}
         <div>
-          <label
-            htmlFor="database_orm"
-            className="block text-sm font-medium text-slate-700 dark:text-slate-300"
-          >
-            ORM / Database Access
-          </label>
-          <select
+          <Label htmlFor="database_orm">ORM / Database Access</Label>
+          <Select
             id="database_orm"
             {...register("database_orm")}
-            className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
             disabled={selectedDatabaseType === "nosql"}
           >
             <option value="">Select ORM</option>
@@ -356,7 +311,7 @@ const DatabaseSection = ({
                 {orm.id}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
       </div>
     </div>

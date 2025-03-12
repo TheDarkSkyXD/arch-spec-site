@@ -16,6 +16,15 @@ import {
 } from "../../services/featuresService";
 import { useToast } from "../../contexts/ToastContext";
 
+// Import shadcn UI components
+import Button from "../ui/Button";
+import Input from "../ui/Input";
+import { Textarea } from "../ui/textarea";
+import { Checkbox } from "../ui/checkbox";
+import { Select } from "../ui/select";
+import Card from "../ui/Card";
+import { Label } from "../ui/label";
+
 interface FeaturesFormProps {
   initialData?: FeaturesData;
   projectId?: string;
@@ -337,20 +346,21 @@ export default function FeaturesForm({
         {/* Add new feature button */}
         {!isAddingFeature && !isEditingFeature && (
           <div className="mb-6">
-            <button
+            <Button
               type="button"
+              variant="default"
+              className="flex items-center"
               onClick={() => setIsAddingFeature(true)}
-              className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
             >
               <PlusCircle size={16} className="mr-2" />
               Add New Feature
-            </button>
+            </Button>
           </div>
         )}
 
         {/* Feature form (used for both adding and editing) */}
         {(isAddingFeature || isEditingFeature) && (
-          <div className="bg-slate-50 dark:bg-slate-700/30 p-4 border border-slate-200 dark:border-slate-700 rounded-lg mb-6">
+          <Card className="bg-slate-50 dark:bg-slate-700/30 p-4 mb-6">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-medium text-slate-800 dark:text-slate-100">
                 {isEditingFeature ? "Edit Feature" : "Add New Feature"}
@@ -367,21 +377,18 @@ export default function FeaturesForm({
             <div className="space-y-4">
               {/* Feature name */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                <Label htmlFor="feature-name">
                   Feature Name <span className="text-red-500">*</span>
-                </label>
-                <input
+                </Label>
+                <Input
+                  id="feature-name"
                   type="text"
                   value={featureForm.name}
                   onChange={(e) =>
                     handleFeatureFormChange("name", e.target.value)
                   }
                   placeholder="e.g., User Authentication"
-                  className={`w-full p-2 border ${
-                    errors.name
-                      ? "border-red-500"
-                      : "border-slate-300 dark:border-slate-600"
-                  } rounded focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100`}
+                  className={errors.name ? "border-red-500" : ""}
                 />
                 {errors.name && (
                   <p className="mt-1 text-sm text-red-500">{errors.name}</p>
@@ -390,22 +397,19 @@ export default function FeaturesForm({
 
               {/* Feature description */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                <Label htmlFor="feature-description">
                   Description <span className="text-red-500">*</span>
-                </label>
-                <textarea
+                </Label>
+                <Textarea
+                  id="feature-description"
                   value={featureForm.description}
                   onChange={(e) =>
                     handleFeatureFormChange("description", e.target.value)
                   }
                   rows={3}
                   placeholder="Describe what this feature does"
-                  className={`w-full p-2 border ${
-                    errors.description
-                      ? "border-red-500"
-                      : "border-slate-300 dark:border-slate-600"
-                  } rounded focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100`}
-                ></textarea>
+                  className={errors.description ? "border-red-500" : ""}
+                />
                 {errors.description && (
                   <p className="mt-1 text-sm text-red-500">
                     {errors.description}
@@ -415,67 +419,44 @@ export default function FeaturesForm({
 
               {/* Feature options */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
+                <div>
+                  <Checkbox
                     id="feature-enabled"
                     checked={featureForm.enabled}
-                    onChange={(e) =>
-                      handleFeatureFormChange("enabled", e.target.checked)
+                    onCheckedChange={(checked) =>
+                      handleFeatureFormChange("enabled", checked)
                     }
-                    className="h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
+                    label="Enabled by default"
                   />
-                  <label
-                    htmlFor="feature-enabled"
-                    className="ml-2 block text-sm text-slate-700 dark:text-slate-300"
-                  >
-                    Enabled by default
-                  </label>
                 </div>
 
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
+                <div>
+                  <Checkbox
                     id="feature-optional"
                     checked={featureForm.optional}
-                    onChange={(e) =>
-                      handleFeatureFormChange("optional", e.target.checked)
+                    onCheckedChange={(checked) =>
+                      handleFeatureFormChange("optional", checked)
                     }
-                    className="h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
+                    label="Optional (not required for implementation)"
                   />
-                  <label
-                    htmlFor="feature-optional"
-                    className="ml-2 block text-sm text-slate-700 dark:text-slate-300"
-                  >
-                    Optional (not required for implementation)
-                  </label>
                 </div>
               </div>
 
               {/* Provider options */}
               <div>
-                <div className="flex items-center mb-2">
-                  <input
-                    type="checkbox"
+                <div className="mb-2">
+                  <Checkbox
                     id="has-providers"
                     checked={showProviders}
-                    onChange={(e) => setShowProviders(e.target.checked)}
-                    className="h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
+                    onCheckedChange={(checked) => setShowProviders(checked)}
+                    label="This feature uses external providers"
                   />
-                  <label
-                    htmlFor="has-providers"
-                    className="ml-2 block text-sm text-slate-700 dark:text-slate-300"
-                  >
-                    This feature uses external providers
-                  </label>
                 </div>
 
                 {showProviders && (
                   <div className="mt-2">
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                      Available Providers
-                    </label>
-                    <select
+                    <Select
+                      label="Available Providers"
                       value={
                         (featureForm.providers && featureForm.providers[0]) ||
                         ""
@@ -486,7 +467,6 @@ export default function FeaturesForm({
                           e.target.value ? [e.target.value] : []
                         )
                       }
-                      className="w-full p-2 border border-slate-300 dark:border-slate-600 rounded focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                     >
                       <option value="">Select provider...</option>
                       <option value="Stripe">Stripe</option>
@@ -496,47 +476,44 @@ export default function FeaturesForm({
                       <option value="GCP">Google Cloud</option>
                       <option value="Firebase">Firebase</option>
                       <option value="Custom">Custom Implementation</option>
-                    </select>
+                    </Select>
                   </div>
                 )}
               </div>
 
               {/* Action buttons */}
               <div className="flex justify-end space-x-2 mt-2">
-                <button
+                <Button
                   type="button"
+                  variant="outline"
                   onClick={resetFeatureForm}
-                  className="px-4 py-2 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-md hover:bg-slate-50 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
                 >
                   Cancel
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
+                  variant="default"
                   onClick={
                     isEditingFeature ? handleEditFeature : handleAddFeature
                   }
-                  className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
                 >
                   {isEditingFeature ? "Save Changes" : "Add Feature"}
-                </button>
+                </Button>
               </div>
             </div>
-          </div>
+          </Card>
         )}
 
         {coreModules.length === 0 && !isAddingFeature && !isEditingFeature ? (
-          <div className="p-6 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-center">
+          <Card className="bg-slate-50 dark:bg-slate-800 text-center">
             <p className="text-slate-600 dark:text-slate-400">
               No features available. Add your first feature to get started.
             </p>
-          </div>
+          </Card>
         ) : (
           <div className="space-y-4">
             {coreModules.map((module, index) => (
-              <div
-                key={index}
-                className="p-4 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800"
-              >
+              <Card key={index} className="p-4 bg-white dark:bg-slate-800">
                 <div className="flex justify-between items-start mb-2">
                   <div>
                     <h3 className="font-medium text-slate-800 dark:text-slate-100">
@@ -601,15 +578,12 @@ export default function FeaturesForm({
                   module.providers &&
                   module.providers.length > 0 && (
                     <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700">
-                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                        Provider
-                      </label>
-                      <select
+                      <Select
+                        label="Provider"
                         value={module.providers[0] || ""}
                         onChange={(e) =>
                           handleProviderChange(index, e.target.value)
                         }
-                        className="w-full p-2 border border-slate-300 dark:border-slate-600 rounded focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                       >
                         <option value="">Select provider...</option>
                         <option value="Stripe">Stripe</option>
@@ -619,27 +593,28 @@ export default function FeaturesForm({
                         <option value="GCP">Google Cloud</option>
                         <option value="Firebase">Firebase</option>
                         <option value="Custom">Custom Implementation</option>
-                      </select>
+                      </Select>
                     </div>
                   )}
-              </div>
+              </Card>
             ))}
           </div>
         )}
       </div>
 
       <div className="mt-6 flex justify-end">
-        <button
+        <Button
           type="submit"
           disabled={isSubmitting || !projectId}
-          className={`px-4 py-2 rounded-md text-white ${
+          variant={!projectId || isSubmitting ? "outline" : "default"}
+          className={
             !projectId || isSubmitting
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-primary-600 hover:bg-primary-700"
-          } focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2`}
+              ? "bg-gray-400 text-white hover:bg-gray-400"
+              : ""
+          }
         >
           {isSubmitting ? "Saving..." : "Save Features"}
-        </button>
+        </Button>
       </div>
     </form>
   );

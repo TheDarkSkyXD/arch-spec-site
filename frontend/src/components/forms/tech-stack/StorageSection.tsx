@@ -4,6 +4,10 @@ import { useEffect, useRef } from "react";
 import { ProjectTechStack } from "../../../types/templates";
 import { Technology } from "../../../types/techStack";
 
+// Import shadcn UI components
+import { Label } from "../../ui/label";
+import { Select } from "../../ui/select";
+
 interface StorageSectionProps {
   register: UseFormRegister<TechStackFormData>;
   storageOptions: Technology[];
@@ -75,42 +79,24 @@ const StorageSection = ({
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label
-            htmlFor="storage_type"
-            className="block text-sm font-medium text-slate-700 dark:text-slate-300"
-          >
-            Storage Type
-          </label>
-          <select
-            id="storage_type"
-            {...register("storage_type")}
-            className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
-          >
+          <Label htmlFor="storage_type">Storage Type</Label>
+          <Select id="storage_type" {...register("storage_type")}>
             <option value="">Select Storage Type</option>
             <option value="objectStorage">Object Storage</option>
             <option value="fileSystem">File System</option>
-          </select>
+          </Select>
         </div>
 
         <div>
-          <label
-            htmlFor="storage_service"
-            className="block text-sm font-medium text-slate-700 dark:text-slate-300"
-          >
-            Storage Service
-          </label>
-          <select
-            id="storage_service"
-            {...register("storage_service")}
-            className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 px-3 py-2 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
-          >
+          <Label htmlFor="storage_service">Storage Service</Label>
+          <Select id="storage_service" {...register("storage_service")}>
             <option value="">Select Storage Service</option>
             {storageOptions.map((option) => (
               <option key={option.id} value={option.id}>
                 {option.id}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
       </div>
     </div>
