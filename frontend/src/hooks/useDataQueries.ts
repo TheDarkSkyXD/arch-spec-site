@@ -8,6 +8,7 @@ import { useState, useEffect } from "react";
 import { RequirementsData } from "../types/project";
 import { apiEndpointsService } from "../services/apiEndpointsService";
 import { Api } from "../types/templates";
+import { dataModelService, DataModelData } from "../services/dataModelService";
 
 // Query keys for different types of data
 export const QUERY_KEYS = {
@@ -223,6 +224,41 @@ export const useApiEndpoints = (projectId?: string) => {
     };
 
     fetchApiEndpoints();
+  }, [projectId]);
+
+  return { data, isLoading, error };
+};
+
+// Data Model hook
+export const useDataModel = (projectId?: string) => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  const [data, setData] = useState<DataModelData | null>(null);
+
+  useEffect(() => {
+    const fetchDataModel = async () => {
+      if (!projectId) {
+        setIsLoading(false);
+        return;
+      }
+
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const dataModel = await dataModelService.getDataModel(projectId);
+        setData(dataModel);
+      } catch (err) {
+        console.error("Error fetching data model:", err);
+        setError(
+          err instanceof Error ? err : new Error("Failed to fetch data model")
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchDataModel();
   }, [projectId]);
 
   return { data, isLoading, error };

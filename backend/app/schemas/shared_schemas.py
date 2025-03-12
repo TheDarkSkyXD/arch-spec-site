@@ -48,10 +48,38 @@ class Pages(BaseModel):
     class Config:
         populate_by_name = True
 
+class EntityField(BaseModel):
+    """Schema for entity field"""
+    name: str
+    type: str
+    primaryKey: Optional[bool] = False
+    generated: Optional[bool] = False
+    unique: Optional[bool] = False
+    required: Optional[bool] = False
+    default: Optional[str] = None
+    enum: Optional[List[str]] = Field(default_factory=list)
+
+
+class Entity(BaseModel):
+    """Schema for entity"""
+    name: str
+    description: str
+    fields: List[EntityField] = Field(default_factory=list)
+
+
+class Relationship(BaseModel):
+    """Schema for relationship"""
+    type: str
+    from_entity: str
+    to_entity: str
+    field: str
+
+
 class DataModel(BaseModel):
     """Schema for data model section"""
-    models: Dict[str, Any] = Field(default_factory=dict)
-    
+    entities: List[Entity] = Field(default_factory=list)
+    relationships: List[Relationship] = Field(default_factory=list)
+
     class Config:
         populate_by_name = True
 

@@ -9,7 +9,8 @@ import RequirementsForm from "../components/forms/RequirementsForm";
 import FeaturesForm from "../components/forms/FeaturesForm";
 import PagesForm from "../components/forms/PagesForm";
 import ApiEndpointsForm from "../components/forms/ApiEndpointsForm";
-import { ChevronLeft, Loader2 } from "lucide-react";
+import DataModelForm from "../components/forms/DataModelForm";
+import { ChevronLeft, Loader2, ChevronDown, ChevronUp } from "lucide-react";
 import MainLayout from "../layouts/MainLayout";
 import { Api, ProjectTechStack } from "../types/templates";
 import {
@@ -17,9 +18,22 @@ import {
   useFeatures,
   usePages,
   useApiEndpoints,
+  useDataModel,
 } from "../hooks/useDataQueries";
 import { FeaturesData } from "../services/featuresService";
 import { PagesData } from "../services/pagesService";
+import { DataModel } from "../types/templates";
+
+// Define section IDs for consistency
+enum SectionId {
+  BASICS = "basics",
+  TECH_STACK = "techStack",
+  REQUIREMENTS = "requirements",
+  FEATURES = "features",
+  PAGES = "pages",
+  DATA_MODEL = "dataModel",
+  API_ENDPOINTS = "apiEndpoints",
+}
 
 const ProjectDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -30,6 +44,27 @@ const ProjectDetails = () => {
   const [techStackLoading, setTechStackLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // State to track expanded sections
+  const [expandedSections, setExpandedSections] = useState<
+    Record<SectionId, boolean>
+  >({
+    [SectionId.BASICS]: true,
+    [SectionId.TECH_STACK]: false,
+    [SectionId.REQUIREMENTS]: false,
+    [SectionId.FEATURES]: false,
+    [SectionId.PAGES]: false,
+    [SectionId.DATA_MODEL]: false,
+    [SectionId.API_ENDPOINTS]: false,
+  });
+
+  // Function to toggle section expansion
+  const toggleSection = (sectionId: SectionId) => {
+    setExpandedSections((prev) => ({
+      ...prev,
+      [sectionId]: !prev[sectionId],
+    }));
+  };
+
   // Use the hooks
   const { data: requirements, isLoading: requirementsLoading } =
     useRequirements(id);
@@ -37,6 +72,8 @@ const ProjectDetails = () => {
   const { data: features, isLoading: featuresLoading } = useFeatures(id);
 
   const { data: pages, isLoading: pagesLoading } = usePages(id);
+
+  const { data: dataModel, isLoading: dataModelLoading } = useDataModel(id);
 
   const { data: apiEndpoints, isLoading: apiEndpointsLoading } =
     useApiEndpoints(id);
@@ -131,6 +168,11 @@ const ProjectDetails = () => {
     console.log("Pages updated:", _updatedPages);
   };
 
+  const handleDataModelUpdate = (_updatedDataModel: DataModel) => {
+    // Update is handled by refetching from the backend
+    console.log("Data Model updated:", _updatedDataModel);
+  };
+
   const handleApiEndpointsUpdate = (updatedApiEndpoints: Api) => {
     // Update is handled by refetching from the backend
     console.log("API Endpoints updated:", updatedApiEndpoints);
@@ -150,6 +192,36 @@ const ProjectDetails = () => {
       domain: project.domain || "",
     };
   };
+
+  // Reusable section header component
+  const SectionHeader = ({
+    title,
+    description,
+    sectionId,
+    isExpanded,
+  }: {
+    title: string;
+    description: string;
+    sectionId: SectionId;
+    isExpanded: boolean;
+  }) => (
+    <div
+      className="p-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center cursor-pointer"
+      onClick={() => toggleSection(sectionId)}
+    >
+      <div>
+        <h2 className="text-lg font-medium text-slate-800 dark:text-slate-100">
+          {title}
+        </h2>
+        <p className="text-sm text-slate-500 dark:text-slate-400">
+          {description}
+        </p>
+      </div>
+      <div className="text-slate-400 dark:text-slate-500">
+        {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+      </div>
+    </div>
+  );
 
   return (
     <MainLayout>
@@ -212,161 +284,188 @@ const ProjectDetails = () => {
           <div className="space-y-6">
             {/* Project Basics */}
             <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-              <div className="p-4 border-b border-slate-100 dark:border-slate-700">
-                <h2 className="text-lg font-medium text-slate-800 dark:text-slate-100">
-                  Project Details
-                </h2>
-                <p className="text-sm text-slate-500 dark:text-slate-400">
-                  Update the basic information about your project
-                </p>
-              </div>
-              <div className="p-6">
-                <ProjectBasicsForm
-                  initialData={processProjectData(project)}
-                  onSuccess={handleProjectUpdate}
-                />
-              </div>
+              <SectionHeader
+                title="Project Details"
+                description="Update the basic information about your project"
+                sectionId={SectionId.BASICS}
+                isExpanded={expandedSections[SectionId.BASICS]}
+              />
+              {expandedSections[SectionId.BASICS] && (
+                <div className="p-6">
+                  <ProjectBasicsForm
+                    initialData={processProjectData(project)}
+                    onSuccess={handleProjectUpdate}
+                  />
+                </div>
+              )}
             </div>
 
             {/* Tech Stack */}
             <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-              <div className="p-4 border-b border-slate-100 dark:border-slate-700">
-                <h2 className="text-lg font-medium text-slate-800 dark:text-slate-100">
-                  Technology Stack
-                </h2>
-                <p className="text-sm text-slate-500 dark:text-slate-400">
-                  Configure the technology stack for your project
-                </p>
-              </div>
-              <div className="p-6">
-                {techStackLoading ? (
-                  <div className="flex items-center justify-center py-8">
-                    <Loader2 className="h-6 w-6 text-primary-600 animate-spin mr-3" />
-                    <span className="text-slate-600 dark:text-slate-300">
-                      Loading tech stack data...
-                    </span>
-                  </div>
-                ) : (
-                  <TechStackForm
-                    initialData={techStack || undefined}
-                    projectId={id}
-                    onSuccess={handleTechStackUpdate}
-                  />
-                )}
-              </div>
+              <SectionHeader
+                title="Technology Stack"
+                description="Configure the technology stack for your project"
+                sectionId={SectionId.TECH_STACK}
+                isExpanded={expandedSections[SectionId.TECH_STACK]}
+              />
+              {expandedSections[SectionId.TECH_STACK] && (
+                <div className="p-6">
+                  {techStackLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="h-6 w-6 text-primary-600 animate-spin mr-3" />
+                      <span className="text-slate-600 dark:text-slate-300">
+                        Loading tech stack data...
+                      </span>
+                    </div>
+                  ) : (
+                    <TechStackForm
+                      initialData={techStack || undefined}
+                      projectId={id}
+                      onSuccess={handleTechStackUpdate}
+                    />
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Requirements Section */}
             <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-              <div className="p-4 border-b border-slate-100 dark:border-slate-700">
-                <h2 className="text-lg font-medium text-slate-800 dark:text-slate-100">
-                  Requirements
-                </h2>
-                <p className="text-sm text-slate-500 dark:text-slate-400">
-                  Define functional and non-functional requirements for your
-                  project
-                </p>
-              </div>
-              <div className="p-6">
-                {requirementsLoading ? (
-                  <div className="flex items-center justify-center py-8">
-                    <Loader2 className="h-6 w-6 text-primary-600 animate-spin mr-3" />
-                    <span className="text-slate-600 dark:text-slate-300">
-                      Loading requirements data...
-                    </span>
-                  </div>
-                ) : (
-                  <RequirementsForm
-                    initialData={requirements || undefined}
-                    projectId={id}
-                    onSuccess={handleRequirementsUpdate}
-                  />
-                )}
-              </div>
+              <SectionHeader
+                title="Requirements"
+                description="Define functional and non-functional requirements for your project"
+                sectionId={SectionId.REQUIREMENTS}
+                isExpanded={expandedSections[SectionId.REQUIREMENTS]}
+              />
+              {expandedSections[SectionId.REQUIREMENTS] && (
+                <div className="p-6">
+                  {requirementsLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="h-6 w-6 text-primary-600 animate-spin mr-3" />
+                      <span className="text-slate-600 dark:text-slate-300">
+                        Loading requirements data...
+                      </span>
+                    </div>
+                  ) : (
+                    <RequirementsForm
+                      initialData={requirements || undefined}
+                      projectId={id}
+                      onSuccess={handleRequirementsUpdate}
+                    />
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Features Section */}
             <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-              <div className="p-4 border-b border-slate-100 dark:border-slate-700">
-                <h2 className="text-lg font-medium text-slate-800 dark:text-slate-100">
-                  Features
-                </h2>
-                <p className="text-sm text-slate-500 dark:text-slate-400">
-                  Configure the features and modules for your project
-                </p>
-              </div>
-              <div className="p-6">
-                {featuresLoading ? (
-                  <div className="flex items-center justify-center py-8">
-                    <Loader2 className="h-6 w-6 text-primary-600 animate-spin mr-3" />
-                    <span className="text-slate-600 dark:text-slate-300">
-                      Loading features data...
-                    </span>
-                  </div>
-                ) : (
-                  <FeaturesForm
-                    initialData={features || undefined}
-                    projectId={id}
-                    onSuccess={handleFeaturesUpdate}
-                  />
-                )}
-              </div>
+              <SectionHeader
+                title="Features"
+                description="Configure the features and modules for your project"
+                sectionId={SectionId.FEATURES}
+                isExpanded={expandedSections[SectionId.FEATURES]}
+              />
+              {expandedSections[SectionId.FEATURES] && (
+                <div className="p-6">
+                  {featuresLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="h-6 w-6 text-primary-600 animate-spin mr-3" />
+                      <span className="text-slate-600 dark:text-slate-300">
+                        Loading features data...
+                      </span>
+                    </div>
+                  ) : (
+                    <FeaturesForm
+                      initialData={features || undefined}
+                      projectId={id}
+                      onSuccess={handleFeaturesUpdate}
+                    />
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Pages Section */}
             <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-              <div className="p-4 border-b border-slate-100 dark:border-slate-700">
-                <h2 className="text-lg font-medium text-slate-800 dark:text-slate-100">
-                  Pages
-                </h2>
-                <p className="text-sm text-slate-500 dark:text-slate-400">
-                  Configure the pages for your application
-                </p>
-              </div>
-              <div className="p-6">
-                {pagesLoading ? (
-                  <div className="flex items-center justify-center py-8">
-                    <Loader2 className="h-6 w-6 text-primary-600 animate-spin mr-3" />
-                    <span className="text-slate-600 dark:text-slate-300">
-                      Loading pages data...
-                    </span>
-                  </div>
-                ) : (
-                  <PagesForm
-                    initialData={pages || undefined}
-                    projectId={id}
-                    onSuccess={handlePagesUpdate}
-                  />
-                )}
-              </div>
+              <SectionHeader
+                title="Pages"
+                description="Configure the pages for your application"
+                sectionId={SectionId.PAGES}
+                isExpanded={expandedSections[SectionId.PAGES]}
+              />
+              {expandedSections[SectionId.PAGES] && (
+                <div className="p-6">
+                  {pagesLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="h-6 w-6 text-primary-600 animate-spin mr-3" />
+                      <span className="text-slate-600 dark:text-slate-300">
+                        Loading pages data...
+                      </span>
+                    </div>
+                  ) : (
+                    <PagesForm
+                      initialData={pages || undefined}
+                      projectId={id}
+                      onSuccess={handlePagesUpdate}
+                    />
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Data Model Section */}
+            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+              <SectionHeader
+                title="Data Model"
+                description="Configure the database entities and relationships"
+                sectionId={SectionId.DATA_MODEL}
+                isExpanded={expandedSections[SectionId.DATA_MODEL]}
+              />
+              {expandedSections[SectionId.DATA_MODEL] && (
+                <div className="p-6">
+                  {dataModelLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="h-6 w-6 text-primary-600 animate-spin mr-3" />
+                      <span className="text-slate-600 dark:text-slate-300">
+                        Loading data model...
+                      </span>
+                    </div>
+                  ) : (
+                    <DataModelForm
+                      initialData={dataModel || undefined}
+                      projectId={id}
+                      onSuccess={handleDataModelUpdate}
+                    />
+                  )}
+                </div>
+              )}
             </div>
 
             {/* API Endpoints Section */}
             <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-              <div className="p-4 border-b border-slate-100 dark:border-slate-700">
-                <h2 className="text-lg font-medium text-slate-800 dark:text-slate-100">
-                  API Endpoints
-                </h2>
-                <p className="text-sm text-slate-500 dark:text-slate-400">
-                  Configure the API endpoints for your application
-                </p>
-              </div>
-              <div className="p-6">
-                {apiEndpointsLoading ? (
-                  <div className="flex items-center justify-center py-8">
-                    <Loader2 className="h-6 w-6 text-primary-600 animate-spin mr-3" />
-                    <span className="text-slate-600 dark:text-slate-300">
-                      Loading API endpoints data...
-                    </span>
-                  </div>
-                ) : (
-                  <ApiEndpointsForm
-                    initialData={apiEndpoints || undefined}
-                    projectId={id}
-                    onSuccess={handleApiEndpointsUpdate}
-                  />
-                )}
-              </div>
+              <SectionHeader
+                title="API Endpoints"
+                description="Configure the API endpoints for your application"
+                sectionId={SectionId.API_ENDPOINTS}
+                isExpanded={expandedSections[SectionId.API_ENDPOINTS]}
+              />
+              {expandedSections[SectionId.API_ENDPOINTS] && (
+                <div className="p-6">
+                  {apiEndpointsLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="h-6 w-6 text-primary-600 animate-spin mr-3" />
+                      <span className="text-slate-600 dark:text-slate-300">
+                        Loading API endpoints data...
+                      </span>
+                    </div>
+                  ) : (
+                    <ApiEndpointsForm
+                      initialData={apiEndpoints || undefined}
+                      projectId={id}
+                      onSuccess={handleApiEndpointsUpdate}
+                    />
+                  )}
+                </div>
+              )}
             </div>
 
             {/* More project sections can be added here later */}

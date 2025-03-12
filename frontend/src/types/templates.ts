@@ -145,9 +145,10 @@ export interface Entity {
 
 export interface Relationship {
   type: string;
-  from: string;
-  to: string;
+  from_entity: string;
+  to_entity: string;
   field: string;
+  throughTable?: string;
 }
 
 export interface DataModel {
