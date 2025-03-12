@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts";
 import UserAccountDropdown from "./UserAccountDropdown";
+import { Settings } from "lucide-react";
 
 const Navigation = () => {
   const { currentUser } = useAuth();
@@ -11,9 +12,10 @@ const Navigation = () => {
   const isActive = (path: string) => location.pathname === path;
 
   const navItems = [
-    { name: "Dashboard", path: "/" },
-    { name: "Projects", path: "/projects" },
-    { name: "Templates", path: "/templates" },
+    { name: "Dashboard", path: "/", icon: null },
+    { name: "Projects", path: "/projects", icon: null },
+    { name: "Templates", path: "/templates", icon: null },
+    { name: "Settings", path: "/settings", icon: Settings },
   ];
 
   return (
@@ -41,6 +43,7 @@ const Navigation = () => {
                       : "border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700 dark:text-slate-300 dark:hover:text-white"
                   }`}
                 >
+                  {item.icon && <item.icon className="h-4 w-4 mr-2" />}
                   {item.name}
                 </Link>
               ))}
@@ -120,13 +123,14 @@ const Navigation = () => {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${
+                className={`flex items-center pl-3 pr-4 py-2 border-l-4 text-base font-medium ${
                   isActive(item.path)
                     ? "bg-primary-50 border-primary-500 text-primary-700 dark:bg-slate-700 dark:border-primary-400 dark:text-primary-400"
                     : "border-transparent text-slate-600 hover:bg-slate-50 hover:border-slate-300 hover:text-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
                 }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
+                {item.icon && <item.icon className="h-5 w-5 mr-3" />}
                 {item.name}
               </Link>
             ))}

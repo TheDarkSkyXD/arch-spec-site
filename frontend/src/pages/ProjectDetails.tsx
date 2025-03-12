@@ -7,11 +7,17 @@ import ProjectBasicsForm from "../components/forms/ProjectBasicsForm";
 import TechStackForm from "../components/forms/TechStackForm";
 import RequirementsForm from "../components/forms/RequirementsForm";
 import FeaturesForm from "../components/forms/FeaturesForm";
+import PagesForm from "../components/forms/PagesForm";
 import { ChevronLeft, Loader2 } from "lucide-react";
 import MainLayout from "../layouts/MainLayout";
 import { ProjectTechStack } from "../types/templates";
-import { useRequirements, useFeatures } from "../hooks/useDataQueries";
+import {
+  useRequirements,
+  useFeatures,
+  usePages,
+} from "../hooks/useDataQueries";
 import { FeaturesData } from "../services/featuresService";
+import { PagesData } from "../services/pagesService";
 
 const ProjectDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -27,6 +33,8 @@ const ProjectDetails = () => {
     useRequirements(id);
 
   const { data: features, isLoading: featuresLoading } = useFeatures(id);
+
+  const { data: pages, isLoading: pagesLoading } = usePages(id);
 
   useEffect(() => {
     const fetchProject = async () => {
@@ -111,6 +119,11 @@ const ProjectDetails = () => {
     // Update is handled by refetching from the backend
     // We could implement a more sophisticated state management approach if needed
     console.log("Features updated:", _updatedFeatures);
+  };
+
+  const handlePagesUpdate = (_updatedPages: PagesData) => {
+    // Update is handled by refetching from the backend
+    console.log("Pages updated:", _updatedPages);
   };
 
   // Process arrays from the backend's comma-separated strings
@@ -285,6 +298,34 @@ const ProjectDetails = () => {
                     initialData={features || undefined}
                     projectId={id}
                     onSuccess={handleFeaturesUpdate}
+                  />
+                )}
+              </div>
+            </div>
+
+            {/* Pages Section */}
+            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+              <div className="p-4 border-b border-slate-100 dark:border-slate-700">
+                <h2 className="text-lg font-medium text-slate-800 dark:text-slate-100">
+                  Pages
+                </h2>
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  Configure the pages for your application
+                </p>
+              </div>
+              <div className="p-6">
+                {pagesLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-6 w-6 text-primary-600 animate-spin mr-3" />
+                    <span className="text-slate-600 dark:text-slate-300">
+                      Loading pages data...
+                    </span>
+                  </div>
+                ) : (
+                  <PagesForm
+                    initialData={pages || undefined}
+                    projectId={id}
+                    onSuccess={handlePagesUpdate}
                   />
                 )}
               </div>

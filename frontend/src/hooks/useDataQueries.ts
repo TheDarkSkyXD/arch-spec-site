@@ -3,6 +3,7 @@ import { templatesService } from "../services/templatesService";
 import { techStackService } from "../services/techStackService";
 import { requirementsService } from "../services/requirementsService";
 import { featuresService, FeaturesData } from "../services/featuresService";
+import { pagesService, PagesData } from "../services/pagesService";
 import { useState, useEffect } from "react";
 import { RequirementsData } from "../types/project";
 
@@ -146,6 +147,41 @@ export const useFeatures = (projectId?: string) => {
     };
 
     fetchFeatures();
+  }, [projectId]);
+
+  return { data, isLoading, error };
+};
+
+// Pages hook
+export const usePages = (projectId?: string) => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  const [data, setData] = useState<PagesData | null>(null);
+
+  useEffect(() => {
+    const fetchPages = async () => {
+      if (!projectId) {
+        setIsLoading(false);
+        return;
+      }
+
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const pages = await pagesService.getPages(projectId);
+        setData(pages);
+      } catch (err) {
+        console.error("Error fetching pages:", err);
+        setError(
+          err instanceof Error ? err : new Error("Failed to fetch pages")
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPages();
   }, [projectId]);
 
   return { data, isLoading, error };

@@ -30,9 +30,20 @@ class Features(BaseModel):
     class Config:
         populate_by_name = True
 
+
+class PageComponent(BaseModel):
+    """Schema for page component"""
+    name: str
+    path: str
+    components: List[str] = Field(default_factory=list)
+    enabled: bool = True
+
+
 class Pages(BaseModel):
     """Schema for pages section"""
-    pages: Dict[str, Any] = Field(default_factory=dict)
+    public: List[PageComponent] = Field(default_factory=list)
+    authenticated: List[PageComponent] = Field(default_factory=list)
+    admin: List[PageComponent] = Field(default_factory=list)
     
     class Config:
         populate_by_name = True
