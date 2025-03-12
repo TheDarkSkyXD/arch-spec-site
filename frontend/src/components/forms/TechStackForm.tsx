@@ -74,10 +74,6 @@ const TechStackForm = ({
     defaultValues: defaultValues,
   });
 
-  useEffect(() => {
-    console.log("initialData", initialData);
-  }, [initialData]);
-
   // Use the data query hook instead of direct service call
   const { data: techStackData, isLoading: isTechStackLoading } = useTechStack();
 

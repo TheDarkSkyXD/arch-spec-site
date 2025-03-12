@@ -30,7 +30,6 @@ export default function RequirementsForm({
 
   // Effect to update local state when initial data changes
   useEffect(() => {
-    console.log("RequirementsForm initialData:", initialData);
     if (initialData) {
       setFunctionalReqs(initialData.functional || []);
       setNonFunctionalReqs(initialData.non_functional || []);

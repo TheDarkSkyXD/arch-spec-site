@@ -53,11 +53,6 @@ export const techStackService = {
         `${API_BASE_URL}/project-sections/${projectId}/tech-stack`
       );
 
-      if (!response.data || !response.data.data) {
-        console.error("Invalid tech stack response:", response.data);
-        return null;
-      }
-
       return response.data.data;
     } catch (error) {
       console.error(
