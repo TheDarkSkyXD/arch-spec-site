@@ -136,19 +136,11 @@ const NewProject = () => {
                   functional_requirements: [],
                   non_functional_requirements: [],
                 }}
-                onSubmit={() => {
-                  console.log("Requirements updated");
+                projectId={projectId}
+                onSuccess={(updatedRequirements) => {
+                  console.log("Requirements updated:", updatedRequirements);
                 }}
               />
-              <div className="mt-4 flex justify-end">
-                <button
-                  type="submit"
-                  form="requirements-form"
-                  className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
-                >
-                  Save Requirements
-                </button>
-              </div>
             </div>
           </div>
 

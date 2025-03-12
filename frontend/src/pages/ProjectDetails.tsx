@@ -2,12 +2,14 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { projectsService } from "../services/projectsService";
 import { techStackService } from "../services/techStackService";
-import { ProjectBase } from "../types/project";
+import { ProjectBase, RequirementsData } from "../types/project";
 import ProjectBasicsForm from "../components/forms/ProjectBasicsForm";
 import TechStackForm from "../components/forms/TechStackForm";
+import RequirementsForm from "../components/forms/RequirementsForm";
 import { ChevronLeft, Loader2 } from "lucide-react";
 import MainLayout from "../layouts/MainLayout";
 import { ProjectTechStack } from "../types/templates";
+import { useRequirements } from "../hooks/useDataQueries";
 
 const ProjectDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -17,6 +19,10 @@ const ProjectDetails = () => {
   const [loading, setLoading] = useState(true);
   const [techStackLoading, setTechStackLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Use the requirements hook
+  const { data: requirements, isLoading: requirementsLoading } =
+    useRequirements(id);
 
   useEffect(() => {
     const fetchProject = async () => {
@@ -89,6 +95,11 @@ const ProjectDetails = () => {
         }
       });
     }
+  };
+
+  const handleRequirementsUpdate = (_updatedRequirements: RequirementsData) => {
+    // Update is handled by refetching from the backend
+    // We could implement a more sophisticated state management approach if needed
   };
 
   // Process arrays from the backend's comma-separated strings
@@ -203,9 +214,38 @@ const ProjectDetails = () => {
                   </div>
                 ) : (
                   <TechStackForm
-                    initialData={techStack}
+                    initialData={techStack || undefined}
                     projectId={id}
                     onSuccess={handleTechStackUpdate}
+                  />
+                )}
+              </div>
+            </div>
+
+            {/* Requirements Section */}
+            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+              <div className="p-4 border-b border-slate-100 dark:border-slate-700">
+                <h2 className="text-lg font-medium text-slate-800 dark:text-slate-100">
+                  Requirements
+                </h2>
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  Define functional and non-functional requirements for your
+                  project
+                </p>
+              </div>
+              <div className="p-6">
+                {requirementsLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-6 w-6 text-primary-600 animate-spin mr-3" />
+                    <span className="text-slate-600 dark:text-slate-300">
+                      Loading requirements data...
+                    </span>
+                  </div>
+                ) : (
+                  <RequirementsForm
+                    initialData={requirements || undefined}
+                    projectId={id}
+                    onSuccess={handleRequirementsUpdate}
                   />
                 )}
               </div>

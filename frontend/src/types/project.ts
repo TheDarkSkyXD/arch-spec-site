@@ -7,3 +7,8 @@ export interface ProjectBase {
   target_users: string[];
   domain: string;
 }
+
+export interface RequirementsData {
+  functional_requirements: string[];
+  non_functional_requirements: string[];
+}

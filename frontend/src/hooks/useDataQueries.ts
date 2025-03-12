@@ -1,6 +1,9 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { templatesService } from "../services/templatesService";
 import { techStackService } from "../services/techStackService";
+import { requirementsService } from "../services/requirementsService";
+import { useState, useEffect } from "react";
+import { RequirementsData } from "../types/project";
 
 // Query keys for different types of data
 export const QUERY_KEYS = {
@@ -74,3 +77,40 @@ export function useRefreshTemplates() {
     },
   };
 }
+
+// Requirements hook
+export const useRequirements = (projectId?: string) => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  const [data, setData] = useState<RequirementsData | null>(null);
+
+  useEffect(() => {
+    const fetchRequirements = async () => {
+      if (!projectId) {
+        setIsLoading(false);
+        return;
+      }
+
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const requirements = await requirementsService.getRequirements(
+          projectId
+        );
+        setData(requirements);
+      } catch (err) {
+        console.error("Error fetching requirements:", err);
+        setError(
+          err instanceof Error ? err : new Error("Failed to fetch requirements")
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchRequirements();
+  }, [projectId]);
+
+  return { data, isLoading, error };
+};

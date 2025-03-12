@@ -1,0 +1,93 @@
+/**
+ * Service for requirements API interactions.
+ */
+import apiClient from "../api/apiClient";
+import { RequirementsData } from "../types/project";
+
+// Interface to match the backend response format
+interface RequirementsSection {
+  id: string;
+  project_id: string;
+  created_at: string;
+  updated_at: string;
+  version: number;
+  last_modified_by?: string;
+  functional: string[];
+  non_functional: string[];
+}
+
+// Define the API base URL to be consistent with other services
+const API_BASE_URL = "/api";
+
+export const requirementsService = {
+  /**
+   * Get requirements for a project
+   *
+   * @param projectId - Project ID
+   * @returns Promise containing the project requirements
+   */
+  async getRequirements(projectId: string): Promise<RequirementsData | null> {
+    try {
+      const response = await apiClient.get<RequirementsSection>(
+        `${API_BASE_URL}/project-sections/${projectId}/requirements`
+      );
+
+      if (!response.data) {
+        console.error("Invalid requirements response:", response.data);
+        return null;
+      }
+
+      return {
+        functional_requirements: response.data.functional || [],
+        non_functional_requirements: response.data.non_functional || [],
+      };
+    } catch (error) {
+      console.error(
+        `Error fetching requirements for project ${projectId}:`,
+        error
+      );
+      return null;
+    }
+  },
+
+  /**
+   * Save requirements for a project
+   *
+   * @param projectId - Project ID
+   * @param data - Requirements data
+   * @returns Promise containing the updated requirements
+   */
+  async saveRequirements(
+    projectId: string,
+    data: RequirementsData
+  ): Promise<RequirementsData | null> {
+    try {
+      // Create the payload in the correct format for the backend
+      const payload = {
+        functional: data.functional_requirements,
+        non_functional: data.non_functional_requirements,
+      };
+
+      const response = await apiClient.put<RequirementsSection>(
+        `${API_BASE_URL}/project-sections/${projectId}/requirements`,
+        payload
+      );
+
+      if (!response.data) {
+        console.error("Invalid requirements response:", response.data);
+        return null;
+      }
+
+      return {
+        functional_requirements: response.data.functional || [],
+        non_functional_requirements: response.data.non_functional || [],
+      };
+    } catch (error) {
+      console.error(
+        `Error saving requirements for project ${projectId}:`,
+        error
+      );
+      return null;
+    }
+  },
+};

@@ -1,30 +1,66 @@
-import { useState } from "react";
-import { PlusCircle, Trash2, AlertCircle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { PlusCircle, Trash2, AlertCircle, Loader2 } from "lucide-react";
+import { requirementsService } from "../../services/requirementsService";
+import { useToast } from "../../contexts/ToastContext";
+import { RequirementsData } from "../../types/project";
 
 interface RequirementsFormProps {
-  initialData: {
-    functional_requirements: string[];
-    non_functional_requirements: string[];
-  };
-  onSubmit: (data: {
-    functional_requirements: string[];
-    non_functional_requirements: string[];
-  }) => void;
+  initialData?: RequirementsData;
+  projectId?: string;
+  onSuccess?: (requirementsData: RequirementsData) => void;
 }
 
 export default function RequirementsForm({
   initialData,
-  onSubmit,
+  projectId,
+  onSuccess,
 }: RequirementsFormProps) {
+  const { showToast } = useToast();
   const [functionalReqs, setFunctionalReqs] = useState<string[]>(
-    initialData.functional_requirements || []
+    initialData?.functional_requirements || []
   );
   const [nonFunctionalReqs, setNonFunctionalReqs] = useState<string[]>(
-    initialData.non_functional_requirements || []
+    initialData?.non_functional_requirements || []
   );
   const [newFunctionalReq, setNewFunctionalReq] = useState("");
   const [newNonFunctionalReq, setNewNonFunctionalReq] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  // Effect to update local state when initial data changes
+  useEffect(() => {
+    if (initialData) {
+      setFunctionalReqs(initialData.functional_requirements || []);
+      setNonFunctionalReqs(initialData.non_functional_requirements || []);
+    }
+  }, [initialData]);
+
+  // Fetch requirements if projectId is provided but no initialData
+  useEffect(() => {
+    const fetchRequirements = async () => {
+      if (projectId && !initialData) {
+        setIsLoading(true);
+        try {
+          const requirementsData = await requirementsService.getRequirements(
+            projectId
+          );
+          if (requirementsData) {
+            setFunctionalReqs(requirementsData.functional_requirements || []);
+            setNonFunctionalReqs(
+              requirementsData.non_functional_requirements || []
+            );
+          }
+        } catch (error) {
+          console.error("Error fetching requirements:", error);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchRequirements();
+  }, [projectId, initialData]);
 
   const addFunctionalRequirement = () => {
     if (!newFunctionalReq.trim()) return;
@@ -48,24 +84,80 @@ export default function RequirementsForm({
     setNonFunctionalReqs(nonFunctionalReqs.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const newErrors: Record<string, string> = {};
 
-    if (functionalReqs.length === 0) {
-      newErrors.functional = "At least one functional requirement is needed";
-    }
+    // Validation can be optional, comment this out if you don't want to require at least one functional requirement
+    // if (functionalReqs.length === 0) {
+    //   newErrors.functional = "At least one functional requirement is needed";
+    // }
 
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length === 0) {
-      onSubmit({
-        functional_requirements: functionalReqs,
-        non_functional_requirements: nonFunctionalReqs,
-      });
+      if (!projectId) {
+        showToast({
+          title: "Error",
+          description: "Project must be saved before requirements can be saved",
+          type: "error",
+        });
+        return;
+      }
+
+      setIsSubmitting(true);
+      try {
+        const data = {
+          functional_requirements: functionalReqs,
+          non_functional_requirements: nonFunctionalReqs,
+        };
+
+        const result = await requirementsService.saveRequirements(
+          projectId,
+          data
+        );
+
+        if (result) {
+          showToast({
+            title: "Success",
+            description: "Requirements saved successfully",
+            type: "success",
+          });
+
+          if (onSuccess) {
+            onSuccess(result);
+          }
+        } else {
+          showToast({
+            title: "Error",
+            description: "Failed to save requirements",
+            type: "error",
+          });
+        }
+      } catch (error) {
+        console.error("Error saving requirements:", error);
+        showToast({
+          title: "Error",
+          description: "An unexpected error occurred",
+          type: "error",
+        });
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <Loader2 className="h-6 w-6 text-primary-600 animate-spin mr-3" />
+        <span className="text-slate-600 dark:text-slate-300">
+          Loading requirements...
+        </span>
+      </div>
+    );
+  }
 
   return (
     <form id="requirements-form" onSubmit={handleSubmit} className="space-y-8">
@@ -185,6 +277,20 @@ export default function RequirementsForm({
             <PlusCircle size={20} />
           </button>
         </div>
+      </div>
+
+      <div className="mt-6 flex justify-end">
+        <button
+          type="submit"
+          disabled={isSubmitting || !projectId}
+          className={`px-4 py-2 rounded-md text-white ${
+            !projectId || isSubmitting
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-primary-600 hover:bg-primary-700"
+          } focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2`}
+        >
+          {isSubmitting ? "Saving..." : "Save Requirements"}
+        </button>
       </div>
     </form>
   );
