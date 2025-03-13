@@ -115,6 +115,21 @@ class Testing(BaseModel):
     class Config:
         populate_by_name = True
 
+class GherkinTestCase(BaseModel):
+    """Schema for Gherkin format test case"""
+    feature: str
+    title: str
+    description: Optional[str] = None
+    tags: Optional[List[str]] = Field(default_factory=list)
+    scenarios: List[Dict[str, Any]] = Field(default_factory=list)
+
+class TestCases(BaseModel):
+    """Schema for test cases spec using Gherkin format"""
+    testCases: List[GherkinTestCase] = Field(default_factory=list)
+    
+    class Config:
+        populate_by_name = True
+
 class ProjectStructure(BaseModel):
     """Schema for project structure spec"""
     structure: Dict[str, Any] = Field(default_factory=dict)
@@ -245,3 +260,4 @@ class ProjectTechStack(BaseModel):
     hosting: Optional[HostingTechStack] = None
     storage: Optional[StorageTechStack] = None
     deployment: Optional[DeploymentTechStack] = None
+

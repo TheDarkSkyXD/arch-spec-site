@@ -24,6 +24,7 @@ from ...schemas.project_specs import (
     DataModelSpec,
     ApiSpec,
     TestingSpec,
+    TestCasesSpec,
     ProjectStructureSpec,
     DeploymentSpec,
     DocumentationSpec,
@@ -33,6 +34,7 @@ from ...schemas.project_specs import (
     DataModelSpecUpdate,
     ApiSpecUpdate,
     TestingSpecUpdate,
+    TestCasesSpecUpdate,
     ProjectStructureSpecUpdate,
     DeploymentSpecUpdate,
     DocumentationSpecUpdate
@@ -417,4 +419,12 @@ add_spec_routes(
     ProjectSpecsService.get_documentation_spec,
     ProjectSpecsService.create_or_update_documentation_spec,
     "documentation"
+)
+
+# Add routes for the test cases spec
+add_spec_routes(
+    "test_cases", "test-cases", TestCasesSpec, TestCasesSpecUpdate,
+    ProjectSpecsService.get_test_cases_spec,
+    ProjectSpecsService.create_or_update_test_cases_spec,
+    "test cases"
 ) 

@@ -10,6 +10,7 @@ import FeaturesForm from "../components/forms/FeaturesForm";
 import PagesForm from "../components/forms/PagesForm";
 import ApiEndpointsForm from "../components/forms/ApiEndpointsForm";
 import DataModelForm from "../components/forms/DataModelForm";
+import TestCasesForm from "../components/forms/TestCasesForm";
 import { ChevronLeft, Loader2, ChevronDown, ChevronUp } from "lucide-react";
 import MainLayout from "../layouts/MainLayout";
 import { Api, ProjectTechStack, Requirements } from "../types/templates";
@@ -19,8 +20,10 @@ import {
   usePages,
   useApiEndpoints,
   useDataModel,
+  useTestCases,
 } from "../hooks/useDataQueries";
 import { FeaturesData } from "../services/featuresService";
+import { TestCasesData } from "../services/testCasesService";
 import { Pages } from "../types/templates";
 import { DataModel } from "../types/templates";
 import ProjectBasicsPreview from "../components/previews/ProjectBasicsPreview";
@@ -30,6 +33,7 @@ import FeaturesPreview from "../components/previews/FeaturesPreview";
 import PagesPreview from "../components/previews/PagesPreview";
 import DataModelPreview from "../components/previews/DataModelPreview";
 import ApiEndpointsPreview from "../components/previews/ApiEndpointsPreview";
+import TestCasesPreview from "../components/previews/TestCasesPreview";
 import MarkdownActions from "../components/common/MarkdownActions";
 import DownloadAllMarkdown from "../components/common/DownloadAllMarkdown";
 import { markdownService } from "../services/markdown";
@@ -53,6 +57,7 @@ enum SectionId {
   PAGES = "pages",
   DATA_MODEL = "dataModel",
   API_ENDPOINTS = "apiEndpoints",
+  TEST_CASES = "testCases",
 }
 
 // Define view modes
@@ -81,6 +86,7 @@ const ProjectDetails = () => {
     [SectionId.PAGES]: false,
     [SectionId.DATA_MODEL]: false,
     [SectionId.API_ENDPOINTS]: false,
+    [SectionId.TEST_CASES]: false,
   });
 
   // State to track view mode (edit or preview) for each section
@@ -94,6 +100,7 @@ const ProjectDetails = () => {
     [SectionId.PAGES]: ViewMode.EDIT,
     [SectionId.DATA_MODEL]: ViewMode.EDIT,
     [SectionId.API_ENDPOINTS]: ViewMode.EDIT,
+    [SectionId.TEST_CASES]: ViewMode.EDIT,
   });
 
   // Function to toggle section expansion
@@ -124,6 +131,8 @@ const ProjectDetails = () => {
 
   const { data: apiEndpoints, isLoading: apiEndpointsLoading } =
     useApiEndpoints(id);
+
+  const { data: testCases, isLoading: testCasesLoading } = useTestCases(id);
 
   useEffect(() => {
     const fetchProject = async () => {
@@ -227,6 +236,11 @@ const ProjectDetails = () => {
     console.log("API Endpoints updated:", updatedApiEndpoints);
   };
 
+  const handleTestCasesUpdate = (_updatedTestCases: TestCasesData) => {
+    // Update is handled by refetching from the backend
+    console.log("Test Cases updated:", _updatedTestCases);
+  };
+
   // Process arrays from the backend's comma-separated strings
   const processProjectData = (project: ProjectBase) => {
     return {
@@ -294,6 +308,7 @@ const ProjectDetails = () => {
                 pages={pages || null}
                 dataModel={dataModel || null}
                 apiEndpoints={apiEndpoints || null}
+                testCases={testCases || null}
               />
             </div>
           )}
@@ -811,6 +826,75 @@ const ProjectDetails = () => {
                           data={apiEndpoints}
                           projectName={project.name}
                           isLoading={apiEndpointsLoading}
+                        />
+                      </TabsContent>
+                    </Tabs>
+                  )}
+                </div>
+              )}
+            </Card>
+
+            {/* Test Cases Section */}
+            <Card className="overflow-hidden">
+              <SectionHeader
+                title="Test Cases"
+                description="Define Gherkin-style test cases to document expected behavior"
+                sectionId={SectionId.TEST_CASES}
+                isExpanded={expandedSections[SectionId.TEST_CASES]}
+              />
+              {expandedSections[SectionId.TEST_CASES] && (
+                <div className="p-6">
+                  {testCasesLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="h-6 w-6 text-primary-600 animate-spin mr-3" />
+                      <span className="text-slate-600 dark:text-slate-300">
+                        Loading test cases data...
+                      </span>
+                    </div>
+                  ) : (
+                    <Tabs
+                      value={sectionViewModes[SectionId.TEST_CASES]}
+                      onValueChange={(value) =>
+                        changeViewMode(SectionId.TEST_CASES, value as ViewMode)
+                      }
+                      className="w-full"
+                    >
+                      <TabsList className="mb-4">
+                        <TabsTrigger value={ViewMode.EDIT}>Edit</TabsTrigger>
+                        <TabsTrigger value={ViewMode.PREVIEW}>
+                          Preview
+                        </TabsTrigger>
+                      </TabsList>
+
+                      <TabsContent value={ViewMode.EDIT}>
+                        {testCases && (
+                          <div className="flex justify-end mb-4">
+                            <MarkdownActions
+                              markdown={markdownService.generateTestCasesMarkdown(
+                                testCases
+                              )}
+                              fileName={markdownService.generateFileName(
+                                project.name,
+                                "test-cases"
+                              )}
+                            />
+                          </div>
+                        )}
+                        <TestCasesForm
+                          initialData={testCases || undefined}
+                          projectId={id}
+                          onSuccess={handleTestCasesUpdate}
+                        />
+                      </TabsContent>
+
+                      <TabsContent
+                        value={ViewMode.PREVIEW}
+                        className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg"
+                      >
+                        <TestCasesPreview
+                          data={testCases}
+                          projectName={project.name}
+                          isLoading={testCasesLoading}
                         />
                       </TabsContent>
                     </Tabs>

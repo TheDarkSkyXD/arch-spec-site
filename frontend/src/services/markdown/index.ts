@@ -5,6 +5,7 @@ import { generateFeaturesMarkdown } from "./features";
 import { generatePagesMarkdown } from "./pages";
 import { generateDataModelMarkdown } from "./dataModel";
 import { generateApiEndpointsMarkdown } from "./apiEndpoints";
+import { generateTestCasesMarkdown } from "./testCases";
 import { formatObject, generateFileName } from "./utils";
 import { generateMarkdownZip } from "./markdownZip";
 
@@ -20,6 +21,7 @@ export const markdownService = {
   generatePagesMarkdown,
   generateDataModelMarkdown,
   generateApiEndpointsMarkdown,
+  generateTestCasesMarkdown,
   generateFileName,
   generateMarkdownZip,
 };
@@ -34,5 +36,6 @@ export {
   generatePagesMarkdown,
   generateDataModelMarkdown,
   generateApiEndpointsMarkdown,
+  generateTestCasesMarkdown,
   generateFileName,
 };

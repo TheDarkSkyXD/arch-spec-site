@@ -12,6 +12,7 @@ from app.ai.tools.print_pages import print_pages_input_schema
 from app.ai.tools.print_data_model import print_data_model_input_schema
 from app.ai.tools.print_api_endpoints import print_api_endpoints_input_schema
 from app.ai.tools.print_tech_stack import print_tech_stack_input_schema
+from app.ai.tools.print_test_cases import print_test_cases_input_schema
 from app.ai.prompts.project_description import project_description_system_prompt
 from app.ai.prompts.business_goals import business_goals_system_prompt_create, business_goals_system_prompt_enhance
 from app.ai.prompts.target_users import target_users_system_prompt_create, target_users_system_prompt_enhance
@@ -21,6 +22,7 @@ from app.ai.prompts.pages import get_pages_user_prompt
 from app.ai.prompts.data_model import get_data_model_user_prompt
 from app.ai.prompts.api_endpoints import get_api_endpoints_user_prompt
 from app.ai.prompts.tech_stack import get_tech_stack_user_prompt
+from app.ai.prompts.test_cases import get_test_cases_user_prompt
 
 from ...schemas.ai_text import (
     DescriptionEnhanceRequest, 
@@ -45,7 +47,10 @@ from ...schemas.ai_text import (
     ApiData,
     TechStackEnhanceRequest,
     TechStackEnhanceResponse,
-    TechStackRecommendation
+    TechStackRecommendation,
+    TestCasesEnhanceRequest,
+    TestCasesEnhanceResponse,
+    TestCasesData
 )
 from ...services.ai_service import AnthropicClient
 from ...core.firebase_auth import get_current_user
@@ -71,6 +76,9 @@ def extract_data_from_response(response: Dict[str, Any], schema_class: Type[T], 
     Raises:
         HTTPException: If data cannot be extracted after all fallback attempts
     """
+    
+    logger.info(f"Response: {response}")
+    
     # Attempt 1: Standard extraction from "data" field
     if "data" in response:
         try:
@@ -108,6 +116,17 @@ def extract_data_from_response(response: Dict[str, Any], schema_class: Type[T], 
                 return schema_class(**json_data)
         except Exception as e:
             logger.warning(f"Failed to extract JSON from string response: {str(e)}")
+    
+    # Attempt 5: For TestCasesData, provide empty default structure if response is empty
+    if schema_class.__name__ == "TestCasesData" and (
+        isinstance(response, dict) and len(response) == 0 or 
+        isinstance(response, dict) and "data" in response and len(response["data"]) == 0
+    ):
+        logger.warning("Empty response detected for TestCasesData. Creating default empty structure.")
+        try:
+            return schema_class(testCases=[])
+        except Exception as e:
+            logger.warning(f"Failed to create default TestCasesData structure: {str(e)}")
     
     # If we've reached this point, log details about the response for debugging
     logger.error(f"Failed to extract data after all fallback attempts. Response structure: {type(response)}")
@@ -395,12 +414,9 @@ async def enhance_features(
         
         user_prompt = get_features_user_prompt(request.project_description, formatted_goals, formatted_requirements, formatted_features)
         
-        # Define the tool schema for print_features
-        tool_schema = print_features_input_schema()
-        
         # Generate the tool use response
         messages = [{"role": "user", "content": user_prompt}]
-        response = client.get_tool_use_response(system_message, [tool_schema], messages)
+        response = client.get_tool_use_response(system_message, [print_features_input_schema()], messages)
         
         if "error" in response:
             logger.error(f"Error in AI tool use: {response['error']}")
@@ -458,12 +474,9 @@ async def enhance_pages(
         # Create the user message
         user_prompt = get_pages_user_prompt(request.project_description, formatted_features, formatted_requirements, formatted_existing_pages)
         
-        # Define the tool schema for print_screens
-        tool_schema = print_pages_input_schema()
-        
         # Generate the tool use response
         messages = [{"role": "user", "content": user_prompt}]
-        response = client.get_tool_use_response(system_message, [tool_schema], messages)
+        response = client.get_tool_use_response(system_message, [print_pages_input_schema()], messages)
         
         if "error" in response:
             logger.error(f"Error in AI tool use: {response['error']}")
@@ -520,13 +533,10 @@ async def enhance_data_model(
             formatted_data_model = json.dumps(request.existing_data_model, indent=2)
         
         user_prompt = get_data_model_user_prompt(request.project_description, formatted_features, formatted_requirements, formatted_data_model)
-        
-        # Define the tool schema for print_data_model
-        tool_schema = print_data_model_input_schema()
-        
+
         # Generate the tool use response
         messages = [{"role": "user", "content": user_prompt}]
-        response = client.get_tool_use_response(system_message, [tool_schema], messages)
+        response = client.get_tool_use_response(system_message, [print_data_model_input_schema()], messages)
         
         if "error" in response:
             logger.error(f"Error in AI tool use: {response['error']}")
@@ -581,13 +591,10 @@ async def enhance_api_endpoints(
             formatted_data_models, 
             formatted_requirements
         )
-        
-        # Define the tool schema for print_api_endpoints
-        tool_schema = print_api_endpoints_input_schema()
-        
+
         # Generate the tool use response
         messages = [{"role": "user", "content": user_prompt}]
-        response = client.get_tool_use_response(system_message, [tool_schema], messages)
+        response = client.get_tool_use_response(system_message, [print_api_endpoints_input_schema()], messages)
         
         if "error" in response:
             logger.error(f"Error in AI tool use: {response['error']}")
@@ -614,62 +621,122 @@ async def enhance_tech_stack(
     current_user: Dict[str, Any] = Depends(get_current_user)
 ):
     """
-    Enhance technology stack recommendations using AI.
-    
-    This endpoint takes a project description, requirements, and user preferences,
-    and returns AI-enhanced technology stack recommendations.
-    
-    Args:
-        request: The request containing the project description, requirements, and user preferences.
-        current_user: The authenticated user.
-        
-    Returns:
-        The enhanced technology stack recommendations.
-        
-    Raises:
-        HTTPException: If there is an error calling the AI service.
+    Enhance technology stack recommendations.
     """
     try:
-        # Initialize the Anthropic client
         client = AnthropicClient()
         
-        # Format the requirements and preferences for the prompt
-        formatted_requirements = "\n".join([f"- {req}" for req in request.project_requirements])
-        formatted_preferences = json.dumps(request.user_preferences, indent=2)
-        
-        # Generate the prompt
-        prompt = get_tech_stack_user_prompt(
-            request.project_description,
-            formatted_requirements,
-            formatted_preferences
+        # Format the input
+        user_prompt = get_tech_stack_user_prompt(
+            request.project_description, 
+            request.project_requirements,
+            request.user_preferences
         )
         
-        # Get the tool schema
-        tool_schema = print_tech_stack_input_schema()
+        messages = [{"role": "user", "content": user_prompt}]
         
         # Call the AI service
         response = client.get_tool_use_response(
-            system_prompt="You are a technical architect advising on technology choices. Recommend appropriate technology stacks based on project requirements.",
-            tools=[tool_schema],
-            messages=[{"role": "user", "content": prompt}]
+            system_prompt="You are an expert software architect specializing in tech stack selection.",
+            tools=[print_tech_stack_input_schema()],
+            messages=messages
         )
         
-        # Check if there was an error
-        if "error" in response:
-            raise HTTPException(
-                status_code=500,
-                detail=f"Error from AI service: {response['error']}"
-            )
-        
-        # Extract tech stack data with fallback mechanisms
+        # Extract the response data
         tech_stack_data = extract_data_from_response(response, TechStackRecommendation, logger)
-            
-        # Return the enhanced tech stack recommendations
-        return TechStackEnhanceResponse(data=tech_stack_data)
         
+        return {"data": tech_stack_data}
     except Exception as e:
         logger.error(f"Error enhancing tech stack: {str(e)}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Error enhancing tech stack: {str(e)}"
-        ) 
+        raise HTTPException(status_code=500, detail=f"Error enhancing tech stack: {str(e)}")
+
+
+@router.post("/enhance-test-cases", response_model=TestCasesEnhanceResponse)
+async def enhance_test_cases(
+    request: TestCasesEnhanceRequest,
+    current_user: Dict[str, Any] = Depends(get_current_user)
+):
+    """
+    Enhance or generate test cases in Gherkin format.
+    """
+    try:
+        client = AnthropicClient()
+        
+        # Format requirements as string
+        formatted_requirements = "\n".join(f"- {req}" for req in request.requirements)
+        
+        # Format features as JSON string
+        formatted_features = json.dumps(request.features, indent=2)
+        
+        # Format existing test cases if any
+        formatted_test_cases = None
+        if request.existing_test_cases:
+            formatted_test_cases = json.dumps(request.existing_test_cases, indent=2)
+        
+        # Create the user prompt
+        user_prompt = get_test_cases_user_prompt(
+            formatted_requirements,
+            formatted_features,
+            formatted_test_cases
+        )
+
+        messages = [{"role": "user", "content": user_prompt}]
+        
+        # Call the AI service
+        response = client.get_tool_use_response(
+            system_prompt="You are an expert QA engineer specializing in writing Gherkin test cases for software applications.",
+            tools=[print_test_cases_input_schema()],
+            messages=messages
+        )
+        
+        # Extract the response data
+        test_cases_data = extract_data_from_response(response, TestCasesData, logger)
+        
+        return {"data": test_cases_data}
+    except Exception as e:
+        logger.error(f"Error enhancing test cases: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error enhancing test cases: {str(e)}")
+
+
+# Add a dedicated endpoint for generating test cases from scratch
+@router.post("/generate-test-cases", response_model=TestCasesEnhanceResponse)
+async def generate_test_cases(
+    request: TestCasesEnhanceRequest,
+    current_user: Dict[str, Any] = Depends(get_current_user)
+):
+    """
+    Generate new test cases in Gherkin format based on project requirements and features.
+    This is a dedicated endpoint for creating test cases from scratch.
+    """
+    try:
+        client = AnthropicClient()
+        
+        # Format requirements as string
+        formatted_requirements = "\n".join(f"- {req}" for req in request.requirements)
+        
+        # Format features as JSON string
+        formatted_features = json.dumps(request.features, indent=2)
+        
+        # Create the user prompt - we don't pass existing test cases
+        user_prompt = get_test_cases_user_prompt(
+            formatted_requirements,
+            formatted_features,
+            None  # No existing test cases for generation from scratch
+        )
+        
+        messages = [{"role": "user", "content": user_prompt}]
+        
+        # Call the AI service
+        response = client.get_tool_use_response(
+            system_prompt="You are an expert QA engineer specializing in writing comprehensive Gherkin test cases for software applications. Focus on creating test cases that cover all functional requirements and important edge cases.",
+            tools=[print_test_cases_input_schema()],
+            messages=messages
+        )
+        
+        # Extract the response data
+        test_cases_data = extract_data_from_response(response, TestCasesData, logger)
+        
+        return {"data": test_cases_data}
+    except Exception as e:
+        logger.error(f"Error generating test cases: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error generating test cases: {str(e)}") 

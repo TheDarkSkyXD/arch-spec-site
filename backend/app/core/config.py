@@ -16,7 +16,7 @@ class MongoSettings(BaseSettings):
 class AnthropicSettings(BaseSettings):
     """Anthropic API configuration settings."""
     api_key: str = os.getenv("ANTHROPIC_API_KEY", "")
-    model: str = os.getenv("ANTHROPIC_MODEL", "claude-3-7-sonnet-20250219")
+    model: str = os.getenv("ANTHROPIC_MODEL", "claude-3-5-sonnet-20241022")
     max_tokens: int = int(os.getenv("ANTHROPIC_MAX_TOKENS", "4000"))
     temperature: float = float(os.getenv("ANTHROPIC_TEMPERATURE", "0.7"))
 

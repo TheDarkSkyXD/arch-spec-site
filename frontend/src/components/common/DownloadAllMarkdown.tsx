@@ -12,6 +12,7 @@ import {
   Api,
 } from "../../types/templates";
 import { FeaturesData } from "../../services/featuresService";
+import { TestCasesData } from "../../services/testCasesService";
 
 interface DownloadAllMarkdownProps {
   project: ProjectBase;
@@ -21,6 +22,7 @@ interface DownloadAllMarkdownProps {
   pages: Pages | null;
   dataModel: Partial<DataModel> | null;
   apiEndpoints: Api | null;
+  testCases?: TestCasesData | null;
   className?: string;
   variant?: "default" | "outline" | "ghost" | "link";
   size?: "default" | "sm" | "lg";
@@ -34,6 +36,7 @@ const DownloadAllMarkdown = ({
   pages,
   dataModel,
   apiEndpoints,
+  testCases = null,
   className = "",
   variant = "default",
   size = "default",
@@ -53,6 +56,7 @@ const DownloadAllMarkdown = ({
         pages,
         dataModel,
         apiEndpoints,
+        testCases,
       });
 
       const zipBlob = await generateMarkdownZip(
@@ -62,7 +66,8 @@ const DownloadAllMarkdown = ({
         features,
         pages,
         dataModel,
-        apiEndpoints
+        apiEndpoints,
+        testCases
       );
 
       console.log(

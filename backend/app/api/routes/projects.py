@@ -210,6 +210,7 @@ async def delete_project(
         "data_model_specs",
         "api_specs",
         "testing_specs",
+        "test_cases_specs",
         "project_structure_specs",
         "deployment_specs",
         "documentation_specs"

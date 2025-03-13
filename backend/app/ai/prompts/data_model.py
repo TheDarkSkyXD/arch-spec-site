@@ -1,7 +1,8 @@
-def get_data_model_user_prompt(project_description, formatted_features, formatted_data_model):
+def get_data_model_user_prompt(project_description, formatted_features, formatted_requirements, formatted_data_model):
   return (
       f"Project description: {project_description}\n"
       f"Features:\n{formatted_features}\n"
+      f"Requirements:\n{formatted_requirements}\n"
       f"Original data model (if any): {formatted_data_model}\n\n"
       "Your task:\n"
       "1. Identify key entities needed to support the features and requirements\n"

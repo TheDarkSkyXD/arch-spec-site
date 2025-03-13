@@ -8,6 +8,7 @@ import {
   Api,
 } from "../../types/templates";
 import { FeaturesData } from "../featuresService";
+import { TestCasesData } from "../testCasesService";
 import { generateApiEndpointsMarkdown } from "./apiEndpoints";
 import { generateDataModelMarkdown } from "./dataModel";
 import { generateFeaturesMarkdown } from "./features";
@@ -15,6 +16,7 @@ import { generatePagesMarkdown } from "./pages";
 import { generateProjectBasicsMarkdown } from "./projectBasics";
 import { generateRequirementsMarkdown } from "./requirements";
 import { generateTechStackMarkdown } from "./techStack";
+import { generateTestCasesMarkdown } from "./testCases";
 import { generateFileName } from "./utils";
 
 /**
@@ -27,6 +29,7 @@ import { generateFileName } from "./utils";
  * @param pages The pages data
  * @param dataModel The data model
  * @param apiEndpoints The API endpoints
+ * @param testCases The test cases
  * @returns Promise that resolves to a Blob containing the zip file
  */
 export async function generateMarkdownZip(
@@ -36,7 +39,8 @@ export async function generateMarkdownZip(
   features: FeaturesData | null,
   pages: Pages | null,
   dataModel: Partial<DataModel> | null,
-  apiEndpoints: Api | null
+  apiEndpoints: Api | null,
+  testCases: TestCasesData | null
 ): Promise<Blob> {
   const zip = new JSZip();
 
@@ -82,6 +86,11 @@ export async function generateMarkdownZip(
     );
   }
 
+  if (testCases) {
+    const testCasesMarkdown = generateTestCasesMarkdown(testCases);
+    zip.file(generateFileName(project.name, "test-cases"), testCasesMarkdown);
+  }
+
   // Generate a README file for the zip
   const readme =
     `# ${project.name} Project Specification\n\n` +
@@ -93,7 +102,8 @@ export async function generateMarkdownZip(
     `- Features\n` +
     `- Pages\n` +
     `- Data Model\n` +
-    `- API Endpoints\n\n` +
+    `- API Endpoints\n` +
+    `- Test Cases\n\n` +
     `Generated on: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`;
 
   zip.file("README.md", readme);

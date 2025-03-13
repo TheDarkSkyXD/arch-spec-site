@@ -4,6 +4,7 @@
 import apiClient from "../api/apiClient";
 import { FeatureModule } from "./featuresService";
 import { DataModel } from "../types/templates";
+import { GherkinTestCase } from "./testCasesService";
 
 interface EnhanceDescriptionRequest {
   user_description: string;
@@ -169,6 +170,31 @@ interface TechStackRecommendation {
 
 interface EnhanceTechStackResponse {
   data: TechStackRecommendation;
+}
+
+interface TestCasesData {
+  testCases: GherkinTestCase[];
+}
+
+interface TestCasesEnhanceRequest {
+  project_description: string;
+  requirements: string[];
+  features: FeatureModule[];
+  existing_test_cases?: GherkinTestCase[];
+}
+
+interface TestCasesEnhanceResponse {
+  data: TestCasesData;
+}
+
+interface EnhanceTestCasesRequest {
+  existing_test_cases: GherkinTestCase[];
+  requirements: string[];
+  features: FeatureModule[];
+}
+
+interface EnhanceTestCasesResponse {
+  testCases: GherkinTestCase[];
 }
 
 class AIService {
@@ -440,6 +466,62 @@ class AIService {
       return response.data.data;
     } catch (error) {
       console.error("Error enhancing tech stack:", error);
+      return null;
+    }
+  }
+
+  async generateTestCases(
+    projectDescription: string,
+    requirements: string[],
+    features: FeatureModule[]
+  ): Promise<TestCasesData | null> {
+    try {
+      const response = await apiClient.post<TestCasesEnhanceResponse>(
+        "/api/ai-text/generate-test-cases",
+        {
+          project_description: projectDescription,
+          requirements,
+          features,
+        } as TestCasesEnhanceRequest
+      );
+
+      if (response.data && response.data.data && response.data.data.testCases) {
+        return {
+          testCases: response.data.data.testCases,
+        };
+      }
+      return null;
+    } catch (error) {
+      console.error("Error generating test cases:", error);
+      return null;
+    }
+  }
+
+  async enhanceTestCases(
+    projectDescription: string,
+    existingTestCases: GherkinTestCase[],
+    requirements: string[],
+    features: FeatureModule[]
+  ): Promise<TestCasesData | null> {
+    try {
+      const response = await apiClient.post<TestCasesEnhanceResponse>(
+        "/api/ai-text/enhance-test-cases",
+        {
+          project_description: projectDescription,
+          existing_test_cases: existingTestCases,
+          requirements,
+          features,
+        } as TestCasesEnhanceRequest
+      );
+
+      if (response.data && response.data.data && response.data.data.testCases) {
+        return {
+          testCases: response.data.data.testCases,
+        };
+      }
+      return null;
+    } catch (error) {
+      console.error("Error enhancing test cases:", error);
       return null;
     }
   }

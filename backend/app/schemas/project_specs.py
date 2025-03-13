@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field
 import uuid
 
 from .shared_schemas import (
-    BudgetItem, ProjectTechStack, Features, Pages, DataModel, Api, Testing, ProjectStructure, Deployment, Documentation, TimelineItem
+    BudgetItem, ProjectTechStack, Features, Pages, DataModel, Api, Testing, TestCases, ProjectStructure, Deployment, Documentation, TimelineItem
 )
 
 
@@ -114,13 +114,18 @@ class ApiSpec(ProjectSpec):
 
 
 class TestingSpec(ProjectSpec):
-    """Testing spec of a project."""
-    data: Optional[Testing] = None
+    """Model for the testing spec."""
+    data: Testing
+
+
+class TestCasesSpec(ProjectSpec):
+    """Model for the test cases spec using Gherkin format."""
+    data: TestCases
 
 
 class ProjectStructureSpec(ProjectSpec):
-    """Project structure spec of a project."""
-    data: Optional[ProjectStructure] = None
+    """Model for the project structure spec."""
+    data: ProjectStructure
 
 
 class DeploymentSpec(ProjectSpec):
@@ -181,8 +186,17 @@ class ApiSpecUpdate(BaseModel):
 
 
 class TestingSpecUpdate(BaseModel):
-    """Model for updating testing spec."""
+    """Model for updating a testing spec."""
     data: Optional[Testing] = None
+    last_modified_by: Optional[str] = None
+
+    class Config:
+        populate_by_name = True
+
+
+class TestCasesSpecUpdate(BaseModel):
+    """Model for updating a test cases spec."""
+    data: Optional[TestCases] = None
     last_modified_by: Optional[str] = None
 
     class Config:

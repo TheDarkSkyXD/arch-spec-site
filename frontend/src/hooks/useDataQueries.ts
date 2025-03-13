@@ -3,6 +3,7 @@ import { templatesService } from "../services/templatesService";
 import { techStackService } from "../services/techStackService";
 import { requirementsService } from "../services/requirementsService";
 import { featuresService, FeaturesData } from "../services/featuresService";
+import { testCasesService, TestCasesData } from "../services/testCasesService";
 import { pagesService } from "../services/pagesService";
 import { useState, useEffect } from "react";
 import { Requirements, Pages, DataModel } from "../types/templates";
@@ -259,6 +260,41 @@ export const useDataModel = (projectId?: string) => {
     };
 
     fetchDataModel();
+  }, [projectId]);
+
+  return { data, isLoading, error };
+};
+
+// Test Cases hook
+export const useTestCases = (projectId?: string) => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  const [data, setData] = useState<TestCasesData | null>(null);
+
+  useEffect(() => {
+    const fetchTestCases = async () => {
+      if (!projectId) {
+        setIsLoading(false);
+        return;
+      }
+
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const testCases = await testCasesService.getTestCases(projectId);
+        setData(testCases);
+      } catch (err) {
+        console.error("Error fetching test cases:", err);
+        setError(
+          err instanceof Error ? err : new Error("Failed to fetch test cases")
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchTestCases();
   }, [projectId]);
 
   return { data, isLoading, error };

@@ -666,6 +666,90 @@ class TechStackEnhanceResponse(BaseModel):
     
     data: TechStackRecommendation = Field(
         ...,
-        title="Tech Stack Recommendations",
-        description="The structured technology stack recommendations"
+        title="Technology Stack Recommendations",
+        description="AI-generated technology stack recommendations",
+    )
+
+
+class TestCase(BaseModel):
+    """Model for an individual test case using Gherkin format."""
+    
+    feature: str = Field(
+        ...,
+        title="Feature",
+        description="The feature being tested (e.g., User Authentication, Shopping Cart)"
+    )
+    
+    title: str = Field(
+        ...,
+        title="Title",
+        description="Title of the test case (e.g., Login with valid credentials)"
+    )
+    
+    description: Optional[str] = Field(
+        None,
+        title="Description",
+        description="Optional description of the test case"
+    )
+    
+    tags: Optional[List[str]] = Field(
+        None,
+        title="Tags",
+        description="Optional tags for categorizing the test case (e.g., smoke, regression, ui)"
+    )
+    
+    scenarios: List[Dict[str, Any]] = Field(
+        ...,
+        title="Scenarios",
+        description="List of scenarios in this test case with steps in Gherkin format"
+    )
+
+
+class TestCasesData(BaseModel):
+    """Model for test cases data using Gherkin format."""
+    
+    testCases: List[TestCase] = Field(
+        ...,
+        title="Test Cases",
+        description="List of test cases in Gherkin format"
+    )
+
+
+class TestCasesEnhanceRequest(BaseModel):
+    """Request model for enhancing test cases."""
+    
+    project_description: str = Field(
+        ...,
+        title="Project Description",
+        description="The description of the project",
+        examples=["A web application for tracking daily fitness workouts and nutrition"],
+    )
+    
+    requirements: List[str] = Field(
+        ...,
+        title="Requirements",
+        description="The project requirements",
+        examples=[["Users must be able to login", "Users should be able to track workouts"]],
+    )
+    
+    features: List[Dict[str, Any]] = Field(
+        ...,
+        title="Features",
+        description="The features implemented in the project",
+    )
+    
+    existing_test_cases: Optional[Dict[str, Any]] = Field(
+        None,
+        title="Existing Test Cases",
+        description="Existing test cases that need enhancement",
+    )
+
+
+class TestCasesEnhanceResponse(BaseModel):
+    """Response model for enhanced test cases."""
+    
+    data: TestCasesData = Field(
+        ...,
+        title="Test Cases Data",
+        description="AI-generated test cases in Gherkin format",
     ) 

@@ -24,6 +24,7 @@ from ..schemas.project_specs import (
     DataModelSpec,
     ApiSpec,
     TestingSpec,
+    TestCasesSpec,
     ProjectStructureSpec,
     DeploymentSpec,
     DocumentationSpec,
@@ -33,13 +34,14 @@ from ..schemas.project_specs import (
     DataModelSpecUpdate,
     ApiSpecUpdate,
     TestingSpecUpdate,
+    TestCasesSpecUpdate,
     ProjectStructureSpecUpdate,
     DeploymentSpecUpdate,
     DocumentationSpecUpdate
 )
 from ..schemas.shared_schemas import (
     BudgetItem, ProjectTechStack, Features, Pages, DataModel, Api, 
-    Testing, ProjectStructure, Deployment, Documentation, TimelineItem
+    Testing, TestCases, ProjectStructure, Deployment, Documentation, TimelineItem
 )
 
 logger = logging.getLogger(__name__)
@@ -556,6 +558,28 @@ class ProjectSpecsService:
     ) -> TestingSpec:
         return await ProjectSpecsService._generic_spec_handler(
             project_id, "testing", data, user_id, database, TestingSpec, TestingSpecUpdate
+        )
+    
+    # Test Cases spec
+    @staticmethod
+    async def get_test_cases_spec(
+        project_id: str, database: AsyncIOMotorDatabase
+    ) -> Optional[TestCasesSpec]:
+        """Get the test cases spec for a project."""
+        spec_doc = await database.test_cases_specs.find_one({"project_id": project_id})
+        if spec_doc:
+            return TestCasesSpec(**spec_doc)
+        return None
+    
+    @staticmethod
+    async def create_or_update_test_cases_spec(
+        project_id: str, 
+        data: Union[TestCases, TestCasesSpecUpdate], 
+        user_id: Optional[str],
+        database: AsyncIOMotorDatabase
+    ) -> TestCasesSpec:
+        return await ProjectSpecsService._generic_spec_handler(
+            project_id, "test_cases", data, user_id, database, TestCasesSpec, TestCasesSpecUpdate
         )
     
     # Project structure spec
