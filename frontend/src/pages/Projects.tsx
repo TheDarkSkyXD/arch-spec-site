@@ -47,7 +47,9 @@ const Projects = () => {
             project.name.toLowerCase().includes(query) ||
             project.description.toLowerCase().includes(query) ||
             project.domain?.toLowerCase().includes(query) ||
-            project.business_goals?.toLowerCase().includes(query) ||
+            project.business_goals?.some((goal: string) =>
+              goal.toLowerCase().includes(query)
+            ) ||
             project.target_users?.toLowerCase().includes(query)
         )
       );

@@ -466,6 +466,7 @@ export default function PagesForm({
           type: "success",
         });
         setSuccess(successMessage);
+        setTimeout(() => setSuccess(""), 3000);
 
         if (onSuccess) {
           onSuccess(result);
@@ -478,6 +479,7 @@ export default function PagesForm({
           type: "error",
         });
         setError(errorMessage);
+        setTimeout(() => setError(""), 5000);
       }
     } catch (error) {
       console.error("Error saving pages:", error);
@@ -488,6 +490,7 @@ export default function PagesForm({
         type: "error",
       });
       setError(errorMessage);
+      setTimeout(() => setError(""), 5000);
     } finally {
       setIsSubmitting(false);
     }

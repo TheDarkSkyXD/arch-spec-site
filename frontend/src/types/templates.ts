@@ -228,7 +228,7 @@ export interface ProjectTemplate {
   version: string;
   description: string;
   tags?: string[];
-  businessGoals: string;
+  businessGoals: string[];
   targetUsers: string;
   domain: string;
   techStack: ProjectTechStack;

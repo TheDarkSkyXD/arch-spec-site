@@ -7,10 +7,10 @@ import {
   Globe,
   Shield,
 } from "lucide-react";
-import { ProjectCreate } from "../../types/project";
+import { ProjectTemplate } from "../../types";
 
 interface ProjectReviewFormProps {
-  projectData: Partial<ProjectCreate>;
+  projectData: Partial<ProjectTemplate>;
   onSubmit: () => void;
   onEdit: (section: string) => void;
 }
@@ -71,14 +71,14 @@ export default function ProjectReviewForm({
                   {projectData.description}
                 </span>
               </div>
-              {projectData.business_goals &&
-                projectData.business_goals.length > 0 && (
+              {projectData.businessGoals &&
+                projectData.businessGoals.length > 0 && (
                   <div>
                     <span className="block text-xs text-slate-500 dark:text-slate-400">
                       Business Goals
                     </span>
                     <ul className="list-disc pl-5 mt-1 space-y-1">
-                      {projectData.business_goals.map((goal, index) => (
+                      {projectData.businessGoals.map((goal, index) => (
                         <li
                           key={index}
                           className="text-sm text-slate-800 dark:text-slate-200"
@@ -89,22 +89,15 @@ export default function ProjectReviewForm({
                     </ul>
                   </div>
                 )}
-              {projectData.target_users &&
-                projectData.target_users.length > 0 && (
+              {projectData.targetUsers &&
+                projectData.targetUsers.length > 0 && (
                   <div>
                     <span className="block text-xs text-slate-500 dark:text-slate-400">
                       Target Users
                     </span>
-                    <ul className="list-disc pl-5 mt-1 space-y-1">
-                      {projectData.target_users.map((user, index) => (
-                        <li
-                          key={index}
-                          className="text-sm text-slate-800 dark:text-slate-200"
-                        >
-                          {user}
-                        </li>
-                      ))}
-                    </ul>
+                    <span className="block text-sm text-slate-800 dark:text-slate-200">
+                      {projectData.targetUsers}
+                    </span>
                   </div>
                 )}
               {projectData.domain && (
@@ -122,7 +115,7 @@ export default function ProjectReviewForm({
         </div>
 
         {/* Tech Stack */}
-        {projectData.template_data && projectData.template_data.techStack && (
+        {projectData.techStack && (
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
             <div className="flex justify-between items-center p-4 bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
               <div className="flex items-center">
@@ -149,7 +142,7 @@ export default function ProjectReviewForm({
                     Frontend
                   </span>
                   <span className="block text-sm text-slate-800 dark:text-slate-200 font-medium">
-                    {projectData.template_data.techStack.frontend}
+                    {projectData.techStack.frontend.framework}
                   </span>
                 </div>
                 <div>
@@ -157,7 +150,7 @@ export default function ProjectReviewForm({
                     Backend
                   </span>
                   <span className="block text-sm text-slate-800 dark:text-slate-200 font-medium">
-                    {projectData.template_data.techStack.backend}
+                    {projectData.techStack.backend.type}
                   </span>
                 </div>
                 <div>
@@ -165,7 +158,7 @@ export default function ProjectReviewForm({
                     Database
                   </span>
                   <span className="block text-sm text-slate-800 dark:text-slate-200 font-medium">
-                    {projectData.template_data.techStack.database}
+                    {projectData.techStack.database.system}
                   </span>
                 </div>
               </div>
@@ -174,7 +167,7 @@ export default function ProjectReviewForm({
         )}
 
         {/* Features */}
-        {projectData.template_data && projectData.template_data.features && (
+        {projectData.features && (
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
             <div className="flex justify-between items-center p-4 bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
               <div className="flex items-center">
@@ -196,7 +189,7 @@ export default function ProjectReviewForm({
             </div>
             <div className="p-4">
               <div className="space-y-3">
-                {projectData.template_data.features.coreModules
+                {projectData.features.coreModules
                   .filter((module) => module.enabled)
                   .map((module, index) => (
                     <div key={index} className="flex items-start">
@@ -220,9 +213,10 @@ export default function ProjectReviewForm({
         )}
 
         {/* Requirements */}
-        {((projectData.functional && projectData.functional.length > 0) ||
-          (projectData.non_functional &&
-            projectData.non_functional.length > 0)) && (
+        {((projectData.requirements?.functional &&
+          projectData.requirements.functional.length > 0) ||
+          (projectData.requirements?.non_functional &&
+            projectData.requirements.non_functional.length > 0)) && (
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
             <div className="flex justify-between items-center p-4 bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
               <div className="flex items-center">
@@ -244,40 +238,44 @@ export default function ProjectReviewForm({
             </div>
             <div className="p-4">
               <div className="space-y-4">
-                {projectData.functional &&
-                  projectData.functional.length > 0 && (
+                {projectData.requirements?.functional &&
+                  projectData.requirements.functional.length > 0 && (
                     <div>
                       <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                         Functional Requirements
                       </h4>
                       <ul className="list-disc pl-5 space-y-1">
-                        {projectData.functional.map((req, index) => (
-                          <li
-                            key={index}
-                            className="text-sm text-slate-800 dark:text-slate-200"
-                          >
-                            {req.description}
-                          </li>
-                        ))}
+                        {projectData.requirements?.functional.map(
+                          (req, index) => (
+                            <li
+                              key={index}
+                              className="text-sm text-slate-800 dark:text-slate-200"
+                            >
+                              {req}
+                            </li>
+                          )
+                        )}
                       </ul>
                     </div>
                   )}
 
-                {projectData.non_functional &&
-                  projectData.non_functional.length > 0 && (
+                {projectData.requirements?.non_functional &&
+                  projectData.requirements.non_functional.length > 0 && (
                     <div>
                       <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                         Non-Functional Requirements
                       </h4>
                       <ul className="list-disc pl-5 space-y-1">
-                        {projectData.non_functional.map((req, index) => (
-                          <li
-                            key={index}
-                            className="text-sm text-slate-800 dark:text-slate-200"
-                          >
-                            {req.description}
-                          </li>
-                        ))}
+                        {projectData.requirements?.non_functional.map(
+                          (req, index) => (
+                            <li
+                              key={index}
+                              className="text-sm text-slate-800 dark:text-slate-200"
+                            >
+                              {req}
+                            </li>
+                          )
+                        )}
                       </ul>
                     </div>
                   )}
@@ -287,78 +285,74 @@ export default function ProjectReviewForm({
         )}
 
         {/* API Endpoints */}
-        {projectData.template_data &&
-          projectData.template_data.api &&
-          projectData.template_data.api.endpoints && (
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
-              <div className="flex justify-between items-center p-4 bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
-                <div className="flex items-center">
-                  <Globe
-                    size={16}
-                    className="text-slate-500 dark:text-slate-400 mr-2"
-                  />
-                  <h3 className="font-medium text-slate-800 dark:text-slate-200">
-                    API Endpoints
-                  </h3>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => onEdit("api")}
-                  className="text-primary-600 hover:text-primary-700 dark:hover:text-primary-500 text-sm font-medium flex items-center"
-                >
-                  Edit <ChevronRight size={16} className="ml-1" />
-                </button>
+        {projectData.api && projectData.api.endpoints && (
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
+            <div className="flex justify-between items-center p-4 bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
+              <div className="flex items-center">
+                <Globe
+                  size={16}
+                  className="text-slate-500 dark:text-slate-400 mr-2"
+                />
+                <h3 className="font-medium text-slate-800 dark:text-slate-200">
+                  API Endpoints
+                </h3>
               </div>
-              <div className="p-4">
-                <div className="space-y-3">
-                  {projectData.template_data.api.endpoints.map(
-                    (endpoint, index) => (
-                      <div
-                        key={index}
-                        className="pb-2 border-b border-slate-100 dark:border-slate-700 last:border-0 last:pb-0"
-                      >
-                        <div className="flex items-center gap-2 mb-1">
-                          <div className="flex space-x-1">
-                            {endpoint.methods.map((method) => (
-                              <span
-                                key={method}
-                                className={`inline-flex px-2 py-0.5 text-xs font-medium rounded-full ${
-                                  method === "GET"
-                                    ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300"
-                                    : method === "POST"
-                                    ? "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300"
-                                    : method === "PUT"
-                                    ? "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300"
-                                    : method === "DELETE"
-                                    ? "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300"
-                                    : "bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-300"
-                                }`}
-                              >
-                                {method}
-                              </span>
-                            ))}
-                          </div>
-                          <span className="font-medium text-sm text-slate-800 dark:text-slate-200">
-                            {endpoint.path}
+              <button
+                type="button"
+                onClick={() => onEdit("api")}
+                className="text-primary-600 hover:text-primary-700 dark:hover:text-primary-500 text-sm font-medium flex items-center"
+              >
+                Edit <ChevronRight size={16} className="ml-1" />
+              </button>
+            </div>
+            <div className="p-4">
+              <div className="space-y-3">
+                {projectData.api.endpoints.map((endpoint, index) => (
+                  <div
+                    key={index}
+                    className="pb-2 border-b border-slate-100 dark:border-slate-700 last:border-0 last:pb-0"
+                  >
+                    <div className="flex items-center gap-2 mb-1">
+                      <div className="flex space-x-1">
+                        {endpoint.methods.map((method) => (
+                          <span
+                            key={method}
+                            className={`inline-flex px-2 py-0.5 text-xs font-medium rounded-full ${
+                              method === "GET"
+                                ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300"
+                                : method === "POST"
+                                ? "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300"
+                                : method === "PUT"
+                                ? "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300"
+                                : method === "DELETE"
+                                ? "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300"
+                                : "bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-300"
+                            }`}
+                          >
+                            {method}
                           </span>
-                          {endpoint.auth && (
-                            <Shield
-                              size={14}
-                              className="text-slate-400 dark:text-slate-500"
-                              aria-label="Requires Authentication"
-                            />
-                          )}
-                        </div>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">
-                          {endpoint.description}
-                        </p>
+                        ))}
                       </div>
-                    )
-                  )}
-                </div>
+                      <span className="font-medium text-sm text-slate-800 dark:text-slate-200">
+                        {endpoint.path}
+                      </span>
+                      {endpoint.auth && (
+                        <Shield
+                          size={14}
+                          className="text-slate-400 dark:text-slate-500"
+                          aria-label="Requires Authentication"
+                        />
+                      )}
+                    </div>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      {endpoint.description}
+                    </p>
+                  </div>
+                ))}
               </div>
             </div>
-          )}
+          </div>
+        )}
       </div>
     </form>
   );

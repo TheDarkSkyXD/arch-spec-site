@@ -9,7 +9,7 @@ from fastapi import APIRouter, HTTPException, Depends, Response
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from ...services.artifact_service import ArtifactService
-from ...schemas.artifact import Artifact
+from ...schemas.artifact_schema import Artifact
 from ...dependencies.services import get_artifact_service
 from ...db.base import db
 from ...core.firebase_auth import get_current_user

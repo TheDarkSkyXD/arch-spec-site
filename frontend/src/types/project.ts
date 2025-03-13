@@ -3,9 +3,9 @@ export interface ProjectBase {
   name: string;
   version: string;
   description: string;
-  business_goals: string[];
-  target_users: string[];
-  domain: string;
+  business_goals?: string[];
+  target_users?: string;
+  domain?: string;
 }
 
 export interface RequirementsData {

@@ -303,6 +303,7 @@ export default function ApiEndpointsForm({
           type: "success",
         });
         setSuccess(successMessage);
+        setTimeout(() => setSuccess(""), 3000);
 
         if (onSuccess) {
           onSuccess(result);
@@ -315,6 +316,7 @@ export default function ApiEndpointsForm({
           type: "error",
         });
         setError(errorMessage);
+        setTimeout(() => setError(""), 5000);
       }
     } catch (error) {
       console.error("Error saving API endpoints:", error);
@@ -325,6 +327,7 @@ export default function ApiEndpointsForm({
         type: "error",
       });
       setError(errorMessage);
+      setTimeout(() => setError(""), 5000);
     } finally {
       setIsSubmitting(false);
     }

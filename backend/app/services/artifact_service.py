@@ -10,7 +10,7 @@ from datetime import datetime, UTC
 import io
 import mimetypes
 
-from ..schemas.artifact import ArtifactCreate, Artifact
+from ..schemas.artifact_schema import ArtifactCreate, Artifact
 from .generator_service import GeneratorService
 from motor.motor_asyncio import AsyncIOMotorDatabase
 

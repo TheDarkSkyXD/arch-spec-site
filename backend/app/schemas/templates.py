@@ -129,7 +129,7 @@ class ProjectTemplate(BaseModel):
     name: str
     version: str
     description: str
-    business_goals: str = Field(default="", alias="businessGoals")
+    business_goals: List[str] = Field(default_factory=list, alias="businessGoals")
     target_users: str = Field(default="", alias="targetUsers")
     domain: str = Field(default="")
     tech_stack: ProjectTechStack = Field(alias="techStack")

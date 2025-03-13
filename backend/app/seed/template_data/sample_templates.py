@@ -9,7 +9,7 @@ PROJECT_TEMPLATES = [
             "name": "React Web App with Supabase",
             "version": "1.0.0",
             "description": "A web application template using React for frontend and Supabase for authentication and database",
-            "businessGoals": "",
+            "businessGoals": [],
             "targetUsers": "",
             "domain": "",
             "techStack": {

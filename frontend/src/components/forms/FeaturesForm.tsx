@@ -308,6 +308,7 @@ export default function FeaturesForm({
           type: "success",
         });
         setSuccess(successMessage);
+        setTimeout(() => setSuccess(""), 3000);
 
         if (onSuccess) {
           onSuccess(result);
@@ -320,6 +321,7 @@ export default function FeaturesForm({
           type: "error",
         });
         setError(errorMessage);
+        setTimeout(() => setError(""), 5000);
       }
     } catch (error) {
       console.error("Error saving features:", error);
@@ -330,6 +332,7 @@ export default function FeaturesForm({
         type: "error",
       });
       setError(errorMessage);
+      setTimeout(() => setError(""), 5000);
     } finally {
       setIsSubmitting(false);
     }

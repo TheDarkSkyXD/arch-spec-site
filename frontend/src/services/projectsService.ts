@@ -9,7 +9,7 @@ interface ProjectResponse {
   id: string;
   name: string;
   description: string;
-  business_goals: string;
+  business_goals: string[];
   target_users: string;
   domain: string;
   version: string;
@@ -41,12 +41,8 @@ const convertToProjectBase = (response: ProjectResponse): ProjectBase => {
     name: response.name,
     description: response.description,
     version: response.version || "1.0.0",
-    business_goals: response.business_goals
-      ? response.business_goals.split(",").map((g) => g.trim())
-      : [],
-    target_users: response.target_users
-      ? response.target_users.split(",").map((u) => u.trim())
-      : [],
+    business_goals: response.business_goals || [],
+    target_users: response.target_users || "",
     domain: response.domain || "",
   };
 };
@@ -64,7 +60,7 @@ export const projectsService = {
   async createProject(projectData: {
     name: string;
     description: string;
-    business_goals?: string;
+    business_goals?: string[];
     target_users?: string;
     domain?: string;
   }): Promise<ProjectBase | null> {
@@ -152,7 +148,7 @@ export const projectsService = {
     projectData: {
       name: string;
       description: string;
-      business_goals?: string;
+      business_goals?: string[];
       target_users?: string;
       domain?: string;
     }

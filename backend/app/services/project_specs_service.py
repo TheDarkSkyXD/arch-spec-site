@@ -133,7 +133,7 @@ class ProjectSpecsService:
             # Update project to indicate it has this spec
             await database.projects.update_one(
                 {"id": project_id},
-                {"$set": {"has_timeline": True, "updated_at": datetime.now(timezone.utc)}}
+                {"$set": {"updated_at": datetime.now(timezone.utc)}}
             )
             
             return new_spec
@@ -184,7 +184,7 @@ class ProjectSpecsService:
             # Update project to indicate it has this spec
             await database.projects.update_one(
                 {"id": project_id},
-                {"$set": {"has_budget": True, "updated_at": datetime.now(timezone.utc)}}
+                {"$set": {"updated_at": datetime.now(timezone.utc)}}
             )
             
             return new_spec
@@ -228,7 +228,7 @@ class ProjectSpecsService:
             # Update project to indicate it has this spec
             await database.projects.update_one(
                 {"id": project_id},
-                {"$set": {"has_requirements": True, "updated_at": datetime.now(timezone.utc)}}
+                {"$set": {"updated_at": datetime.now(timezone.utc)}}
             )
             
             return new_spec
@@ -279,7 +279,7 @@ class ProjectSpecsService:
             # Update project to indicate it has this spec
             await database.projects.update_one(
                 {"id": project_id},
-                {"$set": {"has_metadata": True, "updated_at": datetime.now(timezone.utc)}}
+                {"$set": {"updated_at": datetime.now(timezone.utc)}}
             )
             
             return new_spec
@@ -341,7 +341,7 @@ class ProjectSpecsService:
             # Update project to indicate it has this spec
             await database.projects.update_one(
                 {"id": project_id},
-                {"$set": {"has_tech_stack": True, "updated_at": datetime.now(timezone.utc)}}
+                {"$set": {"updated_at": datetime.now(timezone.utc)}}
             )
             
             return new_spec
@@ -403,7 +403,7 @@ class ProjectSpecsService:
             # Update project to indicate it has this spec
             await database.projects.update_one(
                 {"id": project_id},
-                {"$set": {"has_features": True, "updated_at": datetime.now(timezone.utc)}}
+                {"$set": {"updated_at": datetime.now(timezone.utc)}}
             )
             
             return new_spec
@@ -423,7 +423,6 @@ class ProjectSpecsService:
     ) -> ProjectSpec:
         """Generic handler for creating or updating a spec."""
         collection_name = f"{spec_type}_specs"
-        flag_name = f"has_{spec_type}"
         
         # Check if spec exists
         collection = getattr(database, collection_name)
@@ -464,7 +463,7 @@ class ProjectSpecsService:
             # Update project to indicate it has this spec
             await database.projects.update_one(
                 {"id": project_id},
-                {"$set": {flag_name: True, "updated_at": datetime.now(timezone.utc)}}
+                {"$set": {"updated_at": datetime.now(timezone.utc)}}
             )
             
             return new_spec

@@ -52,7 +52,7 @@ try:
         logger.error(f"Failed to load project specs router: {str(e)}")
     
     try:
-        from .routes import artifacts
+        from .routes import artifact_routes
         api_router.include_router(artifacts.router, tags=["artifacts"])
         logger.info("Artifacts router loaded successfully")
     except Exception as e:

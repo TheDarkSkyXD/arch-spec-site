@@ -4,17 +4,19 @@ import { z } from "zod";
 import { useState, useEffect } from "react";
 import { projectsService } from "../../services/projectsService";
 import { useToast } from "../../contexts/ToastContext";
+import { PlusCircle, Trash2 } from "lucide-react";
 
 // Import shadcn UI components
 import { Label } from "../ui/label";
 import { Textarea } from "../ui/textarea";
 import Button from "../ui/Button";
 import Input from "../ui/Input";
+import Card from "../ui/Card";
 
 const projectBasicsSchema = z.object({
   name: z.string().min(3, "Project name must be at least 3 characters"),
   description: z.string().min(10, "Description must be at least 10 characters"),
-  business_goals: z.string().optional(),
+  business_goals: z.array(z.string()).optional(),
   target_users: z.string().optional(),
   domain: z.string().optional(),
 });
@@ -39,6 +41,11 @@ const ProjectBasicsForm = ({
   // Add state for error and success messages
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
+  // State for business goals
+  const [businessGoals, setBusinessGoals] = useState<string[]>(
+    initialData?.business_goals || []
+  );
+  const [newBusinessGoal, setNewBusinessGoal] = useState<string>("");
 
   const isEditMode = Boolean(projectId);
 
@@ -47,12 +54,13 @@ const ProjectBasicsForm = ({
     handleSubmit,
     formState: { errors },
     reset,
+    setValue,
   } = useForm<ProjectBasicsFormData>({
     resolver: zodResolver(projectBasicsSchema),
     defaultValues: {
       name: initialData?.name || "",
       description: initialData?.description || "",
-      business_goals: initialData?.business_goals || "",
+      business_goals: initialData?.business_goals || [],
       target_users: initialData?.target_users || "",
       domain: initialData?.domain || "",
     },
@@ -64,10 +72,12 @@ const ProjectBasicsForm = ({
       reset({
         name: initialData.name || "",
         description: initialData.description || "",
-        business_goals: initialData.business_goals || "",
+        business_goals: initialData.business_goals || [],
         target_users: initialData.target_users || "",
         domain: initialData.domain || "",
       });
+
+      setBusinessGoals(initialData.business_goals || []);
 
       if (initialData.id) {
         setProjectId(initialData.id);
@@ -75,11 +85,30 @@ const ProjectBasicsForm = ({
     }
   }, [initialData, reset]);
 
+  // Update hidden form field when business goals change
+  useEffect(() => {
+    setValue("business_goals", businessGoals);
+  }, [businessGoals, setValue]);
+
+  const addBusinessGoal = () => {
+    if (!newBusinessGoal.trim()) return;
+
+    setBusinessGoals([...businessGoals, newBusinessGoal]);
+    setNewBusinessGoal("");
+  };
+
+  const removeBusinessGoal = (index: number) => {
+    setBusinessGoals(businessGoals.filter((_, i) => i !== index));
+  };
+
   const onSubmit = async (data: ProjectBasicsFormData) => {
     setIsSubmitting(true);
     // Clear previous messages
     setError("");
     setSuccess("");
+
+    // Update business_goals in form data before submission
+    data.business_goals = businessGoals;
 
     try {
       let project;
@@ -108,6 +137,7 @@ const ProjectBasicsForm = ({
         });
 
         setSuccess(successMessage);
+        setTimeout(() => setSuccess(""), 3000);
 
         if (onSuccess) {
           onSuccess(project.id);
@@ -124,6 +154,7 @@ const ProjectBasicsForm = ({
         });
 
         setError(errorMessage);
+        setTimeout(() => setError(""), 5000);
       }
     } catch (error) {
       console.error(
@@ -138,6 +169,7 @@ const ProjectBasicsForm = ({
       });
 
       setError("An unexpected error occurred");
+      setTimeout(() => setError(""), 5000);
     } finally {
       setIsSubmitting(false);
     }
@@ -183,14 +215,56 @@ const ProjectBasicsForm = ({
         />
       </div>
 
-      <div>
+      <div className="space-y-4">
         <Label htmlFor="business_goals">Business Goals</Label>
-        <Textarea
-          id="business_goals"
-          rows={2}
-          {...register("business_goals")}
-          placeholder="List your key business goals (comma separated)"
-        />
+
+        {/* Display existing business goals */}
+        <div className="space-y-2">
+          {businessGoals.map((goal, index) => (
+            <Card
+              key={index}
+              className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
+            >
+              <p className="dark:text-slate-300">{goal}</p>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => removeBusinessGoal(index)}
+                className="text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400"
+              >
+                <Trash2 size={18} />
+              </Button>
+            </Card>
+          ))}
+        </div>
+
+        {/* Input for new business goal */}
+        <div className="flex items-center w-full gap-2">
+          <div className="flex-grow w-full">
+            <Input
+              type="text"
+              value={newBusinessGoal}
+              onChange={(e) => setNewBusinessGoal(e.target.value)}
+              placeholder="Add a business goal"
+              className="w-full"
+            />
+          </div>
+          <div className="flex-shrink-0">
+            <Button
+              type="button"
+              onClick={addBusinessGoal}
+              disabled={!newBusinessGoal.trim()}
+              variant={!newBusinessGoal.trim() ? "outline" : "default"}
+              className={!newBusinessGoal.trim() ? "cursor-not-allowed" : ""}
+            >
+              <PlusCircle size={20} />
+            </Button>
+          </div>
+        </div>
+
+        {/* Hidden input to handle form submission */}
+        <input type="hidden" {...register("business_goals")} />
       </div>
 
       <div>
@@ -199,7 +273,7 @@ const ProjectBasicsForm = ({
           id="target_users"
           rows={2}
           {...register("target_users")}
-          placeholder="Describe your target user personas (comma separated)"
+          placeholder="Describe your target user personas"
         />
       </div>
 

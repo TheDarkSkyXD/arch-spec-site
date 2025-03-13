@@ -187,12 +187,8 @@ const ProjectDetails = () => {
     return {
       ...project,
       // Convert arrays to comma-separated strings for the form
-      business_goals: Array.isArray(project.business_goals)
-        ? project.business_goals.join(", ")
-        : "",
-      target_users: Array.isArray(project.target_users)
-        ? project.target_users.join(", ")
-        : "",
+      business_goals: project.business_goals || [],
+      target_users: project.target_users || "",
       domain: project.domain || "",
     };
   };

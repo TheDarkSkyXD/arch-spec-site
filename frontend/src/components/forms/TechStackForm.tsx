@@ -311,6 +311,7 @@ const TechStackForm = ({
         type: "error",
       });
       setError("Project must be saved before tech stack can be saved");
+      setTimeout(() => setError(""), 5000);
       return;
     }
 
@@ -329,6 +330,7 @@ const TechStackForm = ({
           type: "success",
         });
         setSuccess("Tech stack saved successfully");
+        setTimeout(() => setSuccess(""), 3000);
 
         if (onSuccess) {
           onSuccess(result);
@@ -340,6 +342,7 @@ const TechStackForm = ({
           type: "error",
         });
         setError("Failed to save tech stack");
+        setTimeout(() => setError(""), 5000);
       }
     } catch (error) {
       console.error("Error saving tech stack:", error);
@@ -349,6 +352,7 @@ const TechStackForm = ({
         type: "error",
       });
       setError("An unexpected error occurred while saving tech stack");
+      setTimeout(() => setError(""), 5000);
     } finally {
       setIsSubmitting(false);
     }

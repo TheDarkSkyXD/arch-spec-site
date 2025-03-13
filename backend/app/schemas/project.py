@@ -8,12 +8,12 @@ class ProjectBase(BaseModel):
     # Project Basics
     name: str
     description: str
-    business_goals: Optional[str] = None  # Stored as comma-separated string, converted to array in frontend
-    target_users: Optional[str] = None  # Stored as comma-separated string, converted to array in frontend
-    domain: Optional[str] = None  # Business domain (e.g., "healthcare", "finance")
-    user_id: Optional[str] = None  # ID of the user who created this project
-    template_id: Optional[str] = None  # ID of the template used to create this project
-    version: Optional[str] = "1.0.0"  # Added version field to align with frontend
+    business_goals: Optional[List[str]] = None
+    target_users: Optional[str] = None
+    domain: Optional[str] = None
+    user_id: Optional[str] = None
+    template_id: Optional[str] = None
+    version: Optional[str] = "1.0.0"
     
     class Config:
         populate_by_name = True
