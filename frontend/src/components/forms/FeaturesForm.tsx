@@ -609,12 +609,12 @@ export default function FeaturesForm({
           </div>
         )}
 
-        {/* Feature form (used for both adding and editing) */}
-        {(isAddingFeature || isEditingFeature) && (
+        {/* Feature form for adding new features only */}
+        {isAddingFeature && (
           <Card className="bg-slate-50 dark:bg-slate-700/30 p-4 mb-6">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-medium text-slate-800 dark:text-slate-100">
-                {isEditingFeature ? "Edit Feature" : "Add New Feature"}
+                Add New Feature
               </h3>
               <button
                 type="button"
@@ -744,11 +744,9 @@ export default function FeaturesForm({
                 <Button
                   type="button"
                   variant="default"
-                  onClick={
-                    isEditingFeature ? handleEditFeature : handleAddFeature
-                  }
+                  onClick={handleAddFeature}
                 >
-                  {isEditingFeature ? "Save Changes" : "Add Feature"}
+                  Add Feature
                 </Button>
               </div>
             </div>
@@ -764,90 +762,246 @@ export default function FeaturesForm({
         ) : (
           <div className="space-y-4">
             {coreModules.map((module, index) => (
-              <Card key={index} className="p-4 bg-white dark:bg-slate-800">
-                <div className="flex justify-between items-start mb-2">
-                  <div>
-                    <h3 className="font-medium text-slate-800 dark:text-slate-100">
-                      {module.name}
-                    </h3>
-                    <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-                      {module.description}
-                    </p>
-                  </div>
-                  <div className="flex space-x-2">
-                    <button
-                      type="button"
-                      onClick={() => handleStartEditFeature(index)}
-                      className="p-1 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
-                      title="Edit feature"
-                    >
-                      <Edit size={18} />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteFeature(index)}
-                      className="p-1 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
-                      title="Remove feature"
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleToggleFeature(index)}
-                      disabled={!module.optional}
-                      className={`p-1 ${
-                        !module.optional
-                          ? "cursor-not-allowed text-slate-400 dark:text-slate-600"
-                          : "cursor-pointer"
-                      }`}
-                      title={
-                        module.optional
-                          ? "Toggle feature"
-                          : "This feature is required"
-                      }
-                    >
-                      {module.enabled ? (
-                        <ToggleRight size={24} className="text-primary-600" />
-                      ) : (
-                        <ToggleLeft
-                          size={24}
-                          className="text-slate-400 dark:text-slate-500"
-                        />
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                {!module.optional && (
-                  <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mb-3">
-                    <Info size={12} />
-                    <span>This feature is required for implementation</span>
-                  </div>
-                )}
-
-                {module.enabled &&
-                  module.providers &&
-                  module.providers.length > 0 && (
-                    <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700">
-                      <Select
-                        label="Provider"
-                        value={module.providers[0] || ""}
-                        onChange={(e) =>
-                          handleProviderChange(index, e.target.value)
+              <div key={index}>
+                <Card className="p-4 bg-white dark:bg-slate-800">
+                  <div className="flex justify-between items-start mb-2">
+                    <div>
+                      <h3 className="font-medium text-slate-800 dark:text-slate-100">
+                        {module.name}
+                      </h3>
+                      <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+                        {module.description}
+                      </p>
+                    </div>
+                    <div className="flex space-x-2">
+                      <button
+                        type="button"
+                        onClick={() => handleStartEditFeature(index)}
+                        className="p-1 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                        title="Edit feature"
+                      >
+                        <Edit size={18} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteFeature(index)}
+                        className="p-1 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                        title="Remove feature"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleToggleFeature(index)}
+                        disabled={!module.optional}
+                        className={`p-1 ${
+                          !module.optional
+                            ? "cursor-not-allowed text-slate-400 dark:text-slate-600"
+                            : "cursor-pointer"
+                        }`}
+                        title={
+                          module.optional
+                            ? "Toggle feature"
+                            : "This feature is required"
                         }
                       >
-                        <option value="">Select provider...</option>
-                        <option value="Stripe">Stripe</option>
-                        <option value="PayPal">PayPal</option>
-                        <option value="AWS">AWS</option>
-                        <option value="Azure">Azure</option>
-                        <option value="GCP">Google Cloud</option>
-                        <option value="Firebase">Firebase</option>
-                        <option value="Custom">Custom Implementation</option>
-                      </Select>
+                        {module.enabled ? (
+                          <ToggleRight size={24} className="text-primary-600" />
+                        ) : (
+                          <ToggleLeft
+                            size={24}
+                            className="text-slate-400 dark:text-slate-500"
+                          />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  {!module.optional && (
+                    <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mb-3">
+                      <Info size={12} />
+                      <span>This feature is required for implementation</span>
                     </div>
                   )}
-              </Card>
+
+                  {module.enabled &&
+                    module.providers &&
+                    module.providers.length > 0 && (
+                      <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700">
+                        <Select
+                          label="Provider"
+                          value={module.providers[0] || ""}
+                          onChange={(e) =>
+                            handleProviderChange(index, e.target.value)
+                          }
+                        >
+                          <option value="">Select provider...</option>
+                          <option value="Stripe">Stripe</option>
+                          <option value="PayPal">PayPal</option>
+                          <option value="AWS">AWS</option>
+                          <option value="Azure">Azure</option>
+                          <option value="GCP">Google Cloud</option>
+                          <option value="Firebase">Firebase</option>
+                          <option value="Custom">Custom Implementation</option>
+                        </Select>
+                      </div>
+                    )}
+                </Card>
+
+                {/* Inline edit form */}
+                {isEditingFeature && editingFeatureIndex === index && (
+                  <Card className="bg-slate-50 dark:bg-slate-700/30 p-4 mt-2 mb-4 border-l-4 border-primary-500">
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="font-medium text-slate-800 dark:text-slate-100">
+                        Edit Feature
+                      </h3>
+                      <button
+                        type="button"
+                        onClick={resetFeatureForm}
+                        className="text-slate-400 hover:text-slate-500 dark:text-slate-500 dark:hover:text-slate-400"
+                      >
+                        <X size={18} />
+                      </button>
+                    </div>
+
+                    <div className="space-y-4">
+                      {/* Feature name */}
+                      <div>
+                        <Label htmlFor={`feature-name-${index}`}>
+                          Feature Name <span className="text-red-500">*</span>
+                        </Label>
+                        <Input
+                          id={`feature-name-${index}`}
+                          type="text"
+                          value={featureForm.name}
+                          onChange={(e) =>
+                            handleFeatureFormChange("name", e.target.value)
+                          }
+                          placeholder="e.g., User Authentication"
+                          className={errors.name ? "border-red-500" : ""}
+                        />
+                        {errors.name && (
+                          <p className="mt-1 text-sm text-red-500">
+                            {errors.name}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Feature description */}
+                      <div>
+                        <Label htmlFor={`feature-description-${index}`}>
+                          Description <span className="text-red-500">*</span>
+                        </Label>
+                        <Textarea
+                          id={`feature-description-${index}`}
+                          value={featureForm.description}
+                          onChange={(e) =>
+                            handleFeatureFormChange(
+                              "description",
+                              e.target.value
+                            )
+                          }
+                          rows={3}
+                          placeholder="Describe what this feature does"
+                          className={errors.description ? "border-red-500" : ""}
+                        />
+                        {errors.description && (
+                          <p className="mt-1 text-sm text-red-500">
+                            {errors.description}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Feature options */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <Checkbox
+                            id={`feature-enabled-${index}`}
+                            checked={featureForm.enabled}
+                            onCheckedChange={(checked) =>
+                              handleFeatureFormChange("enabled", checked)
+                            }
+                            label="Enabled by default"
+                          />
+                        </div>
+
+                        <div>
+                          <Checkbox
+                            id={`feature-optional-${index}`}
+                            checked={featureForm.optional}
+                            onCheckedChange={(checked) =>
+                              handleFeatureFormChange("optional", checked)
+                            }
+                            label="Optional (not required for implementation)"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Provider options */}
+                      <div>
+                        <div className="mb-2">
+                          <Checkbox
+                            id={`has-providers-${index}`}
+                            checked={showProviders}
+                            onCheckedChange={(checked) =>
+                              setShowProviders(checked)
+                            }
+                            label="This feature uses external providers"
+                          />
+                        </div>
+
+                        {showProviders && (
+                          <div className="mt-2">
+                            <Select
+                              label="Available Providers"
+                              value={
+                                (featureForm.providers &&
+                                  featureForm.providers[0]) ||
+                                ""
+                              }
+                              onChange={(e) =>
+                                handleFeatureFormChange(
+                                  "providers",
+                                  e.target.value ? [e.target.value] : []
+                                )
+                              }
+                            >
+                              <option value="">Select provider...</option>
+                              <option value="Stripe">Stripe</option>
+                              <option value="PayPal">PayPal</option>
+                              <option value="AWS">AWS</option>
+                              <option value="Azure">Azure</option>
+                              <option value="GCP">Google Cloud</option>
+                              <option value="Firebase">Firebase</option>
+                              <option value="Custom">
+                                Custom Implementation
+                              </option>
+                            </Select>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Action buttons */}
+                      <div className="flex justify-end space-x-2 mt-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={resetFeatureForm}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="default"
+                          onClick={handleEditFeature}
+                        >
+                          Save Changes
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                )}
+              </div>
             ))}
           </div>
         )}
