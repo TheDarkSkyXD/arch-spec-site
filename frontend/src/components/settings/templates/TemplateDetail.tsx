@@ -341,7 +341,7 @@ const TemplateDetail = ({
 
               <JsonEditor
                 data={
-                  editedTemplate ||
+                  (editedTemplate as unknown as Record<string, unknown>) ||
                   (selectedTemplate as unknown as Record<string, unknown>)
                 }
                 onEdit={isJsonEditing ? handleJsonEdit : undefined}

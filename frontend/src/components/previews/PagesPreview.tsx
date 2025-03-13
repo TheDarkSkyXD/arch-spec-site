@@ -4,7 +4,7 @@ import { markdownService } from "../../services/markdown";
 import PreviewFactory from "./PreviewFactory";
 
 interface PagesPreviewProps {
-  data: Partial<Pages> | null;
+  data: Pages | null;
   projectName?: string;
   isLoading?: boolean;
 }

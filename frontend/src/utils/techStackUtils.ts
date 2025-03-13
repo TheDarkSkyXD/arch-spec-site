@@ -2,7 +2,6 @@ import {
   Categories,
   Technologies,
   TechStackData,
-  SimpleCompatibility,
 } from "../types/techStack";
 
 /**
@@ -29,7 +28,7 @@ export function getCompatibleTechnologies(
   if (!technology) return [];
 
   // Access the compatibleWith property
-  const compatibleWith = (technology as SimpleCompatibility).compatibleWith;
+  const compatibleWith = (technology).compatibleWith;
   if (!compatibleWith) return [];
 
   // If compatibleWith is an array, return it directly
@@ -38,8 +37,12 @@ export function getCompatibleTechnologies(
   }
 
   // If it's an object with the target category, return that array
-  if (compatibleWith[targetCategory]) {
-    return compatibleWith[targetCategory];
+  if (
+    typeof compatibleWith === 'object' &&
+    compatibleWith !== null &&
+    targetCategory in compatibleWith
+  ) {
+    return compatibleWith[targetCategory as keyof typeof compatibleWith];
   }
 
   return [];
@@ -127,129 +130,4 @@ function findCategoryKeyForSubcategory(
   }
 
   return null;
-}
-
-/**
- * Create a sample default tech stack data structure
- */
-export function createDefaultTechStackData(): TechStackData {
-  return {
-    categories: {
-      frontend: {
-        frameworks: ["React", "Vue", "Angular"],
-        languages: ["JavaScript", "TypeScript"],
-        stateManagement: ["Redux", "MobX", "Vuex"],
-        uiLibraries: ["Material-UI", "Tailwind CSS", "Bootstrap"],
-        formHandling: ["Formik", "React Hook Form", "Final Form"],
-        routing: ["React Router", "Vue Router", "Angular Router"],
-        apiClients: ["Axios", "Fetch API", "Apollo Client"],
-        metaFrameworks: ["Next.js", "Nuxt.js", "Gatsby"],
-      },
-      backend: {
-        frameworks: ["Express.js", "NestJS", "Django", "Flask", "Rails"],
-        languages: ["JavaScript", "TypeScript", "Python", "Ruby", "Go"],
-        baas: ["Firebase", "Supabase", "Amplify"],
-        serverless: ["AWS Lambda", "Vercel Functions", "Netlify Functions"],
-        realtime: ["Socket.io", "Firebase Realtime DB", "Pusher"],
-      },
-      database: {
-        sql: ["PostgreSQL", "MySQL", "SQLite"],
-        nosql: ["MongoDB", "DynamoDB", "Firestore"],
-        hosting: ["AWS RDS", "Google Cloud SQL", "Azure SQL"],
-        clients: ["Prisma", "Sequelize", "TypeORM"],
-      },
-      authentication: {
-        providers: ["Auth0", "Firebase Auth", "Okta"],
-        methods: ["OAuth", "JWT", "Session"],
-      },
-      deployment: {
-        platforms: ["Vercel", "Netlify", "Heroku"],
-        containerization: ["Docker", "Kubernetes"],
-        ci_cd: ["GitHub Actions", "CircleCI", "Jenkins"],
-      },
-      storage: {
-        objectStorage: ["AWS S3", "Google Cloud Storage", "Azure Blob Storage"],
-        fileSystem: ["Local Storage", "NFS", "Azure Files"],
-      },
-      hosting: {
-        frontend: ["Vercel", "Netlify", "GitHub Pages"],
-        backend: ["Heroku", "AWS EC2", "Digital Ocean"],
-        database: ["AWS RDS", "MongoDB Atlas", "Supabase"],
-      },
-      testing: {
-        unitTesting: ["Jest", "Mocha", "Vitest"],
-        e2eTesting: ["Cypress", "Playwright", "Selenium"],
-        apiTesting: ["Postman", "Insomnia", "REST Client"],
-      },
-    },
-    technologies: {
-      // This is just a placeholder structure. In a real implementation,
-      // you would need to fill in the compatibility data for each technology.
-      frameworks: {
-        React: {
-          type: "frontend",
-          description: "A JavaScript library for building user interfaces",
-          languages: ["JavaScript", "TypeScript"],
-          compatibleWith: {
-            stateManagement: ["Redux", "MobX", "Zustand"],
-            uiLibraries: ["Material-UI", "Tailwind CSS", "Chakra UI"],
-            formHandling: ["Formik", "React Hook Form"],
-            routing: ["React Router"],
-            apiClients: ["Axios", "React Query", "SWR"],
-            metaFrameworks: ["Next.js", "Gatsby"],
-            hosting: ["Vercel", "Netlify", "GitHub Pages"],
-            testing: ["Jest", "React Testing Library", "Cypress"],
-          },
-        },
-        "Express.js": {
-          type: "backend",
-          description:
-            "Fast, unopinionated, minimalist web framework for Node.js",
-          language: "JavaScript",
-          compatibleWith: {
-            databases: ["MongoDB", "PostgreSQL", "MySQL"],
-            orms: ["Mongoose", "Sequelize", "Prisma"],
-            auth: ["Passport.js", "JWT", "OAuth"],
-            hosting: ["Heroku", "AWS", "Digital Ocean"],
-            testing: ["Mocha", "Jest", "Supertest"],
-          },
-        },
-      },
-      // Other technology categories would be defined here
-      stateManagement: {
-        Redux: {
-          description: "A predictable state container for JavaScript apps",
-          compatibleWith: {
-            frameworks: ["React", "Angular"],
-          },
-        },
-      },
-      databases: {
-        MongoDB: {
-          type: "nosql",
-          description: "Document-oriented NoSQL database",
-          compatibleWith: {
-            hosting: ["MongoDB Atlas", "AWS", "Self-hosted"],
-            orms: ["Mongoose", "Prisma"],
-            frameworks: ["Express.js", "NestJS", "Flask"],
-            baas: ["Firebase", "Supabase"],
-          },
-        },
-      },
-      // Other technologies would be defined here...
-      baas: {},
-      uiLibraries: {},
-      formHandling: {},
-      routing: {},
-      apiClients: {},
-      metaFrameworks: {},
-      orms: {},
-      auth: {},
-      hosting: {},
-      testing: {},
-      storage: {},
-      serverless: {},
-      realtime: {},
-    },
-  };
 }

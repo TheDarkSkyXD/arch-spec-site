@@ -17,6 +17,7 @@ export interface BackendFrameworkCompatibility {
   auth?: string[];
   hosting?: string[];
   testing?: string[];
+  realtime?: string[];
 }
 
 export interface BaaSCompatibility {
@@ -33,10 +34,6 @@ export interface DatabaseCompatibility {
   orms?: string[];
   frameworks?: string[];
   baas?: string[];
-}
-
-export interface SimpleCompatibility {
-  compatibleWith?: string[] | Record<string, string[]>;
 }
 
 export interface HostingCompatibility {
@@ -98,49 +95,49 @@ export interface Database {
 export interface StateManagement {
   id?: string;
   description: string;
-  compatibleWith: SimpleCompatibility;
+  compatibleWith: string[] | Record<string, string[]>;
 }
 
 export interface UILibrary {
   id?: string;
   description: string;
-  compatibleWith: SimpleCompatibility;
+  compatibleWith: string[] | Record<string, string[]>;
 }
 
 export interface FormHandling {
   id?: string;
   description: string;
-  compatibleWith: SimpleCompatibility;
+  compatibleWith: string[] | Record<string, string[]>;
 }
 
 export interface Routing {
   id?: string;
   description: string;
-  compatibleWith: SimpleCompatibility;
+  compatibleWith: string[] | Record<string, string[]>;
 }
 
 export interface APIClient {
   id?: string;
   description: string;
-  compatibleWith: SimpleCompatibility;
+  compatibleWith: string[] | Record<string, string[]>;
 }
 
 export interface MetaFramework {
   id?: string;
   description: string;
-  compatibleWith: SimpleCompatibility;
+  compatibleWith: string[] | Record<string, string[]>;
 }
 
 export interface ORM {
   id?: string;
   description: string;
-  compatibleWith: SimpleCompatibility;
+  compatibleWith: string[] | Record<string, string[]>;
 }
 
 export interface Auth {
   id?: string;
   description: string;
-  compatibleWith: SimpleCompatibility;
+  compatibleWith: string[] | Record<string, string[]>;
 }
 
 export interface Hosting {

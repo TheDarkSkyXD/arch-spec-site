@@ -10,7 +10,13 @@ const Navigation = () => {
 
   const isActive = (path: string) => location.pathname === path;
 
-  const navItems = [
+  type NavItem = {
+    name: string;
+    path: string;
+    icon: React.ComponentType<{ className: string }> | null;
+  };
+
+  const navItems: NavItem[] = [
     { name: "Dashboard", path: "/", icon: null },
     { name: "Projects", path: "/projects", icon: null },
     { name: "Templates", path: "/templates", icon: null },

@@ -1,7 +1,6 @@
 import {
   UseFormRegister,
   FormState,
-  FieldError,
   useWatch,
   Control,
   UseFormSetValue,
@@ -12,7 +11,7 @@ import {
   StateManagement,
 } from "../../../types/techStack";
 import { TechStackFormData } from "../tech-stack/techStackSchema";
-import { ReactNode, useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import {
   filterLanguageOptions,
   filterFrameworkOptions,
@@ -48,11 +47,6 @@ const FrontendSection = ({
 }: FrontendSectionProps) => {
   // Create a ref to track whether we've applied initial data
   const initialDataAppliedRef = useRef<boolean>(false);
-
-  // Helper function to safely get error message
-  const getErrorMessage = (error: FieldError | undefined): ReactNode => {
-    return error?.message as ReactNode;
-  };
 
   // Watch for form value changes
   const watchedValues = useWatch({

@@ -7,9 +7,8 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   sendPasswordResetEmail,
-  AuthError,
 } from "firebase/auth";
-import { app, auth } from "../firebase/config";
+import { auth } from "../firebase/config";
 import { getAuthErrorMessage } from "../utils/authErrorHandler";
 
 // User type definition

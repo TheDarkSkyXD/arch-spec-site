@@ -101,7 +101,7 @@ const TemplateManagement = () => {
               selectedTemplate={selectedTemplate}
               isCreating={isCreating}
               isEditing={isEditing}
-              onEdit={() => handleEditTemplate(selectedTemplate)}
+              onEdit={() => selectedTemplate && handleEditTemplate(selectedTemplate)}
               onCreateNew={handleCreateNew}
               onCancel={handleCancel}
               onTemplateUpdated={handleTemplateUpdated}

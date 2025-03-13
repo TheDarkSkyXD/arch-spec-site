@@ -299,6 +299,10 @@ describe("FeaturesForm", () => {
     const showToastMock = vi.fn();
     vi.mocked(useToast).mockReturnValue({
       showToast: showToastMock,
+      toasts: [],
+      dismissToast: function (): void {
+        throw new Error("Function not implemented.");
+      }
     });
 
     render(

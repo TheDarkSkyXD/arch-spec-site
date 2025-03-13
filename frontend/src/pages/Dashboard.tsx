@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Plus,
-  Loader,
   PlusCircle,
   ArrowRight,
   Calendar,
@@ -318,7 +317,7 @@ const Dashboard = () => {
                     <div className="flex justify-between items-center text-xs text-slate-500 dark:text-slate-400 pt-3 border-t border-slate-100 dark:border-slate-800">
                       <span>
                         Updated{" "}
-                        {new Date(project.updated_at).toLocaleDateString()}
+                        {project.updated_at ? new Date(project.updated_at).toLocaleDateString() : 'N/A'}
                       </span>
                       <Button
                         onClick={() => navigate(`/projects/${project.id}`)}

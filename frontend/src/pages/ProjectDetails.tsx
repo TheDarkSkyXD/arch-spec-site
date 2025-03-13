@@ -289,7 +289,7 @@ const ProjectDetails = () => {
               <DownloadAllMarkdown
                 project={project}
                 techStack={techStack}
-                requirements={requirements || null}
+                requirements={requirements as Requirements | null}
                 features={features || null}
                 pages={pages || null}
                 dataModel={dataModel || null}

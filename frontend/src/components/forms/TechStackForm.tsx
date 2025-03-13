@@ -2,7 +2,15 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import {
+  BaaS,
+  BackendFramework,
+  Database,
+  Hosting,
+  ORM,
+  Realtime,
+  Serverless,
   StateManagement,
+  Storage,
   TechStackData,
   Technology,
   UILibrary,
@@ -136,7 +144,7 @@ const TechStackForm = ({
       .sort((a, b) => a.id.localeCompare(b.id)) as StateManagement[];
   };
 
-  const getBackendFrameworks = (): Technology[] => {
+  const getBackendFrameworks = (): BackendFramework[] => {
     // Get all frameworks and filter to only return backend frameworks
     const frameworks = techStackOptions?.technologies?.frameworks || {};
 
@@ -148,11 +156,11 @@ const TechStackForm = ({
           ...framework,
           id: name,
         }))
-        .sort((a, b) => a.id.localeCompare(b.id)) as Technology[]
+        .sort((a, b) => a.id.localeCompare(b.id)) as BackendFramework[]
     );
   };
 
-  const getBackendBaaS = (): Technology[] => {
+  const getBackendBaaS = (): BaaS[] => {
     // Get all BaaS and filter to only return backend BaaS
     const baas = techStackOptions?.technologies?.baas || {};
 
@@ -161,10 +169,10 @@ const TechStackForm = ({
         ...baas,
         id: name,
       }))
-      .sort((a, b) => a.id.localeCompare(b.id)) as Technology[];
+      .sort((a, b) => a.id.localeCompare(b.id)) as BaaS[];
   };
 
-  const getBackendRealtime = (): Technology[] => {
+  const getBackendRealtime = (): Realtime[] => {
     // Get all realtime and filter to only return backend realtime
     const realtime = techStackOptions?.technologies?.realtime || {};
 
@@ -173,22 +181,10 @@ const TechStackForm = ({
         ...realtime,
         id: name,
       }))
-      .sort((a, b) => a.id.localeCompare(b.id)) as Technology[];
+      .sort((a, b) => a.id.localeCompare(b.id)) as Realtime[];
   };
 
-  const getBackendFunctions = (): Technology[] => {
-    // Get all functions and filter to only return backend functions
-    const functions = techStackOptions?.technologies?.serverless || {};
-
-    return Object.entries(functions)
-      .map(([name, functions]) => ({
-        ...functions,
-        id: name,
-      }))
-      .sort((a, b) => a.id.localeCompare(b.id)) as Technology[];
-  };
-
-  const getBackendServerless = (): Technology[] => {
+  const getBackendServerless = (): Serverless[] => {
     // Get all serverless options
     const serverless = techStackOptions?.technologies?.serverless || {};
 
@@ -197,10 +193,10 @@ const TechStackForm = ({
         ...service,
         id: name,
       }))
-      .sort((a, b) => a.id.localeCompare(b.id)) as Technology[];
+      .sort((a, b) => a.id.localeCompare(b.id)) as Serverless[];
   };
 
-  const getAllDatabases = (): Technology[] => {
+  const getAllDatabases = (): Database[] => {
     // Get all databases
     const databases = techStackOptions?.technologies?.databases || {};
 
@@ -209,10 +205,10 @@ const TechStackForm = ({
         ...database,
         id: name,
       }))
-      .sort((a, b) => a.id.localeCompare(b.id)) as Technology[];
+      .sort((a, b) => a.id.localeCompare(b.id)) as Database[];
   };
 
-  const getAllDatabaseHosting = (): Technology[] => {
+  const getAllDatabaseHosting = (): Hosting[] => {
     // Get all database hosting
     const hosting = techStackOptions?.technologies?.hosting || {};
 
@@ -224,11 +220,11 @@ const TechStackForm = ({
           ...hosting,
           id: name,
         }))
-        .sort((a, b) => a.id.localeCompare(b.id)) as Technology[]
+        .sort((a, b) => a.id.localeCompare(b.id)) as Hosting[]
     );
   };
 
-  const getAllOrms = (): Technology[] => {
+  const getAllOrms = (): ORM[] => {
     // Get all ORMs
     const orms = techStackOptions?.technologies?.orms || {};
 
@@ -237,7 +233,7 @@ const TechStackForm = ({
         ...orm,
         id: name,
       }))
-      .sort((a, b) => a.id.localeCompare(b.id)) as Technology[];
+      .sort((a, b) => a.id.localeCompare(b.id)) as ORM[];
   };
 
   const getAuthProviders = (): string[] => {
@@ -252,7 +248,7 @@ const TechStackForm = ({
     return auth.sort();
   };
 
-  const getAllHostingFrontend = (): Technology[] => {
+  const getAllHostingFrontend = (): Hosting[] => {
     const hosting = techStackOptions?.technologies?.hosting || {};
 
     return Object.entries(hosting)
@@ -260,10 +256,10 @@ const TechStackForm = ({
         ...hosting,
         id: name,
       }))
-      .sort((a, b) => a.id.localeCompare(b.id)) as Technology[];
+      .sort((a, b) => a.id.localeCompare(b.id)) as Hosting[];
   };
 
-  const getAllHostingBackend = (): Technology[] => {
+  const getAllHostingBackend = (): Hosting[] => {
     const hosting = techStackOptions?.technologies?.hosting || {};
 
     return Object.entries(hosting)
@@ -271,10 +267,10 @@ const TechStackForm = ({
         ...hosting,
         id: name,
       }))
-      .sort((a, b) => a.id.localeCompare(b.id)) as Technology[];
+      .sort((a, b) => a.id.localeCompare(b.id)) as Hosting[];
   };
 
-  const getAllStorageServices = (): Technology[] => {
+  const getAllStorageServices = (): Storage[] => {
     const storage = techStackOptions?.technologies?.storage || {};
 
     return Object.entries(storage)
@@ -282,7 +278,7 @@ const TechStackForm = ({
         ...storage,
         id: name,
       }))
-      .sort((a, b) => a.id.localeCompare(b.id)) as Technology[];
+      .sort((a, b) => a.id.localeCompare(b.id)) as Storage[];
   };
 
   const getAllDeploymentContainerization = (): string[] => {
@@ -398,7 +394,6 @@ const TechStackForm = ({
           backendFrameworks={getBackendFrameworks()}
           backendBaaS={getBackendBaaS()}
           backendRealtime={getBackendRealtime()}
-          backendFunctions={getBackendFunctions()}
           backendServerless={getBackendServerless()}
           initialData={initialData}
           control={control}

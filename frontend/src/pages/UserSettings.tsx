@@ -8,11 +8,13 @@ import Spinner from "../components/ui/Spinner";
 import Toggle from "../components/ui/Toggle";
 import ProfileLayout from "../layouts/ProfileLayout";
 
+type ColorScheme = "light" | "dark" | "system";
+
 interface UserSettings {
-  theme: "light" | "dark" | "system";
+  theme: ColorScheme;
   notifications: boolean;
   emailUpdates: boolean;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 const defaultSettings: UserSettings = {
@@ -43,14 +45,14 @@ const UserSettingsPage = () => {
         const profile = await userApi.getCurrentUser();
 
         // Merge default settings with user settings from profile
-        const userSettings = profile.settings as Record<string, any>;
+        const userSettings = profile.settings as Record<string, unknown>;
         setSettings({
           ...defaultSettings,
           ...userSettings,
         });
 
         // Apply theme setting to the document
-        applyTheme(userSettings?.theme || defaultSettings.theme);
+        applyTheme((userSettings?.theme as ColorScheme) || defaultSettings.theme);
       } catch (error) {
         console.error("Error loading settings:", error);
         setError("Failed to load settings. Using default settings.");
@@ -64,7 +66,7 @@ const UserSettingsPage = () => {
 
           // Apply theme setting to the document
           applyTheme(
-            currentUser.profile.settings?.theme || defaultSettings.theme
+            (currentUser.profile.settings?.theme as ColorScheme) || defaultSettings.theme
           );
         }
       } finally {

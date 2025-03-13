@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { dataModelService } from "../../services/dataModelService";
 import Button from "../ui/Button";
 import Input from "../ui/Input";
@@ -118,15 +118,7 @@ export default function DataModelForm({
     "manyToMany",
   ];
 
-  useEffect(() => {
-    if (initialData) {
-      setDataModel(initialData);
-    } else if (projectId) {
-      fetchDataModel();
-    }
-  }, [initialData, projectId]);
-
-  const fetchDataModel = async () => {
+  const fetchDataModel = useCallback(async () => {
     if (!projectId) return;
 
     setLoading(true);
@@ -148,7 +140,18 @@ export default function DataModelForm({
     } finally {
       setLoading(false);
     }
-  };
+  }, [projectId]);
+
+  useEffect(() => {
+    if (initialData) {
+      setDataModel({
+        entities: initialData.entities || [],
+        relationships: initialData.relationships || [],
+      });
+    } else if (projectId) {
+      fetchDataModel();
+    }
+  }, [initialData, projectId, fetchDataModel]);
 
   // Entity form handlers
   const handleEntityFormChange = (field: string, value: string) => {
@@ -254,7 +257,7 @@ export default function DataModelForm({
   };
 
   // Field form handlers
-  const handleFieldFormChange = (field: string, value: any) => {
+  const handleFieldFormChange = (field: string, value: unknown) => {
     // Convert numeric default value to string if needed
     if (field === "default" && typeof value === "number") {
       value = value.toString();
@@ -816,22 +819,26 @@ export default function DataModelForm({
                               <Edit size={16} />
                             </Button>
                             <AlertDialog>
-                              <AlertDialogTrigger asChild>
+                              <AlertDialogTrigger onClick={(e: { stopPropagation: () => void; }) => {
+                                e.stopPropagation();
+                                setEntityToDelete(idx);
+                                setIsDeleteDialogOpen(true);
+                              }}>
                                 <Button
                                   type="button"
                                   variant="ghost"
                                   size="sm"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setEntityToDelete(idx);
-                                    setIsDeleteDialogOpen(true);
-                                  }}
                                 >
                                   <Trash2 size={16} />
                                 </Button>
                               </AlertDialogTrigger>
                               {isDeleteDialogOpen && entityToDelete === idx && (
-                                <AlertDialogContent>
+                                <AlertDialogContent
+                                  isOpen={isDeleteDialogOpen}
+                                  onClose={() => {
+                                    setIsDeleteDialogOpen(false);
+                                    setEntityToDelete(null);
+                                  }}>
                                   <AlertDialogHeader>
                                     <AlertDialogTitle>
                                       Delete {entity.name}?

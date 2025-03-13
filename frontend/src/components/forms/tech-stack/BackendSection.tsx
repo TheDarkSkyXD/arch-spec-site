@@ -1,14 +1,13 @@
 import {
   UseFormRegister,
   FormState,
-  FieldError,
   Control,
   UseFormSetValue,
   useWatch,
 } from "react-hook-form";
-import { Technology } from "../../../types/techStack";
+import { BaaS, BackendFramework, Realtime, Serverless } from "../../../types/techStack";
 import { TechStackFormData } from "../tech-stack/techStackSchema";
-import { ReactNode, useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import {
   ProjectTechStack,
   FrameworkBackend,
@@ -18,7 +17,6 @@ import {
 import {
   filterBackendFrameworkOptions,
   filterBackendRealtimeOptions,
-  filterBackendFunctionsOptions,
   filterBackendBaaSOptions,
   getBackendServiceOptions,
 } from "../../../utils/backendTechStackFilterUtils";
@@ -30,11 +28,10 @@ import { Select } from "../../ui/select";
 interface BackendSectionProps {
   register: UseFormRegister<TechStackFormData>;
   errors: FormState<TechStackFormData>["errors"];
-  backendFrameworks: Technology[];
-  backendBaaS: Technology[];
-  backendRealtime: Technology[];
-  backendFunctions: Technology[];
-  backendServerless: Technology[];
+  backendFrameworks: BackendFramework[];
+  backendBaaS: BaaS[];
+  backendRealtime: Realtime[];
+  backendServerless: Serverless[];
   setValue: UseFormSetValue<TechStackFormData>;
   control: Control<TechStackFormData>;
   initialData?: ProjectTechStack;
@@ -46,7 +43,6 @@ const BackendSection = ({
   backendFrameworks,
   backendBaaS,
   backendRealtime,
-  backendFunctions,
   backendServerless,
   control,
   setValue,
@@ -54,11 +50,6 @@ const BackendSection = ({
 }: BackendSectionProps) => {
   // Create a ref to track whether we've applied initial data
   const initialDataAppliedRef = useRef<boolean>(false);
-
-  // Helper function to safely get error message
-  const getErrorMessage = (error: FieldError | undefined): ReactNode => {
-    return error?.message as ReactNode;
-  };
 
   // Watch for form value changes
   const watchedValues = useWatch({
@@ -116,11 +107,6 @@ const BackendSection = ({
       backendFrameworks,
       backendRealtime,
     ]
-  );
-
-  const filteredFunctions = useMemo(
-    () => filterBackendFunctionsOptions(backendService, backendFunctions),
-    [backendService, backendFunctions]
   );
 
   const filteredBaaS = useMemo(
@@ -218,7 +204,7 @@ const BackendSection = ({
 
       // Set functions if provided
       if (baasBackend.functions) {
-        const functionsExists = backendFunctions.some(
+        const functionsExists = backendServerless.some(
           (func) => func.id === baasBackend.functions
         );
 
@@ -282,7 +268,6 @@ const BackendSection = ({
     backendFrameworks,
     backendBaaS,
     backendRealtime,
-    backendFunctions,
     backendServerless,
     setValue,
   ]);
@@ -362,7 +347,7 @@ const BackendSection = ({
               </Label>
               <Select id="backend_functions" {...register("backend_functions")}>
                 <option value="">None</option>
-                {filteredFunctions.map((functions) => (
+                {serviceOptions.map((functions) => (
                   <option key={functions.id} value={functions.id}>
                     {functions.id}
                   </option>

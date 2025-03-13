@@ -1,9 +1,9 @@
-import { Project } from "../../types/project";
+import { ProjectBase } from "../../types/project";
 import { Clock, ArrowRight, Bookmark, MoreHorizontal } from "lucide-react";
 import { Link } from "react-router-dom";
 
 interface ProjectCardProps {
-  project: Project;
+  project: ProjectBase;
 }
 
 const ProjectCard = ({ project }: ProjectCardProps) => {
@@ -17,32 +17,8 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
     }).format(date);
   };
 
-  // Get status badge color based on status
-  const StatusBadge = ({ status }: { status: string }) => {
-    const formattedStatus = status.replace("_", " ");
-
-    return (
-      <div className={`status-badge ${status}`}>
-        {status === "completed" && (
-          <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-        )}
-        {status === "in_progress" && (
-          <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-        )}
-        {status === "draft" && (
-          <span className="w-1.5 h-1.5 rounded-full bg-slate-500"></span>
-        )}
-        {formattedStatus}
-      </div>
-    );
-  };
-
   // Get the project template name from metadata if available
   const getProjectType = () => {
-    if (project.metadata && typeof project.metadata === "object") {
-      // @ts-expect-error: Safely check if template_name exists in metadata
-      return project.metadata.template_name || "Custom project";
-    }
     return "Custom project";
   };
 
@@ -51,7 +27,6 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
       <div className="flex justify-between items-start mb-4">
         <div className="flex-1">
           <div className="flex items-start justify-between mb-2">
-            <StatusBadge status={project.status} />
             <div className="relative group/menu">
               <button className="p-1 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600">
                 <MoreHorizontal size={18} />
@@ -68,10 +43,12 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
       </div>
 
       <div className="flex items-center justify-between text-xs text-slate-500 pt-4 border-t border-slate-100">
-        <div className="flex items-center">
-          <Clock size={14} className="mr-1" />
-          <span>Updated {formatDate(project.updated_at)}</span>
-        </div>
+        if (project.updated_at) {
+          <div className="flex items-center">
+            <Clock size={14} className="mr-1" />
+            <span>Updated {formatDate(project.updated_at as string)}</span>
+          </div>
+        }
 
         <div>
           <button className="p-1 rounded-full text-slate-400 hover:text-primary-600 hover:bg-primary-50 transition-colors mr-1">

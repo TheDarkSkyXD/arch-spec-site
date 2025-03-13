@@ -57,24 +57,6 @@ apiClient.interceptors.response.use(
   }
 );
 
-// Mock data for fallback in development
-const mockUserProfile: UserProfile = {
-  _id: "mock-user-id",
-  firebase_uid: "mock-firebase-uid",
-  email: "user@example.com",
-  display_name: "Example User",
-  photo_url: "",
-  created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString(),
-  last_login: new Date().toISOString(),
-  is_active: true,
-  settings: {
-    theme: "system",
-    notifications: true,
-    emailUpdates: false,
-  },
-};
-
 // User interfaces
 export interface UserProfile {
   _id: string;

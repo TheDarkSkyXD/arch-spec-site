@@ -19,7 +19,7 @@ export function generateTechStackMarkdown(
   markdown += `## Frontend\n`;
   if (data.frontend) {
     // Type assertion to avoid linter errors with record type
-    markdown += formatObject(data.frontend as Record<string, unknown>);
+    markdown += formatObject(data.frontend as unknown as Record<string, unknown>);
   } else {
     markdown += "*No frontend technology specified*";
   }
@@ -59,7 +59,7 @@ export function generateTechStackMarkdown(
       }
     } else {
       // Use generic object formatting if type property isn't present
-      markdown += formatObject(data.backend as Record<string, unknown>);
+      markdown += formatObject(data.backend as unknown as Record<string, unknown>);
     }
   } else {
     markdown += "*No backend technology specified*";
@@ -85,7 +85,7 @@ export function generateTechStackMarkdown(
         markdown += `- **Client**: ${database.client}\n`;
       }
     } else {
-      markdown += formatObject(data.database as Record<string, unknown>);
+      markdown += formatObject(data.database as unknown as Record<string, unknown>);
     }
   } else {
     markdown += "*No database technology specified*";
@@ -95,7 +95,7 @@ export function generateTechStackMarkdown(
   // Authentication
   markdown += `## Authentication\n`;
   if (data.authentication) {
-    markdown += formatObject(data.authentication as Record<string, unknown>);
+    markdown += formatObject(data.authentication as unknown as Record<string, unknown>);
   } else {
     markdown += "*No authentication technology specified*";
   }
@@ -104,7 +104,7 @@ export function generateTechStackMarkdown(
   // Hosting
   markdown += `## Hosting\n`;
   if (data.hosting) {
-    markdown += formatObject(data.hosting as Record<string, unknown>);
+    markdown += formatObject(data.hosting as unknown as Record<string, unknown>);
   } else {
     markdown += "*No hosting technology specified*";
   }
@@ -113,7 +113,7 @@ export function generateTechStackMarkdown(
   // Optional: Storage
   if (data.storage) {
     markdown += `## Storage\n`;
-    markdown += formatObject(data.storage as Record<string, unknown>);
+    markdown += formatObject(data.storage as unknown as Record<string, unknown>);
     markdown += "\n\n";
   }
 

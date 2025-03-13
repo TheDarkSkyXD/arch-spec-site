@@ -1,14 +1,13 @@
 import {
   UseFormRegister,
   FormState,
-  FieldError,
   Control,
   UseFormSetValue,
   useWatch,
 } from "react-hook-form";
-import { Technology } from "../../../types/techStack";
+import { Database, Hosting, Technology } from "../../../types/techStack";
 import { TechStackFormData } from "../tech-stack/techStackSchema";
-import { ReactNode, useEffect, useRef, useMemo } from "react";
+import { useEffect, useRef, useMemo } from "react";
 import { ProjectTechStack } from "../../../types/templates";
 import {
   filterDatabaseSystems,
@@ -23,8 +22,8 @@ import { Select } from "../../ui/select";
 interface DatabaseSectionProps {
   register: UseFormRegister<TechStackFormData>;
   errors: FormState<TechStackFormData>["errors"];
-  allDatabases: Technology[];
-  allDatabaseHosting: Technology[];
+  allDatabases: Database[];
+  allDatabaseHosting: Hosting[];
   allOrms: Technology[];
   control: Control<TechStackFormData>;
   setValue: UseFormSetValue<TechStackFormData>;
@@ -43,11 +42,6 @@ const DatabaseSection = ({
 }: DatabaseSectionProps) => {
   // Create a ref to track whether we've applied initial data
   const initialDataAppliedRef = useRef<boolean>(false);
-
-  // Helper function to safely get error message
-  const getErrorMessage = (error: FieldError | undefined): ReactNode => {
-    return error?.message as ReactNode;
-  };
 
   // Watch for form value changes
   const watchedValues = useWatch({
@@ -144,7 +138,7 @@ const DatabaseSection = ({
   useEffect(() => {
     // Auto-select database type if only one option is available in filtered databases
     if (filteredDatabases.length > 0 && !selectedDatabaseType) {
-      const types = [...new Set(filteredDatabases.map((db) => db.type || ""))];
+      const types = [...new Set(filteredDatabases.map((db) => (db as Database).type || ""))];
       if (types.length === 1) {
         setValue("database_type", types[0], { shouldDirty: true });
         console.log("Auto-selected database type:", types[0]);

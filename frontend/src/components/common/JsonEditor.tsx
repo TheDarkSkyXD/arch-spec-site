@@ -78,9 +78,9 @@ const JsonEditor = <T extends Record<string, unknown>>({
               collapseStringsAfterLength={50}
               enableClipboard={true}
               displayDataTypes={false}
-              onEdit={!readOnly ? onEdit : undefined}
-              onAdd={!readOnly ? onEdit : undefined}
-              onDelete={!readOnly ? onEdit : undefined}
+              onEdit={!readOnly ? (edit) => onEdit?.(edit as unknown as { updated_src: T }) : undefined}
+              onAdd={!readOnly ? (edit) => onEdit?.(edit as unknown as { updated_src: T }) : undefined}
+              onDelete={!readOnly ? (edit) => onEdit?.(edit as unknown as { updated_src: T }) : undefined}
               style={{
                 backgroundColor: "transparent",
                 textAlign: "left",

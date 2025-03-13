@@ -3,10 +3,8 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   Mail,
   Lock,
-  AlertCircle,
   Eye,
   EyeOff,
-  CheckCircle,
 } from "lucide-react";
 import AuthLayout from "../../layouts/AuthLayout";
 import { useAuth } from "../../contexts/AuthContextDefinition";

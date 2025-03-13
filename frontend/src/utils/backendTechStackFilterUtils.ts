@@ -1,11 +1,11 @@
-import { Technology } from "../types/techStack";
+import { BaaS, BackendFramework, Realtime, Serverless, Technology } from "../types/techStack";
 
 /**
  * Filters backend framework options based on selected language
  */
 export const filterBackendFrameworkOptions = (
   selectedLanguage: string | undefined,
-  backendFrameworks: Technology[]
+  backendFrameworks: BackendFramework[],
 ): Technology[] => {
   // If no language selected, show all frameworks
   if (!selectedLanguage) {
@@ -15,7 +15,7 @@ export const filterBackendFrameworkOptions = (
   // Filter frameworks that support the selected language
   return backendFrameworks.filter((framework) => {
     return (
-      !framework.languages || framework.languages.includes(selectedLanguage)
+      !framework.language || framework.language.includes(selectedLanguage)
     );
   });
 };
@@ -27,8 +27,8 @@ export const filterBackendRealtimeOptions = (
   backendType: string | undefined,
   selectedFramework: string | undefined,
   selectedService: string | undefined,
-  backendFrameworks: Technology[],
-  backendRealtime: Technology[]
+  backendFrameworks: BackendFramework[],
+  backendRealtime: Realtime[]
 ): Technology[] => {
   // If no type selected, show no options
   if (!backendType) {
@@ -72,7 +72,7 @@ export const filterBackendRealtimeOptions = (
  */
 export const filterBackendFunctionsOptions = (
   selectedService: string | undefined,
-  backendFunctions: Technology[]
+  backendFunctions: Serverless[]
 ): Technology[] => {
   // If no service selected, show no options
   if (!selectedService) {
@@ -91,7 +91,7 @@ export const filterBackendFunctionsOptions = (
 export const filterBackendBaaSOptions = (
   selectedRealtime: string | undefined,
   selectedFunctions: string | undefined,
-  backendBaaS: Technology[]
+  backendBaaS: BaaS[]
 ): Technology[] => {
   // If nothing selected, show all BaaS options
   if (!selectedRealtime && !selectedFunctions) {
@@ -104,7 +104,6 @@ export const filterBackendBaaSOptions = (
   if (selectedRealtime) {
     filtered = filtered.filter(
       (baas) =>
-        baas.features?.includes("realtime") ||
         baas.compatibleWith?.realtime?.includes(selectedRealtime)
     );
   }
@@ -113,7 +112,6 @@ export const filterBackendBaaSOptions = (
   if (selectedFunctions) {
     filtered = filtered.filter(
       (baas) =>
-        baas.features?.includes("functions") ||
         baas.compatibleWith?.functions?.includes(selectedFunctions)
     );
   }

@@ -6,7 +6,6 @@ import {
   Search,
   FolderPlus,
   Filter,
-  CheckCircle,
   AlertCircle,
   Trash2,
 } from "lucide-react";
@@ -178,22 +177,12 @@ const Projects = () => {
                           {project.domain}
                         </div>
                       )}
-                      {project.functional && (
-                        <div className="flex items-center text-xs text-slate-500 dark:text-slate-400">
-                          <CheckCircle size={12} className="mr-1" />
-                          <span className="font-medium mr-2">
-                            Requirements:
-                          </span>
-                          {project.functional.length +
-                            (project.non_functional?.length || 0)}
-                        </div>
-                      )}
                     </div>
 
                     <div className="flex justify-between items-center text-xs text-slate-500 dark:text-slate-400 pt-4 border-t border-slate-100 dark:border-slate-700">
                       <span>
                         Updated{" "}
-                        {new Date(project.updated_at).toLocaleDateString()}
+                        {project.updated_at ? new Date(project.updated_at).toLocaleDateString() : 'N/A'}
                       </span>
                       <div className="flex space-x-3">
                         <button

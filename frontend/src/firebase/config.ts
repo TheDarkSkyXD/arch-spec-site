@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-import { getAuth, connectAuthEmulator } from "firebase/auth";
+import { Analytics, getAnalytics } from "firebase/analytics";
+import { getAuth, Auth } from "firebase/auth";
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
@@ -17,8 +17,8 @@ const firebaseConfig = {
 
 // Initialize Firebase
 export const app = initializeApp(firebaseConfig);
-export let analytics;
-export let auth;
+export let analytics: Analytics;
+export let auth: Auth;
 
 // Custom logger function that only logs in development mode
 const logMessage = (message: string, isError = false) => {

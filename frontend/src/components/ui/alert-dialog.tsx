@@ -16,7 +16,7 @@ const AlertDialog = ({ children, className }: AlertDialogProps) => {
 
 interface AlertDialogTriggerProps {
   children: React.ReactNode
-  onClick?: () => void
+  onClick?: (event: React.MouseEvent) => void
 }
 
 const AlertDialogTrigger = ({ children, onClick }: AlertDialogTriggerProps) => {

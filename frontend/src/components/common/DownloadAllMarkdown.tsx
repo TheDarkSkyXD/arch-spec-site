@@ -22,7 +22,7 @@ interface DownloadAllMarkdownProps {
   dataModel: Partial<DataModel> | null;
   apiEndpoints: Api | null;
   className?: string;
-  variant?: "default" | "outline" | "subtle" | "ghost" | "link";
+  variant?: "default" | "outline" | "ghost" | "link";
   size?: "default" | "sm" | "lg";
 }
 

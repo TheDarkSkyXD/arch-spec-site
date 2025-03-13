@@ -1,7 +1,6 @@
 import {
   getCompatibleTechnologies,
   filterCompatibleTechnologies,
-  createDefaultTechStackData,
 } from "../techStackUtils";
 import { TechStackData } from "../../types/techStack";
 
@@ -104,9 +103,7 @@ describe("Tech Stack Utilities", () => {
         stateManagement: {
           Redux: {
             description: "A predictable state container for JavaScript apps",
-            compatibleWith: {
-              frameworks: ["React"],
-            },
+            compatibleWith: ["React"] ,
           },
           MobX: {
             description: "Simple, scalable state management",
@@ -175,14 +172,14 @@ describe("Tech Stack Utilities", () => {
             type: "frontend",
             description: "Platform for frontend frameworks and static sites",
             compatibleWith: {
-              frameworks: ["React", "Vue", "Next.js"],
+              frontend: ["React", "Vue", "Next.js"],
             },
           },
           Netlify: {
             type: "frontend",
             description: "Platform for modern web projects",
             compatibleWith: {
-              frameworks: ["React", "Vue", "Gatsby"],
+              frontend: ["React", "Vue", "Gatsby"],
             },
           },
           Heroku: {
@@ -190,14 +187,14 @@ describe("Tech Stack Utilities", () => {
             description:
               "Cloud platform that lets companies build, deliver, monitor and scale apps",
             compatibleWith: {
-              frameworks: ["Express.js", "Django", "Rails"],
+              backend: ["Express.js", "Django", "Rails"],
             },
           },
           AWS: {
             type: "backend",
             description: "On-demand cloud computing platforms and APIs",
             compatibleWith: {
-              frameworks: ["Express.js", "NestJS"],
+              backend: ["Express.js", "NestJS"],
             },
           },
         },
@@ -357,41 +354,6 @@ describe("Tech Stack Utilities", () => {
       expect(result).not.toContain("AWS");
       expect(result).not.toContain("Vercel");
       expect(result).not.toContain("Netlify");
-    });
-  });
-
-  describe("createDefaultTechStackData", () => {
-    it("should create a valid TechStackData structure", () => {
-      const defaultData = createDefaultTechStackData();
-
-      // Check the structure
-      expect(defaultData).toHaveProperty("categories");
-      expect(defaultData).toHaveProperty("technologies");
-
-      // Check that categories contains frontend, backend, etc.
-      expect(defaultData.categories).toHaveProperty("frontend");
-      expect(defaultData.categories).toHaveProperty("backend");
-      expect(defaultData.categories).toHaveProperty("database");
-
-      // Check that technologies contains frameworks, databases, etc.
-      expect(defaultData.technologies).toHaveProperty("frameworks");
-      expect(defaultData.technologies).toHaveProperty("databases");
-      expect(defaultData.technologies).toHaveProperty("stateManagement");
-    });
-
-    it("should include sample data for React", () => {
-      const defaultData = createDefaultTechStackData();
-
-      // Check that React is defined with compatibility info
-      expect(defaultData.technologies.frameworks).toHaveProperty("React");
-      const react = defaultData.technologies.frameworks["React"];
-      expect(react).toHaveProperty("type", "frontend");
-      expect(react).toHaveProperty("description");
-      expect(react).toHaveProperty("compatibleWith");
-
-      // Check that React has compatibility with state management
-      expect((react as any).compatibleWith).toHaveProperty("stateManagement");
-      expect((react as any).compatibleWith.stateManagement).toContain("Redux");
     });
   });
 });

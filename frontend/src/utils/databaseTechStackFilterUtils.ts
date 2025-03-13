@@ -1,12 +1,12 @@
-import { Technology, Database, ORM } from "../types/techStack";
+import { Technology, Database, ORM, Hosting } from "../types/techStack";
 
 // Filter database systems based on selections
 export const filterDatabaseSystems = (
   selectedType: string | undefined,
   selectedHosting: string | undefined,
   selectedOrm: string | undefined,
-  allDatabases: Technology[],
-  allDatabaseHosting: Technology[],
+  allDatabases: Database[],
+  allDatabaseHosting: Hosting[],
   allOrms: Technology[]
 ): Technology[] => {
   // If nothing selected, show all databases
@@ -56,8 +56,8 @@ export const filterDatabaseHosting = (
   selectedType: string | undefined,
   selectedSystem: string | undefined,
   selectedOrm: string | undefined,
-  allDatabases: Technology[],
-  allDatabaseHosting: Technology[],
+  allDatabases: Database[],
+  allDatabaseHosting: Hosting[],
   allOrms: Technology[]
 ): Technology[] => {
   // If nothing selected, show all hosting options
@@ -126,8 +126,8 @@ export const filterOrmOptions = (
   selectedType: string | undefined,
   selectedSystem: string | undefined,
   selectedHosting: string | undefined,
-  allDatabases: Technology[],
-  allDatabaseHosting: Technology[],
+  allDatabases: Database[],
+  allDatabaseHosting: Hosting[],
   allOrms: Technology[]
 ): Technology[] => {
   // Only show ORMs for SQL databases

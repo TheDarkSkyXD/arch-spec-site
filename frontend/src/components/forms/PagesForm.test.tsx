@@ -1,8 +1,6 @@
-import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { vi } from "vitest";
 import PagesForm from "./PagesForm";
-import { useToast } from "../../contexts/ToastContext";
 import { pagesService } from "../../services/pagesService";
 
 // Mock the pagesService
