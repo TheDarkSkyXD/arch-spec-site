@@ -10,10 +10,17 @@ import {
   ChevronDown,
   ChevronUp,
   Plus,
+  Sparkles,
+  RefreshCw,
 } from "lucide-react";
-import { PageComponent, Pages } from "../../types/templates";
+import { Pages } from "../../types/templates";
 import { pagesService } from "../../services/pagesService";
 import { useToast } from "../../contexts/ToastContext";
+import { projectsService } from "../../services/projectsService";
+import { featuresService } from "../../services/featuresService";
+import { requirementsService } from "../../services/requirementsService";
+import { aiService } from "../../services/aiService";
+import { PageComponent, PagesData } from "../../services/aiService";
 
 // Import shadcn UI components
 import Button from "../ui/Button";
@@ -53,6 +60,13 @@ export default function PagesForm({
   // Add state for error and success messages
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
+
+  // Add state for AI enhancement
+  const [isEnhancing, setIsEnhancing] = useState<boolean>(false);
+  const [isAddingPages, setIsAddingPages] = useState<boolean>(false);
+  const [projectDescription, setProjectDescription] = useState<string>("");
+  const [projectFeatures, setProjectFeatures] = useState<any[]>([]);
+  const [requirements, setRequirements] = useState<string[]>([]);
 
   // Editing state
   const [isEditing, setIsEditing] = useState(false);
@@ -119,6 +133,210 @@ export default function PagesForm({
 
     fetchPages();
   }, [projectId, initialData]);
+
+  // New function to fetch project info for AI enhancement
+  const fetchProjectInfo = async () => {
+    if (!projectId) return;
+
+    try {
+      // Fetch project details including description
+      const projectDetails = await projectsService.getProjectById(projectId);
+
+      if (projectDetails) {
+        setProjectDescription(projectDetails.description || "");
+
+        // Fetch features
+        const featuresData = await featuresService.getFeatures(projectId);
+        if (featuresData && featuresData.coreModules) {
+          setProjectFeatures(featuresData.coreModules);
+        }
+
+        // Fetch requirements
+        const requirementsData = await requirementsService.getRequirements(
+          projectId
+        );
+        if (requirementsData) {
+          // Combine functional and non-functional requirements
+          const allRequirements = [
+            ...(requirementsData.functional || []),
+            ...(requirementsData.non_functional || []),
+          ];
+          setRequirements(allRequirements);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching project details:", error);
+    }
+  };
+
+  // Add effect to fetch project info
+  useEffect(() => {
+    if (projectId) {
+      fetchProjectInfo();
+    }
+  }, [projectId]);
+
+  // Function to enhance pages using AI (replace existing pages)
+  const enhancePages = async () => {
+    if (!projectId) {
+      showToast({
+        title: "Error",
+        description: "Project must be saved before pages can be enhanced",
+        type: "error",
+      });
+      return;
+    }
+
+    if (!projectDescription) {
+      showToast({
+        title: "Warning",
+        description:
+          "Project description is missing. Pages may not be properly enhanced.",
+        type: "warning",
+      });
+    }
+
+    if (projectFeatures.length === 0) {
+      showToast({
+        title: "Warning",
+        description:
+          "No features found. Pages will be based only on project description.",
+        type: "warning",
+      });
+    }
+
+    setIsEnhancing(true);
+    try {
+      console.log("Enhancing pages with AI...");
+
+      // Create the current pages data to pass
+      const currentPages = {
+        public: publicPages,
+        authenticated: authenticatedPages,
+        admin: adminPages,
+      };
+
+      const enhancedPages = await aiService.enhancePages(
+        projectDescription,
+        projectFeatures,
+        requirements,
+        // Only pass existing pages if we have some
+        publicPages.length > 0 ||
+          authenticatedPages.length > 0 ||
+          adminPages.length > 0
+          ? currentPages
+          : undefined
+      );
+
+      if (enhancedPages) {
+        // Replace existing pages with enhanced ones
+        setPublicPages(enhancedPages.public || []);
+        setAuthenticatedPages(enhancedPages.authenticated || []);
+        setAdminPages(enhancedPages.admin || []);
+
+        showToast({
+          title: "Success",
+          description: "Pages enhanced successfully",
+          type: "success",
+        });
+      } else {
+        showToast({
+          title: "Warning",
+          description: "No enhanced pages returned",
+          type: "warning",
+        });
+      }
+    } catch (error) {
+      console.error("Error enhancing pages:", error);
+      showToast({
+        title: "Error",
+        description: "Failed to enhance pages",
+        type: "error",
+      });
+    } finally {
+      setIsEnhancing(false);
+    }
+  };
+
+  // Function to add AI-generated pages without replacing existing ones
+  const addAIPages = async () => {
+    if (!projectId) {
+      showToast({
+        title: "Error",
+        description: "Project must be saved before pages can be enhanced",
+        type: "error",
+      });
+      return;
+    }
+
+    if (!projectDescription) {
+      showToast({
+        title: "Warning",
+        description:
+          "Project description is missing. Pages may not be properly generated.",
+        type: "warning",
+      });
+    }
+
+    setIsAddingPages(true);
+    try {
+      // When adding new pages, we don't pass the existing pages to avoid duplication
+      const enhancedPages = await aiService.enhancePages(
+        projectDescription,
+        projectFeatures,
+        requirements
+      );
+
+      if (enhancedPages) {
+        // Add new pages to existing ones (avoiding duplicates by path)
+        const existingPublicPaths = new Set(publicPages.map((p) => p.path));
+        const newPublicPages = enhancedPages.public.filter(
+          (p) => !existingPublicPaths.has(p.path)
+        );
+
+        const existingAuthPaths = new Set(
+          authenticatedPages.map((p) => p.path)
+        );
+        const newAuthPages = enhancedPages.authenticated.filter(
+          (p) => !existingAuthPaths.has(p.path)
+        );
+
+        const existingAdminPaths = new Set(adminPages.map((p) => p.path));
+        const newAdminPages = enhancedPages.admin.filter(
+          (p) => !existingAdminPaths.has(p.path)
+        );
+
+        // Update state with combined pages
+        setPublicPages([...publicPages, ...newPublicPages]);
+        setAuthenticatedPages([...authenticatedPages, ...newAuthPages]);
+        setAdminPages([...adminPages, ...newAdminPages]);
+
+        const totalNewPages =
+          newPublicPages.length + newAuthPages.length + newAdminPages.length;
+
+        showToast({
+          title: "Success",
+          description: `Added ${totalNewPages} new pages`,
+          type: "success",
+        });
+      } else {
+        showToast({
+          title: "Warning",
+          description: "No new pages generated",
+          type: "warning",
+        });
+      }
+    } catch (error) {
+      console.error("Error adding AI pages:", error);
+      showToast({
+        title: "Error",
+        description: "Failed to generate new pages",
+        type: "error",
+      });
+    } finally {
+      setIsAddingPages(false);
+    }
+  };
 
   const handleTogglePage = (
     type: "public" | "authenticated" | "admin",
@@ -717,6 +935,50 @@ export default function PagesForm({
           <p className="text-slate-600 dark:text-slate-400 mb-6">
             Define the pages that will be included in your application.
           </p>
+        </div>
+
+        {/* AI Enhancement Buttons */}
+        <div className="flex justify-end items-center gap-3 mb-4">
+          <Button
+            type="button"
+            onClick={addAIPages}
+            disabled={isAddingPages || isEnhancing || !projectId}
+            variant="outline"
+            className="flex items-center gap-2"
+            title="Generate new pages to complement existing ones"
+          >
+            {isAddingPages ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Adding...</span>
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-4 w-4" />
+                <span>Add AI Pages</span>
+              </>
+            )}
+          </Button>
+          <Button
+            type="button"
+            onClick={enhancePages}
+            disabled={isEnhancing || isAddingPages || !projectId}
+            variant="outline"
+            className="flex items-center gap-2"
+            title="Replace all pages with AI-generated ones"
+          >
+            {isEnhancing ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Enhancing...</span>
+              </>
+            ) : (
+              <>
+                <RefreshCw className="h-4 w-4" />
+                <span>Replace All</span>
+              </>
+            )}
+          </Button>
         </div>
 
         <Card className="overflow-hidden">

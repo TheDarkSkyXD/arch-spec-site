@@ -56,6 +56,30 @@ interface EnhanceFeaturesResponse {
   data: FeaturesData;
 }
 
+export interface PageComponent {
+  name: string;
+  path: string;
+  components: string[];
+  enabled: boolean;
+}
+
+export interface PagesData {
+  public: PageComponent[];
+  authenticated: PageComponent[];
+  admin: PageComponent[];
+}
+
+interface EnhancePagesRequest {
+  project_description: string;
+  features: FeatureModule[];
+  requirements: string[];
+  existing_pages?: PagesData;
+}
+
+interface EnhancePagesResponse {
+  data: PagesData;
+}
+
 class AIService {
   /**
    * Enhance a project description using AI.
@@ -190,6 +214,39 @@ class AIService {
       return response.data.data;
     } catch (error) {
       console.error("Error enhancing features:", error);
+      return null;
+    }
+  }
+
+  /**
+   * Enhance project pages/screens using AI.
+   *
+   * @param projectDescription The project description
+   * @param features The project features
+   * @param requirements The project requirements
+   * @param existingPages The original pages (optional)
+   * @returns The enhanced pages data or null if an error occurred
+   */
+  async enhancePages(
+    projectDescription: string,
+    features: FeatureModule[],
+    requirements: string[],
+    existingPages?: PagesData
+  ): Promise<PagesData | null> {
+    try {
+      const response = await apiClient.post<EnhancePagesResponse>(
+        "/api/ai-text/enhance-pages",
+        {
+          project_description: projectDescription,
+          features: features,
+          requirements: requirements,
+          existing_pages: existingPages,
+        } as EnhancePagesRequest
+      );
+
+      return response.data.data;
+    } catch (error) {
+      console.error("Error enhancing pages:", error);
       return null;
     }
   }

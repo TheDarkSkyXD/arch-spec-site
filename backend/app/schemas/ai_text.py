@@ -231,4 +231,94 @@ class FeaturesEnhanceResponse(BaseModel):
         ...,
         title="Features Data",
         description="The structured feature data organized by modules"
+    )
+
+
+class PageComponent(BaseModel):
+    """Model for a page component."""
+    
+    name: str = Field(
+        ...,
+        title="Page Name",
+        description="Name of the page (e.g., Landing, Dashboard)"
+    )
+    
+    path: str = Field(
+        ...,
+        title="Page Path",
+        description="URL path for the page"
+    )
+    
+    components: List[str] = Field(
+        default_factory=list,
+        title="Components",
+        description="List of UI components included in this page"
+    )
+    
+    enabled: bool = Field(
+        default=True,
+        title="Enabled",
+        description="Whether this page is enabled"
+    )
+
+
+class PagesData(BaseModel):
+    """Model for pages data organized by access level."""
+    
+    public: List[PageComponent] = Field(
+        default_factory=list,
+        title="Public Pages",
+        description="List of screens accessible to unauthenticated users"
+    )
+    
+    authenticated: List[PageComponent] = Field(
+        default_factory=list,
+        title="Authenticated Pages",
+        description="List of screens accessible to logged-in users"
+    )
+    
+    admin: List[PageComponent] = Field(
+        default_factory=list,
+        title="Admin Pages",
+        description="List of screens accessible to administrators"
+    )
+
+
+class PagesEnhanceRequest(BaseModel):
+    """Request model for enhancing application pages."""
+    
+    project_description: str = Field(
+        ...,
+        title="Project Description",
+        description="The description of the project",
+        examples=["A web application for tracking daily fitness workouts and nutrition"],
+    )
+    
+    features: List[Dict[str, Any]] = Field(
+        default_factory=list,
+        title="Features",
+        description="The project features that need UI representation",
+    )
+    
+    requirements: List[str] = Field(
+        default_factory=list,
+        title="Requirements",
+        description="The project requirements",
+        examples=[["Track workouts", "Monitor progress", "Share with friends"]],
+    )
+    
+    existing_pages: Optional[PagesData] = Field(
+        default=None,
+        title="Existing Pages",
+        description="The existing pages that may need enhancement",
+    )
+
+
+class PagesEnhanceResponse(BaseModel):
+    """Response model for enhanced pages."""
+    
+    data: PagesData = Field(
+        ...,
+        title="Pages Data",
+        description="The structured page recommendations organized by access level"
     ) 
