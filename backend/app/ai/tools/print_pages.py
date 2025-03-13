@@ -1,38 +1,38 @@
-def print_screens_input_schema():
+def print_pages_input_schema():
     return {
-      "name": "print_screens",
-      "description": "Formats and displays the organized screen recommendations for different user access levels",
+      "name": "print_pages",
+      "description": "Formats and displays the organized page recommendations for different user access levels",
       "input_schema": {
           "type": "object",
           "properties": {
               "data": {
                   "type": "object",
-                  "description": "The structured screen recommendations organized by access level",
+                  "description": "The structured page recommendations organized by access level",
                   "properties": {
                       "public": {
                           "type": "array",
-                          "description": "List of screens accessible to unauthenticated users",
+                          "description": "List of pages accessible to unauthenticated users",
                           "items": {
                               "type": "object",
                               "properties": {
                                   "name": {
                                       "type": "string",
-                                      "description": "Name of the screen (e.g., Landing, Login)"
+                                      "description": "Name of the page (e.g., Landing, Login)"
                                   },
                                   "path": {
                                       "type": "string",
-                                      "description": "URL path for the screen"
+                                      "description": "URL path for the page"
                                   },
                                   "components": {
                                       "type": "array",
-                                      "description": "List of UI components included in this screen",
+                                      "description": "List of UI components included in this page",
                                       "items": {
                                           "type": "string"
                                       }
                                   },
                                   "enabled": {
                                       "type": "boolean",
-                                      "description": "Whether this screen is enabled"
+                                      "description": "Whether this page is enabled"
                                   }
                               },
                               "required": ["name", "path", "components", "enabled"]
@@ -40,28 +40,28 @@ def print_screens_input_schema():
                       },
                       "authenticated": {
                           "type": "array",
-                          "description": "List of screens accessible to logged-in users",
+                          "description": "List of pages accessible to logged-in users",
                           "items": {
                               "type": "object",
                               "properties": {
                                   "name": {
                                       "type": "string",
-                                      "description": "Name of the screen (e.g., Dashboard, Profile)"
+                                      "description": "Name of the page (e.g., Dashboard, Profile)"
                                   },
                                   "path": {
                                       "type": "string",
-                                      "description": "URL path for the screen"
+                                      "description": "URL path for the page"
                                   },
                                   "components": {
                                       "type": "array",
-                                      "description": "List of UI components included in this screen",
+                                      "description": "List of UI components included in this page",
                                       "items": {
                                           "type": "string"
                                       }
                                   },
                                   "enabled": {
                                       "type": "boolean",
-                                      "description": "Whether this screen is enabled"
+                                      "description": "Whether this page is enabled"
                                   }
                               },
                               "required": ["name", "path", "components", "enabled"]
@@ -69,28 +69,28 @@ def print_screens_input_schema():
                       },
                       "admin": {
                           "type": "array",
-                          "description": "List of screens accessible to administrators",
+                          "description": "List of pages accessible to administrators",
                           "items": {
                               "type": "object",
                               "properties": {
                                   "name": {
                                       "type": "string",
-                                      "description": "Name of the screen (e.g., AdminDashboard, UserManagement)"
+                                      "description": "Name of the page (e.g., AdminDashboard, UserManagement)"
                                   },
                                   "path": {
                                       "type": "string",
-                                      "description": "URL path for the screen"
+                                      "description": "URL path for the page"
                                   },
                                   "components": {
                                       "type": "array",
-                                      "description": "List of UI components included in this screen",
+                                      "description": "List of UI components included in this page",
                                       "items": {
                                           "type": "string"
                                       }
                                   },
                                   "enabled": {
                                       "type": "boolean",
-                                      "description": "Whether this screen is enabled"
+                                      "description": "Whether this page is enabled"
                                   }
                               },
                               "required": ["name", "path", "components", "enabled"]

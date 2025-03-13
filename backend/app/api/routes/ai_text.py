@@ -3,11 +3,12 @@ API routes for AI text generation.
 """
 import logging
 from fastapi import APIRouter, HTTPException, Depends
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional, Type, TypeVar, Generic, Union
 import json
+import re
 
 from app.ai.tools.print_features import print_features_input_schema
-from app.ai.tools.print_screens import print_screens_input_schema
+from app.ai.tools.print_pages import print_pages_input_schema
 from app.ai.tools.print_data_model import print_data_model_input_schema
 from app.ai.prompts.project_description import project_description_system_prompt
 from app.ai.prompts.business_goals import business_goals_system_prompt_create, business_goals_system_prompt_enhance
@@ -15,7 +16,7 @@ from app.ai.prompts.target_users import target_users_system_prompt_create, targe
 from app.ai.prompts.requirements import requirements_system_prompt_enhance
 from app.ai.prompts.features import get_features_user_prompt
 from app.ai.prompts.pages import get_pages_user_prompt
-from app.ai.prompts.data_mode import get_data_model_user_prompt
+from app.ai.prompts.data_model import get_data_model_user_prompt
 
 from ...schemas.ai_text import (
     DescriptionEnhanceRequest, 
@@ -42,6 +43,72 @@ from ...core.firebase_auth import get_current_user
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
+# Type variable for generic response types
+T = TypeVar('T')
+
+def extract_data_from_response(response: Dict[str, Any], schema_class: Type[T], logger: logging.Logger) -> T:
+    """
+    Extract data from an AI response with multiple fallback mechanisms.
+    
+    Args:
+        response: The response from the AI service
+        schema_class: The Pydantic schema class to convert the data to
+        logger: Logger instance for logging errors
+    
+    Returns:
+        An instance of the schema_class with the extracted data
+        
+    Raises:
+        HTTPException: If data cannot be extracted after all fallback attempts
+    """
+    # Attempt 1: Standard extraction from "data" field
+    if "data" in response:
+        try:
+            return schema_class(**response["data"])
+        except Exception as e:
+            logger.warning(f"Failed to parse standard 'data' field: {str(e)}")
+    
+    # Attempt 2: Check if the entire response is the data structure
+    if isinstance(response, dict) and not any(k in response for k in ["data", "error"]):
+        try:
+            return schema_class(**response)
+        except Exception as e:
+            logger.warning(f"Failed to parse entire response as data: {str(e)}")
+    
+    # Attempt 3: Check if there's a JSON string in the response
+    if "content" in response and isinstance(response["content"], str):
+        try:
+            # Look for JSON objects in the content
+            content = response["content"]
+            json_match = re.search(r'\{.*\}', content, re.DOTALL)
+            if json_match:
+                json_str = json_match.group(0)
+                json_data = json.loads(json_str)
+                return schema_class(**json_data)
+        except Exception as e:
+            logger.warning(f"Failed to extract JSON from content: {str(e)}")
+    
+    # Attempt 4: Check if response contains raw text that could be parsed as JSON
+    if isinstance(response, str):
+        try:
+            json_match = re.search(r'\{.*\}', response, re.DOTALL)
+            if json_match:
+                json_str = json_match.group(0)
+                json_data = json.loads(json_str)
+                return schema_class(**json_data)
+        except Exception as e:
+            logger.warning(f"Failed to extract JSON from string response: {str(e)}")
+    
+    # If we've reached this point, log details about the response for debugging
+    logger.error(f"Failed to extract data after all fallback attempts. Response structure: {type(response)}")
+    if isinstance(response, dict):
+        logger.error(f"Response keys: {list(response.keys())}")
+    
+    # All attempts failed, raise exception
+    raise HTTPException(
+        status_code=500,
+        detail="Failed to extract valid data from AI response after multiple attempts"
+    )
 
 @router.post("/enhance-description", response_model=DescriptionEnhanceResponse)
 async def enhance_project_description(
@@ -332,16 +399,8 @@ async def enhance_features(
                 detail=f"Failed to generate features: {response['error']}"
             )
             
-        # If we got a proper response, it should have 'data' field
-        if "data" not in response:
-            logger.error("AI response missing 'data' field")
-            raise HTTPException(
-                status_code=500,
-                detail="AI returned malformed response"
-            )
-            
-        # Convert the response to our schema format
-        features_data = FeaturesData(**response["data"])
+        # Extract features data with fallback mechanisms
+        features_data = extract_data_from_response(response, FeaturesData, logger)
             
         # Return the enhanced features
         return FeaturesEnhanceResponse(data=features_data)
@@ -390,7 +449,7 @@ async def enhance_pages(
         user_prompt = get_pages_user_prompt(request.project_description, formatted_features, formatted_requirements, formatted_existing_pages)
         
         # Define the tool schema for print_screens
-        tool_schema = print_screens_input_schema()
+        tool_schema = print_pages_input_schema()
         
         # Generate the tool use response
         messages = [{"role": "user", "content": user_prompt}]
@@ -403,16 +462,8 @@ async def enhance_pages(
                 detail=f"Failed to generate pages: {response['error']}"
             )
             
-        # If we got a proper response, it should have 'data' field
-        if "data" not in response:
-            logger.error("AI response missing 'data' field")
-            raise HTTPException(
-                status_code=500,
-                detail="AI returned malformed response"
-            )
-            
-        # Convert the response to our schema format
-        pages_data = PagesData(**response["data"])
+        # Extract pages data with fallback mechanisms
+        pages_data = extract_data_from_response(response, PagesData, logger)
             
         # Return the enhanced pages
         return PagesEnhanceResponse(data=pages_data)
@@ -458,7 +509,7 @@ async def enhance_data_model(
         ):
             formatted_data_model = json.dumps(request.existing_data_model, indent=2)
         
-        user_prompt = get_data_model_user_prompt(request.project_description, formatted_goals, formatted_features, formatted_requirements, formatted_data_model)
+        user_prompt = get_data_model_user_prompt(request.project_description, formatted_features, formatted_requirements, formatted_data_model)
         
         # Define the tool schema for print_data_model
         tool_schema = print_data_model_input_schema()
@@ -474,16 +525,8 @@ async def enhance_data_model(
                 detail=f"Failed to generate data model: {response['error']}"
             )
             
-        # If we got a proper response, it should have 'data' field
-        if "data" not in response:
-            logger.error("AI response missing 'data' field")
-            raise HTTPException(
-                status_code=500,
-                detail="AI returned malformed response"
-            )
-            
-        # Convert the response to our schema format
-        data_model = DataModel(**response["data"])
+        # Extract data model with fallback mechanisms
+        data_model = extract_data_from_response(response, DataModel, logger)
             
         # Return the enhanced data model
         return DataModelEnhanceResponse(data=data_model)
