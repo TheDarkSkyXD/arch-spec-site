@@ -66,6 +66,7 @@ const TechStackForm = ({
   // Add state for error and success messages
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
+  const [justification, setJustification] = useState<string>("");
 
   // Add state for AI enhancement
   const [isEnhancing, setIsEnhancing] = useState<boolean>(false);
@@ -365,6 +366,7 @@ const TechStackForm = ({
     }
 
     setIsEnhancing(true);
+    setJustification("");
     try {
       console.log("Enhancing tech stack with AI...");
 
@@ -492,11 +494,12 @@ const TechStackForm = ({
           type: "success",
         });
 
-        // Set success message with justification
-        setSuccess(
-          `Tech stack enhanced successfully.\n\nJustification: ${justification}`
-        );
-        setTimeout(() => setSuccess(""), 10000);
+        // Set success message
+        setSuccess("Tech stack enhanced successfully.");
+        setTimeout(() => setSuccess(""), 3000);
+
+        // Set justification
+        setJustification(justification);
       } else {
         showToast({
           title: "Warning",
@@ -598,6 +601,12 @@ const TechStackForm = ({
       {success && (
         <div className="bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 p-3 rounded-md whitespace-pre-line mb-4">
           {success}
+        </div>
+      )}
+
+      {justification && (
+        <div className="bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 p-3 rounded-md whitespace-pre-line mb-4">
+          {justification}
         </div>
       )}
 
