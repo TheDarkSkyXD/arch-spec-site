@@ -121,22 +121,24 @@ export default function FeaturesForm({
   // New function to fetch project info for AI enhancement
   const fetchProjectInfo = async () => {
     if (!projectId) return;
-    
+
     try {
       // Fetch project details including description and business goals
       const projectDetails = await projectsService.getProjectById(projectId);
-      
+
       if (projectDetails) {
         setProjectDescription(projectDetails.description || "");
         setBusinessGoals(projectDetails.business_goals || []);
-        
+
         // Fetch requirements as well
-        const requirementsData = await requirementsService.getRequirements(projectId);
+        const requirementsData = await requirementsService.getRequirements(
+          projectId
+        );
         if (requirementsData) {
           // Combine functional and non-functional requirements
           const allRequirements = [
             ...(requirementsData.functional || []),
-            ...(requirementsData.non_functional || [])
+            ...(requirementsData.non_functional || []),
           ];
           setRequirements(allRequirements);
         }
@@ -335,7 +337,8 @@ export default function FeaturesForm({
     if (!projectDescription) {
       showToast({
         title: "Warning",
-        description: "Project description is missing. Features may not be properly enhanced.",
+        description:
+          "Project description is missing. Features may not be properly enhanced.",
         type: "warning",
       });
     }
@@ -343,13 +346,16 @@ export default function FeaturesForm({
     if (requirements.length === 0) {
       showToast({
         title: "Warning",
-        description: "No requirements found. Features will be based only on project description.",
+        description:
+          "No requirements found. Features will be based only on project description.",
         type: "warning",
       });
     }
 
     setIsEnhancing(true);
     try {
+      console.log("Enhancing features with AI...");
+      console.log("Core modules:", coreModules);
       const enhancedFeatures = await aiService.enhanceFeatures(
         projectDescription,
         businessGoals,
@@ -360,10 +366,10 @@ export default function FeaturesForm({
       if (enhancedFeatures) {
         // Replace existing features with enhanced ones
         setCoreModules(enhancedFeatures.coreModules || []);
-        
+
         // If we have optional modules, we could handle them here too
         // For now, we'll focus on core modules
-        
+
         showToast({
           title: "Success",
           description: "Features enhanced successfully",
@@ -402,7 +408,8 @@ export default function FeaturesForm({
     if (!projectDescription) {
       showToast({
         title: "Warning",
-        description: "Project description is missing. Features may not be properly generated.",
+        description:
+          "Project description is missing. Features may not be properly generated.",
         type: "warning",
       });
     }
@@ -419,7 +426,7 @@ export default function FeaturesForm({
       if (enhancedFeatures && enhancedFeatures.coreModules.length > 0) {
         // Add new features to existing ones
         setCoreModules([...coreModules, ...enhancedFeatures.coreModules]);
-        
+
         showToast({
           title: "Success",
           description: `Added ${enhancedFeatures.coreModules.length} new features`,

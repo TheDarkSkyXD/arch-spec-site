@@ -6,13 +6,16 @@ specifications.
 """
 
 import json
+import logging
 from typing import List, Dict, Any, Optional, Generator
-import anthropic
-from anthropic.types import ContentBlockDeltaEvent, MessageDeltaEvent
+import httpx
+from anthropic import Anthropic, DefaultHttpxClient
+from anthropic.types import ContentBlockDeltaEvent
 
 from ..core.config import settings
-from .llm_adapter import LLMAdapter
 
+# Set up logger at module level
+logger = logging.getLogger(__name__)
 
 class SetEncoder(json.JSONEncoder):
     """JSON encoder that can handle sets."""
@@ -24,7 +27,7 @@ class SetEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
-class AnthropicClient(LLMAdapter):
+class AnthropicClient():
     """Client for interacting with Anthropic Claude API.
     
     This client provides methods for generating responses from Claude,
@@ -41,15 +44,26 @@ class AnthropicClient(LLMAdapter):
     def __init__(self) -> None:
         """Initialize the Anthropic client."""
         try:
-            # Basic initialization without any extra parameters
-            self.client = anthropic.Anthropic(api_key=settings.anthropic.api_key)
+            # Create a custom HTTP client with compatible configuration
+            # Avoid using socket_options which is causing compatibility issues
+            http_client = DefaultHttpxClient(
+                # Use a basic transport without socket_options
+                transport=httpx.HTTPTransport(),
+                # Set a reasonable timeout
+                timeout=httpx.Timeout(60.0)
+            )
+            
+            # Initialize the Anthropic client with the custom HTTP client
+            self.client = Anthropic(
+                api_key=settings.anthropic.api_key,
+                http_client=http_client
+            )
             self.model = settings.anthropic.model
             self.max_tokens = settings.anthropic.max_tokens
             self.temperature = settings.anthropic.temperature
+            logger.info("Anthropic client initialized successfully")
         except Exception as e:
             # Log the error but don't crash
-            import logging
-            logger = logging.getLogger(__name__)
             logger.error(f"Error initializing Anthropic client: {str(e)}")
             # Set client to None to indicate it's not available
             self.client = None
@@ -204,8 +218,6 @@ class AnthropicClient(LLMAdapter):
             The processed specification data with AI-generated enhancements.
         """
         if not self.client:
-            import logging
-            logger = logging.getLogger(__name__)
             logger.error("Cannot process specification: Anthropic client not available")
             return spec_data
             
@@ -223,8 +235,6 @@ class AnthropicClient(LLMAdapter):
             return self._parse_ai_content(response, spec_data)
             
         except Exception as e:
-            import logging
-            logger = logging.getLogger(__name__)
             logger.error(f"Error in AI processing: {str(e)}")
             # Return original spec data if AI processing fails
             return spec_data
