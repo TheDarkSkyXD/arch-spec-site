@@ -3,7 +3,7 @@
  */
 import apiClient from "../api/apiClient";
 import { FeatureModule } from "./featuresService";
-import { DataModel, Entity } from "../types/templates";
+import { DataModel } from "../types/templates";
 
 interface EnhanceDescriptionRequest {
   user_description: string;

@@ -6,6 +6,17 @@ from fastapi import APIRouter, HTTPException, Depends
 from typing import Dict, Any, List
 import json
 
+from app.ai.tools.print_features import print_features_input_schema
+from app.ai.tools.print_screens import print_screens_input_schema
+from app.ai.tools.print_data_model import print_data_model_input_schema
+from app.ai.prompts.project_description import project_description_system_prompt
+from app.ai.prompts.business_goals import business_goals_system_prompt_create, business_goals_system_prompt_enhance
+from app.ai.prompts.target_users import target_users_system_prompt_create, target_users_system_prompt_enhance
+from app.ai.prompts.requirements import requirements_system_prompt_enhance
+from app.ai.prompts.features import get_features_user_prompt
+from app.ai.prompts.pages import get_pages_user_prompt
+from app.ai.prompts.data_mode import get_data_model_user_prompt
+
 from ...schemas.ai_text import (
     DescriptionEnhanceRequest, 
     DescriptionEnhanceResponse,
@@ -49,25 +60,14 @@ async def enhance_project_description(
         client = AnthropicClient()
         
         # Create the system message and user message
-        system_message = (
-            "You are a technical writing assistant helping to improve project descriptions. "
-            "You'll be given a user's project description that may be rough, informal, or incomplete. "
-            "\n\nYour task:"
-            "\n- Enhance clarity and professionalism while maintaining the original meaning"
-            "\n- Fix grammar, spelling, and structure issues"
-            "\n- Add technical precision where appropriate"
-            "\n- Ensure the description clearly communicates what the project is about"
-            "\n- Keep the length similar to the original (no more than 25% longer)"
-            "\n- Do not add major new concepts not implied in the original"
-            "\n\nReturn only the improved description without explanations or comments."
-        )
+        system_prompt = project_description_system_prompt()
         
         # Create the user message with the project description
         user_message = f"Original description: {request.user_description}"
         
         # Generate the response
         messages = [{"role": "user", "content": user_message}]
-        response = client.generate_response(messages, system_message)
+        response = client.generate_response(messages, system_prompt)
         
         # Return the enhanced description
         return DescriptionEnhanceResponse(enhanced_description=response)
@@ -97,33 +97,9 @@ async def enhance_business_goals(
         
         # Create the system message, adjusting based on whether goals were provided
         if request.user_goals and len(request.user_goals) > 0:
-            system_message = (
-                "You are a business analyst helping to refine project goals. Review the project description "
-                "and the user's initial business goals to provide more focused, actionable goals."
-                "\n\nYour task:"
-                "\n- Ensure the goals align with and support the project description"
-                "\n- Restructure the goals to be clearer and more actionable"
-                "\n- Make each goal specific, measurable, achievable, relevant, and time-bound (SMART) where possible"
-                "\n- Use professional business terminology appropriately"
-                "\n- Maintain the original intent and priorities"
-                "\n- Format as a concise, bulleted list"
-                "\n- Limit to 3-5 clear goals (combine related goals if needed)"
-                "\n- Do not introduce goals that weren't implied in the original text or project description"
-                "\n\nReturn only the improved business goals as a bulleted list without explanations or comments."
-            )
+            system_message = business_goals_system_prompt_enhance()
         else:
-            system_message = (
-                "You are a business analyst helping to create project goals. Review the project description "
-                "and generate appropriate business goals for this project."
-                "\n\nYour task:"
-                "\n- Create 3-5 focused, actionable business goals that align with the project description"
-                "\n- Make each goal specific, measurable, achievable, relevant, and time-bound (SMART) where possible"
-                "\n- Use professional business terminology appropriately"
-                "\n- Cover different aspects of the business value (e.g., user acquisition, revenue, user satisfaction)"
-                "\n- Format as a concise, bulleted list"
-                "\n- Only include goals that are reasonable based on the project description"
-                "\n\nReturn only the business goals as a bulleted list without explanations or comments."
-            )
+            system_message = business_goals_system_prompt_create()
         
         # Create the user message, adjusting based on whether goals were provided
         if request.user_goals and len(request.user_goals) > 0:
@@ -200,33 +176,9 @@ async def enhance_target_users(
         
         # Create the system message
         if request.target_users and len(request.target_users.strip()) > 0:
-            system_message = (
-                "You are a UX researcher helping to refine target user personas for a project. "
-                "You'll be given a project description and an initial description of target users. "
-                "\n\nYour task:"
-                "\n- Enhance the target users description with more detail and clarity"
-                "\n- Identify key demographics, needs, goals, and pain points of the users"
-                "\n- Make the description specific and actionable for design and marketing"
-                "\n- Keep the tone professional while making the personas feel real and relatable"
-                "\n- Format as a coherent paragraph (not a bulleted list)"
-                "\n- Only include details that are reasonable given the project description"
-                "\n- Keep the description concise (3-5 sentences)"
-                "\n\nReturn only the improved target users description without explanations or comments."
-            )
+            system_message = target_users_system_prompt_enhance()
         else:
-            system_message = (
-                "You are a UX researcher helping to create target user personas for a project. "
-                "You'll be given a project description and need to generate appropriate target users. "
-                "\n\nYour task:"
-                "\n- Create a clear description of the target users based on the project description"
-                "\n- Identify likely demographics, needs, goals, and pain points of the users"
-                "\n- Make the description specific and actionable for design and marketing"
-                "\n- Keep the tone professional while making the personas feel real and relatable"
-                "\n- Format as a coherent paragraph (not a bulleted list)"
-                "\n- Only include details that are reasonable given the project description"
-                "\n- Keep the description concise (3-5 sentences)"
-                "\n\nReturn only the target users description without explanations or comments."
-            )
+            system_message = target_users_system_prompt_create()
         
         # Create the user message
         if request.target_users and len(request.target_users.strip()) > 0:
@@ -268,26 +220,7 @@ async def enhance_requirements(
         client = AnthropicClient()
         
         # Create the system message
-        system_message = (
-            "You are a requirements analyst refining project requirements. "
-            "You'll be given a project description, business goals, and the user's initial requirements."
-            "\n\nYour task:"
-            "\n- Ensure each requirement directly supports the project description and business goals"
-            "\n- Convert vague statements into specific, testable requirements"
-            "\n- Use the format \"The system shall...\" for functional requirements"
-            "\n- Categorize requirements (functional, non-functional)"
-            "\n- Remove duplicates and merge similar requirements"
-            "\n- Identify and add any critical requirements that are missing but implied"
-            "\n- If existing requirements are provided, generate complementary new requirements rather than just refining existing ones"
-            "\n- Avoid duplicating functionality already covered by existing requirements"
-            "\n- Prioritize requirements (High/Medium/Low) based on their importance to the business goals"
-            "\n- Keep the language clear, precise, and unambiguous"
-            "\n- Format each requirement as:"
-            "\n  [Category] The system shall... (description)"
-            "\n  where Category is either 'Functional' or 'Non-Functional'"
-            "\n- IMPORTANT: Every requirement MUST start with the category prefix '[Functional]' or '[Non-Functional]'"
-            "\n\nReturn only the improved requirements list without explanations or comments."
-        )
+        system_message = requirements_system_prompt_enhance()
         
         # Format the business goals and requirements as strings
         formatted_goals = "\n".join([f"- {goal}" for goal in request.business_goals])
@@ -383,113 +316,13 @@ async def enhance_features(
         if request.user_features and len(request.user_features) > 0:
             formatted_features = json.dumps(request.user_features, indent=2)
         
-        user_message = (
-            f"Project description: {request.project_description}\n"
-            f"Business goals:\n{formatted_goals}\n"
-            f"Requirements:\n{formatted_requirements}\n"
-            f"Original features (if any): {formatted_features}\n\n"
-            "Your task:\n"
-            "1. Create a clear list of features that fulfill the requirements and support the business goals\n"
-            "2. Group features into logical categories based on core modules\n"
-            "3. For each feature, include:\n"
-            "   * A descriptive name\n"
-            "   * A brief (1-2 sentence) description\n"
-            "   * User benefit or value\n"
-            "   * Complexity estimate (Simple/Moderate/Complex)\n"
-            "4. Ensure all high-priority requirements are addressed by at least one feature\n"
-            "5. If the user provided original features, incorporate and improve them\n"
-            "6. If generating from scratch, create features that comprehensively address the requirements\n"
-            "7. Include both core features and nice-to-have features, clearly labeled\n\n"
-            "Once you've analyzed the requirements and created the features, use the print_features function to output the organized feature list."
-        )
+        user_prompt = get_features_user_prompt(request.project_description, formatted_goals, formatted_requirements, formatted_features)
         
         # Define the tool schema for print_features
-        tool_schema = {
-            "name": "print_features",
-            "description": "Formats and displays the organized feature list based on core modules",
-            "input_schema": {
-                "type": "object",
-                "properties": {
-                    "data": {
-                        "type": "object",
-                        "description": "The structured feature data organized by modules",
-                        "properties": {
-                            "coreModules": {
-                                "type": "array",
-                                "description": "List of core modules in the application",
-                                "items": {
-                                    "type": "object",
-                                    "properties": {
-                                        "name": {
-                                            "type": "string",
-                                            "description": "Name of the module (e.g., Authentication, User Management)"
-                                        },
-                                        "description": {
-                                            "type": "string",
-                                            "description": "Brief description of the module's purpose"
-                                        },
-                                        "enabled": {
-                                            "type": "boolean",
-                                            "description": "Whether this module is enabled by default"
-                                        },
-                                        "optional": {
-                                            "type": "boolean",
-                                            "description": "Whether this module is optional or required"
-                                        },
-                                        "providers": {
-                                            "type": "array",
-                                            "description": "List of service providers associated with this module, if any",
-                                            "items": {
-                                                "type": "string"
-                                            }
-                                        }
-                                    },
-                                    "required": ["name", "description", "enabled", "optional"]
-                                }
-                            },
-                            "optionalModules": {
-                                "type": "array",
-                                "description": "List of optional modules that can be enabled",
-                                "items": {
-                                    "type": "object",
-                                    "properties": {
-                                        "name": {
-                                            "type": "string",
-                                            "description": "Name of the optional module"
-                                        },
-                                        "description": {
-                                            "type": "string",
-                                            "description": "Brief description of the optional module's purpose"
-                                        },
-                                        "enabled": {
-                                            "type": "boolean",
-                                            "description": "Whether this optional module is enabled by default"
-                                        },
-                                        "optional": {
-                                            "type": "boolean",
-                                            "description": "Always true for optional modules"
-                                        },
-                                        "providers": {
-                                            "type": "array",
-                                            "description": "List of service providers associated with this module, if any",
-                                            "items": {
-                                                "type": "string"
-                                            }
-                                        }
-                                    },
-                                    "required": ["name", "description", "enabled", "optional"]
-                                }
-                            }
-                        },
-                        "required": ["coreModules"]
-                    }
-                },
-                "required": ["data"]
-            }
-        }
+        tool_schema = print_features_input_schema()
         
         # Generate the tool use response
-        messages = [{"role": "user", "content": user_message}]
+        messages = [{"role": "user", "content": user_prompt}]
         response = client.get_tool_use_response(system_message, [tool_schema], messages)
         
         if "error" in response:
@@ -554,133 +387,13 @@ async def enhance_pages(
             formatted_existing_pages = json.dumps(request.existing_pages.dict(), indent=2)
         
         # Create the user message
-        user_message = (
-            f"Project description: {request.project_description}\n"
-            f"Features: {formatted_features}\n"
-            f"Requirements:\n{formatted_requirements}\n"
-            f"Existing pages (if any): {formatted_existing_pages}\n\n"
-            "Your task:\n"
-            "1. Identify the essential screens needed to implement the specified features\n"
-            "2. For each screen, provide:\n"
-            "   * A descriptive name\n"
-            "   * The primary purpose/function\n"
-            "   * Key UI elements to include\n"
-            "   * User interactions to support\n"
-            "3. Organize screens by user access level (public, authenticated, admin)\n"
-            "4. Consider different user roles if mentioned in the requirements\n"
-            "5. Focus on screens that deliver the core functionality first\n"
-            "6. Include administrative/management screens if needed\n\n"
-            "Once you've analyzed the requirements and identified the essential screens, use the print_screens function to output the organized screen recommendations."
-        )
+        user_prompt = get_pages_user_prompt(request.project_description, formatted_features, formatted_requirements, formatted_existing_pages)
         
         # Define the tool schema for print_screens
-        tool_schema = {
-            "name": "print_screens",
-            "description": "Formats and displays the organized screen recommendations for different user access levels",
-            "input_schema": {
-                "type": "object",
-                "properties": {
-                    "data": {
-                        "type": "object",
-                        "description": "The structured screen recommendations organized by access level",
-                        "properties": {
-                            "public": {
-                                "type": "array",
-                                "description": "List of screens accessible to unauthenticated users",
-                                "items": {
-                                    "type": "object",
-                                    "properties": {
-                                        "name": {
-                                            "type": "string",
-                                            "description": "Name of the screen (e.g., Landing, Login)"
-                                        },
-                                        "path": {
-                                            "type": "string",
-                                            "description": "URL path for the screen"
-                                        },
-                                        "components": {
-                                            "type": "array",
-                                            "description": "List of UI components included in this screen",
-                                            "items": {
-                                                "type": "string"
-                                            }
-                                        },
-                                        "enabled": {
-                                            "type": "boolean",
-                                            "description": "Whether this screen is enabled"
-                                        }
-                                    },
-                                    "required": ["name", "path", "components", "enabled"]
-                                }
-                            },
-                            "authenticated": {
-                                "type": "array",
-                                "description": "List of screens accessible to logged-in users",
-                                "items": {
-                                    "type": "object",
-                                    "properties": {
-                                        "name": {
-                                            "type": "string",
-                                            "description": "Name of the screen (e.g., Dashboard, Profile)"
-                                        },
-                                        "path": {
-                                            "type": "string",
-                                            "description": "URL path for the screen"
-                                        },
-                                        "components": {
-                                            "type": "array",
-                                            "description": "List of UI components included in this screen",
-                                            "items": {
-                                                "type": "string"
-                                            }
-                                        },
-                                        "enabled": {
-                                            "type": "boolean",
-                                            "description": "Whether this screen is enabled"
-                                        }
-                                    },
-                                    "required": ["name", "path", "components", "enabled"]
-                                }
-                            },
-                            "admin": {
-                                "type": "array",
-                                "description": "List of screens accessible to administrators",
-                                "items": {
-                                    "type": "object",
-                                    "properties": {
-                                        "name": {
-                                            "type": "string",
-                                            "description": "Name of the screen (e.g., AdminDashboard, UserManagement)"
-                                        },
-                                        "path": {
-                                            "type": "string",
-                                            "description": "URL path for the screen"
-                                        },
-                                        "components": {
-                                            "type": "array",
-                                            "description": "List of UI components included in this screen",
-                                            "items": {
-                                                "type": "string"
-                                            }
-                                        },
-                                        "enabled": {
-                                            "type": "boolean",
-                                            "description": "Whether this screen is enabled"
-                                        }
-                                    },
-                                    "required": ["name", "path", "components", "enabled"]
-                                }
-                            }
-                        },
-                        "required": ["public", "authenticated", "admin"]
-                    }
-                },
-                "required": ["data"]
-            }
-        }
+        tool_schema = print_screens_input_schema()
         
         # Generate the tool use response
-        messages = [{"role": "user", "content": user_message}]
+        messages = [{"role": "user", "content": user_prompt}]
         response = client.get_tool_use_response(system_message, [tool_schema], messages)
         
         if "error" in response:
@@ -745,136 +458,13 @@ async def enhance_data_model(
         ):
             formatted_data_model = json.dumps(request.existing_data_model, indent=2)
         
-        user_message = (
-            f"Project description: {request.project_description}\n"
-            f"Business goals:\n{formatted_goals}\n"
-            f"Features:\n{formatted_features}\n"
-            f"Requirements:\n{formatted_requirements}\n"
-            f"Original data model (if any): {formatted_data_model}\n\n"
-            "Your task:\n"
-            "1. Identify key entities needed to support the features and requirements\n"
-            "2. Define properties/fields for each entity including their data types, constraints, and defaults\n"
-            "3. Specify relationships between entities (one-to-one, one-to-many, many-to-many)\n"
-            "4. Indicate primary keys and foreign keys\n"
-            "5. Group related entities into logical schemas\n"
-            "6. Include indexing recommendations for performance\n\n"
-            "Once you've analyzed the requirements and created the data model, use the print_data_model function to output the structured data model specification."
-        )
+        user_prompt = get_data_model_user_prompt(request.project_description, formatted_goals, formatted_features, formatted_requirements, formatted_data_model)
         
         # Define the tool schema for print_data_model
-        tool_schema = {
-            "name": "print_data_model",
-            "description": "Formats and displays the complete data model specification with entities and relationships",
-            "input_schema": {
-                "type": "object",
-                "properties": {
-                    "data": {
-                        "type": "object",
-                        "description": "The structured data model specification",
-                        "properties": {
-                            "entities": {
-                                "type": "array",
-                                "description": "List of entities in the data model",
-                                "items": {
-                                    "type": "object",
-                                    "properties": {
-                                        "name": {
-                                            "type": "string",
-                                            "description": "Name of the entity"
-                                        },
-                                        "description": {
-                                            "type": "string",
-                                            "description": "Brief description of the entity's purpose"
-                                        },
-                                        "fields": {
-                                            "type": "array",
-                                            "description": "List of fields/properties for this entity",
-                                            "items": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "name": {
-                                                        "type": "string",
-                                                        "description": "Name of the field"
-                                                    },
-                                                    "type": {
-                                                        "type": "string",
-                                                        "description": "Data type of the field"
-                                                    },
-                                                    "primaryKey": {
-                                                        "type": "boolean",
-                                                        "description": "Whether this field is a primary key"
-                                                    },
-                                                    "generated": {
-                                                        "type": "boolean",
-                                                        "description": "Whether this field value is automatically generated"
-                                                    },
-                                                    "unique": {
-                                                        "type": "boolean",
-                                                        "description": "Whether this field must contain unique values"
-                                                    },
-                                                    "required": {
-                                                        "type": "boolean",
-                                                        "description": "Whether this field is required"
-                                                    },
-                                                    "default": {
-                                                        "type": ["string", "null"],
-                                                        "description": "Default value for this field"
-                                                    },
-                                                    "enum": {
-                                                        "type": ["array", "null"],
-                                                        "description": "List of allowed values for this field",
-                                                        "items": {
-                                                            "type": "string"
-                                                        }
-                                                    }
-                                                },
-                                                "required": ["name", "type"]
-                                            }
-                                        }
-                                    },
-                                    "required": ["name", "description", "fields"]
-                                }
-                            },
-                            "relationships": {
-                                "type": "array",
-                                "description": "List of relationships between entities",
-                                "items": {
-                                    "type": "object",
-                                    "properties": {
-                                        "type": {
-                                            "type": "string",
-                                            "description": "Type of relationship (oneToOne, oneToMany, manyToOne, manyToMany)"
-                                        },
-                                        "from_entity": {
-                                            "type": "string",
-                                            "description": "Source entity name"
-                                        },
-                                        "to_entity": {
-                                            "type": "string",
-                                            "description": "Target entity name"
-                                        },
-                                        "field": {
-                                            "type": "string",
-                                            "description": "Field name that represents the relationship"
-                                        },
-                                        "throughTable": {
-                                            "type": ["string", "null"],
-                                            "description": "Intermediate table for many-to-many relationships"
-                                        }
-                                    },
-                                    "required": ["type", "from_entity", "to_entity", "field"]
-                                }
-                            }
-                        },
-                        "required": ["entities", "relationships"]
-                    }
-                },
-                "required": ["data"]
-            }
-        }
+        tool_schema = print_data_model_input_schema()
         
         # Generate the tool use response
-        messages = [{"role": "user", "content": user_message}]
+        messages = [{"role": "user", "content": user_prompt}]
         response = client.get_tool_use_response(system_message, [tool_schema], messages)
         
         if "error" in response:

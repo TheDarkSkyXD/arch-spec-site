@@ -1,0 +1,20 @@
+def get_features_user_prompt(project_description, formatted_goals, formatted_requirements, formatted_features):
+  return (
+      f"Project description: {project_description}\n"
+      f"Business goals:\n{formatted_goals}\n"
+      f"Requirements:\n{formatted_requirements}\n"
+      f"Original features (if any): {formatted_features}\n\n"
+      "Your task:\n"
+      "1. Create a clear list of features that fulfill the requirements and support the business goals\n"
+      "2. Group features into logical categories based on core modules\n"
+      "3. For each feature, include:\n"
+      "   * A descriptive name\n"
+      "   * A brief (1-2 sentence) description\n"
+      "   * User benefit or value\n"
+      "   * Complexity estimate (Simple/Moderate/Complex)\n"
+      "4. Ensure all high-priority requirements are addressed by at least one feature\n"
+      "5. If the user provided original features, incorporate and improve them\n"
+      "6. If generating from scratch, create features that comprehensively address the requirements\n"
+      "7. Include both core features and nice-to-have features, clearly labeled\n\n"
+      "Once you've analyzed the requirements and created the features, use the print_features function to output the organized feature list."
+  )
