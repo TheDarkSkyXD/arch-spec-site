@@ -2,7 +2,7 @@
 Schemas for AI text generation.
 """
 from pydantic import BaseModel, Field
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 
 
 class DescriptionEnhanceRequest(BaseModel):
@@ -140,4 +140,95 @@ class RequirementsEnhanceResponse(BaseModel):
         ...,
         title="Enhanced Requirements",
         description="The AI-enhanced project requirements",
+    )
+
+
+class FeaturesEnhanceRequest(BaseModel):
+    """Request model for enhancing project features."""
+    
+    project_description: str = Field(
+        ...,
+        title="Project Description",
+        description="The description of the project",
+        examples=["A web application for tracking daily fitness workouts and nutrition"],
+    )
+    
+    business_goals: List[str] = Field(
+        ...,
+        title="Business Goals",
+        description="The business goals of the project",
+        examples=[["Increase user engagement", "Generate revenue through premium subscriptions"]],
+    )
+    
+    requirements: List[str] = Field(
+        ...,
+        title="Requirements",
+        description="The project requirements",
+        examples=[["Track workouts", "Monitor progress", "Share with friends"]],
+    )
+    
+    user_features: Optional[List[Dict[str, Any]]] = Field(
+        default=None,
+        title="User Features",
+        description="The original features provided by the user",
+    )
+
+
+class FeatureModule(BaseModel):
+    """Model for a feature module."""
+    
+    name: str = Field(
+        ...,
+        title="Module Name",
+        description="Name of the module (e.g., Authentication, User Management)"
+    )
+    
+    description: str = Field(
+        ...,
+        title="Module Description",
+        description="Brief description of the module's purpose"
+    )
+    
+    enabled: bool = Field(
+        ...,
+        title="Enabled",
+        description="Whether this module is enabled by default"
+    )
+    
+    optional: bool = Field(
+        ...,
+        title="Optional",
+        description="Whether this module is optional or required"
+    )
+    
+    providers: Optional[List[str]] = Field(
+        default=None,
+        title="Providers",
+        description="List of service providers associated with this module, if any"
+    )
+
+
+class FeaturesData(BaseModel):
+    """Model for features data."""
+    
+    coreModules: List[FeatureModule] = Field(
+        ...,
+        title="Core Modules",
+        description="List of core modules in the application"
+    )
+    
+    optionalModules: Optional[List[FeatureModule]] = Field(
+        default=None,
+        title="Optional Modules",
+        description="List of optional modules that can be enabled"
+    )
+
+
+class FeaturesEnhanceResponse(BaseModel):
+    """Response model for enhanced features."""
+    
+    data: FeaturesData = Field(
+        ...,
+        title="Features Data",
+        description="The structured feature data organized by modules"
     ) 

@@ -132,7 +132,7 @@ class AnthropicClient(LLMAdapter):
         except Exception as e:
             raise Exception(f"Error streaming from Anthropic API: {str(e)}")
     
-    def _get_tool_use_response(self, system_prompt: str, tools: List[Dict[str, Any]], messages: List[Dict[str, str]]) -> Dict[str, Any]:
+    def get_tool_use_response(self, system_prompt: str, tools: List[Dict[str, Any]], messages: List[Dict[str, str]]) -> Dict[str, Any]:
         """Process a response from the Anthropic API that may contain tool use.
         
         This method handles the asynchronous nature of tool use in the Anthropic API.

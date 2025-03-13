@@ -154,7 +154,7 @@ def test_get_tool_use_response_with_tool_use(mock_anthropic):
     messages = [{"role": "user", "content": "Test message"}]
     
     # Call the method
-    result = client._get_tool_use_response(system_prompt, tools, messages)
+    result = client.get_tool_use_response(system_prompt, tools, messages)
     
     # Check that the client was called with the right parameters
     mock_client.messages.create.assert_called_once_with(
@@ -192,7 +192,7 @@ def test_get_tool_use_response_fallback_to_json(mock_anthropic):
     messages = [{"role": "user", "content": "Test message"}]
     
     # Call the method
-    result = client._get_tool_use_response(system_prompt, tools, messages)
+    result = client.get_tool_use_response(system_prompt, tools, messages)
     
     # Check the result
     assert result == {"key": "value"}
@@ -213,7 +213,7 @@ def test_get_tool_use_response_error_handling(mock_anthropic):
     messages = [{"role": "user", "content": "Test message"}]
     
     # Call the method
-    result = client._get_tool_use_response(system_prompt, tools, messages)
+    result = client.get_tool_use_response(system_prompt, tools, messages)
     
     # Check the result
     assert "error" in result

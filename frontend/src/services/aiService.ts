@@ -2,6 +2,7 @@
  * Service for interacting with AI endpoints.
  */
 import apiClient from "../api/apiClient";
+import { FeatureModule } from "./featuresService";
 
 interface EnhanceDescriptionRequest {
   user_description: string;
@@ -37,6 +38,22 @@ interface EnhanceRequirementsRequest {
 
 interface EnhanceRequirementsResponse {
   enhanced_requirements: string[];
+}
+
+interface FeaturesData {
+  coreModules: FeatureModule[];
+  optionalModules?: FeatureModule[];
+}
+
+interface EnhanceFeaturesRequest {
+  project_description: string;
+  business_goals: string[];
+  requirements: string[];
+  user_features?: FeatureModule[];
+}
+
+interface EnhanceFeaturesResponse {
+  data: FeaturesData;
 }
 
 class AIService {
@@ -140,6 +157,39 @@ class AIService {
       return response.data.enhanced_requirements;
     } catch (error) {
       console.error("Error enhancing requirements:", error);
+      return null;
+    }
+  }
+
+  /**
+   * Enhance project features using AI.
+   *
+   * @param projectDescription The project description
+   * @param businessGoals The business goals
+   * @param requirements The project requirements
+   * @param userFeatures The original features (optional)
+   * @returns The enhanced features data or null if an error occurred
+   */
+  async enhanceFeatures(
+    projectDescription: string,
+    businessGoals: string[],
+    requirements: string[],
+    userFeatures?: FeatureModule[]
+  ): Promise<FeaturesData | null> {
+    try {
+      const response = await apiClient.post<EnhanceFeaturesResponse>(
+        "/api/ai-text/enhance-features",
+        {
+          project_description: projectDescription,
+          business_goals: businessGoals,
+          requirements: requirements,
+          user_features: userFeatures,
+        } as EnhanceFeaturesRequest
+      );
+
+      return response.data.data;
+    } catch (error) {
+      console.error("Error enhancing features:", error);
       return null;
     }
   }

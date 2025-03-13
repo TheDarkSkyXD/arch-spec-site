@@ -4,6 +4,7 @@ API routes for AI text generation.
 import logging
 from fastapi import APIRouter, HTTPException, Depends
 from typing import Dict, Any, List
+import json
 
 from ...schemas.ai_text import (
     DescriptionEnhanceRequest, 
@@ -13,7 +14,10 @@ from ...schemas.ai_text import (
     TargetUsersEnhanceRequest,
     TargetUsersEnhanceResponse,
     RequirementsEnhanceRequest,
-    RequirementsEnhanceResponse
+    RequirementsEnhanceResponse,
+    FeaturesEnhanceRequest,
+    FeaturesEnhanceResponse,
+    FeaturesData
 )
 from ...services.ai_service import AnthropicClient
 from ...core.firebase_auth import get_current_user
@@ -338,4 +342,173 @@ async def enhance_requirements(
         raise HTTPException(
             status_code=500,
             detail=f"Failed to enhance requirements: {str(e)}"
+        )
+
+
+@router.post("/enhance-features", response_model=FeaturesEnhanceResponse)
+async def enhance_features(
+    request: FeaturesEnhanceRequest,
+    current_user: Dict[str, Any] = Depends(get_current_user)
+):
+    """
+    Enhance project features using AI with function calling.
+    
+    This endpoint takes a project description, business goals, requirements, and optionally
+    existing features, and returns an improved, structured feature set with core and optional modules.
+    It uses Anthropic's tool use feature to ensure a structured response.
+    """
+    try:
+        # Initialize the AI client
+        client = AnthropicClient()
+        
+        # Create the system message
+        system_message = (
+            "You are a product manager refining or generating features for a software project. "
+            "Based on the project description, business goals, and requirements, create a comprehensive feature list."
+        )
+        
+        # Create the user message
+        # Format the business goals and requirements as strings
+        formatted_goals = "\n".join([f"- {goal}" for goal in request.business_goals])
+        formatted_requirements = "\n".join([f"- {req}" for req in request.requirements])
+        
+        # Format the original features if provided
+        formatted_features = "None provided"
+        if request.user_features and len(request.user_features) > 0:
+            formatted_features = json.dumps(request.user_features, indent=2)
+        
+        user_message = (
+            f"Project description: {request.project_description}\n"
+            f"Business goals:\n{formatted_goals}\n"
+            f"Requirements:\n{formatted_requirements}\n"
+            f"Original features (if any): {formatted_features}\n\n"
+            "Your task:\n"
+            "1. Create a clear list of features that fulfill the requirements and support the business goals\n"
+            "2. Group features into logical categories based on core modules\n"
+            "3. For each feature, include:\n"
+            "   * A descriptive name\n"
+            "   * A brief (1-2 sentence) description\n"
+            "   * User benefit or value\n"
+            "   * Complexity estimate (Simple/Moderate/Complex)\n"
+            "4. Ensure all high-priority requirements are addressed by at least one feature\n"
+            "5. If the user provided original features, incorporate and improve them\n"
+            "6. If generating from scratch, create features that comprehensively address the requirements\n"
+            "7. Include both core features and nice-to-have features, clearly labeled\n\n"
+            "Once you've analyzed the requirements and created the features, use the print_features function to output the organized feature list."
+        )
+        
+        # Define the tool schema for print_features
+        tool_schema = {
+            "name": "print_features",
+            "description": "Formats and displays the organized feature list based on core modules",
+            "input_schema": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "object",
+                        "description": "The structured feature data organized by modules",
+                        "properties": {
+                            "coreModules": {
+                                "type": "array",
+                                "description": "List of core modules in the application",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "name": {
+                                            "type": "string",
+                                            "description": "Name of the module (e.g., Authentication, User Management)"
+                                        },
+                                        "description": {
+                                            "type": "string",
+                                            "description": "Brief description of the module's purpose"
+                                        },
+                                        "enabled": {
+                                            "type": "boolean",
+                                            "description": "Whether this module is enabled by default"
+                                        },
+                                        "optional": {
+                                            "type": "boolean",
+                                            "description": "Whether this module is optional or required"
+                                        },
+                                        "providers": {
+                                            "type": "array",
+                                            "description": "List of service providers associated with this module, if any",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    },
+                                    "required": ["name", "description", "enabled", "optional"]
+                                }
+                            },
+                            "optionalModules": {
+                                "type": "array",
+                                "description": "List of optional modules that can be enabled",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "name": {
+                                            "type": "string",
+                                            "description": "Name of the optional module"
+                                        },
+                                        "description": {
+                                            "type": "string",
+                                            "description": "Brief description of the optional module's purpose"
+                                        },
+                                        "enabled": {
+                                            "type": "boolean",
+                                            "description": "Whether this optional module is enabled by default"
+                                        },
+                                        "optional": {
+                                            "type": "boolean",
+                                            "description": "Always true for optional modules"
+                                        },
+                                        "providers": {
+                                            "type": "array",
+                                            "description": "List of service providers associated with this module, if any",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    },
+                                    "required": ["name", "description", "enabled", "optional"]
+                                }
+                            }
+                        },
+                        "required": ["coreModules"]
+                    }
+                },
+                "required": ["data"]
+            }
+        }
+        
+        # Generate the tool use response
+        messages = [{"role": "user", "content": user_message}]
+        response = client.get_tool_use_response(system_message, [tool_schema], messages)
+        
+        if "error" in response:
+            logger.error(f"Error in AI tool use: {response['error']}")
+            raise HTTPException(
+                status_code=500,
+                detail=f"Failed to generate features: {response['error']}"
+            )
+            
+        # If we got a proper response, it should have 'data' field
+        if "data" not in response:
+            logger.error("AI response missing 'data' field")
+            raise HTTPException(
+                status_code=500,
+                detail="AI returned malformed response"
+            )
+            
+        # Convert the response to our schema format
+        features_data = FeaturesData(**response["data"])
+            
+        # Return the enhanced features
+        return FeaturesEnhanceResponse(data=features_data)
+    except Exception as e:
+        logger.error(f"Error enhancing features: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to enhance features: {str(e)}"
         ) 

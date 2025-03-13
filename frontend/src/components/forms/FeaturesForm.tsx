@@ -8,6 +8,8 @@ import {
   X,
   Edit,
   Trash2,
+  Sparkles,
+  RefreshCw,
 } from "lucide-react";
 import {
   FeatureModule,
@@ -15,6 +17,9 @@ import {
   featuresService,
 } from "../../services/featuresService";
 import { useToast } from "../../contexts/ToastContext";
+import { projectsService } from "../../services/projectsService";
+import { requirementsService } from "../../services/requirementsService";
+import { aiService } from "../../services/aiService";
 
 // Import shadcn UI components
 import Button from "../ui/Button";
@@ -68,6 +73,13 @@ export default function FeaturesForm({
   const [showProviders, setShowProviders] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  // Add state for AI enhancement
+  const [isEnhancing, setIsEnhancing] = useState<boolean>(false);
+  const [isAddingFeatures, setIsAddingFeatures] = useState<boolean>(false);
+  const [projectDescription, setProjectDescription] = useState<string>("");
+  const [businessGoals, setBusinessGoals] = useState<string[]>([]);
+  const [requirements, setRequirements] = useState<string[]>([]);
+
   // Add debug logging for initialData
   // useEffect(() => {
   //   console.log("FeaturesForm initialData:", initialData);
@@ -105,6 +117,41 @@ export default function FeaturesForm({
 
     fetchFeatures();
   }, [projectId, initialData]);
+
+  // New function to fetch project info for AI enhancement
+  const fetchProjectInfo = async () => {
+    if (!projectId) return;
+    
+    try {
+      // Fetch project details including description and business goals
+      const projectDetails = await projectsService.getProjectById(projectId);
+      
+      if (projectDetails) {
+        setProjectDescription(projectDetails.description || "");
+        setBusinessGoals(projectDetails.business_goals || []);
+        
+        // Fetch requirements as well
+        const requirementsData = await requirementsService.getRequirements(projectId);
+        if (requirementsData) {
+          // Combine functional and non-functional requirements
+          const allRequirements = [
+            ...(requirementsData.functional || []),
+            ...(requirementsData.non_functional || [])
+          ];
+          setRequirements(allRequirements);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching project details:", error);
+    }
+  };
+
+  // Add effect to fetch project info
+  useEffect(() => {
+    if (projectId) {
+      fetchProjectInfo();
+    }
+  }, [projectId]);
 
   const handleToggleFeature = (index: number) => {
     if (!coreModules[index].optional) return; // Can't disable non-optional features
@@ -274,6 +321,129 @@ export default function FeaturesForm({
     setEditingFeatureIndex(null);
   };
 
+  // New function to enhance features using AI (replace existing features)
+  const enhanceFeatures = async () => {
+    if (!projectId) {
+      showToast({
+        title: "Error",
+        description: "Project must be saved before features can be enhanced",
+        type: "error",
+      });
+      return;
+    }
+
+    if (!projectDescription) {
+      showToast({
+        title: "Warning",
+        description: "Project description is missing. Features may not be properly enhanced.",
+        type: "warning",
+      });
+    }
+
+    if (requirements.length === 0) {
+      showToast({
+        title: "Warning",
+        description: "No requirements found. Features will be based only on project description.",
+        type: "warning",
+      });
+    }
+
+    setIsEnhancing(true);
+    try {
+      const enhancedFeatures = await aiService.enhanceFeatures(
+        projectDescription,
+        businessGoals,
+        requirements,
+        coreModules.length > 0 ? coreModules : undefined
+      );
+
+      if (enhancedFeatures) {
+        // Replace existing features with enhanced ones
+        setCoreModules(enhancedFeatures.coreModules || []);
+        
+        // If we have optional modules, we could handle them here too
+        // For now, we'll focus on core modules
+        
+        showToast({
+          title: "Success",
+          description: "Features enhanced successfully",
+          type: "success",
+        });
+      } else {
+        showToast({
+          title: "Warning",
+          description: "No enhanced features returned",
+          type: "warning",
+        });
+      }
+    } catch (error) {
+      console.error("Error enhancing features:", error);
+      showToast({
+        title: "Error",
+        description: "Failed to enhance features",
+        type: "error",
+      });
+    } finally {
+      setIsEnhancing(false);
+    }
+  };
+
+  // New function to add AI-generated features without replacing existing ones
+  const addAIFeatures = async () => {
+    if (!projectId) {
+      showToast({
+        title: "Error",
+        description: "Project must be saved before features can be enhanced",
+        type: "error",
+      });
+      return;
+    }
+
+    if (!projectDescription) {
+      showToast({
+        title: "Warning",
+        description: "Project description is missing. Features may not be properly generated.",
+        type: "warning",
+      });
+    }
+
+    setIsAddingFeatures(true);
+    try {
+      // When adding new features, we don't pass the existing features to avoid duplication
+      const enhancedFeatures = await aiService.enhanceFeatures(
+        projectDescription,
+        businessGoals,
+        requirements
+      );
+
+      if (enhancedFeatures && enhancedFeatures.coreModules.length > 0) {
+        // Add new features to existing ones
+        setCoreModules([...coreModules, ...enhancedFeatures.coreModules]);
+        
+        showToast({
+          title: "Success",
+          description: `Added ${enhancedFeatures.coreModules.length} new features`,
+          type: "success",
+        });
+      } else {
+        showToast({
+          title: "Warning",
+          description: "No new features generated",
+          type: "warning",
+        });
+      }
+    } catch (error) {
+      console.error("Error adding AI features:", error);
+      showToast({
+        title: "Error",
+        description: "Failed to generate new features",
+        type: "error",
+      });
+    } finally {
+      setIsAddingFeatures(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -371,6 +541,50 @@ export default function FeaturesForm({
           <p className="text-slate-600 dark:text-slate-400 mb-6">
             Define the features and modules to include in your project.
           </p>
+        </div>
+
+        {/* AI Enhancement Buttons */}
+        <div className="flex justify-end items-center gap-3 mb-4">
+          <Button
+            type="button"
+            onClick={addAIFeatures}
+            disabled={isAddingFeatures || isEnhancing || !projectId}
+            variant="outline"
+            className="flex items-center gap-2"
+            title="Generate new features to complement existing ones"
+          >
+            {isAddingFeatures ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Adding...</span>
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-4 w-4" />
+                <span>Add AI Features</span>
+              </>
+            )}
+          </Button>
+          <Button
+            type="button"
+            onClick={enhanceFeatures}
+            disabled={isEnhancing || isAddingFeatures || !projectId}
+            variant="outline"
+            className="flex items-center gap-2"
+            title="Replace all features with AI-generated ones"
+          >
+            {isEnhancing ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Enhancing...</span>
+              </>
+            ) : (
+              <>
+                <RefreshCw className="h-4 w-4" />
+                <span>Replace All</span>
+              </>
+            )}
+          </Button>
         </div>
 
         {/* Add new feature button */}
