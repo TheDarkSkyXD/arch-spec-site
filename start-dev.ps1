@@ -41,7 +41,7 @@ function Test-VirtualEnvExists {
         [string]$Directory
     )
     
-    if ($isWindows) {
+    if ($isWindowsOS) {
         $venvPath = Join-Path $Directory ".venv\Scripts\activate.ps1"
     } else {
         $venvPath = Join-Path $Directory ".venv/bin/activate"
@@ -51,17 +51,17 @@ function Test-VirtualEnvExists {
 }
 
 # Detect OS platform
-$isWindows = $PSVersionTable.Platform -eq 'Win32NT' -or [string]::IsNullOrEmpty($PSVersionTable.Platform)
-$isLinux = $PSVersionTable.Platform -eq 'Unix' -and $PSVersionTable.OS -like '*Linux*'
-$isMacOS = $PSVersionTable.Platform -eq 'Unix' -and $PSVersionTable.OS -like '*Darwin*'
+$isWindowsOS = $PSVersionTable.Platform -eq 'Win32NT' -or [string]::IsNullOrEmpty($PSVersionTable.Platform)
+$isLinuxOS = $PSVersionTable.Platform -eq 'Unix' -and $PSVersionTable.OS -like '*Linux*'
+$isMacOSX = $PSVersionTable.Platform -eq 'Unix' -and $PSVersionTable.OS -like '*Darwin*'
 
 if ($null -eq $PSVersionTable.Platform) {
     # Old PowerShell on Windows doesn't have Platform property
-    $isWindows = $true
+    $isWindowsOS = $true
 }
 
 Write-ColorOutput "🚀 Starting development environment..." "Cyan"
-Write-ColorOutput "💻 Detected Platform: $(if($isWindows){'Windows'}elseif($isMacOS){'macOS'}elseif($isLinux){'Linux'}else{'Unknown'})" "Cyan"
+Write-ColorOutput "💻 Detected Platform: $(if($isWindowsOS){'Windows'}elseif($isMacOSX){'macOS'}elseif($isLinuxOS){'Linux'}else{'Unknown'})" "Cyan"
 Write-ColorOutput "📦 Starting MongoDB container..." "Yellow"
 
 # Change to backend directory
@@ -135,7 +135,7 @@ if (-not (Test-VirtualEnvExists -Directory $backendDir)) {
 
 # Activate virtual environment based on platform
 Write-ColorOutput "🐍 Activating Python virtual environment..." "Yellow"
-if ($isWindows) {
+if ($isWindowsOS) {
     $venvActivatePath = Join-Path $backendDir ".venv\Scripts\Activate.ps1"
     if (Test-Path $venvActivatePath) {
         & $venvActivatePath
@@ -166,11 +166,11 @@ if ($isWindows) {
 
 # Start Backend Server (async) in platform-specific way
 Write-ColorOutput "🌐 Starting backend server..." "Yellow"
-if ($isWindows) {
+if ($isWindowsOS) {
     Start-Process -FilePath "pwsh" -ArgumentList "-NoExit", "-Command", "cd '$backendDir'; if (Test-Path .venv\Scripts\Activate.ps1) { .\.venv\Scripts\Activate.ps1 }; python -m uvicorn app.main:app --reload" -WindowStyle Normal
 } else {
     # On Unix systems, we use bash to ensure proper activation
-    if ($isMacOS) {
+    if ($isMacOSX) {
         Start-Process -FilePath "pwsh" -ArgumentList "-NoExit", "-Command", "cd '$backendDir'; if (Test-Path .venv/bin/activate) { bash -c 'source .venv/bin/activate && python -m uvicorn app.main:app --reload' } else { python -m uvicorn app.main:app --reload }"
     } else {
         Start-Process -FilePath "pwsh" -ArgumentList "-NoExit", "-Command", "cd '$backendDir'; if (Test-Path .venv/bin/activate) { bash -c 'source .venv/bin/activate && python -m uvicorn app.main:app --reload' } else { python -m uvicorn app.main:app --reload }"
@@ -198,7 +198,7 @@ if (-not (Test-NodeModulesExists -Directory $frontendDir)) {
 
 # Start Frontend Development Server
 Write-ColorOutput "⚛️ Starting frontend development server..." "Yellow"
-if ($isWindows) {
+if ($isWindowsOS) {
     Start-Process -FilePath "pwsh" -ArgumentList "-NoExit", "-Command", "cd '$frontendDir'; pnpm run dev" -WindowStyle Normal
 } else {
     # On Unix systems, we need a different approach for background processes
@@ -210,4 +210,4 @@ Write-ColorOutput "✨ Development environment is ready!" "Green"
 Write-ColorOutput "   Backend is running at http://localhost:8000" "Cyan"
 Write-ColorOutput "   Frontend is running at http://localhost:5173" "Cyan"
 Write-ColorOutput "   MongoDB is running on port 27017" "Cyan"
-Write-ColorOutput "   Press Ctrl+C in each terminal window to stop the services." "DarkYellow" 
+Write-ColorOutput "   Press Ctrl+C in each terminal window to stop the services." "DarkYellow"
