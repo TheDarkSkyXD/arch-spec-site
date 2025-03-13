@@ -51,6 +51,13 @@ try:
     except Exception as e:
         logger.error(f"Failed to load users router: {str(e)}")
     
+    try:
+        from .routes import ai_text
+        api_router.include_router(ai_text.router, prefix="/ai-text", tags=["ai-text"])
+        logger.info("AI Text router loaded successfully")
+    except Exception as e:
+        logger.error(f"Failed to load AI Text router: {str(e)}")
+    
     logger.info("API routes imported successfully")
 except Exception as e:
     logger.error(f"Failed to import API routes: {str(e)}") 

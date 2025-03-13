@@ -3,8 +3,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useState, useEffect } from "react";
 import { projectsService } from "../../services/projectsService";
+import { aiService } from "../../services/aiService";
 import { useToast } from "../../contexts/ToastContext";
-import { PlusCircle, Trash2 } from "lucide-react";
+import { PlusCircle, Trash2, Sparkles, Wand2 } from "lucide-react";
 
 // Import shadcn UI components
 import { Label } from "../ui/label";
@@ -33,6 +34,8 @@ const ProjectBasicsForm = ({
   onSuccess,
 }: ProjectBasicsFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isEnhancing, setIsEnhancing] = useState(false);
+  const [isEnhancingGoals, setIsEnhancingGoals] = useState(false);
   const { showToast } = useToast();
   // Track the project ID internally for subsequent updates
   const [projectId, setProjectId] = useState<string | undefined>(
@@ -55,6 +58,7 @@ const ProjectBasicsForm = ({
     formState: { errors },
     reset,
     setValue,
+    watch,
   } = useForm<ProjectBasicsFormData>({
     resolver: zodResolver(projectBasicsSchema),
     defaultValues: {
@@ -65,6 +69,9 @@ const ProjectBasicsForm = ({
       domain: initialData?.domain || "",
     },
   });
+
+  // Get current description value for enhance button
+  const currentDescription = watch("description");
 
   // Update form values if initialData changes
   useEffect(() => {
@@ -99,6 +106,99 @@ const ProjectBasicsForm = ({
 
   const removeBusinessGoal = (index: number) => {
     setBusinessGoals(businessGoals.filter((_, i) => i !== index));
+  };
+
+  const enhanceDescription = async () => {
+    if (!currentDescription || currentDescription.length < 5) {
+      showToast({
+        title: "Description too short",
+        description: "Please provide a longer description to enhance",
+        type: "warning",
+      });
+      return;
+    }
+
+    setIsEnhancing(true);
+    try {
+      const enhancedDescription = await aiService.enhanceDescription(
+        currentDescription
+      );
+
+      if (enhancedDescription) {
+        setValue("description", enhancedDescription, { shouldValidate: true });
+        showToast({
+          title: "Description Enhanced",
+          description: "The project description has been improved",
+          type: "success",
+        });
+      } else {
+        showToast({
+          title: "Enhancement Failed",
+          description: "Unable to enhance the description. Please try again.",
+          type: "error",
+        });
+      }
+    } catch (error) {
+      console.error("Error enhancing description:", error);
+      showToast({
+        title: "Enhancement Failed",
+        description: "An error occurred while enhancing the description",
+        type: "error",
+      });
+    } finally {
+      setIsEnhancing(false);
+    }
+  };
+
+  const enhanceBusinessGoals = async () => {
+    // Only need a valid description to generate/enhance goals
+    if (!currentDescription || currentDescription.length < 5) {
+      showToast({
+        title: "Description too short",
+        description: "Please provide a project description first",
+        type: "warning",
+      });
+      return;
+    }
+
+    setIsEnhancingGoals(true);
+    try {
+      const enhancedGoals = await aiService.enhanceBusinessGoals(
+        currentDescription,
+        businessGoals
+      );
+
+      if (enhancedGoals && enhancedGoals.length > 0) {
+        setBusinessGoals(enhancedGoals);
+
+        // Show different messages based on whether we're enhancing or generating
+        const hasExistingGoals = businessGoals.length > 0;
+        showToast({
+          title: hasExistingGoals
+            ? "Business Goals Enhanced"
+            : "Business Goals Generated",
+          description: hasExistingGoals
+            ? "Your business goals have been improved"
+            : "New business goals have been generated based on your project description",
+          type: "success",
+        });
+      } else {
+        showToast({
+          title: "Enhancement Failed",
+          description: "Unable to enhance business goals. Please try again.",
+          type: "error",
+        });
+      }
+    } catch (error) {
+      console.error("Error enhancing business goals:", error);
+      showToast({
+        title: "Enhancement Failed",
+        description: "An error occurred while enhancing business goals",
+        type: "error",
+      });
+    } finally {
+      setIsEnhancingGoals(false);
+    }
   };
 
   const onSubmit = async (data: ProjectBasicsFormData) => {
@@ -206,17 +306,67 @@ const ProjectBasicsForm = ({
 
       <div>
         <Label htmlFor="description">Description</Label>
-        <Textarea
-          id="description"
-          rows={4}
-          {...register("description")}
-          error={errors.description?.message?.toString()}
-          placeholder="Describe your project"
-        />
+        <div className="relative">
+          <Textarea
+            id="description"
+            rows={4}
+            {...register("description")}
+            error={errors.description?.message?.toString()}
+            placeholder="Describe your project"
+          />
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="absolute right-2 top-2 text-slate-400 dark:text-slate-500 hover:text-blue-500 dark:hover:text-blue-400"
+            onClick={enhanceDescription}
+            disabled={isEnhancing || !currentDescription}
+            title="Enhance with AI"
+          >
+            <Sparkles
+              size={18}
+              className={isEnhancing ? "animate-pulse" : ""}
+            />
+          </Button>
+        </div>
+        {isEnhancing && (
+          <div className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+            Enhancing description...
+          </div>
+        )}
       </div>
 
       <div className="space-y-4">
-        <Label htmlFor="business_goals">Business Goals</Label>
+        <div className="flex justify-between items-center">
+          <Label htmlFor="business_goals">Business Goals</Label>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={enhanceBusinessGoals}
+            disabled={isEnhancingGoals || !currentDescription}
+            className="text-xs flex items-center gap-1"
+            title={
+              businessGoals.length > 0
+                ? "Enhance business goals with AI"
+                : "Generate business goals with AI"
+            }
+          >
+            <Wand2
+              size={14}
+              className={isEnhancingGoals ? "animate-pulse" : ""}
+            />
+            {businessGoals.length > 0 ? "Enhance Goals" : "Generate Goals"}
+          </Button>
+        </div>
+
+        {isEnhancingGoals && (
+          <div className="text-sm text-slate-500 dark:text-slate-400">
+            {businessGoals.length > 0
+              ? "Enhancing business goals..."
+              : "Generating business goals..."}
+          </div>
+        )}
 
         {/* Display existing business goals */}
         <div className="space-y-2">
