@@ -105,4 +105,39 @@ class EnhanceTargetUsersRequest(BaseModel):
 
 
 class EnhanceTargetUsersResponse(BaseModel):
-    enhanced_target_users: str 
+    enhanced_target_users: str
+
+
+class RequirementsEnhanceRequest(BaseModel):
+    """Request model for enhancing project requirements."""
+    
+    project_description: str = Field(
+        ...,
+        title="Project Description",
+        description="The description of the project",
+        examples=["A web application for tracking daily fitness workouts and nutrition"],
+    )
+    
+    business_goals: List[str] = Field(
+        ...,
+        title="Business Goals",
+        description="The business goals of the project",
+        examples=[["Increase user engagement", "Generate revenue through premium subscriptions"]],
+    )
+    
+    user_requirements: List[str] = Field(
+        ...,
+        title="User Requirements",
+        description="The original requirements provided by the user",
+        examples=[["Track workouts", "Monitor progress", "Share with friends"]],
+    )
+
+
+class RequirementsEnhanceResponse(BaseModel):
+    """Response model for enhanced project requirements."""
+    
+    enhanced_requirements: List[str] = Field(
+        ...,
+        title="Enhanced Requirements",
+        description="The AI-enhanced project requirements",
+    ) 

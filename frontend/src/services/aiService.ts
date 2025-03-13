@@ -29,6 +29,16 @@ interface EnhanceTargetUsersResponse {
   enhanced_target_users: string;
 }
 
+interface EnhanceRequirementsRequest {
+  project_description: string;
+  business_goals: string[];
+  user_requirements: string[];
+}
+
+interface EnhanceRequirementsResponse {
+  enhanced_requirements: string[];
+}
+
 class AIService {
   /**
    * Enhance a project description using AI.
@@ -100,6 +110,36 @@ class AIService {
       return response.data.enhanced_target_users;
     } catch (error) {
       console.error("Error enhancing target users:", error);
+      return null;
+    }
+  }
+
+  /**
+   * Enhance project requirements using AI.
+   *
+   * @param projectDescription The project description
+   * @param businessGoals The business goals
+   * @param requirements The original requirements
+   * @returns The enhanced requirements or null if an error occurred
+   */
+  async enhanceRequirements(
+    projectDescription: string,
+    businessGoals: string[],
+    requirements: string[]
+  ): Promise<string[] | null> {
+    try {
+      const response = await apiClient.post<EnhanceRequirementsResponse>(
+        "/api/ai-text/enhance-requirements",
+        {
+          project_description: projectDescription,
+          business_goals: businessGoals,
+          user_requirements: requirements,
+        } as EnhanceRequirementsRequest
+      );
+
+      return response.data.enhanced_requirements;
+    } catch (error) {
+      console.error("Error enhancing requirements:", error);
       return null;
     }
   }

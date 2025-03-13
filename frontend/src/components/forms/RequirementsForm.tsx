@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
-import { PlusCircle, Trash2, AlertCircle, Loader2 } from "lucide-react";
+import { PlusCircle, Trash2, AlertCircle, Loader2, Sparkles, Tag } from "lucide-react";
 import { requirementsService } from "../../services/requirementsService";
+import { projectsService } from "../../services/projectsService";
+import { aiService } from "../../services/aiService";
 import { useToast } from "../../contexts/ToastContext";
 import { Requirements } from "../../types/templates";
 
@@ -35,6 +37,12 @@ export default function RequirementsForm({
   // Add state for form-level error and success messages
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
+  // Add state for AI enhancement
+  const [isEnhancing, setIsEnhancing] = useState<boolean>(false);
+  const [projectDescription, setProjectDescription] = useState<string>("");
+  const [businessGoals, setBusinessGoals] = useState<string[]>([]);
+  // Add state for stripping prefixes
+  const [stripPrefixes, setStripPrefixes] = useState<boolean>(true);
 
   // Effect to update local state when initial data changes
   useEffect(() => {
@@ -68,6 +76,30 @@ export default function RequirementsForm({
     fetchRequirements();
   }, [projectId, initialData]);
 
+  // New function to fetch project description and business goals for AI enhancement
+  const fetchProjectInfo = async () => {
+    if (!projectId) return;
+    
+    try {
+      // Fetch project details including description and business goals
+      const projectDetails = await projectsService.getProjectById(projectId);
+      
+      if (projectDetails) {
+        setProjectDescription(projectDetails.description || "");
+        setBusinessGoals(projectDetails.business_goals || []);
+      }
+    } catch (error) {
+      console.error("Error fetching project details:", error);
+    }
+  };
+
+  // Add effect to fetch project info
+  useEffect(() => {
+    if (projectId) {
+      fetchProjectInfo();
+    }
+  }, [projectId]);
+
   const addFunctionalRequirement = () => {
     if (!newFunctionalReq.trim()) return;
 
@@ -88,6 +120,123 @@ export default function RequirementsForm({
 
   const removeNonFunctionalRequirement = (index: number) => {
     setNonFunctionalReqs(nonFunctionalReqs.filter((_, i) => i !== index));
+  };
+
+  // Function to strip category prefixes
+  const stripCategoryPrefix = (req: string): string => {
+    if (stripPrefixes && (
+        req.toLowerCase().startsWith("[functional]") || 
+        req.toLowerCase().startsWith("[non-functional]") ||
+        req.toLowerCase().startsWith("[nonfunctional]")
+      )) {
+      return req.substring(req.indexOf("]") + 1).trim();
+    }
+    return req;
+  };
+
+  // New function to enhance requirements using AI
+  const enhanceRequirements = async () => {
+    if (!projectId) {
+      showToast({
+        title: "Error",
+        description: "Project must be saved before requirements can be enhanced",
+        type: "error",
+      });
+      return;
+    }
+
+    if (!projectDescription) {
+      showToast({
+        title: "Warning",
+        description: "Project description is missing. Requirements may not be properly enhanced.",
+        type: "warning",
+      });
+    }
+
+    // Combine functional and non-functional requirements
+    const allRequirements = [...functionalReqs, ...nonFunctionalReqs];
+    
+    if (allRequirements.length === 0) {
+      showToast({
+        title: "Warning",
+        description: "No requirements to enhance. Please add some requirements first.",
+        type: "warning",
+      });
+      return;
+    }
+
+    setIsEnhancing(true);
+    try {
+      const enhancedRequirements = await aiService.enhanceRequirements(
+        projectDescription,
+        businessGoals,
+        allRequirements
+      );
+
+      if (enhancedRequirements && enhancedRequirements.length > 0) {
+        // Process enhanced requirements
+        const functionalRequirements: string[] = [];
+        const nonFunctionalRequirements: string[] = [];
+
+        console.log("Enhanced requirements from AI:", enhancedRequirements);
+
+        // Categorize requirements based on [Category] prefix first, then fall back to content keywords
+        enhancedRequirements.forEach(req => {
+          const lowerCaseReq = req.toLowerCase();
+          
+          // First check for explicit category prefixes
+          if (lowerCaseReq.startsWith("[functional]")) {
+            functionalRequirements.push(req); // Keep original format for categorization
+          } else if (lowerCaseReq.startsWith("[non-functional]") || lowerCaseReq.startsWith("[nonfunctional]")) {
+            nonFunctionalRequirements.push(req); // Keep original format for categorization
+          } 
+          // Fall back to keyword detection if no category prefix is found
+          else if (
+            lowerCaseReq.includes("non-functional") ||
+            lowerCaseReq.includes("nonfunctional") ||
+            lowerCaseReq.includes("nfr") ||
+            lowerCaseReq.includes("quality") ||
+            lowerCaseReq.includes("performance") ||
+            lowerCaseReq.includes("security") ||
+            lowerCaseReq.includes("usability") ||
+            lowerCaseReq.includes("reliability") ||
+            lowerCaseReq.includes("maintainability")
+          ) {
+            nonFunctionalRequirements.push(req);
+          } else {
+            // Default to functional requirement if no other indicators are present
+            functionalRequirements.push(req);
+          }
+        });
+
+        console.log("Categorized functional requirements:", functionalRequirements);
+        console.log("Categorized non-functional requirements:", nonFunctionalRequirements);
+
+        setFunctionalReqs(functionalRequirements);
+        setNonFunctionalReqs(nonFunctionalRequirements);
+        
+        showToast({
+          title: "Success",
+          description: "Requirements enhanced successfully",
+          type: "success",
+        });
+      } else {
+        showToast({
+          title: "Warning",
+          description: "No enhanced requirements returned",
+          type: "warning",
+        });
+      }
+    } catch (error) {
+      console.error("Error enhancing requirements:", error);
+      showToast({
+        title: "Error",
+        description: "Failed to enhance requirements",
+        type: "error",
+      });
+    } finally {
+      setIsEnhancing(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -204,6 +353,42 @@ export default function RequirementsForm({
         </p>
       </div>
 
+      {/* AI Enhancement Button */}
+      <div className="flex justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            onClick={() => setStripPrefixes(!stripPrefixes)}
+            variant="ghost"
+            size="sm"
+            className="flex items-center gap-1 text-xs"
+            title={stripPrefixes ? "Show category prefixes" : "Hide category prefixes"}
+          >
+            <Tag className="h-3 w-3" />
+            {stripPrefixes ? "Show prefixes" : "Hide prefixes"}
+          </Button>
+        </div>
+        <Button
+          type="button"
+          onClick={enhanceRequirements}
+          disabled={isEnhancing || !projectId}
+          variant="outline"
+          className="flex items-center gap-2"
+        >
+          {isEnhancing ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span>Enhancing...</span>
+            </>
+          ) : (
+            <>
+              <Sparkles className="h-4 w-4" />
+              <span>Enhance with AI</span>
+            </>
+          )}
+        </Button>
+      </div>
+
       {/* Functional Requirements */}
       <div className="space-y-4">
         <h3 className="text-lg font-medium text-slate-800 dark:text-slate-100">
@@ -226,7 +411,7 @@ export default function RequirementsForm({
               key={index}
               className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
             >
-              <p className="dark:text-slate-300">{req}</p>
+              <p className="dark:text-slate-300">{stripCategoryPrefix(req)}</p>
               <Button
                 type="button"
                 variant="ghost"
@@ -276,7 +461,7 @@ export default function RequirementsForm({
               key={index}
               className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
             >
-              <p className="dark:text-slate-300">{req}</p>
+              <p className="dark:text-slate-300">{stripCategoryPrefix(req)}</p>
               <Button
                 type="button"
                 variant="ghost"
