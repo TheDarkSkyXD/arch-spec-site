@@ -93,6 +93,31 @@ interface EnhanceDataModelResponse {
   data: DataModel;
 }
 
+// New interfaces for API endpoints enhancement
+export interface ApiEndpoint {
+  path: string;
+  description: string;
+  methods: string[];
+  auth: boolean;
+  roles?: string[];
+}
+
+export interface ApiData {
+  endpoints: ApiEndpoint[];
+}
+
+interface EnhanceApiEndpointsRequest {
+  project_description: string;
+  features: FeatureModule[];
+  data_models: any;
+  requirements: string[];
+  existing_endpoints?: ApiData;
+}
+
+interface EnhanceApiEndpointsResponse {
+  data: ApiData;
+}
+
 class AIService {
   /**
    * Enhance a project description using AI.
@@ -227,6 +252,42 @@ class AIService {
       return response.data.data;
     } catch (error) {
       console.error("Error enhancing features:", error);
+      return null;
+    }
+  }
+
+  /**
+   * Enhance API endpoints using AI.
+   *
+   * @param projectDescription The project description
+   * @param features The project features
+   * @param dataModels The data models
+   * @param requirements The project requirements
+   * @param existingEndpoints The original endpoints (optional)
+   * @returns The enhanced API endpoints or null if an error occurred
+   */
+  async enhanceApiEndpoints(
+    projectDescription: string,
+    features: FeatureModule[],
+    dataModels: any,
+    requirements: string[],
+    existingEndpoints?: ApiData
+  ): Promise<ApiData | null> {
+    try {
+      const response = await apiClient.post<EnhanceApiEndpointsResponse>(
+        "/api/ai-text/enhance-api-endpoints",
+        {
+          project_description: projectDescription,
+          features: features,
+          data_models: dataModels,
+          requirements: requirements,
+          existing_endpoints: existingEndpoints,
+        } as EnhanceApiEndpointsRequest
+      );
+
+      return response.data.data;
+    } catch (error) {
+      console.error("Error enhancing API endpoints:", error);
       return null;
     }
   }

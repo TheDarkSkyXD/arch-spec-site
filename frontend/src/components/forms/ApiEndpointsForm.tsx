@@ -7,6 +7,8 @@ import {
   Lock,
   Loader2,
   Edit,
+  Sparkles,
+  RefreshCw,
 } from "lucide-react";
 import {
   ApiEndpoint,
@@ -14,6 +16,11 @@ import {
 } from "../../services/apiEndpointsService";
 import { useToast } from "../../contexts/ToastContext";
 import { Api } from "../../types/templates";
+import { aiService } from "../../services/aiService";
+import { projectsService } from "../../services/projectsService";
+import { featuresService } from "../../services/featuresService";
+import { dataModelService } from "../../services/dataModelService";
+import { requirementsService } from "../../services/requirementsService";
 
 // Import shadcn UI components
 import Button from "../ui/Button";
@@ -47,6 +54,14 @@ export default function ApiEndpointsForm({
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
 
+  // AI enhancement state
+  const [isEnhancing, setIsEnhancing] = useState<boolean>(false);
+  const [isAddingEndpoints, setIsAddingEndpoints] = useState<boolean>(false);
+  const [projectDescription, setProjectDescription] = useState<string>("");
+  const [features, setFeatures] = useState<any[]>([]);
+  const [dataModels, setDataModels] = useState<any>({});
+  const [requirements, setRequirements] = useState<string[]>([]);
+
   // New endpoint form state
   const [newEndpoint, setNewEndpoint] = useState<ApiEndpoint>({
     path: "",
@@ -58,6 +73,131 @@ export default function ApiEndpointsForm({
   const [showNewEndpointForm, setShowNewEndpointForm] = useState(false);
   const [newRole, setNewRole] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // New function to enhance endpoints using AI (replace existing endpoints)
+  const enhanceEndpoints = async () => {
+    if (!projectId) {
+      showToast({
+        title: "Error",
+        description: "Project must be saved before endpoints can be enhanced",
+        type: "error",
+      });
+      return;
+    }
+
+    if (!projectDescription) {
+      showToast({
+        title: "Warning",
+        description:
+          "Project description is missing. Endpoints may not be properly enhanced.",
+        type: "warning",
+      });
+    }
+
+    if (features.length === 0) {
+      showToast({
+        title: "Warning",
+        description:
+          "No features found. Endpoints will be based only on project description.",
+        type: "warning",
+      });
+    }
+
+    setIsEnhancing(true);
+    try {
+      const enhancedEndpoints = await aiService.enhanceApiEndpoints(
+        projectDescription,
+        features,
+        dataModels,
+        requirements,
+        endpoints.length > 0 ? { endpoints } : undefined
+      );
+
+      if (enhancedEndpoints) {
+        // Replace existing endpoints with enhanced ones
+        setEndpoints(enhancedEndpoints.endpoints || []);
+
+        showToast({
+          title: "Success",
+          description: "API endpoints enhanced successfully",
+          type: "success",
+        });
+      } else {
+        showToast({
+          title: "Warning",
+          description: "No enhanced endpoints returned",
+          type: "warning",
+        });
+      }
+    } catch (error) {
+      console.error("Error enhancing endpoints:", error);
+      showToast({
+        title: "Error",
+        description: "Failed to enhance endpoints",
+        type: "error",
+      });
+    } finally {
+      setIsEnhancing(false);
+    }
+  };
+
+  // New function to add AI-generated endpoints without replacing existing ones
+  const addAIEndpoints = async () => {
+    if (!projectId) {
+      showToast({
+        title: "Error",
+        description: "Project must be saved before endpoints can be enhanced",
+        type: "error",
+      });
+      return;
+    }
+
+    if (!projectDescription) {
+      showToast({
+        title: "Warning",
+        description:
+          "Project description is missing. Endpoints may not be properly generated.",
+        type: "warning",
+      });
+    }
+
+    setIsAddingEndpoints(true);
+    try {
+      // When adding new endpoints, we don't pass the existing endpoints to avoid duplication
+      const enhancedEndpoints = await aiService.enhanceApiEndpoints(
+        projectDescription,
+        features,
+        dataModels,
+        requirements
+      );
+
+      if (enhancedEndpoints && enhancedEndpoints.endpoints.length > 0) {
+        // Add new endpoints to existing ones
+        setEndpoints([...endpoints, ...enhancedEndpoints.endpoints]);
+
+        showToast({
+          title: "Success",
+          description: `Added ${enhancedEndpoints.endpoints.length} new endpoints`,
+          type: "success",
+        });
+      } else {
+        showToast({
+          title: "Warning",
+          description: "No new endpoints generated",
+          type: "warning",
+        });
+      }
+    } catch (error) {
+      console.error("Error adding AI endpoints:", error);
+      showToast({
+        title: "Error",
+        description: "Failed to generate new endpoints",
+        type: "error",
+      });
+    } finally {
+      setIsAddingEndpoints(false);
+    }
+  };
 
   // Effect to update local state when initial data changes
   useEffect(() => {
@@ -88,6 +228,54 @@ export default function ApiEndpointsForm({
 
     fetchApiEndpoints();
   }, [projectId, initialData]);
+
+  // New function to fetch project info for AI enhancement
+  const fetchProjectInfo = async () => {
+    if (!projectId) return;
+
+    try {
+      // Fetch project details including description
+      const projectDetails = await projectsService.getProjectById(projectId);
+
+      if (projectDetails) {
+        setProjectDescription(projectDetails.description || "");
+
+        // Fetch features
+        const featuresData = await featuresService.getFeatures(projectId);
+        if (featuresData?.coreModules) {
+          setFeatures(featuresData.coreModules);
+        }
+
+        // Fetch data models
+        const dataModelData = await dataModelService.getDataModel(projectId);
+        if (dataModelData) {
+          setDataModels(dataModelData);
+        }
+
+        // Fetch requirements
+        const requirementsData = await requirementsService.getRequirements(
+          projectId
+        );
+        if (requirementsData) {
+          // Combine functional and non-functional requirements
+          const allRequirements = [
+            ...(requirementsData.functional || []),
+            ...(requirementsData.non_functional || []),
+          ];
+          setRequirements(allRequirements);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching project details:", error);
+    }
+  };
+
+  // Add effect to fetch project info
+  useEffect(() => {
+    if (projectId) {
+      fetchProjectInfo();
+    }
+  }, [projectId]);
 
   const toggleEndpointExpand = (index: number) => {
     setExpandedEndpoint(expandedEndpoint === index ? null : index);
@@ -366,6 +554,50 @@ export default function ApiEndpointsForm({
           <p className="text-slate-600 dark:text-slate-400 mb-6">
             Define the API endpoints for your application.
           </p>
+        </div>
+
+        {/* AI Enhancement Buttons */}
+        <div className="flex justify-end items-center gap-3 mb-4">
+          <Button
+            type="button"
+            onClick={addAIEndpoints}
+            disabled={isAddingEndpoints || isEnhancing || !projectId}
+            variant="outline"
+            className="flex items-center gap-2"
+            title="Generate new endpoints to complement existing ones"
+          >
+            {isAddingEndpoints ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Adding...</span>
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-4 w-4" />
+                <span>Add AI Endpoints</span>
+              </>
+            )}
+          </Button>
+          <Button
+            type="button"
+            onClick={enhanceEndpoints}
+            disabled={isEnhancing || isAddingEndpoints || !projectId}
+            variant="outline"
+            className="flex items-center gap-2"
+            title="Replace all endpoints with AI-generated ones"
+          >
+            {isEnhancing ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Enhancing...</span>
+              </>
+            ) : (
+              <>
+                <RefreshCw className="h-4 w-4" />
+                <span>Replace All</span>
+              </>
+            )}
+          </Button>
         </div>
 
         {/* Add new endpoint button */}

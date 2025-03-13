@@ -492,4 +492,94 @@ class DataModelEnhanceResponse(BaseModel):
         ...,
         title="Data Model",
         description="The structured data model with entities and relationships"
+    )
+
+
+class ApiEndpoint(BaseModel):
+    """Model for an API endpoint."""
+    
+    path: str = Field(
+        ...,
+        title="API Endpoint Path",
+        description="The path of the API endpoint (e.g., /api/users)"
+    )
+    
+    description: str = Field(
+        ...,
+        title="Description",
+        description="Brief description of the endpoint's purpose"
+    )
+    
+    methods: List[str] = Field(
+        ...,
+        title="HTTP Methods",
+        description="HTTP methods supported by this endpoint (GET, POST, PUT, DELETE, PATCH)"
+    )
+    
+    auth: bool = Field(
+        ...,
+        title="Authentication Required",
+        description="Whether authentication is required for this endpoint"
+    )
+    
+    roles: Optional[List[str]] = Field(
+        default=None,
+        title="Required Roles",
+        description="Roles that can access this endpoint, if any"
+    )
+
+
+class ApiData(BaseModel):
+    """Model for API endpoints data."""
+    
+    endpoints: List[ApiEndpoint] = Field(
+        ...,
+        title="API Endpoints",
+        description="List of API endpoints"
+    )
+
+
+class ApiEndpointsEnhanceRequest(BaseModel):
+    """Request model for enhancing API endpoints."""
+    
+    project_description: str = Field(
+        ...,
+        title="Project Description",
+        description="The description of the project",
+        examples=["A web application for tracking daily fitness workouts and nutrition"],
+    )
+    
+    features: List[Dict[str, Any]] = Field(
+        ...,
+        title="Features",
+        description="The features implemented in the project",
+    )
+    
+    data_models: Dict[str, Any] = Field(
+        default_factory=dict,
+        title="Data Models",
+        description="The data models used in the project",
+    )
+    
+    requirements: List[str] = Field(
+        ...,
+        title="Requirements",
+        description="The project requirements",
+        examples=[["User authentication", "Data persistence", "Real-time updates"]],
+    )
+    
+    existing_endpoints: Optional[Dict[str, Any]] = Field(
+        default=None,
+        title="Existing Endpoints",
+        description="The existing API endpoints that may need enhancement",
+    )
+
+
+class ApiEndpointsEnhanceResponse(BaseModel):
+    """Response model for enhanced API endpoints."""
+    
+    data: ApiData = Field(
+        ...,
+        title="API Endpoints Data",
+        description="The structured API endpoints data"
     ) 
