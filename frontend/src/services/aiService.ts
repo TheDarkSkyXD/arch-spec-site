@@ -3,6 +3,7 @@
  */
 import apiClient from "../api/apiClient";
 import { FeatureModule } from "./featuresService";
+import { DataModel, Entity } from "../types/templates";
 
 interface EnhanceDescriptionRequest {
   user_description: string;
@@ -78,6 +79,18 @@ interface EnhancePagesRequest {
 
 interface EnhancePagesResponse {
   data: PagesData;
+}
+
+interface EnhanceDataModelRequest {
+  project_description: string;
+  business_goals: string[];
+  features: FeatureModule[];
+  requirements: string[];
+  existing_data_model?: Partial<DataModel>;
+}
+
+interface EnhanceDataModelResponse {
+  data: DataModel;
 }
 
 class AIService {
@@ -247,6 +260,42 @@ class AIService {
       return response.data.data;
     } catch (error) {
       console.error("Error enhancing pages:", error);
+      return null;
+    }
+  }
+
+  /**
+   * Enhance data model using AI.
+   *
+   * @param projectDescription The project description
+   * @param businessGoals The business goals
+   * @param features The project features
+   * @param requirements The project requirements
+   * @param existingDataModel The original data model (optional)
+   * @returns The enhanced data model or null if an error occurred
+   */
+  async enhanceDataModel(
+    projectDescription: string,
+    businessGoals: string[],
+    features: FeatureModule[],
+    requirements: string[],
+    existingDataModel?: Partial<DataModel>
+  ): Promise<DataModel | null> {
+    try {
+      const response = await apiClient.post<EnhanceDataModelResponse>(
+        "/api/ai-text/enhance-data-model",
+        {
+          project_description: projectDescription,
+          business_goals: businessGoals,
+          features: features,
+          requirements: requirements,
+          existing_data_model: existingDataModel,
+        } as EnhanceDataModelRequest
+      );
+
+      return response.data.data;
+    } catch (error) {
+      console.error("Error enhancing data model:", error);
       return null;
     }
   }

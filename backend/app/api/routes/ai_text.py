@@ -20,7 +20,10 @@ from ...schemas.ai_text import (
     FeaturesData,
     PagesEnhanceRequest,
     PagesEnhanceResponse,
-    PagesData
+    PagesData,
+    DataModelEnhanceRequest,
+    DataModelEnhanceResponse,
+    DataModel
 )
 from ...services.ai_service import AnthropicClient
 from ...core.firebase_auth import get_current_user
@@ -705,4 +708,198 @@ async def enhance_pages(
         raise HTTPException(
             status_code=500,
             detail=f"Failed to enhance pages: {str(e)}"
+        )
+
+@router.post("/enhance-data-model", response_model=DataModelEnhanceResponse)
+async def enhance_data_model(
+    request: DataModelEnhanceRequest,
+    current_user: Dict[str, Any] = Depends(get_current_user)
+):
+    """
+    Enhance data model using AI with function calling.
+    
+    This endpoint takes a project description, business goals, features, requirements, and optionally
+    an existing data model, and returns an improved, structured data model with entities and relationships.
+    It uses Anthropic's tool use feature to ensure a structured response.
+    """
+    try:
+        # Initialize the AI client
+        client = AnthropicClient()
+        
+        # Create the system message
+        system_message = (
+            "You are a database architect designing data models for a software project. "
+            "Based on the project details, create comprehensive data models that support all the features and requirements."
+        )
+        
+        # Format the business goals, features, and requirements as strings
+        formatted_goals = "\n".join([f"- {goal}" for goal in request.business_goals])
+        formatted_features = json.dumps(request.features, indent=2)
+        formatted_requirements = "\n".join([f"- {req}" for req in request.requirements])
+        
+        # Format the original data model if provided
+        formatted_data_model = "None provided"
+        if request.existing_data_model and (
+            "entities" in request.existing_data_model and 
+            len(request.existing_data_model["entities"]) > 0
+        ):
+            formatted_data_model = json.dumps(request.existing_data_model, indent=2)
+        
+        user_message = (
+            f"Project description: {request.project_description}\n"
+            f"Business goals:\n{formatted_goals}\n"
+            f"Features:\n{formatted_features}\n"
+            f"Requirements:\n{formatted_requirements}\n"
+            f"Original data model (if any): {formatted_data_model}\n\n"
+            "Your task:\n"
+            "1. Identify key entities needed to support the features and requirements\n"
+            "2. Define properties/fields for each entity including their data types, constraints, and defaults\n"
+            "3. Specify relationships between entities (one-to-one, one-to-many, many-to-many)\n"
+            "4. Indicate primary keys and foreign keys\n"
+            "5. Group related entities into logical schemas\n"
+            "6. Include indexing recommendations for performance\n\n"
+            "Once you've analyzed the requirements and created the data model, use the print_data_model function to output the structured data model specification."
+        )
+        
+        # Define the tool schema for print_data_model
+        tool_schema = {
+            "name": "print_data_model",
+            "description": "Formats and displays the complete data model specification with entities and relationships",
+            "input_schema": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "object",
+                        "description": "The structured data model specification",
+                        "properties": {
+                            "entities": {
+                                "type": "array",
+                                "description": "List of entities in the data model",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "name": {
+                                            "type": "string",
+                                            "description": "Name of the entity"
+                                        },
+                                        "description": {
+                                            "type": "string",
+                                            "description": "Brief description of the entity's purpose"
+                                        },
+                                        "fields": {
+                                            "type": "array",
+                                            "description": "List of fields/properties for this entity",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "name": {
+                                                        "type": "string",
+                                                        "description": "Name of the field"
+                                                    },
+                                                    "type": {
+                                                        "type": "string",
+                                                        "description": "Data type of the field"
+                                                    },
+                                                    "primaryKey": {
+                                                        "type": "boolean",
+                                                        "description": "Whether this field is a primary key"
+                                                    },
+                                                    "generated": {
+                                                        "type": "boolean",
+                                                        "description": "Whether this field value is automatically generated"
+                                                    },
+                                                    "unique": {
+                                                        "type": "boolean",
+                                                        "description": "Whether this field must contain unique values"
+                                                    },
+                                                    "required": {
+                                                        "type": "boolean",
+                                                        "description": "Whether this field is required"
+                                                    },
+                                                    "default": {
+                                                        "type": ["string", "null"],
+                                                        "description": "Default value for this field"
+                                                    },
+                                                    "enum": {
+                                                        "type": ["array", "null"],
+                                                        "description": "List of allowed values for this field",
+                                                        "items": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                },
+                                                "required": ["name", "type"]
+                                            }
+                                        }
+                                    },
+                                    "required": ["name", "description", "fields"]
+                                }
+                            },
+                            "relationships": {
+                                "type": "array",
+                                "description": "List of relationships between entities",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "type": {
+                                            "type": "string",
+                                            "description": "Type of relationship (oneToOne, oneToMany, manyToOne, manyToMany)"
+                                        },
+                                        "from_entity": {
+                                            "type": "string",
+                                            "description": "Source entity name"
+                                        },
+                                        "to_entity": {
+                                            "type": "string",
+                                            "description": "Target entity name"
+                                        },
+                                        "field": {
+                                            "type": "string",
+                                            "description": "Field name that represents the relationship"
+                                        },
+                                        "throughTable": {
+                                            "type": ["string", "null"],
+                                            "description": "Intermediate table for many-to-many relationships"
+                                        }
+                                    },
+                                    "required": ["type", "from_entity", "to_entity", "field"]
+                                }
+                            }
+                        },
+                        "required": ["entities", "relationships"]
+                    }
+                },
+                "required": ["data"]
+            }
+        }
+        
+        # Generate the tool use response
+        messages = [{"role": "user", "content": user_message}]
+        response = client.get_tool_use_response(system_message, [tool_schema], messages)
+        
+        if "error" in response:
+            logger.error(f"Error in AI tool use: {response['error']}")
+            raise HTTPException(
+                status_code=500,
+                detail=f"Failed to generate data model: {response['error']}"
+            )
+            
+        # If we got a proper response, it should have 'data' field
+        if "data" not in response:
+            logger.error("AI response missing 'data' field")
+            raise HTTPException(
+                status_code=500,
+                detail="AI returned malformed response"
+            )
+            
+        # Convert the response to our schema format
+        data_model = DataModel(**response["data"])
+            
+        # Return the enhanced data model
+        return DataModelEnhanceResponse(data=data_model)
+    except Exception as e:
+        logger.error(f"Error enhancing data model: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to enhance data model: {str(e)}"
         ) 

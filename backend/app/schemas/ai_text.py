@@ -321,4 +321,175 @@ class PagesEnhanceResponse(BaseModel):
         ...,
         title="Pages Data",
         description="The structured page recommendations organized by access level"
+    )
+
+
+class DataModelEnhanceRequest(BaseModel):
+    """Request model for enhancing the data model."""
+    
+    project_description: str = Field(
+        ...,
+        title="Project Description",
+        description="The description of the project",
+        examples=["A web application for tracking daily fitness workouts and nutrition"],
+    )
+    
+    business_goals: List[str] = Field(
+        ...,
+        title="Business Goals",
+        description="The business goals of the project",
+        examples=[["Increase user engagement", "Generate revenue through premium subscriptions"]],
+    )
+    
+    features: List[Dict[str, Any]] = Field(
+        ...,
+        title="Features",
+        description="The features implemented in the project",
+    )
+    
+    requirements: List[str] = Field(
+        ...,
+        title="Requirements",
+        description="The project requirements",
+        examples=[["Track workouts", "Monitor progress", "Share with friends"]],
+    )
+    
+    existing_data_model: Optional[Dict[str, Any]] = Field(
+        default=None,
+        title="Existing Data Model",
+        description="The existing data model that may need enhancement",
+    )
+
+
+class EntityField(BaseModel):
+    """Model for a field in an entity."""
+    
+    name: str = Field(
+        ...,
+        title="Field Name",
+        description="Name of the field"
+    )
+    
+    type: str = Field(
+        ...,
+        title="Field Type",
+        description="Data type of the field"
+    )
+    
+    primaryKey: Optional[bool] = Field(
+        default=None,
+        title="Primary Key",
+        description="Whether this field is a primary key"
+    )
+    
+    generated: Optional[bool] = Field(
+        default=None,
+        title="Generated",
+        description="Whether this field value is automatically generated"
+    )
+    
+    unique: Optional[bool] = Field(
+        default=None,
+        title="Unique",
+        description="Whether this field must contain unique values"
+    )
+    
+    required: Optional[bool] = Field(
+        default=None,
+        title="Required",
+        description="Whether this field is required"
+    )
+    
+    default: Optional[str] = Field(
+        default=None,
+        title="Default Value",
+        description="Default value for this field"
+    )
+    
+    enum: Optional[List[str]] = Field(
+        default=None,
+        title="Enum Values",
+        description="List of allowed values for this field"
+    )
+
+
+class Entity(BaseModel):
+    """Model for an entity in the data model."""
+    
+    name: str = Field(
+        ...,
+        title="Entity Name",
+        description="Name of the entity"
+    )
+    
+    description: str = Field(
+        ...,
+        title="Entity Description",
+        description="Brief description of the entity's purpose"
+    )
+    
+    fields: List[EntityField] = Field(
+        ...,
+        title="Fields",
+        description="List of fields/properties for this entity"
+    )
+
+
+class Relationship(BaseModel):
+    """Model for a relationship between entities."""
+    
+    type: str = Field(
+        ...,
+        title="Relationship Type",
+        description="Type of relationship (oneToOne, oneToMany, manyToOne, manyToMany)"
+    )
+    
+    from_entity: str = Field(
+        ...,
+        title="From Entity",
+        description="Source entity name"
+    )
+    
+    to_entity: str = Field(
+        ...,
+        title="To Entity",
+        description="Target entity name"
+    )
+    
+    field: str = Field(
+        ...,
+        title="Field",
+        description="Field name that represents the relationship"
+    )
+    
+    throughTable: Optional[str] = Field(
+        default=None,
+        title="Through Table",
+        description="Intermediate table for many-to-many relationships"
+    )
+
+
+class DataModel(BaseModel):
+    """Model for a complete data model."""
+    
+    entities: List[Entity] = Field(
+        ...,
+        title="Entities",
+        description="List of entities in the data model"
+    )
+    
+    relationships: List[Relationship] = Field(
+        default_factory=list,
+        title="Relationships",
+        description="List of relationships between entities"
+    )
+
+
+class DataModelEnhanceResponse(BaseModel):
+    """Response model for enhanced data model."""
+    
+    data: DataModel = Field(
+        ...,
+        title="Data Model",
+        description="The structured data model with entities and relationships"
     ) 

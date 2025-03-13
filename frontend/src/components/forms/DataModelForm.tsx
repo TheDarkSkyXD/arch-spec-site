@@ -1,5 +1,10 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { dataModelService } from "../../services/dataModelService";
+import { projectsService } from "../../services/projectsService";
+import { requirementsService } from "../../services/requirementsService";
+import { featuresService } from "../../services/featuresService";
+import { aiService } from "../../services/aiService";
+import { FeatureModule } from "../../services/featuresService";
 import Button from "../ui/Button";
 import Input from "../ui/Input";
 import {
@@ -20,7 +25,7 @@ import {
   AlertDialogTrigger,
 } from "../ui/alert-dialog";
 import { Label } from "../ui/label";
-import { Edit, Trash2 } from "lucide-react";
+import { Edit, Trash2, Loader2, Sparkles, RefreshCw } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -38,6 +43,7 @@ import {
   EntityField,
 } from "../../types/templates";
 import { Textarea } from "../ui/textarea";
+
 interface DataModelFormProps {
   initialData?: Partial<DataModel>;
   projectId?: string;
@@ -118,6 +124,14 @@ export default function DataModelForm({
     "manyToMany",
   ];
 
+  // Add state for AI enhancement
+  const [isEnhancing, setIsEnhancing] = useState<boolean>(false);
+  const [isAddingEntities, setIsAddingEntities] = useState<boolean>(false);
+  const [projectDescription, setProjectDescription] = useState<string>("");
+  const [businessGoals, setBusinessGoals] = useState<string[]>([]);
+  const [requirements, setRequirements] = useState<string[]>([]);
+  const [projectFeatures, setProjectFeatures] = useState<FeatureModule[]>([]);
+
   const fetchDataModel = useCallback(async () => {
     if (!projectId) return;
 
@@ -152,6 +166,49 @@ export default function DataModelForm({
       fetchDataModel();
     }
   }, [initialData, projectId, fetchDataModel]);
+
+  // New function to fetch project info for AI enhancement
+  const fetchProjectInfo = async () => {
+    if (!projectId) return;
+
+    try {
+      // Fetch project details including description and business goals
+      const projectDetails = await projectsService.getProjectById(projectId);
+
+      if (projectDetails) {
+        setProjectDescription(projectDetails.description || "");
+        setBusinessGoals(projectDetails.business_goals || []);
+
+        // Fetch requirements
+        const requirementsData = await requirementsService.getRequirements(
+          projectId
+        );
+        if (requirementsData) {
+          // Combine functional and non-functional requirements
+          const allRequirements = [
+            ...(requirementsData.functional || []),
+            ...(requirementsData.non_functional || []),
+          ];
+          setRequirements(allRequirements);
+        }
+
+        // Fetch features
+        const featuresData = await featuresService.getFeatures(projectId);
+        if (featuresData) {
+          setProjectFeatures(featuresData.coreModules || []);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching project details:", error);
+    }
+  };
+
+  // Add effect to fetch project info
+  useEffect(() => {
+    if (projectId) {
+      fetchProjectInfo();
+    }
+  }, [projectId]);
 
   // Entity form handlers
   const handleEntityFormChange = (field: string, value: string) => {
@@ -433,6 +490,122 @@ export default function DataModelForm({
     setError(null);
   };
 
+  // New function to enhance the data model using AI (replace existing model)
+  const enhanceDataModel = async () => {
+    if (!projectId) {
+      setError("Project must be saved before data model can be enhanced");
+      return;
+    }
+
+    if (!projectDescription) {
+      setError(
+        "Project description is missing. Data model may not be properly enhanced."
+      );
+      return;
+    }
+
+    if (projectFeatures.length === 0) {
+      setError(
+        "No features found. Data model will be based only on requirements and description."
+      );
+      return;
+    }
+
+    setIsEnhancing(true);
+    setError(null);
+
+    try {
+      console.log("Enhancing data model with AI...");
+      const enhancedDataModel = await aiService.enhanceDataModel(
+        projectDescription,
+        businessGoals,
+        projectFeatures,
+        requirements,
+        dataModel.entities.length > 0 ? dataModel : undefined
+      );
+
+      if (enhancedDataModel) {
+        // Replace existing data model with enhanced one
+        setDataModel(enhancedDataModel);
+        setSuccess("Data model enhanced successfully!");
+      } else {
+        setError("No enhanced data model returned");
+      }
+    } catch (error) {
+      console.error("Error enhancing data model:", error);
+      setError("Failed to enhance data model");
+    } finally {
+      setIsEnhancing(false);
+    }
+  };
+
+  // New function to add AI-generated entities without replacing existing ones
+  const addAIEntities = async () => {
+    if (!projectId) {
+      setError("Project must be saved before data model can be enhanced");
+      return;
+    }
+
+    if (!projectDescription) {
+      setError(
+        "Project description is missing. Entities may not be properly generated."
+      );
+      return;
+    }
+
+    setIsAddingEntities(true);
+    setError(null);
+
+    try {
+      // When adding new entities, we pass the existing data model to avoid duplication
+      const enhancedDataModel = await aiService.enhanceDataModel(
+        projectDescription,
+        businessGoals,
+        projectFeatures,
+        requirements,
+        dataModel
+      );
+
+      if (enhancedDataModel && enhancedDataModel.entities.length > 0) {
+        // Get entity names we already have
+        const existingEntityNames = dataModel.entities.map((e) => e.name);
+
+        // Filter out any duplicates from the enhanced model
+        const newEntities = enhancedDataModel.entities.filter(
+          (entity) => !existingEntityNames.includes(entity.name)
+        );
+
+        // Add new entities to existing ones
+        setDataModel({
+          ...dataModel,
+          entities: [...dataModel.entities, ...newEntities],
+          // Merge relationships, filtering out any duplicates
+          relationships: [
+            ...dataModel.relationships,
+            ...enhancedDataModel.relationships.filter(
+              (newRel) =>
+                !dataModel.relationships.some(
+                  (existingRel) =>
+                    existingRel.from_entity === newRel.from_entity &&
+                    existingRel.to_entity === newRel.to_entity &&
+                    existingRel.field === newRel.field
+                )
+            ),
+          ],
+        });
+
+        setSuccess(`Added ${newEntities.length} new entities`);
+      } else {
+        setError("No new entities generated");
+      }
+    } catch (error) {
+      console.error("Error adding AI entities:", error);
+      setError("Failed to generate new entities");
+    } finally {
+      setIsAddingEntities(false);
+    }
+  };
+
   // Submit handler
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -488,6 +661,50 @@ export default function DataModelForm({
 
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 gap-6">
+              {/* AI Enhancement Buttons */}
+              <div className="flex justify-end items-center gap-3 mb-4">
+                <Button
+                  type="button"
+                  onClick={addAIEntities}
+                  disabled={isAddingEntities || isEnhancing || !projectId}
+                  variant="outline"
+                  className="flex items-center gap-2"
+                  title="Generate new entities to complement existing ones"
+                >
+                  {isAddingEntities ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span>Adding...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4" />
+                      <span>Add AI Entities</span>
+                    </>
+                  )}
+                </Button>
+                <Button
+                  type="button"
+                  onClick={enhanceDataModel}
+                  disabled={isEnhancing || isAddingEntities || !projectId}
+                  variant="outline"
+                  className="flex items-center gap-2"
+                  title="Replace entire data model with AI-generated one"
+                >
+                  {isEnhancing ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span>Enhancing...</span>
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="h-4 w-4" />
+                      <span>Replace All</span>
+                    </>
+                  )}
+                </Button>
+              </div>
+
               {/* Entities Section */}
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
@@ -819,16 +1036,16 @@ export default function DataModelForm({
                               <Edit size={16} />
                             </Button>
                             <AlertDialog>
-                              <AlertDialogTrigger onClick={(e: { stopPropagation: () => void; }) => {
-                                e.stopPropagation();
-                                setEntityToDelete(idx);
-                                setIsDeleteDialogOpen(true);
-                              }}>
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="sm"
-                                >
+                              <AlertDialogTrigger
+                                onClick={(e: {
+                                  stopPropagation: () => void;
+                                }) => {
+                                  e.stopPropagation();
+                                  setEntityToDelete(idx);
+                                  setIsDeleteDialogOpen(true);
+                                }}
+                              >
+                                <Button type="button" variant="ghost" size="sm">
                                   <Trash2 size={16} />
                                 </Button>
                               </AlertDialogTrigger>
@@ -838,7 +1055,8 @@ export default function DataModelForm({
                                   onClose={() => {
                                     setIsDeleteDialogOpen(false);
                                     setEntityToDelete(null);
-                                  }}>
+                                  }}
+                                >
                                   <AlertDialogHeader>
                                     <AlertDialogTitle>
                                       Delete {entity.name}?
