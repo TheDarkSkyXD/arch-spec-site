@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { projectsService } from "../../services/projectsService";
 import { aiService } from "../../services/aiService";
 import { useToast } from "../../contexts/ToastContext";
-import { PlusCircle, Trash2, Sparkles, Wand2 } from "lucide-react";
+import { PlusCircle, Trash2, Sparkles, Wand2, Users } from "lucide-react";
 
 // Import shadcn UI components
 import { Label } from "../ui/label";
@@ -36,6 +36,7 @@ const ProjectBasicsForm = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [isEnhancingGoals, setIsEnhancingGoals] = useState(false);
+  const [isEnhancingTargetUsers, setIsEnhancingTargetUsers] = useState(false);
   const { showToast } = useToast();
   // Track the project ID internally for subsequent updates
   const [projectId, setProjectId] = useState<string | undefined>(
@@ -70,8 +71,9 @@ const ProjectBasicsForm = ({
     },
   });
 
-  // Get current description value for enhance button
+  // Get current field values for enhance buttons
   const currentDescription = watch("description");
+  const currentTargetUsers = watch("target_users");
 
   // Update form values if initialData changes
   useEffect(() => {
@@ -198,6 +200,57 @@ const ProjectBasicsForm = ({
       });
     } finally {
       setIsEnhancingGoals(false);
+    }
+  };
+
+  const enhanceTargetUsers = async () => {
+    // Need a valid description to generate/enhance target users
+    if (!currentDescription || currentDescription.length < 5) {
+      showToast({
+        title: "Description too short",
+        description: "Please provide a project description first",
+        type: "warning",
+      });
+      return;
+    }
+
+    setIsEnhancingTargetUsers(true);
+    try {
+      const enhancedTargetUsers = await aiService.enhanceTargetUsers(
+        currentDescription,
+        currentTargetUsers || ""
+      );
+
+      if (enhancedTargetUsers) {
+        setValue("target_users", enhancedTargetUsers, { shouldValidate: true });
+
+        // Show different messages based on whether we're enhancing or generating
+        const hasExistingTargetUsers = currentTargetUsers?.trim().length > 0;
+        showToast({
+          title: hasExistingTargetUsers
+            ? "Target Users Enhanced"
+            : "Target Users Generated",
+          description: hasExistingTargetUsers
+            ? "Your target users description has been improved"
+            : "Target users have been generated based on your project description",
+          type: "success",
+        });
+      } else {
+        showToast({
+          title: "Enhancement Failed",
+          description: "Unable to enhance target users. Please try again.",
+          type: "error",
+        });
+      }
+    } catch (error) {
+      console.error("Error enhancing target users:", error);
+      showToast({
+        title: "Enhancement Failed",
+        description: "An error occurred while enhancing target users",
+        type: "error",
+      });
+    } finally {
+      setIsEnhancingTargetUsers(false);
     }
   };
 
@@ -418,7 +471,37 @@ const ProjectBasicsForm = ({
       </div>
 
       <div>
-        <Label htmlFor="target_users">Target Users</Label>
+        <div className="flex justify-between items-center mb-1">
+          <Label htmlFor="target_users">Target Users</Label>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={enhanceTargetUsers}
+            disabled={isEnhancingTargetUsers || !currentDescription}
+            className="text-xs flex items-center gap-1"
+            title={
+              currentTargetUsers
+                ? "Enhance target users with AI"
+                : "Generate target users with AI"
+            }
+          >
+            <Users
+              size={14}
+              className={isEnhancingTargetUsers ? "animate-pulse" : ""}
+            />
+            {currentTargetUsers ? "Enhance Users" : "Generate Users"}
+          </Button>
+        </div>
+
+        {isEnhancingTargetUsers && (
+          <div className="text-sm text-slate-500 dark:text-slate-400 mb-1">
+            {currentTargetUsers
+              ? "Enhancing target users..."
+              : "Generating target users..."}
+          </div>
+        )}
+
         <Textarea
           id="target_users"
           rows={2}

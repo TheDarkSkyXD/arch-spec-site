@@ -20,6 +20,15 @@ interface EnhanceBusinessGoalsResponse {
   enhanced_goals: string[];
 }
 
+interface EnhanceTargetUsersRequest {
+  project_description: string;
+  target_users: string;
+}
+
+interface EnhanceTargetUsersResponse {
+  enhanced_target_users: string;
+}
+
 class AIService {
   /**
    * Enhance a project description using AI.
@@ -64,6 +73,33 @@ class AIService {
       return response.data.enhanced_goals;
     } catch (error) {
       console.error("Error enhancing business goals:", error);
+      return null;
+    }
+  }
+
+  /**
+   * Enhance target users description using AI.
+   *
+   * @param projectDescription The project description
+   * @param targetUsers The original target users description
+   * @returns The enhanced target users description or null if an error occurred
+   */
+  async enhanceTargetUsers(
+    projectDescription: string,
+    targetUsers: string
+  ): Promise<string | null> {
+    try {
+      const response = await apiClient.post<EnhanceTargetUsersResponse>(
+        "/api/ai-text/enhance-target-users",
+        {
+          project_description: projectDescription,
+          target_users: targetUsers,
+        } as EnhanceTargetUsersRequest
+      );
+
+      return response.data.enhanced_target_users;
+    } catch (error) {
+      console.error("Error enhancing target users:", error);
       return null;
     }
   }
