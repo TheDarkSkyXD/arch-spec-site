@@ -1,7 +1,7 @@
 #!/usr/bin/env pwsh
-# Development environment shutdown script
+# Cross-platform development environment shutdown script
 
-# Define paths
+# Define paths using platform-agnostic Join-Path
 $rootDir = $PSScriptRoot
 $backendDir = Join-Path $rootDir "backend"
 
@@ -18,28 +18,70 @@ function Write-ColorOutput {
     Write-Host $Message -ForegroundColor $ForegroundColor
 }
 
+# Detect OS platform
+$isWindows = $PSVersionTable.Platform -eq 'Win32NT' -or [string]::IsNullOrEmpty($PSVersionTable.Platform)
+$isLinux = $PSVersionTable.Platform -eq 'Unix' -and $PSVersionTable.OS -like '*Linux*'
+$isMacOS = $PSVersionTable.Platform -eq 'Unix' -and $PSVersionTable.OS -like '*Darwin*'
+
+if ($null -eq $PSVersionTable.Platform) {
+    # Old PowerShell on Windows doesn't have Platform property
+    $isWindows = $true
+}
+
 Write-ColorOutput "🛑 Stopping development environment..." "Cyan"
+Write-ColorOutput "💻 Detected Platform: $(if($isWindows){'Windows'}elseif($isMacOS){'macOS'}elseif($isLinux){'Linux'}else{'Unknown'})" "Cyan"
 
-# Stop any running Python/Node.js processes related to our dev servers
-Write-ColorOutput "🔍 Stopping development servers..." "Yellow"
-
-# Find and stop uvicorn process
-$uvicornProcess = Get-Process -Name python -ErrorAction SilentlyContinue | Where-Object { $_.CommandLine -like "*uvicorn*app.main:app*" }
-if ($uvicornProcess) {
-    $uvicornProcess | Stop-Process -Force
-    Write-ColorOutput "  ✅ Backend server stopped" "Green"
-} else {
-    Write-ColorOutput "  ℹ️ No backend server process found" "Blue"
+# Cross-platform function to stop processes
+function Stop-DevProcess {
+    param (
+        [string]$ProcessName,
+        [string]$ProcessPattern,
+        [string]$FriendlyName
+    )
+    
+    Write-ColorOutput "🔍 Finding and stopping $FriendlyName..." "Yellow"
+    
+    if ($isWindows) {
+        $process = Get-Process -Name $ProcessName -ErrorAction SilentlyContinue | 
+                   Where-Object { $_.CommandLine -like "*$ProcessPattern*" }
+        if ($process) {
+            $process | Stop-Process -Force
+            Write-ColorOutput "  ✅ $FriendlyName stopped" "Green"
+            return $true
+        }
+    } else {
+        # Unix-based systems use different approach
+        $pidCommand = if ($isMacOS) {
+            "pgrep -f '$ProcessPattern'"
+        } else {
+            "pgrep -f '$ProcessPattern'"
+        }
+        
+        $pids = Invoke-Expression $pidCommand
+        
+        if ($pids) {
+            foreach ($pid in $pids) {
+                if ($pid -match '^\d+$') {
+                    # Only process numeric PIDs for safety
+                    try {
+                        Invoke-Expression "kill -9 $pid"
+                    } catch {
+                        Write-ColorOutput "  ⚠️ Failed to kill process $pid: $_" "Yellow"
+                    }
+                }
+            }
+            Write-ColorOutput "  ✅ $FriendlyName stopped" "Green"
+            return $true
+        }
+    }
+    
+    Write-ColorOutput "  ℹ️ No $FriendlyName process found" "Blue"
+    return $false
 }
 
-# Find and stop Node.js process for frontend
-$nodeProcess = Get-Process -Name node -ErrorAction SilentlyContinue | Where-Object { $_.CommandLine -like "*vite*" }
-if ($nodeProcess) {
-    $nodeProcess | Stop-Process -Force
-    Write-ColorOutput "  ✅ Frontend server stopped" "Green"
-} else {
-    Write-ColorOutput "  ℹ️ No frontend server process found" "Blue"
-}
+# Stop backend and frontend servers
+Stop-DevProcess -ProcessName "python" -ProcessPattern "uvicorn*app.main:app" -FriendlyName "Backend server"
+Stop-DevProcess -ProcessName "node" -ProcessPattern "vite" -FriendlyName "Frontend server"
 
 # Stop MongoDB container
 Write-ColorOutput "📦 Stopping MongoDB container..." "Yellow"
