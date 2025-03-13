@@ -39,9 +39,9 @@ import {
 } from "../../types/templates";
 import { Textarea } from "../ui/textarea";
 interface DataModelFormProps {
-  initialData?: DataModel;
+  initialData?: Partial<DataModel>;
   projectId?: string;
-  onSuccess?: (dataModel: DataModel) => void;
+  onSuccess?: (dataModel: Partial<DataModel>) => void;
 }
 
 export default function DataModelForm({

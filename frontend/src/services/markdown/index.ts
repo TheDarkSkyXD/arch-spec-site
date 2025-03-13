@@ -6,6 +6,7 @@ import { generatePagesMarkdown } from "./pages";
 import { generateDataModelMarkdown } from "./dataModel";
 import { generateApiEndpointsMarkdown } from "./apiEndpoints";
 import { formatObject, generateFileName } from "./utils";
+import { generateMarkdownZip } from "./markdownZip";
 
 /**
  * Markdown service - generates markdown representations of project data
@@ -20,6 +21,7 @@ export const markdownService = {
   generateDataModelMarkdown,
   generateApiEndpointsMarkdown,
   generateFileName,
+  generateMarkdownZip,
 };
 
 // Also export individual functions for direct imports

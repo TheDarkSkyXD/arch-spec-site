@@ -31,6 +31,7 @@ import PagesPreview from "../components/previews/PagesPreview";
 import DataModelPreview from "../components/previews/DataModelPreview";
 import ApiEndpointsPreview from "../components/previews/ApiEndpointsPreview";
 import MarkdownActions from "../components/common/MarkdownActions";
+import DownloadAllMarkdown from "../components/common/DownloadAllMarkdown";
 import { markdownService } from "../services/markdown";
 
 // Import shadcn UI components
@@ -283,6 +284,19 @@ const ProjectDetails = () => {
               ? "Loading Project..."
               : project?.name || "Project Details"}
           </h1>
+          {project && !loading && (
+            <div className="ml-auto">
+              <DownloadAllMarkdown
+                project={project}
+                techStack={techStack}
+                requirements={requirements || null}
+                features={features || null}
+                pages={pages || null}
+                dataModel={dataModel || null}
+                apiEndpoints={apiEndpoints || null}
+              />
+            </div>
+          )}
         </div>
 
         {loading ? (
