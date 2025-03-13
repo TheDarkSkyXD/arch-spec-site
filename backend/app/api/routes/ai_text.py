@@ -268,6 +268,8 @@ async def enhance_requirements(
             "\n- Categorize requirements (functional, non-functional)"
             "\n- Remove duplicates and merge similar requirements"
             "\n- Identify and add any critical requirements that are missing but implied"
+            "\n- If existing requirements are provided, generate complementary new requirements rather than just refining existing ones"
+            "\n- Avoid duplicating functionality already covered by existing requirements"
             "\n- Prioritize requirements (High/Medium/Low) based on their importance to the business goals"
             "\n- Keep the language clear, precise, and unambiguous"
             "\n- Format each requirement as:"

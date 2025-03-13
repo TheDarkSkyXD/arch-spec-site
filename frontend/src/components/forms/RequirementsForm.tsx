@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { PlusCircle, Trash2, AlertCircle, Loader2, Sparkles, Tag } from "lucide-react";
+import { PlusCircle, Trash2, AlertCircle, Loader2, Sparkles, Tag, RefreshCw } from "lucide-react";
 import { requirementsService } from "../../services/requirementsService";
 import { projectsService } from "../../services/projectsService";
 import { aiService } from "../../services/aiService";
@@ -43,6 +43,8 @@ export default function RequirementsForm({
   const [businessGoals, setBusinessGoals] = useState<string[]>([]);
   // Add state for stripping prefixes
   const [stripPrefixes, setStripPrefixes] = useState<boolean>(true);
+  // Add a new state for the second button loading state
+  const [isAddingRequirements, setIsAddingRequirements] = useState<boolean>(false);
 
   // Effect to update local state when initial data changes
   useEffect(() => {
@@ -115,11 +117,43 @@ export default function RequirementsForm({
   };
 
   const removeFunctionalRequirement = (index: number) => {
-    setFunctionalReqs(functionalReqs.filter((_, i) => i !== index));
+    const newReqs = functionalReqs.filter((_, i) => i !== index);
+    
+    // If we're removing the last item before a divider, or the first item after a divider,
+    // we should also remove the divider if it exists
+    const dividerIndex = newReqs.indexOf("---");
+    if (dividerIndex !== -1) {
+      // Check if there are items before and after the divider
+      const hasBefore = dividerIndex > 0;
+      const hasAfter = dividerIndex < newReqs.length - 1;
+      
+      // If either section is empty, remove the divider
+      if (!hasBefore || !hasAfter) {
+        newReqs.splice(dividerIndex, 1);
+      }
+    }
+    
+    setFunctionalReqs(newReqs);
   };
 
   const removeNonFunctionalRequirement = (index: number) => {
-    setNonFunctionalReqs(nonFunctionalReqs.filter((_, i) => i !== index));
+    const newReqs = nonFunctionalReqs.filter((_, i) => i !== index);
+    
+    // If we're removing the last item before a divider, or the first item after a divider,
+    // we should also remove the divider if it exists
+    const dividerIndex = newReqs.indexOf("---");
+    if (dividerIndex !== -1) {
+      // Check if there are items before and after the divider
+      const hasBefore = dividerIndex > 0;
+      const hasAfter = dividerIndex < newReqs.length - 1;
+      
+      // If either section is empty, remove the divider
+      if (!hasBefore || !hasAfter) {
+        newReqs.splice(dividerIndex, 1);
+      }
+    }
+    
+    setNonFunctionalReqs(newReqs);
   };
 
   // Function to strip category prefixes
@@ -239,6 +273,112 @@ export default function RequirementsForm({
     }
   };
 
+  // New function to add AI-generated requirements without replacing existing ones
+  const addAIRequirements = async () => {
+    if (!projectId) {
+      showToast({
+        title: "Error",
+        description: "Project must be saved before requirements can be enhanced",
+        type: "error",
+      });
+      return;
+    }
+
+    if (!projectDescription) {
+      showToast({
+        title: "Warning",
+        description: "Project description is missing. Requirements may not be properly enhanced.",
+        type: "warning",
+      });
+    }
+
+    // Combine functional and non-functional requirements to provide context to the AI
+    const allRequirements = [...functionalReqs, ...nonFunctionalReqs];
+    
+    setIsAddingRequirements(true);
+    try {
+      const enhancedRequirements = await aiService.enhanceRequirements(
+        projectDescription,
+        businessGoals,
+        allRequirements
+      );
+
+      if (enhancedRequirements && enhancedRequirements.length > 0) {
+        // Process enhanced requirements
+        const newFunctionalRequirements: string[] = [];
+        const newNonFunctionalRequirements: string[] = [];
+
+        console.log("New requirements from AI:", enhancedRequirements);
+
+        // Categorize requirements based on [Category] prefix first, then fall back to content keywords
+        enhancedRequirements.forEach(req => {
+          const lowerCaseReq = req.toLowerCase();
+          
+          // First check for explicit category prefixes
+          if (lowerCaseReq.startsWith("[functional]")) {
+            newFunctionalRequirements.push(req); // Keep original format for categorization
+          } else if (lowerCaseReq.startsWith("[non-functional]") || lowerCaseReq.startsWith("[nonfunctional]")) {
+            newNonFunctionalRequirements.push(req); // Keep original format for categorization
+          } 
+          // Fall back to keyword detection if no category prefix is found
+          else if (
+            lowerCaseReq.includes("non-functional") ||
+            lowerCaseReq.includes("nonfunctional") ||
+            lowerCaseReq.includes("nfr") ||
+            lowerCaseReq.includes("quality") ||
+            lowerCaseReq.includes("performance") ||
+            lowerCaseReq.includes("security") ||
+            lowerCaseReq.includes("usability") ||
+            lowerCaseReq.includes("reliability") ||
+            lowerCaseReq.includes("maintainability")
+          ) {
+            newNonFunctionalRequirements.push(req);
+          } else {
+            // Default to functional requirement if no other indicators are present
+            newFunctionalRequirements.push(req);
+          }
+        });
+
+        // If there are already requirements and we're adding new ones, add a divider
+        const divider = "---";
+        
+        // Add new requirements to existing requirements with a divider if needed
+        if (functionalReqs.length > 0 && newFunctionalRequirements.length > 0) {
+          setFunctionalReqs([...functionalReqs, divider, ...newFunctionalRequirements]);
+        } else {
+          setFunctionalReqs([...functionalReqs, ...newFunctionalRequirements]);
+        }
+        
+        if (nonFunctionalReqs.length > 0 && newNonFunctionalRequirements.length > 0) {
+          setNonFunctionalReqs([...nonFunctionalReqs, divider, ...newNonFunctionalRequirements]);
+        } else {
+          setNonFunctionalReqs([...nonFunctionalReqs, ...newNonFunctionalRequirements]);
+        }
+        
+        showToast({
+          title: "Success",
+          description: `Added ${newFunctionalRequirements.length + newNonFunctionalRequirements.length} new requirements`,
+          type: "success",
+        });
+      } else {
+        showToast({
+          title: "Warning",
+          description: "No new requirements generated",
+          type: "warning",
+        });
+      }
+    } catch (error) {
+      console.error("Error adding AI requirements:", error);
+      showToast({
+        title: "Error",
+        description: "Failed to generate new requirements",
+        type: "error",
+      });
+    } finally {
+      setIsAddingRequirements(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -353,7 +493,7 @@ export default function RequirementsForm({
         </p>
       </div>
 
-      {/* AI Enhancement Button */}
+      {/* AI Enhancement Buttons */}
       <div className="flex justify-between mb-4">
         <div className="flex items-center gap-2">
           <Button
@@ -368,25 +508,48 @@ export default function RequirementsForm({
             {stripPrefixes ? "Show prefixes" : "Hide prefixes"}
           </Button>
         </div>
-        <Button
-          type="button"
-          onClick={enhanceRequirements}
-          disabled={isEnhancing || !projectId}
-          variant="outline"
-          className="flex items-center gap-2"
-        >
-          {isEnhancing ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              <span>Enhancing...</span>
-            </>
-          ) : (
-            <>
-              <Sparkles className="h-4 w-4" />
-              <span>Enhance with AI</span>
-            </>
-          )}
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button
+            type="button"
+            onClick={addAIRequirements}
+            disabled={isAddingRequirements || isEnhancing || !projectId}
+            variant="outline"
+            className="flex items-center gap-2"
+            title="Generate new requirements to complement existing ones"
+          >
+            {isAddingRequirements ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Adding...</span>
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-4 w-4" />
+                <span>Add New Requirements</span>
+              </>
+            )}
+          </Button>
+          <Button
+            type="button"
+            onClick={enhanceRequirements}
+            disabled={isEnhancing || isAddingRequirements || !projectId}
+            variant="outline"
+            className="flex items-center gap-2"
+            title="Replace all requirements with enhanced versions"
+          >
+            {isEnhancing ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Enhancing...</span>
+              </>
+            ) : (
+              <>
+                <RefreshCw className="h-4 w-4" />
+                <span>Replace All</span>
+              </>
+            )}
+          </Button>
+        </div>
       </div>
 
       {/* Functional Requirements */}
@@ -407,21 +570,30 @@ export default function RequirementsForm({
 
         <div className="space-y-2">
           {functionalReqs.map((req, index) => (
-            <Card
-              key={index}
-              className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
-            >
-              <p className="dark:text-slate-300">{stripCategoryPrefix(req)}</p>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => removeFunctionalRequirement(index)}
-                className="text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400"
+            req === "---" ? (
+              <div 
+                key={`divider-${index}`} 
+                className="border-t border-dashed border-slate-300 dark:border-slate-600 my-4 py-1 px-3 text-xs text-center text-slate-500 dark:text-slate-400"
               >
-                <Trash2 size={18} />
-              </Button>
-            </Card>
+                New AI-generated requirements
+              </div>
+            ) : (
+              <Card
+                key={index}
+                className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
+              >
+                <p className="dark:text-slate-300">{stripCategoryPrefix(req)}</p>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removeFunctionalRequirement(index)}
+                  className="text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400"
+                >
+                  <Trash2 size={18} />
+                </Button>
+              </Card>
+            )
           ))}
         </div>
 
@@ -457,21 +629,30 @@ export default function RequirementsForm({
 
         <div className="space-y-2">
           {nonFunctionalReqs.map((req, index) => (
-            <Card
-              key={index}
-              className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
-            >
-              <p className="dark:text-slate-300">{stripCategoryPrefix(req)}</p>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => removeNonFunctionalRequirement(index)}
-                className="text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400"
+            req === "---" ? (
+              <div 
+                key={`divider-${index}`} 
+                className="border-t border-dashed border-slate-300 dark:border-slate-600 my-4 py-1 px-3 text-xs text-center text-slate-500 dark:text-slate-400"
               >
-                <Trash2 size={18} />
-              </Button>
-            </Card>
+                New AI-generated requirements
+              </div>
+            ) : (
+              <Card
+                key={index}
+                className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
+              >
+                <p className="dark:text-slate-300">{stripCategoryPrefix(req)}</p>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removeNonFunctionalRequirement(index)}
+                  className="text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400"
+                >
+                  <Trash2 size={18} />
+                </Button>
+              </Card>
+            )
           ))}
         </div>
 
