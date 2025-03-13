@@ -156,12 +156,27 @@ export interface DataModel {
   relationships: Relationship[];
 }
 
+export interface ApiParameter {
+  name: string;
+  type: string;
+  required: boolean;
+  description: string;
+}
+
+export interface ApiResponse {
+  status: number;
+  description: string;
+  schema: string;
+}
+
 export interface ApiEndpoint {
   path: string;
+  parameters?: ApiParameter[];
   description: string;
   methods: string[];
   auth: boolean;
   roles?: string[];
+  responses?: ApiResponse[];
 }
 
 export interface Api {

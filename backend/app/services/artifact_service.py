@@ -73,56 +73,6 @@ class ArtifactService:
         
         return stored_artifacts
     
-    async def generate_and_store_artifacts(
-        self,
-        project_id: str,
-        tech_stack_spec: Dict[str, Any],
-        requirements_spec: Dict[str, Any],
-        data_model_spec: Dict[str, Any],
-        database: AsyncIOMotorDatabase,
-        api_spec: Optional[Dict[str, Any]] = None,
-        documentation_spec: Optional[Dict[str, Any]] = None,
-        features_spec: Optional[Dict[str, Any]] = None,
-        testing_spec: Optional[Dict[str, Any]] = None,
-        project_structure_spec: Optional[Dict[str, Any]] = None
-    ) -> List[Dict[str, Any]]:
-        """Generate and store artifacts from project specs.
-        
-        Args:
-            project_id: The project ID.
-            tech_stack_spec: The tech stack spec data.
-            requirements_spec: The requirements spec data.
-            data_model_spec: The data model spec data.
-            database: The database instance.
-            api_spec: Optional API spec data.
-            documentation_spec: Optional documentation spec data.
-            features_spec: Optional features spec data.
-            testing_spec: Optional testing spec data.
-            project_structure_spec: Optional project structure spec data.
-            
-        Returns:
-            A list of generated and stored artifacts.
-        """
-        # Generate artifacts using the generator service
-        artifacts = await self.generator_service.generate_artifacts_from_project_specs(
-            tech_stack_spec=tech_stack_spec,
-            requirements_spec=requirements_spec,
-            data_model_spec=data_model_spec,
-            api_spec=api_spec,
-            documentation_spec=documentation_spec,
-            features_spec=features_spec,
-            testing_spec=testing_spec,
-            project_structure_spec=project_structure_spec
-        )
-        
-        for artifact in artifacts:
-            artifact['project_id'] = project_id
-        
-        # Store the artifacts in the database
-        stored_artifacts = await self.store_artifacts(artifacts, database)
-        
-        return stored_artifacts
-    
     async def create_artifact(self, artifact_data: Dict[str, Any]) -> Dict[str, Any]:
         """Create a new artifact.
         
@@ -158,35 +108,8 @@ class ArtifactService:
         if not artifact:
             raise ValueError(f"Artifact not found: {artifact_id}")
         
-        # Determine the content type based on the artifact format
-        content_type = self._get_content_type(artifact['format'])
         
         # Return the content as bytes and the content type
-        return artifact['content'].encode('utf-8'), content_type
-    
-    async def get_artifacts_by_project(self, project_id: str, database: Optional[AsyncIOMotorDatabase] = None) -> List[Dict[str, Any]]:
-        """Get all artifacts for a project.
-        
-        Args:
-            project_id: The project ID.
-            database: Optional database instance for retrieving from MongoDB.
-            
-        Returns:
-            A list of artifacts.
-        """
-        if database:
-            # Retrieve from MongoDB
-            cursor = await database.artifacts.find({"project_id": project_id})
-            artifacts = await cursor.to_list(length=100)
-            return artifacts
-        else:
-            # Filter artifacts by project ID from in-memory storage
-            artifacts = [
-                artifact for artifact in self.artifacts_db.values()
-                if artifact.get('project_id') == project_id
-            ]
-            
-            return artifacts
     
     async def generate_artifact(
         self,
@@ -240,41 +163,3 @@ class ArtifactService:
             raise ValueError(f"Artifact not found: {artifact_id}")
         
         del self.artifacts_db[artifact_id]
-    
-    def _get_content_type(self, format_type: str) -> str:
-        """Get the content type for an artifact format.
-        
-        Args:
-            format_type: The artifact format.
-            
-        Returns:
-            The content type.
-        """
-        format_to_content_type = {
-            'markdown': 'text/markdown',
-            'json': 'application/json',
-            'mermaid': 'text/plain',
-            'yaml': 'application/yaml',
-            'svg': 'image/svg+xml',
-            'png': 'image/png'
-        }
-        
-        return format_to_content_type.get(format_type, 'text/plain')
-    
-    def _get_default_format(self, artifact_type: str) -> str:
-        """Get the default format for an artifact type.
-        
-        Args:
-            artifact_type: The artifact type.
-            
-        Returns:
-            The default format.
-        """
-        type_to_format = {
-            'document': 'markdown',
-            'diagram': 'mermaid',
-            'schema': 'json',
-            'code': 'text/plain'
-        }
-        
-        return type_to_format.get(artifact_type, 'text/plain') 

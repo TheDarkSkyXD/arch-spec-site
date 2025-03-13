@@ -3,12 +3,12 @@ import { templatesService } from "../services/templatesService";
 import { techStackService } from "../services/techStackService";
 import { requirementsService } from "../services/requirementsService";
 import { featuresService, FeaturesData } from "../services/featuresService";
-import { pagesService, PagesData } from "../services/pagesService";
+import { pagesService } from "../services/pagesService";
 import { useState, useEffect } from "react";
-import { RequirementsData } from "../types/project";
+import { Requirements, Pages, DataModel } from "../types/templates";
 import { apiEndpointsService } from "../services/apiEndpointsService";
 import { Api } from "../types/templates";
-import { dataModelService, DataModelData } from "../services/dataModelService";
+import { dataModelService } from "../services/dataModelService";
 
 // Query keys for different types of data
 export const QUERY_KEYS = {
@@ -87,7 +87,7 @@ export function useRefreshTemplates() {
 export const useRequirements = (projectId?: string) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const [data, setData] = useState<RequirementsData | null>(null);
+  const [data, setData] = useState<Partial<Requirements> | null>(null);
 
   useEffect(() => {
     const fetchRequirements = async () => {
@@ -159,7 +159,7 @@ export const useFeatures = (projectId?: string) => {
 export const usePages = (projectId?: string) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const [data, setData] = useState<PagesData | null>(null);
+  const [data, setData] = useState<Pages | null>(null);
 
   useEffect(() => {
     const fetchPages = async () => {
@@ -233,7 +233,7 @@ export const useApiEndpoints = (projectId?: string) => {
 export const useDataModel = (projectId?: string) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const [data, setData] = useState<DataModelData | null>(null);
+  const [data, setData] = useState<Partial<DataModel> | null>(null);
 
   useEffect(() => {
     const fetchDataModel = async () => {

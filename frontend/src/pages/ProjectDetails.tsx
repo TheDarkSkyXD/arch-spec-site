@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { projectsService } from "../services/projectsService";
 import { techStackService } from "../services/techStackService";
-import { ProjectBase, RequirementsData } from "../types/project";
+import { ProjectBase } from "../types/project";
 import ProjectBasicsForm from "../components/forms/ProjectBasicsForm";
 import TechStackForm from "../components/forms/TechStackForm";
 import RequirementsForm from "../components/forms/RequirementsForm";
@@ -12,7 +12,7 @@ import ApiEndpointsForm from "../components/forms/ApiEndpointsForm";
 import DataModelForm from "../components/forms/DataModelForm";
 import { ChevronLeft, Loader2, ChevronDown, ChevronUp } from "lucide-react";
 import MainLayout from "../layouts/MainLayout";
-import { Api, ProjectTechStack } from "../types/templates";
+import { Api, ProjectTechStack, Requirements } from "../types/templates";
 import {
   useRequirements,
   useFeatures,
@@ -21,12 +21,27 @@ import {
   useDataModel,
 } from "../hooks/useDataQueries";
 import { FeaturesData } from "../services/featuresService";
-import { PagesData } from "../services/pagesService";
+import { Pages } from "../types/templates";
 import { DataModel } from "../types/templates";
+import ProjectBasicsPreview from "../components/previews/ProjectBasicsPreview";
+import TechStackPreview from "../components/previews/TechStackPreview";
+import RequirementsPreview from "../components/previews/RequirementsPreview";
+import FeaturesPreview from "../components/previews/FeaturesPreview";
+import PagesPreview from "../components/previews/PagesPreview";
+import DataModelPreview from "../components/previews/DataModelPreview";
+import ApiEndpointsPreview from "../components/previews/ApiEndpointsPreview";
+import MarkdownActions from "../components/common/MarkdownActions";
+import { markdownService } from "../services/markdown";
 
 // Import shadcn UI components
 import Button from "../components/ui/Button";
 import Card from "../components/ui/Card";
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+} from "../components/ui/tabs";
 
 // Define section IDs for consistency
 enum SectionId {
@@ -37,6 +52,12 @@ enum SectionId {
   PAGES = "pages",
   DATA_MODEL = "dataModel",
   API_ENDPOINTS = "apiEndpoints",
+}
+
+// Define view modes
+enum ViewMode {
+  EDIT = "edit",
+  PREVIEW = "preview",
 }
 
 const ProjectDetails = () => {
@@ -61,11 +82,32 @@ const ProjectDetails = () => {
     [SectionId.API_ENDPOINTS]: false,
   });
 
+  // State to track view mode (edit or preview) for each section
+  const [sectionViewModes, setSectionViewModes] = useState<
+    Record<SectionId, ViewMode>
+  >({
+    [SectionId.BASICS]: ViewMode.EDIT,
+    [SectionId.TECH_STACK]: ViewMode.EDIT,
+    [SectionId.REQUIREMENTS]: ViewMode.EDIT,
+    [SectionId.FEATURES]: ViewMode.EDIT,
+    [SectionId.PAGES]: ViewMode.EDIT,
+    [SectionId.DATA_MODEL]: ViewMode.EDIT,
+    [SectionId.API_ENDPOINTS]: ViewMode.EDIT,
+  });
+
   // Function to toggle section expansion
   const toggleSection = (sectionId: SectionId) => {
     setExpandedSections((prev) => ({
       ...prev,
       [sectionId]: !prev[sectionId],
+    }));
+  };
+
+  // Function to change view mode
+  const changeViewMode = (sectionId: SectionId, viewMode: ViewMode) => {
+    setSectionViewModes((prev) => ({
+      ...prev,
+      [sectionId]: viewMode,
     }));
   };
 
@@ -155,7 +197,9 @@ const ProjectDetails = () => {
     }
   };
 
-  const handleRequirementsUpdate = (_updatedRequirements: RequirementsData) => {
+  const handleRequirementsUpdate = (
+    _updatedRequirements: Partial<Requirements>
+  ) => {
     // Update is handled by refetching from the backend
     // We could implement a more sophisticated state management approach if needed
     console.log("Requirements updated:", _updatedRequirements);
@@ -167,12 +211,12 @@ const ProjectDetails = () => {
     console.log("Features updated:", _updatedFeatures);
   };
 
-  const handlePagesUpdate = (_updatedPages: PagesData) => {
+  const handlePagesUpdate = (_updatedPages: Pages) => {
     // Update is handled by refetching from the backend
     console.log("Pages updated:", _updatedPages);
   };
 
-  const handleDataModelUpdate = (_updatedDataModel: DataModel) => {
+  const handleDataModelUpdate = (_updatedDataModel: Partial<DataModel>) => {
     // Update is handled by refetching from the backend
     console.log("Data Model updated:", _updatedDataModel);
   };
@@ -293,10 +337,50 @@ const ProjectDetails = () => {
               />
               {expandedSections[SectionId.BASICS] && (
                 <div className="p-6">
-                  <ProjectBasicsForm
-                    initialData={processProjectData(project)}
-                    onSuccess={handleProjectUpdate}
-                  />
+                  <Tabs
+                    value={sectionViewModes[SectionId.BASICS]}
+                    onValueChange={(value) =>
+                      changeViewMode(SectionId.BASICS, value as ViewMode)
+                    }
+                    className="w-full"
+                  >
+                    <TabsList className="mb-4">
+                      <TabsTrigger value={ViewMode.EDIT}>Edit</TabsTrigger>
+                      <TabsTrigger value={ViewMode.PREVIEW}>
+                        Preview
+                      </TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value={ViewMode.EDIT}>
+                      {project && (
+                        <div className="flex justify-end mb-4">
+                          <MarkdownActions
+                            markdown={markdownService.generateProjectBasicsMarkdown(
+                              project
+                            )}
+                            fileName={markdownService.generateFileName(
+                              project.name,
+                              "basics"
+                            )}
+                          />
+                        </div>
+                      )}
+                      <ProjectBasicsForm
+                        initialData={processProjectData(project)}
+                        onSuccess={handleProjectUpdate}
+                      />
+                    </TabsContent>
+
+                    <TabsContent
+                      value={ViewMode.PREVIEW}
+                      className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg"
+                    >
+                      <ProjectBasicsPreview
+                        data={project}
+                        isLoading={loading}
+                      />
+                    </TabsContent>
+                  </Tabs>
                 </div>
               )}
             </Card>
@@ -319,11 +403,52 @@ const ProjectDetails = () => {
                       </span>
                     </div>
                   ) : (
-                    <TechStackForm
-                      initialData={techStack || undefined}
-                      projectId={id}
-                      onSuccess={handleTechStackUpdate}
-                    />
+                    <Tabs
+                      value={sectionViewModes[SectionId.TECH_STACK]}
+                      onValueChange={(value) =>
+                        changeViewMode(SectionId.TECH_STACK, value as ViewMode)
+                      }
+                      className="w-full"
+                    >
+                      <TabsList className="mb-4">
+                        <TabsTrigger value={ViewMode.EDIT}>Edit</TabsTrigger>
+                        <TabsTrigger value={ViewMode.PREVIEW}>
+                          Preview
+                        </TabsTrigger>
+                      </TabsList>
+
+                      <TabsContent value={ViewMode.EDIT}>
+                        {techStack && (
+                          <div className="flex justify-end mb-4">
+                            <MarkdownActions
+                              markdown={markdownService.generateTechStackMarkdown(
+                                techStack
+                              )}
+                              fileName={markdownService.generateFileName(
+                                project.name,
+                                "tech-stack"
+                              )}
+                            />
+                          </div>
+                        )}
+                        <TechStackForm
+                          initialData={techStack || undefined}
+                          projectId={id}
+                          onSuccess={handleTechStackUpdate}
+                        />
+                      </TabsContent>
+
+                      <TabsContent
+                        value={ViewMode.PREVIEW}
+                        className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg"
+                      >
+                        <TechStackPreview
+                          data={techStack}
+                          projectName={project.name}
+                          isLoading={techStackLoading}
+                        />
+                      </TabsContent>
+                    </Tabs>
                   )}
                 </div>
               )}
@@ -347,11 +472,55 @@ const ProjectDetails = () => {
                       </span>
                     </div>
                   ) : (
-                    <RequirementsForm
-                      initialData={requirements || undefined}
-                      projectId={id}
-                      onSuccess={handleRequirementsUpdate}
-                    />
+                    <Tabs
+                      value={sectionViewModes[SectionId.REQUIREMENTS]}
+                      onValueChange={(value) =>
+                        changeViewMode(
+                          SectionId.REQUIREMENTS,
+                          value as ViewMode
+                        )
+                      }
+                      className="w-full"
+                    >
+                      <TabsList className="mb-4">
+                        <TabsTrigger value={ViewMode.EDIT}>Edit</TabsTrigger>
+                        <TabsTrigger value={ViewMode.PREVIEW}>
+                          Preview
+                        </TabsTrigger>
+                      </TabsList>
+
+                      <TabsContent value={ViewMode.EDIT}>
+                        {requirements && (
+                          <div className="flex justify-end mb-4">
+                            <MarkdownActions
+                              markdown={markdownService.generateRequirementsMarkdown(
+                                requirements
+                              )}
+                              fileName={markdownService.generateFileName(
+                                project.name,
+                                "requirements"
+                              )}
+                            />
+                          </div>
+                        )}
+                        <RequirementsForm
+                          initialData={requirements || undefined}
+                          projectId={id}
+                          onSuccess={handleRequirementsUpdate}
+                        />
+                      </TabsContent>
+
+                      <TabsContent
+                        value={ViewMode.PREVIEW}
+                        className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg"
+                      >
+                        <RequirementsPreview
+                          data={requirements}
+                          projectName={project.name}
+                          isLoading={requirementsLoading}
+                        />
+                      </TabsContent>
+                    </Tabs>
                   )}
                 </div>
               )}
@@ -375,11 +544,52 @@ const ProjectDetails = () => {
                       </span>
                     </div>
                   ) : (
-                    <FeaturesForm
-                      initialData={features || undefined}
-                      projectId={id}
-                      onSuccess={handleFeaturesUpdate}
-                    />
+                    <Tabs
+                      value={sectionViewModes[SectionId.FEATURES]}
+                      onValueChange={(value) =>
+                        changeViewMode(SectionId.FEATURES, value as ViewMode)
+                      }
+                      className="w-full"
+                    >
+                      <TabsList className="mb-4">
+                        <TabsTrigger value={ViewMode.EDIT}>Edit</TabsTrigger>
+                        <TabsTrigger value={ViewMode.PREVIEW}>
+                          Preview
+                        </TabsTrigger>
+                      </TabsList>
+
+                      <TabsContent value={ViewMode.EDIT}>
+                        {features && (
+                          <div className="flex justify-end mb-4">
+                            <MarkdownActions
+                              markdown={markdownService.generateFeaturesMarkdown(
+                                features
+                              )}
+                              fileName={markdownService.generateFileName(
+                                project.name,
+                                "features"
+                              )}
+                            />
+                          </div>
+                        )}
+                        <FeaturesForm
+                          initialData={features || undefined}
+                          projectId={id}
+                          onSuccess={handleFeaturesUpdate}
+                        />
+                      </TabsContent>
+
+                      <TabsContent
+                        value={ViewMode.PREVIEW}
+                        className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg"
+                      >
+                        <FeaturesPreview
+                          data={features}
+                          projectName={project.name}
+                          isLoading={featuresLoading}
+                        />
+                      </TabsContent>
+                    </Tabs>
                   )}
                 </div>
               )}
@@ -403,11 +613,52 @@ const ProjectDetails = () => {
                       </span>
                     </div>
                   ) : (
-                    <PagesForm
-                      initialData={pages || undefined}
-                      projectId={id}
-                      onSuccess={handlePagesUpdate}
-                    />
+                    <Tabs
+                      value={sectionViewModes[SectionId.PAGES]}
+                      onValueChange={(value) =>
+                        changeViewMode(SectionId.PAGES, value as ViewMode)
+                      }
+                      className="w-full"
+                    >
+                      <TabsList className="mb-4">
+                        <TabsTrigger value={ViewMode.EDIT}>Edit</TabsTrigger>
+                        <TabsTrigger value={ViewMode.PREVIEW}>
+                          Preview
+                        </TabsTrigger>
+                      </TabsList>
+
+                      <TabsContent value={ViewMode.EDIT}>
+                        {pages && (
+                          <div className="flex justify-end mb-4">
+                            <MarkdownActions
+                              markdown={markdownService.generatePagesMarkdown(
+                                pages
+                              )}
+                              fileName={markdownService.generateFileName(
+                                project.name,
+                                "pages"
+                              )}
+                            />
+                          </div>
+                        )}
+                        <PagesForm
+                          initialData={pages || undefined}
+                          projectId={id}
+                          onSuccess={handlePagesUpdate}
+                        />
+                      </TabsContent>
+
+                      <TabsContent
+                        value={ViewMode.PREVIEW}
+                        className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg"
+                      >
+                        <PagesPreview
+                          data={pages}
+                          projectName={project.name}
+                          isLoading={pagesLoading}
+                        />
+                      </TabsContent>
+                    </Tabs>
                   )}
                 </div>
               )}
@@ -431,11 +682,52 @@ const ProjectDetails = () => {
                       </span>
                     </div>
                   ) : (
-                    <DataModelForm
-                      initialData={dataModel || undefined}
-                      projectId={id}
-                      onSuccess={handleDataModelUpdate}
-                    />
+                    <Tabs
+                      value={sectionViewModes[SectionId.DATA_MODEL]}
+                      onValueChange={(value) =>
+                        changeViewMode(SectionId.DATA_MODEL, value as ViewMode)
+                      }
+                      className="w-full"
+                    >
+                      <TabsList className="mb-4">
+                        <TabsTrigger value={ViewMode.EDIT}>Edit</TabsTrigger>
+                        <TabsTrigger value={ViewMode.PREVIEW}>
+                          Preview
+                        </TabsTrigger>
+                      </TabsList>
+
+                      <TabsContent value={ViewMode.EDIT}>
+                        {dataModel && (
+                          <div className="flex justify-end mb-4">
+                            <MarkdownActions
+                              markdown={markdownService.generateDataModelMarkdown(
+                                dataModel
+                              )}
+                              fileName={markdownService.generateFileName(
+                                project.name,
+                                "data-model"
+                              )}
+                            />
+                          </div>
+                        )}
+                        <DataModelForm
+                          initialData={dataModel || undefined}
+                          projectId={id}
+                          onSuccess={handleDataModelUpdate}
+                        />
+                      </TabsContent>
+
+                      <TabsContent
+                        value={ViewMode.PREVIEW}
+                        className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg"
+                      >
+                        <DataModelPreview
+                          data={dataModel}
+                          projectName={project.name}
+                          isLoading={dataModelLoading}
+                        />
+                      </TabsContent>
+                    </Tabs>
                   )}
                 </div>
               )}
@@ -459,11 +751,55 @@ const ProjectDetails = () => {
                       </span>
                     </div>
                   ) : (
-                    <ApiEndpointsForm
-                      initialData={apiEndpoints || undefined}
-                      projectId={id}
-                      onSuccess={handleApiEndpointsUpdate}
-                    />
+                    <Tabs
+                      value={sectionViewModes[SectionId.API_ENDPOINTS]}
+                      onValueChange={(value) =>
+                        changeViewMode(
+                          SectionId.API_ENDPOINTS,
+                          value as ViewMode
+                        )
+                      }
+                      className="w-full"
+                    >
+                      <TabsList className="mb-4">
+                        <TabsTrigger value={ViewMode.EDIT}>Edit</TabsTrigger>
+                        <TabsTrigger value={ViewMode.PREVIEW}>
+                          Preview
+                        </TabsTrigger>
+                      </TabsList>
+
+                      <TabsContent value={ViewMode.EDIT}>
+                        {apiEndpoints && (
+                          <div className="flex justify-end mb-4">
+                            <MarkdownActions
+                              markdown={markdownService.generateApiEndpointsMarkdown(
+                                apiEndpoints
+                              )}
+                              fileName={markdownService.generateFileName(
+                                project.name,
+                                "api-endpoints"
+                              )}
+                            />
+                          </div>
+                        )}
+                        <ApiEndpointsForm
+                          initialData={apiEndpoints || undefined}
+                          projectId={id}
+                          onSuccess={handleApiEndpointsUpdate}
+                        />
+                      </TabsContent>
+
+                      <TabsContent
+                        value={ViewMode.PREVIEW}
+                        className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg"
+                      >
+                        <ApiEndpointsPreview
+                          data={apiEndpoints}
+                          projectName={project.name}
+                          isLoading={apiEndpointsLoading}
+                        />
+                      </TabsContent>
+                    </Tabs>
                   )}
                 </div>
               )}

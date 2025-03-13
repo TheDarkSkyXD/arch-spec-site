@@ -1,11 +1,14 @@
-import { PageComponent, Pages } from "../types/templates";
+import { Pages } from "../types/templates";
 import apiClient from "../api/apiClient";
 const API_BASE_URL = "/api";
 
-export interface PagesData {
-  public: PageComponent[];
-  authenticated: PageComponent[];
-  admin: PageComponent[];
+interface PagesResponse {
+  id: string;
+  project_id: string;
+  created_at: string;
+  updated_at: string;
+  version: number;
+  data: Pages;
 }
 
 export class PagesService {
@@ -14,9 +17,9 @@ export class PagesService {
    * @param projectId The project ID
    * @returns Pages data or null if not found
    */
-  static async getPages(projectId: string): Promise<PagesData | null> {
+  static async getPages(projectId: string): Promise<Pages | null> {
     try {
-      const response = await apiClient.get<Pages>(
+      const response = await apiClient.get<PagesResponse>(
         `${API_BASE_URL}/project-specs/${projectId}/pages`
       );
 
@@ -27,7 +30,7 @@ export class PagesService {
         throw new Error(`Failed to fetch pages: ${response.statusText}`);
       }
 
-      return response.data;
+      return response.data.data;
     } catch (error) {
       console.error("Error fetching pages:", error);
       throw error;
@@ -42,8 +45,8 @@ export class PagesService {
    */
   static async savePages(
     projectId: string,
-    pagesData: PagesData
-  ): Promise<PagesData | null> {
+    pagesData: Pages
+  ): Promise<Pages | null> {
     try {
       const response = await apiClient.put<Pages>(
         `${API_BASE_URL}/project-specs/${projectId}/pages`,

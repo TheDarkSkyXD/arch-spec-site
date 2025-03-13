@@ -2,7 +2,7 @@
  * Service for requirements API interactions.
  */
 import apiClient from "../api/apiClient";
-import { RequirementsData } from "../types/project";
+import { Requirements } from "../types/templates";
 
 // Interface to match the backend response format
 interface RequirementsSpec {
@@ -26,7 +26,9 @@ export const requirementsService = {
    * @param projectId - Project ID
    * @returns Promise containing the project requirements
    */
-  async getRequirements(projectId: string): Promise<RequirementsData | null> {
+  async getRequirements(
+    projectId: string
+  ): Promise<Partial<Requirements> | null> {
     try {
       const response = await apiClient.get<RequirementsSpec>(
         `${API_BASE_URL}/project-specs/${projectId}/requirements`
@@ -59,8 +61,8 @@ export const requirementsService = {
    */
   async saveRequirements(
     projectId: string,
-    data: RequirementsData
-  ): Promise<RequirementsData | null> {
+    data: Partial<Requirements>
+  ): Promise<Partial<Requirements> | null> {
     try {
       // Create the payload in the correct format for the backend
       const payload = {

@@ -18,8 +18,6 @@ class GeneratorService:
         self, 
         project_id: str,
         project: Dict[str, Any],
-        tech_stack_spec: Optional[Dict[str, Any]] = None,
-        requirements_spec: Optional[Dict[str, Any]] = None,
         # add more specs here
     ) -> List[Dict[str, Any]]:
         """Generate artifacts directly from project specs.
@@ -27,8 +25,6 @@ class GeneratorService:
         Args:
             project_id: The ID of the project
             project: The base project data
-            tech_stack_spec: The tech stack spec data
-            requirements_spec: The requirements spec data
             
         Returns:
             A list of generated artifacts.
@@ -37,9 +33,7 @@ class GeneratorService:
 
         # Generate project overview document
         overview_doc = self._generate_project_basics(
-            project, 
-            tech_stack_spec, 
-            requirements_spec
+            project,
         )
         artifacts.append(
             ArtifactCreate(

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { PlusCircle, Trash2, AlertCircle, Loader2 } from "lucide-react";
 import { requirementsService } from "../../services/requirementsService";
 import { useToast } from "../../contexts/ToastContext";
-import { RequirementsData } from "../../types/project";
+import { Requirements } from "../../types/templates";
 
 // Import shadcn UI components
 import Button from "../ui/Button";
@@ -10,9 +10,9 @@ import Input from "../ui/Input";
 import Card from "../ui/Card";
 
 interface RequirementsFormProps {
-  initialData?: RequirementsData;
+  initialData?: Partial<Requirements>;
   projectId?: string;
-  onSuccess?: (requirementsData: RequirementsData) => void;
+  onSuccess?: (requirementsData: Partial<Requirements>) => void;
 }
 
 export default function RequirementsForm({

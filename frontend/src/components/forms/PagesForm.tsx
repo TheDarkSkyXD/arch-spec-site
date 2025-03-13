@@ -11,8 +11,8 @@ import {
   ChevronUp,
   Plus,
 } from "lucide-react";
-import { PageComponent } from "../../types/templates";
-import { pagesService, PagesData } from "../../services/pagesService";
+import { PageComponent, Pages } from "../../types/templates";
+import { pagesService } from "../../services/pagesService";
 import { useToast } from "../../contexts/ToastContext";
 
 // Import shadcn UI components
@@ -22,9 +22,9 @@ import Card from "../ui/Card";
 import { Label } from "../ui/label";
 
 interface PagesFormProps {
-  initialData?: PagesData;
+  initialData?: Pages;
   projectId?: string;
-  onSuccess?: (data: PagesData) => void;
+  onSuccess?: (data: Pages) => void;
 }
 
 export default function PagesForm({
