@@ -20,7 +20,7 @@ import { projectsService } from "../../services/projectsService";
 import { featuresService } from "../../services/featuresService";
 import { requirementsService } from "../../services/requirementsService";
 import { aiService } from "../../services/aiService";
-import { PageComponent, PagesData } from "../../services/aiService";
+import { PageComponent } from "../../services/aiService";
 
 // Import shadcn UI components
 import Button from "../ui/Button";

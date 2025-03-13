@@ -223,9 +223,9 @@ const ProjectBasicsForm = ({
 
       if (enhancedTargetUsers) {
         setValue("target_users", enhancedTargetUsers, { shouldValidate: true });
-
         // Show different messages based on whether we're enhancing or generating
-        const hasExistingTargetUsers = currentTargetUsers?.trim().length > 0;
+        const hasExistingTargetUsers =
+          currentTargetUsers && currentTargetUsers.trim().length > 0;
         showToast({
           title: hasExistingTargetUsers
             ? "Target Users Enhanced"
