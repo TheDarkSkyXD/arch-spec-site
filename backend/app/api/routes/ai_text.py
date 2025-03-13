@@ -11,6 +11,7 @@ from app.ai.tools.print_features import print_features_input_schema
 from app.ai.tools.print_pages import print_pages_input_schema
 from app.ai.tools.print_data_model import print_data_model_input_schema
 from app.ai.tools.print_api_endpoints import print_api_endpoints_input_schema
+from app.ai.tools.print_tech_stack import print_tech_stack_input_schema
 from app.ai.prompts.project_description import project_description_system_prompt
 from app.ai.prompts.business_goals import business_goals_system_prompt_create, business_goals_system_prompt_enhance
 from app.ai.prompts.target_users import target_users_system_prompt_create, target_users_system_prompt_enhance
@@ -19,6 +20,7 @@ from app.ai.prompts.features import get_features_user_prompt
 from app.ai.prompts.pages import get_pages_user_prompt
 from app.ai.prompts.data_model import get_data_model_user_prompt
 from app.ai.prompts.api_endpoints import get_api_endpoints_user_prompt
+from app.ai.prompts.tech_stack import get_tech_stack_user_prompt
 
 from ...schemas.ai_text import (
     DescriptionEnhanceRequest, 
@@ -40,7 +42,10 @@ from ...schemas.ai_text import (
     DataModel,
     ApiEndpointsEnhanceRequest,
     ApiEndpointsEnhanceResponse,
-    ApiData
+    ApiData,
+    TechStackEnhanceRequest,
+    TechStackEnhanceResponse,
+    TechStackRecommendation
 )
 from ...services.ai_service import AnthropicClient
 from ...core.firebase_auth import get_current_user
@@ -601,4 +606,70 @@ async def enhance_api_endpoints(
         raise HTTPException(
             status_code=500,
             detail=f"Failed to enhance API endpoints: {str(e)}"
+        )
+
+@router.post("/enhance-tech-stack", response_model=TechStackEnhanceResponse)
+async def enhance_tech_stack(
+    request: TechStackEnhanceRequest,
+    current_user: Dict[str, Any] = Depends(get_current_user)
+):
+    """
+    Enhance technology stack recommendations using AI.
+    
+    This endpoint takes a project description, requirements, and user preferences,
+    and returns AI-enhanced technology stack recommendations.
+    
+    Args:
+        request: The request containing the project description, requirements, and user preferences.
+        current_user: The authenticated user.
+        
+    Returns:
+        The enhanced technology stack recommendations.
+        
+    Raises:
+        HTTPException: If there is an error calling the AI service.
+    """
+    try:
+        # Initialize the Anthropic client
+        client = AnthropicClient()
+        
+        # Format the requirements and preferences for the prompt
+        formatted_requirements = "\n".join([f"- {req}" for req in request.project_requirements])
+        formatted_preferences = json.dumps(request.user_preferences, indent=2)
+        
+        # Generate the prompt
+        prompt = get_tech_stack_user_prompt(
+            request.project_description,
+            formatted_requirements,
+            formatted_preferences
+        )
+        
+        # Get the tool schema
+        tool_schema = print_tech_stack_input_schema()
+        
+        # Call the AI service
+        response = client.get_tool_use_response(
+            system_prompt="You are a technical architect advising on technology choices. Recommend appropriate technology stacks based on project requirements.",
+            tools=[tool_schema],
+            messages=[{"role": "user", "content": prompt}]
+        )
+        
+        # Check if there was an error
+        if "error" in response:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Error from AI service: {response['error']}"
+            )
+        
+        # Extract tech stack data with fallback mechanisms
+        tech_stack_data = extract_data_from_response(response, TechStackRecommendation, logger)
+            
+        # Return the enhanced tech stack recommendations
+        return TechStackEnhanceResponse(data=tech_stack_data)
+        
+    except Exception as e:
+        logger.error(f"Error enhancing tech stack: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error enhancing tech stack: {str(e)}"
         ) 

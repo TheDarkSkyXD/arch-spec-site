@@ -582,4 +582,90 @@ class ApiEndpointsEnhanceResponse(BaseModel):
         ...,
         title="API Endpoints Data",
         description="The structured API endpoints data"
+    )
+
+
+class TechStackEnhanceRequest(BaseModel):
+    """Request model for enhancing technology stack recommendations."""
+    
+    project_description: str = Field(
+        ...,
+        title="Project Description",
+        description="The description of the project",
+        examples=["A web application for tracking daily fitness workouts and nutrition"],
+    )
+    
+    project_requirements: List[str] = Field(
+        ...,
+        title="Project Requirements",
+        description="The project requirements",
+        examples=[["User authentication", "Data persistence", "Real-time updates"]],
+    )
+    
+    user_preferences: Dict[str, Any] = Field(
+        default_factory=dict,
+        title="User Preferences",
+        description="The user's existing technology preferences",
+    )
+
+
+class TechStackRecommendation(BaseModel):
+    """Model for technology stack recommendations."""
+    
+    frontend: Dict[str, Optional[str]] = Field(
+        default_factory=dict,
+        title="Frontend Technologies",
+        description="Recommended frontend technologies"
+    )
+    
+    backend: Dict[str, Optional[str]] = Field(
+        default_factory=dict,
+        title="Backend Technologies",
+        description="Recommended backend technologies"
+    )
+    
+    database: Dict[str, Optional[str]] = Field(
+        default_factory=dict,
+        title="Database Technologies",
+        description="Recommended database technologies"
+    )
+    
+    authentication: Dict[str, Any] = Field(
+        default_factory=dict,
+        title="Authentication Technologies",
+        description="Recommended authentication technologies"
+    )
+    
+    hosting: Dict[str, Optional[str]] = Field(
+        default_factory=dict,
+        title="Hosting Technologies",
+        description="Recommended hosting technologies"
+    )
+    
+    storage: Dict[str, Optional[str]] = Field(
+        default_factory=dict,
+        title="Storage Technologies",
+        description="Recommended storage technologies"
+    )
+    
+    deployment: Dict[str, Optional[str]] = Field(
+        default_factory=dict,
+        title="Deployment Technologies",
+        description="Recommended deployment technologies"
+    )
+    
+    overallJustification: str = Field(
+        default="",
+        title="Overall Justification",
+        description="Brief explanation of why this tech stack is appropriate for the project"
+    )
+
+
+class TechStackEnhanceResponse(BaseModel):
+    """Response model for enhanced technology stack recommendations."""
+    
+    data: TechStackRecommendation = Field(
+        ...,
+        title="Tech Stack Recommendations",
+        description="The structured technology stack recommendations"
     ) 

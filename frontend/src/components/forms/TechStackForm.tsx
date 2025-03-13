@@ -17,10 +17,14 @@ import {
 } from "../../types/techStack";
 import { useTechStack } from "../../hooks/useDataQueries";
 import { techStackService } from "../../services/techStackService";
+// Import AI service for tech stack enhancement
+import { aiService } from "../../services/aiService";
 
 // Import shadcn UI components
 import Button from "../ui/Button";
 import Card from "../ui/Card";
+// Import Lucide icons for AI enhancement buttons
+import { Loader2, Sparkles } from "lucide-react";
 
 // Import schema
 import {
@@ -38,6 +42,9 @@ import StorageSection from "./tech-stack/StorageSection";
 import DeploymentSection from "./tech-stack/DeploymentSection";
 import { ProjectTechStack } from "../../types/templates";
 import { useToast } from "../../contexts/ToastContext";
+// Import services to fetch project info for AI enhancement
+import { projectsService } from "../../services/projectsService";
+import { requirementsService } from "../../services/requirementsService";
 
 interface TechStackFormProps {
   initialData?: ProjectTechStack;
@@ -59,6 +66,11 @@ const TechStackForm = ({
   // Add state for error and success messages
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
+
+  // Add state for AI enhancement
+  const [isEnhancing, setIsEnhancing] = useState<boolean>(false);
+  const [projectDescription, setProjectDescription] = useState<string>("");
+  const [projectRequirements, setProjectRequirements] = useState<string[]>([]);
 
   const defaultValues: TechStackFormData = {
     frontend: "",
@@ -294,6 +306,223 @@ const TechStackForm = ({
     return ci_cd.sort();
   };
 
+  // New function to fetch project info for AI enhancement
+  const fetchProjectInfo = async () => {
+    if (!projectId) return;
+
+    try {
+      // Fetch project details including description
+      const projectDetails = await projectsService.getProjectById(projectId);
+
+      if (projectDetails) {
+        setProjectDescription(projectDetails.description || "");
+
+        // Fetch requirements as well
+        const requirementsData = await requirementsService.getRequirements(
+          projectId
+        );
+        if (requirementsData) {
+          // Combine functional and non-functional requirements
+          const allRequirements = [
+            ...(requirementsData.functional || []),
+            ...(requirementsData.non_functional || []),
+          ];
+          setProjectRequirements(allRequirements);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching project details:", error);
+    }
+  };
+
+  // New function to enhance tech stack using AI (replace existing settings)
+  const enhanceTechStack = async () => {
+    if (!projectId) {
+      showToast({
+        title: "Error",
+        description: "Project must be saved before tech stack can be enhanced",
+        type: "error",
+      });
+      return;
+    }
+
+    if (!projectDescription) {
+      showToast({
+        title: "Warning",
+        description:
+          "Project description is missing. Tech stack may not be properly enhanced.",
+        type: "warning",
+      });
+    }
+
+    if (projectRequirements.length === 0) {
+      showToast({
+        title: "Warning",
+        description:
+          "No requirements found. Tech stack will be based only on project description.",
+        type: "warning",
+      });
+    }
+
+    setIsEnhancing(true);
+    try {
+      console.log("Enhancing tech stack with AI...");
+
+      // Get current form values as user preferences
+      const formValues = control._formValues;
+      console.log("Current tech stack preferences:", formValues);
+
+      const techStackRecommendations = await aiService.enhanceTechStack(
+        projectDescription,
+        projectRequirements,
+        formValues
+      );
+
+      if (techStackRecommendations) {
+        // Set form values based on AI recommendations
+        if (techStackRecommendations.frontend) {
+          if (techStackRecommendations.frontend.framework) {
+            setTechStackValue(
+              "frontend",
+              techStackRecommendations.frontend.framework
+            );
+          }
+          if (techStackRecommendations.frontend.language) {
+            setTechStackValue(
+              "frontend_language",
+              techStackRecommendations.frontend.language
+            );
+          }
+          if (techStackRecommendations.frontend.uiLibrary) {
+            setTechStackValue(
+              "ui_library",
+              techStackRecommendations.frontend.uiLibrary
+            );
+          }
+          if (techStackRecommendations.frontend.stateManagement) {
+            setTechStackValue(
+              "state_management",
+              techStackRecommendations.frontend.stateManagement
+            );
+          }
+        }
+
+        if (techStackRecommendations.backend) {
+          if (techStackRecommendations.backend.type) {
+            // Convert the backend type to a valid value for the form
+            const backendType =
+              techStackRecommendations.backend.type === "traditional"
+                ? "framework"
+                : techStackRecommendations.backend.type;
+
+            // Only set if it's a valid value
+            if (["framework", "baas", "serverless"].includes(backendType)) {
+              setTechStackValue(
+                "backend_type",
+                backendType as "framework" | "baas" | "serverless"
+              );
+            }
+          }
+          if (techStackRecommendations.backend.service) {
+            setTechStackValue(
+              "backend_service",
+              techStackRecommendations.backend.service
+            );
+          }
+          if (techStackRecommendations.backend.realtime) {
+            setTechStackValue(
+              "backend_realtime",
+              techStackRecommendations.backend.realtime
+            );
+          }
+        }
+
+        if (techStackRecommendations.database) {
+          if (techStackRecommendations.database.type) {
+            setTechStackValue(
+              "database_type",
+              techStackRecommendations.database.type
+            );
+          }
+          if (techStackRecommendations.database.system) {
+            setTechStackValue(
+              "database_system",
+              techStackRecommendations.database.system
+            );
+          }
+          if (techStackRecommendations.database.hosting) {
+            setTechStackValue(
+              "database_hosting",
+              techStackRecommendations.database.hosting
+            );
+          }
+          if (techStackRecommendations.database.orm) {
+            setTechStackValue(
+              "database_orm",
+              techStackRecommendations.database.orm
+            );
+          }
+        }
+
+        if (techStackRecommendations.authentication) {
+          if (techStackRecommendations.authentication.provider) {
+            setTechStackValue(
+              "auth_provider",
+              techStackRecommendations.authentication.provider
+            );
+          }
+          if (
+            techStackRecommendations.authentication.methods &&
+            techStackRecommendations.authentication.methods.length > 0
+          ) {
+            setTechStackValue(
+              "auth_methods",
+              techStackRecommendations.authentication.methods.join(",")
+            );
+          }
+        }
+
+        // Display success message with the overall justification
+        const justification =
+          techStackRecommendations.overallJustification ||
+          "Tech stack enhanced successfully";
+        showToast({
+          title: "Success",
+          description: "Tech stack enhanced successfully",
+          type: "success",
+        });
+
+        // Set success message with justification
+        setSuccess(
+          `Tech stack enhanced successfully.\n\nJustification: ${justification}`
+        );
+        setTimeout(() => setSuccess(""), 10000);
+      } else {
+        showToast({
+          title: "Warning",
+          description: "No tech stack recommendations returned",
+          type: "warning",
+        });
+      }
+    } catch (error) {
+      console.error("Error enhancing tech stack:", error);
+      showToast({
+        title: "Error",
+        description: "Failed to enhance tech stack",
+        type: "error",
+      });
+    } finally {
+      setIsEnhancing(false);
+    }
+  };
+
+  // Add effect to fetch project info when projectId changes
+  useEffect(() => {
+    if (projectId) {
+      fetchProjectInfo();
+    }
+  }, [projectId]);
+
   if (isLoading || !techStackOptions) {
     return <Card className="p-4">Loading tech stack options...</Card>;
   }
@@ -367,10 +596,34 @@ const TechStackForm = ({
         </div>
       )}
       {success && (
-        <div className="bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 p-3 rounded-md mb-4">
+        <div className="bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 p-3 rounded-md whitespace-pre-line mb-4">
           {success}
         </div>
       )}
+
+      {/* AI Enhancement Button */}
+      <div className="flex justify-end items-center gap-3 mb-4">
+        <Button
+          type="button"
+          onClick={enhanceTechStack}
+          disabled={isEnhancing || !projectId}
+          variant="outline"
+          className="flex items-center gap-2"
+          title="Replace tech stack with AI-generated recommendations"
+        >
+          {isEnhancing ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span>Analyzing requirements...</span>
+            </>
+          ) : (
+            <>
+              <Sparkles className="h-4 w-4" />
+              <span>AI Recommendations</span>
+            </>
+          )}
+        </Button>
+      </div>
 
       {/* Frontend Section */}
       <Card className="p-6">

@@ -109,13 +109,66 @@ export interface ApiData {
 interface EnhanceApiEndpointsRequest {
   project_description: string;
   features: FeatureModule[];
-  data_models: any;
+  data_models: Record<string, unknown>;
   requirements: string[];
   existing_endpoints?: ApiData;
 }
 
 interface EnhanceApiEndpointsResponse {
   data: ApiData;
+}
+
+interface EnhanceTechStackRequest {
+  project_description: string;
+  project_requirements: string[];
+  user_preferences: Record<string, unknown>;
+}
+
+interface TechStackRecommendation {
+  frontend: {
+    framework: string | null;
+    language: string | null;
+    stateManagement: string | null;
+    uiLibrary: string | null;
+    formHandling: string | null;
+    routing: string | null;
+    apiClient: string | null;
+    metaFramework: string | null;
+  };
+  backend: {
+    type: string | null;
+    service: string | null;
+    functions: string | null;
+    realtime: string | null;
+  };
+  database: {
+    type: string | null;
+    system: string | null;
+    hosting: string | null;
+    orm: string | null;
+  };
+  authentication: {
+    provider: string | null;
+    methods: string[];
+  };
+  hosting: {
+    frontend: string | null;
+    backend: string | null;
+    database: string | null;
+  };
+  storage: {
+    type: string | null;
+    service: string | null;
+  };
+  deployment: {
+    ci_cd: string | null;
+    containerization: string | null;
+  };
+  overallJustification: string;
+}
+
+interface EnhanceTechStackResponse {
+  data: TechStackRecommendation;
 }
 
 class AIService {
@@ -269,7 +322,7 @@ class AIService {
   async enhanceApiEndpoints(
     projectDescription: string,
     features: FeatureModule[],
-    dataModels: any,
+    dataModels: Record<string, unknown>,
     requirements: string[],
     existingEndpoints?: ApiData
   ): Promise<ApiData | null> {
@@ -357,6 +410,36 @@ class AIService {
       return response.data.data;
     } catch (error) {
       console.error("Error enhancing data model:", error);
+      return null;
+    }
+  }
+
+  /**
+   * Enhance technology stack recommendations using AI.
+   *
+   * @param projectDescription The project description
+   * @param projectRequirements The project requirements
+   * @param userPreferences The user's existing tech preferences (optional)
+   * @returns The enhanced tech stack recommendations or null if an error occurred
+   */
+  async enhanceTechStack(
+    projectDescription: string,
+    projectRequirements: string[],
+    userPreferences?: Record<string, unknown>
+  ): Promise<TechStackRecommendation | null> {
+    try {
+      const response = await apiClient.post<EnhanceTechStackResponse>(
+        "/api/ai-text/enhance-tech-stack",
+        {
+          project_description: projectDescription,
+          project_requirements: projectRequirements,
+          user_preferences: userPreferences || {},
+        } as EnhanceTechStackRequest
+      );
+
+      return response.data.data;
+    } catch (error) {
+      console.error("Error enhancing tech stack:", error);
       return null;
     }
   }
