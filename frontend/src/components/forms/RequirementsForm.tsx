@@ -1,9 +1,19 @@
 import { useState, useEffect } from "react";
-import { PlusCircle, Trash2, AlertCircle, Loader2, Sparkles, Tag, RefreshCw } from "lucide-react";
+import {
+  PlusCircle,
+  Trash2,
+  AlertCircle,
+  Loader2,
+  Sparkles,
+  Tag,
+  RefreshCw,
+  Lock,
+} from "lucide-react";
 import { requirementsService } from "../../services/requirementsService";
 import { projectsService } from "../../services/projectsService";
 import { aiService } from "../../services/aiService";
 import { useToast } from "../../contexts/ToastContext";
+import { useSubscription } from "../../contexts/SubscriptionContext";
 import { Requirements } from "../../types/templates";
 
 // Import shadcn UI components
@@ -23,6 +33,7 @@ export default function RequirementsForm({
   onSuccess,
 }: RequirementsFormProps) {
   const { showToast } = useToast();
+  const { hasAIFeatures } = useSubscription();
   const [functionalReqs, setFunctionalReqs] = useState<string[]>(
     initialData?.functional || []
   );
@@ -44,7 +55,8 @@ export default function RequirementsForm({
   // Add state for stripping prefixes
   const [stripPrefixes, setStripPrefixes] = useState<boolean>(true);
   // Add a new state for the second button loading state
-  const [isAddingRequirements, setIsAddingRequirements] = useState<boolean>(false);
+  const [isAddingRequirements, setIsAddingRequirements] =
+    useState<boolean>(false);
 
   // Effect to update local state when initial data changes
   useEffect(() => {
@@ -81,11 +93,11 @@ export default function RequirementsForm({
   // New function to fetch project description and business goals for AI enhancement
   const fetchProjectInfo = async () => {
     if (!projectId) return;
-    
+
     try {
       // Fetch project details including description and business goals
       const projectDetails = await projectsService.getProjectById(projectId);
-      
+
       if (projectDetails) {
         setProjectDescription(projectDetails.description || "");
         setBusinessGoals(projectDetails.business_goals || []);
@@ -118,7 +130,7 @@ export default function RequirementsForm({
 
   const removeFunctionalRequirement = (index: number) => {
     const newReqs = functionalReqs.filter((_, i) => i !== index);
-    
+
     // If we're removing the last item before a divider, or the first item after a divider,
     // we should also remove the divider if it exists
     const dividerIndex = newReqs.indexOf("---");
@@ -126,19 +138,19 @@ export default function RequirementsForm({
       // Check if there are items before and after the divider
       const hasBefore = dividerIndex > 0;
       const hasAfter = dividerIndex < newReqs.length - 1;
-      
+
       // If either section is empty, remove the divider
       if (!hasBefore || !hasAfter) {
         newReqs.splice(dividerIndex, 1);
       }
     }
-    
+
     setFunctionalReqs(newReqs);
   };
 
   const removeNonFunctionalRequirement = (index: number) => {
     const newReqs = nonFunctionalReqs.filter((_, i) => i !== index);
-    
+
     // If we're removing the last item before a divider, or the first item after a divider,
     // we should also remove the divider if it exists
     const dividerIndex = newReqs.indexOf("---");
@@ -146,35 +158,48 @@ export default function RequirementsForm({
       // Check if there are items before and after the divider
       const hasBefore = dividerIndex > 0;
       const hasAfter = dividerIndex < newReqs.length - 1;
-      
+
       // If either section is empty, remove the divider
       if (!hasBefore || !hasAfter) {
         newReqs.splice(dividerIndex, 1);
       }
     }
-    
+
     setNonFunctionalReqs(newReqs);
   };
 
   // Function to strip category prefixes
   const stripCategoryPrefix = (req: string): string => {
-    if (stripPrefixes && (
-        req.toLowerCase().startsWith("[functional]") || 
+    if (
+      stripPrefixes &&
+      (req.toLowerCase().startsWith("[functional]") ||
         req.toLowerCase().startsWith("[non-functional]") ||
-        req.toLowerCase().startsWith("[nonfunctional]")
-      )) {
+        req.toLowerCase().startsWith("[nonfunctional]"))
+    ) {
       return req.substring(req.indexOf("]") + 1).trim();
     }
     return req;
   };
 
-  // New function to enhance requirements using AI
+  // Enhanced function to enhance requirements using AI with subscription check
   const enhanceRequirements = async () => {
     if (!projectId) {
       showToast({
         title: "Error",
-        description: "Project must be saved before requirements can be enhanced",
+        description:
+          "Project must be saved before requirements can be enhanced",
         type: "error",
+      });
+      return;
+    }
+
+    // Check if user has access to AI features
+    if (!hasAIFeatures) {
+      showToast({
+        title: "Premium Feature",
+        description:
+          "AI enhancement is only available on Premium and Open Source plans. Please upgrade to use this feature.",
+        type: "warning",
       });
       return;
     }
@@ -182,18 +207,20 @@ export default function RequirementsForm({
     if (!projectDescription) {
       showToast({
         title: "Warning",
-        description: "Project description is missing. Requirements may not be properly enhanced.",
+        description:
+          "Project description is missing. Requirements may not be properly enhanced.",
         type: "warning",
       });
     }
 
     // Combine functional and non-functional requirements
     const allRequirements = [...functionalReqs, ...nonFunctionalReqs];
-    
+
     if (allRequirements.length === 0) {
       showToast({
         title: "Warning",
-        description: "No requirements to enhance. Please add some requirements first.",
+        description:
+          "No requirements to enhance. Please add some requirements first.",
         type: "warning",
       });
       return;
@@ -215,15 +242,18 @@ export default function RequirementsForm({
         console.log("Enhanced requirements from AI:", enhancedRequirements);
 
         // Categorize requirements based on [Category] prefix first, then fall back to content keywords
-        enhancedRequirements.forEach(req => {
+        enhancedRequirements.forEach((req) => {
           const lowerCaseReq = req.toLowerCase();
-          
+
           // First check for explicit category prefixes
           if (lowerCaseReq.startsWith("[functional]")) {
             functionalRequirements.push(req); // Keep original format for categorization
-          } else if (lowerCaseReq.startsWith("[non-functional]") || lowerCaseReq.startsWith("[nonfunctional]")) {
+          } else if (
+            lowerCaseReq.startsWith("[non-functional]") ||
+            lowerCaseReq.startsWith("[nonfunctional]")
+          ) {
             nonFunctionalRequirements.push(req); // Keep original format for categorization
-          } 
+          }
           // Fall back to keyword detection if no category prefix is found
           else if (
             lowerCaseReq.includes("non-functional") ||
@@ -243,12 +273,18 @@ export default function RequirementsForm({
           }
         });
 
-        console.log("Categorized functional requirements:", functionalRequirements);
-        console.log("Categorized non-functional requirements:", nonFunctionalRequirements);
+        console.log(
+          "Categorized functional requirements:",
+          functionalRequirements
+        );
+        console.log(
+          "Categorized non-functional requirements:",
+          nonFunctionalRequirements
+        );
 
         setFunctionalReqs(functionalRequirements);
         setNonFunctionalReqs(nonFunctionalRequirements);
-        
+
         showToast({
           title: "Success",
           description: "Requirements enhanced successfully",
@@ -273,13 +309,25 @@ export default function RequirementsForm({
     }
   };
 
-  // New function to add AI-generated requirements without replacing existing ones
+  // Enhanced function to add AI-generated requirements with subscription check
   const addAIRequirements = async () => {
     if (!projectId) {
       showToast({
         title: "Error",
-        description: "Project must be saved before requirements can be enhanced",
+        description:
+          "Project must be saved before requirements can be enhanced",
         type: "error",
+      });
+      return;
+    }
+
+    // Check if user has access to AI features
+    if (!hasAIFeatures) {
+      showToast({
+        title: "Premium Feature",
+        description:
+          "AI-generated requirements are only available on Premium and Open Source plans. Please upgrade to use this feature.",
+        type: "warning",
       });
       return;
     }
@@ -287,14 +335,15 @@ export default function RequirementsForm({
     if (!projectDescription) {
       showToast({
         title: "Warning",
-        description: "Project description is missing. Requirements may not be properly enhanced.",
+        description:
+          "Project description is missing. Requirements may not be properly enhanced.",
         type: "warning",
       });
     }
 
     // Combine functional and non-functional requirements to provide context to the AI
     const allRequirements = [...functionalReqs, ...nonFunctionalReqs];
-    
+
     setIsAddingRequirements(true);
     try {
       const enhancedRequirements = await aiService.enhanceRequirements(
@@ -311,15 +360,18 @@ export default function RequirementsForm({
         console.log("New requirements from AI:", enhancedRequirements);
 
         // Categorize requirements based on [Category] prefix first, then fall back to content keywords
-        enhancedRequirements.forEach(req => {
+        enhancedRequirements.forEach((req) => {
           const lowerCaseReq = req.toLowerCase();
-          
+
           // First check for explicit category prefixes
           if (lowerCaseReq.startsWith("[functional]")) {
             newFunctionalRequirements.push(req); // Keep original format for categorization
-          } else if (lowerCaseReq.startsWith("[non-functional]") || lowerCaseReq.startsWith("[nonfunctional]")) {
+          } else if (
+            lowerCaseReq.startsWith("[non-functional]") ||
+            lowerCaseReq.startsWith("[nonfunctional]")
+          ) {
             newNonFunctionalRequirements.push(req); // Keep original format for categorization
-          } 
+          }
           // Fall back to keyword detection if no category prefix is found
           else if (
             lowerCaseReq.includes("non-functional") ||
@@ -341,23 +393,40 @@ export default function RequirementsForm({
 
         // If there are already requirements and we're adding new ones, add a divider
         const divider = "---";
-        
+
         // Add new requirements to existing requirements with a divider if needed
         if (functionalReqs.length > 0 && newFunctionalRequirements.length > 0) {
-          setFunctionalReqs([...functionalReqs, divider, ...newFunctionalRequirements]);
+          setFunctionalReqs([
+            ...functionalReqs,
+            divider,
+            ...newFunctionalRequirements,
+          ]);
         } else {
           setFunctionalReqs([...functionalReqs, ...newFunctionalRequirements]);
         }
-        
-        if (nonFunctionalReqs.length > 0 && newNonFunctionalRequirements.length > 0) {
-          setNonFunctionalReqs([...nonFunctionalReqs, divider, ...newNonFunctionalRequirements]);
+
+        if (
+          nonFunctionalReqs.length > 0 &&
+          newNonFunctionalRequirements.length > 0
+        ) {
+          setNonFunctionalReqs([
+            ...nonFunctionalReqs,
+            divider,
+            ...newNonFunctionalRequirements,
+          ]);
         } else {
-          setNonFunctionalReqs([...nonFunctionalReqs, ...newNonFunctionalRequirements]);
+          setNonFunctionalReqs([
+            ...nonFunctionalReqs,
+            ...newNonFunctionalRequirements,
+          ]);
         }
-        
+
         showToast({
           title: "Success",
-          description: `Added ${newFunctionalRequirements.length + newNonFunctionalRequirements.length} new requirements`,
+          description: `Added ${
+            newFunctionalRequirements.length +
+            newNonFunctionalRequirements.length
+          } new requirements`,
           type: "success",
         });
       } else {
@@ -502,20 +571,41 @@ export default function RequirementsForm({
             variant="ghost"
             size="sm"
             className="flex items-center gap-1 text-xs"
-            title={stripPrefixes ? "Show category prefixes" : "Hide category prefixes"}
+            title={
+              stripPrefixes
+                ? "Show category prefixes"
+                : "Hide category prefixes"
+            }
           >
             <Tag className="h-3 w-3" />
             {stripPrefixes ? "Show prefixes" : "Hide prefixes"}
           </Button>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex justify-end items-center gap-3 mb-4">
+          {!hasAIFeatures && (
+            <div className="mr-2 text-sm text-muted-foreground flex items-center">
+              <span className="mr-1">✨</span>
+              <span>AI features available with Premium plan</span>
+            </div>
+          )}
           <Button
             type="button"
             onClick={addAIRequirements}
-            disabled={isAddingRequirements || isEnhancing || !projectId}
-            variant="outline"
-            className="flex items-center gap-2"
-            title="Generate new requirements to complement existing ones"
+            disabled={
+              isAddingRequirements ||
+              isEnhancing ||
+              !projectId ||
+              !hasAIFeatures
+            }
+            variant={hasAIFeatures ? "outline" : "ghost"}
+            className={`flex items-center gap-2 relative ${
+              !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+            title={
+              hasAIFeatures
+                ? "Generate new requirements to complement existing ones"
+                : "Upgrade to Premium to use AI-powered features"
+            }
           >
             {isAddingRequirements ? (
               <>
@@ -524,18 +614,33 @@ export default function RequirementsForm({
               </>
             ) : (
               <>
-                <Sparkles className="h-4 w-4" />
-                <span>Add New Requirements</span>
+                {hasAIFeatures ? (
+                  <Sparkles className="h-4 w-4" />
+                ) : (
+                  <Lock className="h-4 w-4" />
+                )}
+                <span>Add AI Requirements</span>
               </>
             )}
           </Button>
           <Button
             type="button"
             onClick={enhanceRequirements}
-            disabled={isEnhancing || isAddingRequirements || !projectId}
-            variant="outline"
-            className="flex items-center gap-2"
-            title="Replace all requirements with enhanced versions"
+            disabled={
+              isEnhancing ||
+              isAddingRequirements ||
+              !projectId ||
+              !hasAIFeatures
+            }
+            variant={hasAIFeatures ? "outline" : "ghost"}
+            className={`flex items-center gap-2 relative ${
+              !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+            title={
+              hasAIFeatures
+                ? "Replace all requirements with enhanced versions"
+                : "Upgrade to Premium to use AI-powered features"
+            }
           >
             {isEnhancing ? (
               <>
@@ -544,7 +649,11 @@ export default function RequirementsForm({
               </>
             ) : (
               <>
-                <RefreshCw className="h-4 w-4" />
+                {hasAIFeatures ? (
+                  <RefreshCw className="h-4 w-4" />
+                ) : (
+                  <Lock className="h-4 w-4" />
+                )}
                 <span>Replace All</span>
               </>
             )}
@@ -569,10 +678,10 @@ export default function RequirementsForm({
         )}
 
         <div className="space-y-2">
-          {functionalReqs.map((req, index) => (
+          {functionalReqs.map((req, index) =>
             req === "---" ? (
-              <div 
-                key={`divider-${index}`} 
+              <div
+                key={`divider-${index}`}
                 className="border-t border-dashed border-slate-300 dark:border-slate-600 my-4 py-1 px-3 text-xs text-center text-slate-500 dark:text-slate-400"
               >
                 New AI-generated requirements
@@ -582,7 +691,9 @@ export default function RequirementsForm({
                 key={index}
                 className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
               >
-                <p className="dark:text-slate-300">{stripCategoryPrefix(req)}</p>
+                <p className="dark:text-slate-300">
+                  {stripCategoryPrefix(req)}
+                </p>
                 <Button
                   type="button"
                   variant="ghost"
@@ -594,7 +705,7 @@ export default function RequirementsForm({
                 </Button>
               </Card>
             )
-          ))}
+          )}
         </div>
 
         <div className="flex gap-2">
@@ -628,10 +739,10 @@ export default function RequirementsForm({
         </p>
 
         <div className="space-y-2">
-          {nonFunctionalReqs.map((req, index) => (
+          {nonFunctionalReqs.map((req, index) =>
             req === "---" ? (
-              <div 
-                key={`divider-${index}`} 
+              <div
+                key={`divider-${index}`}
                 className="border-t border-dashed border-slate-300 dark:border-slate-600 my-4 py-1 px-3 text-xs text-center text-slate-500 dark:text-slate-400"
               >
                 New AI-generated requirements
@@ -641,7 +752,9 @@ export default function RequirementsForm({
                 key={index}
                 className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
               >
-                <p className="dark:text-slate-300">{stripCategoryPrefix(req)}</p>
+                <p className="dark:text-slate-300">
+                  {stripCategoryPrefix(req)}
+                </p>
                 <Button
                   type="button"
                   variant="ghost"
@@ -653,7 +766,7 @@ export default function RequirementsForm({
                 </Button>
               </Card>
             )
-          ))}
+          )}
         </div>
 
         <div className="flex gap-2">

@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, Literal
 from pydantic import BaseModel, Field
 
 
@@ -26,6 +26,8 @@ class SubscriptionPlan(BaseModel):
     trial_days: int
     description: str
     features: List[str]
+    plan_type: Literal["free", "premium", "open_source"] = "free"
+    ai_credits: int = 0  # Number of AI credits included in this plan
 
 
 class Subscription(BaseModel):
@@ -34,6 +36,11 @@ class Subscription(BaseModel):
     current_period_end: datetime
     plan_id: str
     customer_id: str
+    plan_type: Literal["free", "premium", "open_source"] = "free"
+    ai_credits_reset_value: int = 0  # How many credits the user gets when subscription renews
+    ai_credits_current: int = 0  # Current available credits
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
 
 class CheckoutCreate(BaseModel):

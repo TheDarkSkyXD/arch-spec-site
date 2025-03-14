@@ -1,5 +1,6 @@
 import axios from "axios";
 import { getAuthToken } from "../services/auth";
+import { SubscriptionPlan } from "../contexts/SubscriptionContext";
 
 // Define API base URL
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
@@ -58,6 +59,10 @@ apiClient.interceptors.response.use(
 
 // User interfaces
 export interface UserProfile {
+  plan: SubscriptionPlan;
+  subscription_id: string | null;
+  ai_credits: number;
+  ai_credits_used: number;
   _id: string;
   firebase_uid: string;
   email: string;

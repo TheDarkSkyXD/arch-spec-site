@@ -5,6 +5,8 @@ import { requirementsService } from "../../services/requirementsService";
 import { featuresService } from "../../services/featuresService";
 import { aiService } from "../../services/aiService";
 import { FeatureModule } from "../../services/featuresService";
+import { useSubscription } from "../../contexts/SubscriptionContext";
+import { useToast } from "../../contexts/ToastContext";
 import Button from "../ui/Button";
 import Input from "../ui/Input";
 import {
@@ -25,7 +27,7 @@ import {
   AlertDialogTrigger,
 } from "../ui/alert-dialog";
 import { Label } from "../ui/label";
-import { Edit, Trash2, Loader2, Sparkles, RefreshCw } from "lucide-react";
+import { Edit, Trash2, Loader2, Sparkles, RefreshCw, Lock } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -55,6 +57,8 @@ export default function DataModelForm({
   projectId,
   onSuccess,
 }: DataModelFormProps) {
+  const { hasAIFeatures } = useSubscription();
+  const { showToast } = useToast();
   const [dataModel, setDataModel] = useState<DataModel>({
     entities: [],
     relationships: [],
@@ -492,6 +496,16 @@ export default function DataModelForm({
 
   // New function to enhance the data model using AI (replace existing model)
   const enhanceDataModel = async () => {
+    // Return early if the user doesn't have access to AI features
+    if (!hasAIFeatures) {
+      showToast({
+        title: "Premium Feature",
+        description: "Upgrade to Premium to use AI-powered features",
+        type: "info",
+      });
+      return;
+    }
+
     if (!projectId) {
       setError("Project must be saved before data model can be enhanced");
       return;
@@ -541,6 +555,16 @@ export default function DataModelForm({
 
   // New function to add AI-generated entities without replacing existing ones
   const addAIEntities = async () => {
+    // Return early if the user doesn't have access to AI features
+    if (!hasAIFeatures) {
+      showToast({
+        title: "Premium Feature",
+        description: "Upgrade to Premium to use AI-powered features",
+        type: "info",
+      });
+      return;
+    }
+
     if (!projectId) {
       setError("Project must be saved before data model can be enhanced");
       return;
@@ -557,6 +581,8 @@ export default function DataModelForm({
     setError(null);
 
     try {
+      console.log("Adding AI entities...");
+
       // When adding new entities, we pass the existing data model to avoid duplication
       const enhancedDataModel = await aiService.enhanceDataModel(
         projectDescription,
@@ -600,7 +626,7 @@ export default function DataModelForm({
       }
     } catch (error) {
       console.error("Error adding AI entities:", error);
-      setError("Failed to generate new entities");
+      setError("Failed to add AI entities. Please try again.");
     } finally {
       setIsAddingEntities(false);
     }
@@ -663,13 +689,30 @@ export default function DataModelForm({
             <div className="grid grid-cols-1 gap-6">
               {/* AI Enhancement Buttons */}
               <div className="flex justify-end items-center gap-3 mb-4">
+                {!hasAIFeatures && (
+                  <div className="mr-2 text-sm text-muted-foreground flex items-center">
+                    <span className="mr-1">✨</span>
+                    <span>AI features available with Premium plan</span>
+                  </div>
+                )}
                 <Button
                   type="button"
                   onClick={addAIEntities}
-                  disabled={isAddingEntities || isEnhancing || !projectId}
-                  variant="outline"
-                  className="flex items-center gap-2"
-                  title="Generate new entities to complement existing ones"
+                  disabled={
+                    isAddingEntities ||
+                    isEnhancing ||
+                    !projectId ||
+                    !hasAIFeatures
+                  }
+                  variant={hasAIFeatures ? "outline" : "ghost"}
+                  className={`flex items-center gap-2 relative ${
+                    !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
+                  title={
+                    hasAIFeatures
+                      ? "Generate new entities to complement existing ones"
+                      : "Upgrade to Premium to use AI-powered features"
+                  }
                 >
                   {isAddingEntities ? (
                     <>
@@ -678,7 +721,11 @@ export default function DataModelForm({
                     </>
                   ) : (
                     <>
-                      <Sparkles className="h-4 w-4" />
+                      {hasAIFeatures ? (
+                        <Sparkles className="h-4 w-4" />
+                      ) : (
+                        <Lock className="h-4 w-4" />
+                      )}
                       <span>Add AI Entities</span>
                     </>
                   )}
@@ -686,10 +733,21 @@ export default function DataModelForm({
                 <Button
                   type="button"
                   onClick={enhanceDataModel}
-                  disabled={isEnhancing || isAddingEntities || !projectId}
-                  variant="outline"
-                  className="flex items-center gap-2"
-                  title="Replace entire data model with AI-generated one"
+                  disabled={
+                    isEnhancing ||
+                    isAddingEntities ||
+                    !projectId ||
+                    !hasAIFeatures
+                  }
+                  variant={hasAIFeatures ? "outline" : "ghost"}
+                  className={`flex items-center gap-2 relative ${
+                    !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
+                  title={
+                    hasAIFeatures
+                      ? "Replace entire data model with AI-generated one"
+                      : "Upgrade to Premium to use AI-powered features"
+                  }
                 >
                   {isEnhancing ? (
                     <>
@@ -698,7 +756,11 @@ export default function DataModelForm({
                     </>
                   ) : (
                     <>
-                      <RefreshCw className="h-4 w-4" />
+                      {hasAIFeatures ? (
+                        <RefreshCw className="h-4 w-4" />
+                      ) : (
+                        <Lock className="h-4 w-4" />
+                      )}
                       <span>Replace All</span>
                     </>
                   )}
@@ -938,7 +1000,7 @@ export default function DataModelForm({
                                   <div className="font-medium">
                                     {field.name}
                                   </div>
-                                  <div className="text-sm text-slate-500 dark:text-slate-400 flex items-center space-x-2">
+                                  <div className="text-slate-500 dark:text-slate-400 flex items-center space-x-2">
                                     <Badge variant="outline">
                                       {field.type}
                                     </Badge>
