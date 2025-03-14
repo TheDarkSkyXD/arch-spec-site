@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../contexts";
 import paymentService, {
   SubscriptionPlan,
   Customer,
@@ -23,50 +23,85 @@ const SubscriptionPage = () => {
     useState<Subscription | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreatingCheckout, setIsCreatingCheckout] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Access auth context and explicitly type the user
-  const auth = useAuth();
-  const user = auth?.currentUser as User | undefined;
+  // Get auth context with proper typing
+  const { currentUser, loading: authLoading } = useAuth();
+  // Safely cast currentUser to User type
+  const user = currentUser as User | null | undefined;
 
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Keep track of component mount state
+    let isMounted = true;
+
     const loadData = async () => {
-      if (!user) {
-        navigate("/login");
+      // Don't do anything if auth is still loading
+      if (authLoading) {
+        return;
+      }
+
+      // Only redirect if auth is finished loading and user is definitely null
+      if (!user && !authLoading) {
+        console.log("User is not authenticated, redirecting to login");
+        navigate("/login", {
+          state: {
+            from: "/subscription",
+            message: "Please sign in to view subscription plans",
+          },
+        });
         return;
       }
 
       try {
+        if (!isMounted) return;
         setIsLoading(true);
+        setError(null);
+
         // Fetch subscription plans
         const availablePlans = await paymentService.getSubscriptionPlans();
+        if (!isMounted) return;
         setPlans(availablePlans);
 
         if (availablePlans.length > 0) {
           setSelectedPlan(getBestValuePlan(availablePlans));
         }
 
-        // Get or create customer
-        const customerData = await paymentService.getOrCreateCustomer(user);
-        setCustomer(customerData);
+        // Only proceed with user-specific operations if we have a user
+        if (user && user.uid) {
+          // Get or create customer
+          const customerData = await paymentService.getOrCreateCustomer(user);
+          if (!isMounted) return;
+          setCustomer(customerData);
 
-        // Get current subscription if any
-        if (user.email) {
-          const subscription = await paymentService.getCurrentSubscription(
-            user.email
-          );
-          setCurrentSubscription(subscription);
+          // Get current subscription if any
+          if (user.email) {
+            const subscription = await paymentService.getCurrentSubscription(
+              user.email
+            );
+            if (!isMounted) return;
+            setCurrentSubscription(subscription);
+          }
         }
       } catch (error) {
+        if (!isMounted) return;
         console.error("Error loading subscription data:", error);
+        setError("Failed to load subscription data. Please try again later.");
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
 
     loadData();
-  }, [user, navigate]);
+
+    // Cleanup function
+    return () => {
+      isMounted = false;
+    };
+  }, [user, navigate, authLoading]);
 
   const getBestValuePlan = (
     availablePlans: SubscriptionPlan[]
@@ -111,11 +146,13 @@ const SubscriptionPage = () => {
 
   const handleSubscribe = async () => {
     if (!selectedPlan || !user || !user.email || !user.uid) {
+      setError("Unable to process subscription. Please sign in again.");
       return;
     }
 
     try {
       setIsCreatingCheckout(true);
+      setError(null);
       const { url } = await paymentService.createCheckout(
         selectedPlan.id,
         user.email,
@@ -126,24 +163,46 @@ const SubscriptionPage = () => {
       window.location.href = url;
     } catch (error) {
       console.error("Error creating checkout:", error);
+      setError("Failed to create checkout session. Please try again.");
     } finally {
       setIsCreatingCheckout(false);
     }
   };
 
   const handleManageSubscription = async () => {
-    if (!customer) return;
+    if (!customer) {
+      setError("Customer information not available. Please try again.");
+      return;
+    }
 
     try {
       setIsLoading(true);
+      setError(null);
       const { url } = await paymentService.createCustomerPortalUrl(customer.id);
       window.location.href = url;
     } catch (error) {
       console.error("Error creating customer portal URL:", error);
+      setError("Failed to open subscription management. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
+
+  // Render a loading state while authentication is in progress
+  if (authLoading) {
+    return (
+      <DashboardLayout>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="mt-12 flex justify-center flex-col items-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
+            <p className="mt-4 text-gray-500 dark:text-gray-300">
+              Verifying your account...
+            </p>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
@@ -156,6 +215,12 @@ const SubscriptionPage = () => {
             Select the plan that works best for you and your projects
           </p>
         </div>
+
+        {error && (
+          <div className="mt-6 bg-red-50 border border-red-100 text-red-700 p-4 rounded-md">
+            <p>{error}</p>
+          </div>
+        )}
 
         {isLoading ? (
           <div className="mt-12 flex justify-center">
@@ -201,7 +266,7 @@ const SubscriptionPage = () => {
               className="inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
               disabled={isLoading}
             >
-              Manage Subscription
+              {isLoading ? "Loading..." : "Manage Subscription"}
             </button>
           </div>
         ) : (

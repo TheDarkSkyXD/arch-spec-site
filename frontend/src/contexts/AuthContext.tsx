@@ -1,7 +1,13 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { UserProfile } from '../api/userApi';
-import * as authService from '../services/auth';
-import { userApi } from '../api/userApi';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
+import { UserProfile } from "../api/userApi";
+import * as authService from "../services/auth";
+import { userApi } from "../api/userApi";
 
 // Define the User type
 export interface User {
@@ -54,7 +60,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const profile = await userApi.getCurrentUser();
       return { ...user, profile };
     } catch (error) {
-      console.error('Error loading user profile:', error);
+      console.error("Error loading user profile:", error);
       return user;
     }
   };
@@ -81,11 +87,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   // Sign in with email and password
   const signIn = async (email: string, password: string) => {
     setLoading(true);
-    
+
     try {
       // Sign in with Firebase
       await authService.signInWithEmail(email, password);
-      
+
       // Auth state listener will handle setting the user
     } catch (error) {
       setLoading(false);
@@ -96,11 +102,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   // Sign in with Google
   const signInWithGoogle = async () => {
     setLoading(true);
-    
+
     try {
       // Sign in with Google via Firebase
       await authService.signInWithGoogle();
-      
+
       // Auth state listener will handle setting the user
     } catch (error) {
       setLoading(false);
@@ -111,11 +117,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   // Sign up with email and password
   const signUp = async (email: string, password: string) => {
     setLoading(true);
-    
+
     try {
       // Create user with Firebase
       await authService.signUpWithEmail(email, password);
-      
+
       // Auth state listener will handle setting the user
     } catch (error) {
       setLoading(false);
@@ -126,11 +132,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   // Sign out
   const signOut = async () => {
     setLoading(true);
-    
+
     try {
       // Sign out from Firebase
       await authService.signOut();
-      
+
       // Auth state listener will handle clearing the user
     } catch (error) {
       setLoading(false);
@@ -151,7 +157,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     signInWithGoogle,
     signUp,
     signOut,
-    sendPasswordResetEmail
+    sendPasswordResetEmail,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
