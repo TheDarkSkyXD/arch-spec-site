@@ -59,6 +59,16 @@ const SubscriptionPage = () => {
         setIsLoading(true);
         setError(null);
 
+        // Since payment integration is not yet complete, we'll simulate loading and then
+        // show a message instead of attempting to load real data that would result in errors
+        setTimeout(() => {
+          if (isMounted) {
+            setIsLoading(false);
+          }
+        }, 800); // Short delay to simulate loading for better UX
+
+        // Comment out the actual data loading for now
+        /*
         // Fetch subscription plans
         const availablePlans = await paymentService.getSubscriptionPlans();
         if (!isMounted) return;
@@ -84,14 +94,11 @@ const SubscriptionPage = () => {
             setCurrentSubscription(subscription);
           }
         }
+        */
       } catch (error) {
         if (!isMounted) return;
         console.error("Error loading subscription data:", error);
-        setError("Failed to load subscription data. Please try again later.");
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
+        setIsLoading(false);
       }
     };
 
@@ -216,168 +223,146 @@ const SubscriptionPage = () => {
           </p>
         </div>
 
-        {error && (
-          <div className="mt-6 bg-red-50 border border-red-100 text-red-700 p-4 rounded-md">
-            <p>{error}</p>
-          </div>
-        )}
-
         {isLoading ? (
           <div className="mt-12 flex justify-center">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
           </div>
-        ) : currentSubscription &&
-          ["active", "on_trial"].includes(currentSubscription.status) ? (
-          <div className="mt-12 max-w-3xl mx-auto bg-white dark:bg-slate-800 shadow rounded-lg p-8 text-center">
-            <div className="inline-flex items-center justify-center p-2 rounded-full bg-green-100 text-green-600 mb-4">
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M5 13l4 4L19 7"
-                ></path>
-              </svg>
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-              {currentSubscription.status === "on_trial"
-                ? "Trial Active"
-                : "Subscription Active"}
-            </h2>
-            <p className="text-gray-600 dark:text-gray-300 mb-6">
-              {currentSubscription.status === "on_trial"
-                ? "You are currently on a free trial."
-                : "Thank you for your subscription!"}
-              <br />
-              Your subscription is active until{" "}
-              {new Date(
-                currentSubscription.currentPeriodEnd
-              ).toLocaleDateString()}
-              .
-            </p>
-            <button
-              onClick={handleManageSubscription}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-              disabled={isLoading}
-            >
-              {isLoading ? "Loading..." : "Manage Subscription"}
-            </button>
-          </div>
         ) : (
-          <div className="mt-12 space-y-12 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-x-8">
-            {plans.map((plan) => (
-              <div
-                key={plan.id}
-                className={`relative p-8 bg-white dark:bg-slate-700 border-2 rounded-2xl shadow-sm flex flex-col ${
-                  selectedPlan?.id === plan.id
-                    ? "border-primary-500 ring-2 ring-primary-500"
-                    : "border-gray-200 dark:border-gray-600"
-                }`}
-              >
-                <div className="flex-1">
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                    {plan.name}
-                  </h3>
-                  <p className="mt-4 flex items-baseline text-gray-900 dark:text-white">
-                    <span className="text-5xl font-extrabold tracking-tight">
-                      ${(plan.price / 100).toFixed(0)}
-                    </span>
-                    <span className="ml-1 text-xl font-semibold">
-                      /{plan.interval}
-                    </span>
-                  </p>
-                  <p className="mt-6 text-gray-500 dark:text-gray-300">
-                    {plan.description}
-                  </p>
-                  {/* Now using the formatPlanDescription function to display additional info */}
-                  <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                    {formatPlanDescription(plan)}
-                  </p>
-
-                  <ul className="mt-6 space-y-4">
-                    {plan.features.map((feature, index) => (
-                      <li key={index} className="flex items-start">
-                        <div className="flex-shrink-0">
-                          <svg
-                            className="h-6 w-6 text-green-500"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M5 13l4 4L19 7"
-                            />
-                          </svg>
-                        </div>
-                        <p className="ml-3 text-base text-gray-700 dark:text-gray-300">
-                          {feature}
-                        </p>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <button
-                  type="button"
-                  className={`mt-8 block w-full py-3 px-6 border border-transparent rounded-md text-center font-medium ${
-                    selectedPlan?.id === plan.id
-                      ? "bg-primary-600 text-white hover:bg-primary-700"
-                      : "bg-primary-50 text-primary-700 hover:bg-primary-100 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500"
-                  }`}
-                  onClick={() => handleSelectPlan(plan)}
-                >
-                  {selectedPlan?.id === plan.id ? "Selected" : "Select Plan"}
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {!currentSubscription && selectedPlan && (
-          <div className="mt-8 text-center">
-            <button
-              onClick={handleSubscribe}
-              className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-              disabled={isCreatingCheckout}
-            >
-              {isCreatingCheckout ? (
-                <>
+          <div className="mt-12 max-w-3xl mx-auto bg-white dark:bg-slate-800 shadow rounded-lg overflow-hidden">
+            <div className="bg-primary-500 p-6 text-white">
+              <h2 className="text-2xl font-bold">
+                Payment System in Development
+              </h2>
+            </div>
+            <div className="p-8">
+              <div className="flex items-center space-x-4 mb-6">
+                <div className="flex-shrink-0 bg-blue-100 rounded-full p-3">
                   <svg
-                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
                     xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6 text-blue-600"
                     fill="none"
                     viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
                   >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
                     <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
                   </svg>
-                  Processing...
-                </>
-              ) : (
-                "Subscribe Now"
-              )}
-            </button>
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                    We're Almost There!
+                  </h3>
+                  <p className="mt-1 text-gray-600 dark:text-gray-300">
+                    Our automated payment system is currently under development.
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-blue-50 dark:bg-blue-900 p-5 rounded-lg border-l-4 border-blue-500">
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <svg
+                      className="h-5 w-5 text-blue-500"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-sm text-blue-800 dark:text-blue-200">
+                      If you'd like to activate a premium subscription, please
+                      contact our support team at{" "}
+                      <a
+                        href="mailto:mamerto@codefrost.com"
+                        className="font-medium underline"
+                      >
+                        mamerto@codefrost.com
+                      </a>
+                      . We'll set up your subscription manually.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-8 space-y-4">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
+                    <svg
+                      className="h-5 w-5 text-green-500"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                  <p className="ml-3 text-base text-gray-700 dark:text-gray-300">
+                    AI-powered project architecture generation
+                  </p>
+                </div>
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
+                    <svg
+                      className="h-5 w-5 text-green-500"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                  <p className="ml-3 text-base text-gray-700 dark:text-gray-300">
+                    Advanced AI enhancements for your projects
+                  </p>
+                </div>
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
+                    <svg
+                      className="h-5 w-5 text-green-500"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                  <p className="ml-3 text-base text-gray-700 dark:text-gray-300">
+                    Priority support and unlimited projects
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-8 flex justify-center">
+                <a
+                  href="mailto:mamerto@codefrost.com?subject=Subscription%20Activation&body=Hi%20there%2C%0A%0AI'd%20like%20to%20activate%20a%20premium%20subscription.%0A%0AMy%20account%20email%20is%3A%20"
+                  className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                >
+                  Contact Support to Subscribe
+                </a>
+              </div>
+            </div>
           </div>
         )}
       </div>
