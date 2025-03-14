@@ -7,6 +7,7 @@ import React, {
 } from "react";
 import { useAuth } from "./AuthContext";
 import { subscriptionService } from "../services/subscriptionService";
+import { userApi } from "../api/userApi";
 
 export type SubscriptionPlan = "free" | "premium" | "open_source";
 
@@ -58,6 +59,9 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
   const [subscriptionId, setSubscriptionId] = useState<string | null>(null);
   const [aiCreditsAvailable, setAiCreditsAvailable] = useState(0);
   const [aiCreditsUsed, setAiCreditsUsed] = useState(0);
+  const [hasAIFeatures, setHasAIFeatures] = useState(false);
+  const [hasPremiumTemplates, setHasPremiumTemplates] = useState(false);
+  const [hasUnlimitedProjects, setHasUnlimitedProjects] = useState(false);
 
   const fetchSubscriptionData = async () => {
     if (authLoading || !currentUser) {
@@ -99,16 +103,16 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
     fetchSubscriptionData();
   }, [authLoading, currentUser]);
 
-  // Feature availability based on plan
-  const hasAIFeatures =
-    currentPlan === "premium" || currentPlan === "open_source";
-  const hasPremiumTemplates = currentPlan === "premium";
-  const hasUnlimitedProjects =
-    currentPlan === "premium" || currentPlan === "open_source";
-
   // Function to refresh subscription data
   const refreshSubscriptionData = async (): Promise<void> => {
-    await fetchSubscriptionData();
+    const user = await userApi.getCurrentUser();
+    if (user) {
+      setHasAIFeatures(user.plan === "premium" || user.plan === "open_source");
+      setHasPremiumTemplates(user.plan === "premium");
+      setHasUnlimitedProjects(
+        user.plan === "premium" || user.plan === "open_source"
+      );
+    }
   };
 
   const value: SubscriptionContextType = {

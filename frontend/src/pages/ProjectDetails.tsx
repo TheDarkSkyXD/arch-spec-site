@@ -47,6 +47,8 @@ import {
   TabsTrigger,
   TabsContent,
 } from "../components/ui/tabs";
+import { userApi } from "../api/userApi";
+import { useSubscription } from "../contexts/SubscriptionContext";
 
 // Define section IDs for consistency
 enum SectionId {
@@ -74,6 +76,7 @@ const ProjectDetails = () => {
   const [loading, setLoading] = useState(true);
   const [techStackLoading, setTechStackLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { refreshSubscriptionData } = useSubscription();
 
   // State to track expanded sections
   const [expandedSections, setExpandedSections] = useState<
@@ -133,6 +136,14 @@ const ProjectDetails = () => {
     useApiEndpoints(id);
 
   const { data: testCases, isLoading: testCasesLoading } = useTestCases(id);
+
+  useEffect(() => {
+    const loadUserProfile = async () => {
+      await userApi.getCurrentUser();
+      refreshSubscriptionData();
+    };
+    loadUserProfile();
+  }, [refreshSubscriptionData]);
 
   useEffect(() => {
     const fetchProject = async () => {
