@@ -15,9 +15,16 @@ import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
+// Landing page
+import LandingPage from "./pages/LandingPage";
 
 // Router configuration
 const router = createBrowserRouter([
+  // Public landing page
+  {
+    path: "/",
+    element: <LandingPage />,
+  },
   // Auth routes (public)
   {
     path: "/login",
@@ -37,7 +44,7 @@ const router = createBrowserRouter([
   },
   // Protected routes (require authentication)
   {
-    path: "/",
+    path: "/dashboard",
     element: (
       <ProtectedRoute>
         <Dashboard />

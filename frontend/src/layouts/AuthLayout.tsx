@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { Link } from "react-router-dom";
+import Logo from "../components/ui/Logo";
 
 interface AuthLayoutProps {
   children: ReactNode;
@@ -14,11 +15,7 @@ const AuthLayout = ({ children }: AuthLayoutProps) => {
           <div className="flex justify-between h-16">
             <div className="flex items-center">
               <Link to="/" className="flex items-center">
-                <img
-                  src="/assets/images/arch-spec-logo.png"
-                  alt="ArchSpec Logo"
-                  className="h-10 w-auto"
-                />
+                <Logo size="medium" href="/" variant="horizontal" />
               </Link>
             </div>
           </div>

@@ -1,11 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import {
-  Mail,
-  Lock,
-  Eye,
-  EyeOff,
-} from "lucide-react";
+import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import AuthLayout from "../../layouts/AuthLayout";
 import { useAuth } from "../../contexts/AuthContextDefinition";
 import ErrorMessage from "../../components/ui/ErrorMessage";
@@ -26,7 +21,7 @@ const Login = () => {
   // Check if there's a success message from registration
   const successMessage = location.state?.message;
   // Check if there's a redirect destination
-  const from = location.state?.from || "/";
+  const from = location.state?.from || "/dashboard";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -17,7 +17,7 @@ const Navigation = () => {
   };
 
   const navItems: NavItem[] = [
-    { name: "Dashboard", path: "/", icon: null },
+    { name: "Dashboard", path: "/dashboard", icon: null },
     { name: "Projects", path: "/projects", icon: null },
     { name: "Templates", path: "/templates", icon: null },
   ];
@@ -28,7 +28,7 @@ const Navigation = () => {
         <div className="flex justify-between h-16">
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
-              <Link to="/" className="flex items-center">
+              <Link to="/dashboard" className="flex items-center">
                 <img
                   src="/assets/images/arch-spec-logo-horizontal.png"
                   alt="ArchSpec Logo"
