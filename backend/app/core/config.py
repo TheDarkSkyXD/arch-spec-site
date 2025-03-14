@@ -21,6 +21,13 @@ class AnthropicSettings(BaseSettings):
     temperature: float = float(os.getenv("ANTHROPIC_TEMPERATURE", "0.7"))
 
 
+class LemonSqueezySettings(BaseSettings):
+    """LemonSqueezy API configuration settings."""
+    api_key: str = os.getenv("LEMONSQUEEZY_API_KEY", "")
+    store_id: str = os.getenv("LEMONSQUEEZY_STORE_ID", "")
+    webhook_secret: str = os.getenv("LEMONSQUEEZY_WEBHOOK_SECRET", "")
+
+
 class Settings(BaseSettings):
     """Application configuration settings."""
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
@@ -33,11 +40,19 @@ class Settings(BaseSettings):
     # CORS settings
     cors_origins: List[str] = ["http://localhost:3000", "http://localhost:5173"]
     
+    # Frontend URL for redirects
+    frontend_url: str = os.getenv("FRONTEND_URL", "http://localhost:5173")
+    
     # MongoDB settings
     mongo: MongoSettings = MongoSettings()
     
     # Anthropic settings
     anthropic: AnthropicSettings = AnthropicSettings()
+    
+    # LemonSqueezy settings
+    LEMONSQUEEZY_API_KEY: str = os.getenv("LEMONSQUEEZY_API_KEY", "")
+    LEMONSQUEEZY_STORE_ID: str = os.getenv("LEMONSQUEEZY_STORE_ID", "")
+    LEMONSQUEEZY_WEBHOOK_SECRET: str = os.getenv("LEMONSQUEEZY_WEBHOOK_SECRET", "")
 
 
 settings = Settings() 

@@ -17,6 +17,9 @@ import ForgotPassword from "./pages/auth/ForgotPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
 // Landing page
 import LandingPage from "./pages/LandingPage";
+// Subscription page
+import Subscription from "./pages/Subscription";
+import CheckoutSuccess from "./pages/CheckoutSuccess";
 
 // Router configuration
 const router = createBrowserRouter([
@@ -120,6 +123,23 @@ const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <SecuritySettings />
+      </ProtectedRoute>
+    ),
+  },
+  // Subscription routes
+  {
+    path: "/subscription",
+    element: (
+      <ProtectedRoute>
+        <Subscription />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/checkout/success",
+    element: (
+      <ProtectedRoute>
+        <CheckoutSuccess />
       </ProtectedRoute>
     ),
   },

@@ -465,7 +465,7 @@ const LandingPage = () => {
               </div>
 
               <Link
-                to="/register"
+                to="/register?checkout=true"
                 className="mt-8 block w-full bg-primary-600 py-3 px-6 border border-transparent rounded-md text-center font-medium text-white hover:bg-primary-700"
               >
                 Start Building Now
@@ -652,7 +652,7 @@ const LandingPage = () => {
             planning.
           </p>
           <Link
-            to="/register"
+            to="/register?checkout=true"
             className="mt-8 w-full inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-primary-600 bg-white hover:bg-primary-50 sm:w-auto"
           >
             Get Started Today
