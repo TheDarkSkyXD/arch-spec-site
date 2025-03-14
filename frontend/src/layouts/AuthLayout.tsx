@@ -15,7 +15,7 @@ const AuthLayout = ({ children }: AuthLayoutProps) => {
           <div className="flex justify-between h-16">
             <div className="flex items-center">
               <Link to="/" className="flex items-center">
-                <Logo size="medium" href="/" variant="horizontal" />
+                <Logo size="medium" variant="horizontal" />
               </Link>
             </div>
           </div>

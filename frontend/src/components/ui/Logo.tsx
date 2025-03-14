@@ -10,7 +10,7 @@ interface LogoProps {
 
 const Logo: React.FC<LogoProps> = ({
   size = "medium",
-  href = "/",
+  href = undefined,
   className = "",
   variant = "text",
 }) => {

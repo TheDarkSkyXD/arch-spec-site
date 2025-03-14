@@ -88,7 +88,12 @@ class UserService:
                 "updated_at": now,
                 "last_login": now,
                 "is_active": True,
-                "settings": {}
+                "settings": {},
+                # Initialize subscription-related fields
+                "plan": "free",
+                "subscription_id": None,
+                "ai_credits": 0,
+                "ai_credits_used": 0
             }
             
             # Insert user
