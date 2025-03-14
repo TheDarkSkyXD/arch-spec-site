@@ -29,6 +29,7 @@ import Button from "../ui/Button";
 import Input from "../ui/Input";
 import Card from "../ui/Card";
 import { Label } from "../ui/label";
+import { PremiumFeatureBadge } from "../ui/index";
 
 interface PagesFormProps {
   initialData?: Pages;
@@ -962,12 +963,7 @@ export default function PagesForm({
 
         {/* AI Enhancement Buttons */}
         <div className="flex justify-end items-center gap-3 mb-4">
-          {!hasAIFeatures && (
-            <div className="mr-2 text-sm text-muted-foreground flex items-center">
-              <span className="mr-1">✨</span>
-              <span>AI features available with Premium plan</span>
-            </div>
-          )}
+          {!hasAIFeatures && <PremiumFeatureBadge />}
           <Button
             type="button"
             onClick={addAIPages}

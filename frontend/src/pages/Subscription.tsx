@@ -1,12 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts";
-import paymentService, {
-  SubscriptionPlan,
-  Customer,
-  Subscription,
-  User,
-} from "../services/paymentService";
+import { User } from "../services/paymentService";
 
 // Mock DashboardLayout component until the real one is available
 const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
@@ -14,15 +9,7 @@ const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
 }) => <div className="dashboard-layout">{children}</div>;
 
 const SubscriptionPage = () => {
-  const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
-  const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(
-    null
-  );
-  const [customer, setCustomer] = useState<Customer | null>(null);
-  const [currentSubscription, setCurrentSubscription] =
-    useState<Subscription | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isCreatingCheckout, setIsCreatingCheckout] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Get auth context with proper typing
@@ -110,6 +97,8 @@ const SubscriptionPage = () => {
     };
   }, [user, navigate, authLoading]);
 
+  // Unused functions - commented out to avoid linter errors
+  /*
   const getBestValuePlan = (
     availablePlans: SubscriptionPlan[]
   ): SubscriptionPlan => {
@@ -136,7 +125,6 @@ const SubscriptionPage = () => {
     return pricePerMonth;
   };
 
-  // This function is now used in the JSX to display plan details
   const formatPlanDescription = (plan: SubscriptionPlan): string => {
     const pricePerMonth = plan.price / 100 / plan.intervalCount;
     const formattedPrice = `$${pricePerMonth.toFixed(0)}/${plan.interval}`;
@@ -194,6 +182,7 @@ const SubscriptionPage = () => {
       setIsLoading(false);
     }
   };
+  */
 
   // Render a loading state while authentication is in progress
   if (authLoading) {

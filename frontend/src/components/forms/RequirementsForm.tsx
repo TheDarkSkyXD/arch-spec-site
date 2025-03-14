@@ -15,11 +15,10 @@ import { aiService } from "../../services/aiService";
 import { useToast } from "../../contexts/ToastContext";
 import { useSubscription } from "../../contexts/SubscriptionContext";
 import { Requirements } from "../../types/templates";
-
-// Import shadcn UI components
 import Button from "../ui/Button";
 import Input from "../ui/Input";
 import Card from "../ui/Card";
+import { PremiumFeatureBadge } from "../ui/index";
 
 interface RequirementsFormProps {
   initialData?: Partial<Requirements>;
@@ -582,12 +581,7 @@ export default function RequirementsForm({
           </Button>
         </div>
         <div className="flex justify-end items-center gap-3 mb-4">
-          {!hasAIFeatures && (
-            <div className="mr-2 text-sm text-muted-foreground flex items-center">
-              <span className="mr-1">✨</span>
-              <span>AI features available with Premium plan</span>
-            </div>
-          )}
+          {!hasAIFeatures && <PremiumFeatureBadge />}
           <Button
             type="button"
             onClick={addAIRequirements}

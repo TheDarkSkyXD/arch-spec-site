@@ -29,6 +29,7 @@ import Input from "../ui/Input";
 import { Textarea } from "../ui/textarea";
 import { Checkbox } from "../ui/checkbox";
 import Card from "../ui/Card";
+import PremiumFeatureBadge from "../ui/PremiumFeatureBadge";
 
 interface ApiEndpointsFormProps {
   initialData?: Api;
@@ -579,12 +580,7 @@ export default function ApiEndpointsForm({
 
         {/* AI Enhancement Buttons */}
         <div className="flex justify-end items-center gap-3 mb-4">
-          {!hasAIFeatures && (
-            <div className="mr-2 text-sm text-muted-foreground flex items-center">
-              <span className="mr-1">✨</span>
-              <span>AI features available with Premium plan</span>
-            </div>
-          )}
+          {!hasAIFeatures && <PremiumFeatureBadge />}
           <Button
             type="button"
             onClick={addAIEndpoints}

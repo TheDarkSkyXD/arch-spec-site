@@ -45,6 +45,7 @@ import {
   EntityField,
 } from "../../types/templates";
 import { Textarea } from "../ui/textarea";
+import { PremiumFeatureBadge } from "../ui/index";
 
 interface DataModelFormProps {
   initialData?: Partial<DataModel>;
@@ -689,12 +690,7 @@ export default function DataModelForm({
             <div className="grid grid-cols-1 gap-6">
               {/* AI Enhancement Buttons */}
               <div className="flex justify-end items-center gap-3 mb-4">
-                {!hasAIFeatures && (
-                  <div className="mr-2 text-sm text-muted-foreground flex items-center">
-                    <span className="mr-1">✨</span>
-                    <span>AI features available with Premium plan</span>
-                  </div>
-                )}
+                {!hasAIFeatures && <PremiumFeatureBadge />}
                 <Button
                   type="button"
                   onClick={addAIEntities}

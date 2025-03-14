@@ -32,6 +32,7 @@ import { Select } from "../ui/select";
 import { Badge } from "../ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { projectsService } from "../../services/projectsService";
+import PremiumFeatureBadge from "../ui/PremiumFeatureBadge";
 
 interface TestCasesFormProps {
   initialData?: TestCasesData;
@@ -668,12 +669,7 @@ export default function TestCasesForm({
 
         {/* AI Generation Buttons */}
         <div className="flex justify-end items-center gap-3 mb-4">
-          {!hasAIFeatures && (
-            <div className="mr-2 text-sm text-muted-foreground flex items-center">
-              <span className="mr-1">✨</span>
-              <span>AI features available with Premium plan</span>
-            </div>
-          )}
+          {!hasAIFeatures && <PremiumFeatureBadge />}
           <Button
             type="button"
             onClick={generateTestCases}

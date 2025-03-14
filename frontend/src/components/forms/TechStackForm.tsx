@@ -46,6 +46,7 @@ import { useToast } from "../../contexts/ToastContext";
 import { projectsService } from "../../services/projectsService";
 import { requirementsService } from "../../services/requirementsService";
 import { useSubscription } from "../../contexts/SubscriptionContext";
+import { PremiumFeatureBadge } from "../ui/index";
 
 interface TechStackFormProps {
   initialData?: ProjectTechStack;
@@ -625,12 +626,7 @@ const TechStackForm = ({
 
       {/* AI Enhancement Button */}
       <div className="flex justify-end items-center gap-3 mb-4">
-        {!hasAIFeatures && (
-          <div className="mr-2 text-sm text-muted-foreground flex items-center">
-            <span className="mr-1">✨</span>
-            <span>AI features available with Premium plan</span>
-          </div>
-        )}
+        {!hasAIFeatures && <PremiumFeatureBadge />}
         <Button
           type="button"
           onClick={enhanceTechStack}
@@ -655,9 +651,7 @@ const TechStackForm = ({
               {hasAIFeatures ? (
                 <Sparkles className="h-4 w-4" />
               ) : (
-                <>
-                  <Lock className="h-4 w-4" />
-                </>
+                <Lock className="h-4 w-4" />
               )}
               <span>AI Recommendations</span>
             </>

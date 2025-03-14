@@ -22,6 +22,7 @@ import { Textarea } from "../ui/textarea";
 import Button from "../ui/Button";
 import Input from "../ui/Input";
 import Card from "../ui/Card";
+import PremiumFeatureBadge from "../ui/PremiumFeatureBadge";
 
 const projectBasicsSchema = z.object({
   name: z.string().min(3, "Project name must be at least 3 characters"),
@@ -382,12 +383,7 @@ const ProjectBasicsForm = ({
           <Label htmlFor="description">Description</Label>
 
           <div className="flex justify-end items-center gap-3 mb-1">
-            {!hasAIFeatures && (
-              <div className="mr-2 text-sm text-muted-foreground flex items-center">
-                <span className="mr-1">✨</span>
-                <span>AI features available with Premium plan</span>
-              </div>
-            )}
+            {!hasAIFeatures && <PremiumFeatureBadge />}
             <Button
               type="button"
               variant="outline"
@@ -439,12 +435,7 @@ const ProjectBasicsForm = ({
           <Label htmlFor="business_goals">Business Goals</Label>
 
           <div className="flex justify-end items-center gap-3">
-            {!hasAIFeatures && (
-              <div className="mr-2 text-sm text-muted-foreground flex items-center">
-                <span className="mr-1">✨</span>
-                <span>AI features available with Premium plan</span>
-              </div>
-            )}
+            {!hasAIFeatures && <PremiumFeatureBadge />}
             <Button
               type="button"
               variant="outline"
@@ -540,38 +531,42 @@ const ProjectBasicsForm = ({
       <div>
         <div className="flex justify-between items-center mb-1">
           <Label htmlFor="target_users">Target Users</Label>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={enhanceTargetUsers}
-            disabled={
-              isEnhancingTargetUsers || !currentDescription || !hasAIFeatures
-            }
-            className={`text-xs flex items-center gap-1 ${
-              !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
-            }`}
-            title={
-              hasAIFeatures
-                ? currentTargetUsers
-                  ? "Enhance target users with AI"
-                  : "Generate target users with AI"
-                : "Upgrade to Premium to use AI-powered features"
-            }
-          >
-            {isEnhancingTargetUsers ? (
-              <Loader2 size={14} className="animate-spin mr-1" />
-            ) : (
-              <>
-                {hasAIFeatures ? (
-                  <Users size={14} className="mr-1" />
-                ) : (
-                  <Lock size={14} className="mr-1" />
-                )}
-              </>
-            )}
-            {currentTargetUsers ? "Enhance Users" : "Generate Users"}
-          </Button>
+
+          <div className="flex justify-end items-center gap-3 mb-1">
+            {!hasAIFeatures && <PremiumFeatureBadge />}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={enhanceTargetUsers}
+              disabled={
+                isEnhancingTargetUsers || !currentDescription || !hasAIFeatures
+              }
+              className={`text-xs flex items-center gap-1 ${
+                !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+              title={
+                hasAIFeatures
+                  ? currentTargetUsers
+                    ? "Enhance target users with AI"
+                    : "Generate target users with AI"
+                  : "Upgrade to Premium to use AI-powered features"
+              }
+            >
+              {isEnhancingTargetUsers ? (
+                <Loader2 size={14} className="animate-spin mr-1" />
+              ) : (
+                <>
+                  {hasAIFeatures ? (
+                    <Users size={14} className="mr-1" />
+                  ) : (
+                    <Lock size={14} className="mr-1" />
+                  )}
+                </>
+              )}
+              {currentTargetUsers ? "Enhance Users" : "Generate Users"}
+            </Button>
+          </div>
         </div>
 
         {isEnhancingTargetUsers && (
