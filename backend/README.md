@@ -44,10 +44,15 @@ pip install -r requirements.txt
 6. Create a `.env` file with the following content:
 
 ```
+# MongoDB credentials
 MONGODB_URI=mongodb://localhost:27017
 MONGODB_DB_NAME=archspec
+
+# Anthropic API credentials
 ANTHROPIC_API_KEY=your_anthropic_api_key_here
-ANTHROPIC_MODEL=claude-3-sonnet-20240229
+ANTHROPIC_MODEL=claude-3-7-sonnet-20250219
+ANTHROPIC_MAX_TOKENS=20000
+ANTHROPIC_TEMPERATURE=0.7
 
 # Firebase credentials (required for authentication)
 FIREBASE_TYPE=service_account

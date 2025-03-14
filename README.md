@@ -44,4 +44,24 @@ ArchSpec consists of four primary subsystems:
 
 ## Getting Started
 
-_Implementation details to be added as the project progresses._
+### Prerequisites
+
+- Node.js (v20+) with pnpm for frontend development
+- Python 3.12+ with uv for backend development
+- Docker and Docker Compose for containerized deployment
+- MongoDB (local instance or containerized)
+- Firebase project with Authentication configured
+
+### Development Setup
+
+See [dev-scripts-README.md](dev-scripts-README.md) for detailed development setup instructions.
+
+### Authentication
+
+This project uses Firebase Authentication. For authentication setup details, see [README-firebase-auth.md](README-firebase-auth.md).
+
+### Docker Deployment
+
+For Docker-based deployment instructions, including CI/CD with GitHub Actions, see the [Docker Deployment Guide](DOCKER-DEPLOYMENT.md).
+
+_Additional implementation details to be added as the project progresses._

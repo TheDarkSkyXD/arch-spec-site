@@ -1,0 +1,73 @@
+version: "3.8"
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # In production, this must be a publicly accessible URL that browsers can reach
+        VITE_API_URL: ${BACKEND_API_URL:-https://api.yourdomain.com}
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - archspec-network
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      # Only expose to localhost in production
+      - "127.0.0.1:8000:8000"
+    environment:
+      - MONGODB_URI=mongodb://mongo:27017
+      - MONGODB_DB_NAME=archspec
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - ANTHROPIC_MODEL=${ANTHROPIC_MODEL}
+      - ANTHROPIC_MAX_TOKENS=${ANTHROPIC_MAX_TOKENS}
+      - ANTHROPIC_TEMPERATURE=${ANTHROPIC_TEMPERATURE}
+      - FIREBASE_TYPE=${FIREBASE_TYPE}
+      - FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID}
+      - FIREBASE_PRIVATE_KEY_ID=${FIREBASE_PRIVATE_KEY_ID}
+      - FIREBASE_PRIVATE_KEY=${FIREBASE_PRIVATE_KEY}
+      - FIREBASE_CLIENT_EMAIL=${FIREBASE_CLIENT_EMAIL}
+      - FIREBASE_CLIENT_ID=${FIREBASE_CLIENT_ID}
+      - FIREBASE_AUTH_URI=${FIREBASE_AUTH_URI}
+      - FIREBASE_TOKEN_URI=${FIREBASE_TOKEN_URI}
+      - FIREBASE_AUTH_PROVIDER_X509_CERT_URL=${FIREBASE_AUTH_PROVIDER_X509_CERT_URL}
+      - FIREBASE_CLIENT_X509_CERT_URL=${FIREBASE_CLIENT_X509_CERT_URL}
+      - FIREBASE_UNIVERSE_DOMAIN=${FIREBASE_UNIVERSE_DOMAIN}
+    depends_on:
+      - mongo
+    networks:
+      - archspec-network
+    volumes:
+      - backend-storage:/app/storage
+      - backend-temp:/app/temp
+    restart: unless-stopped
+
+  mongo:
+    image: mongo:6
+    # Not exposing mongo port in production for security
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - archspec-network
+    restart: unless-stopped
+    command: ["--auth", "--bind_ip_all"]
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-password}
+
+networks:
+  archspec-network:
+    driver: bridge
+
+volumes:
+  mongo-data:
+  backend-storage:
+  backend-temp:
