@@ -37,6 +37,14 @@ interface TestCasesFormProps {
   onSuccess?: (testCasesData: TestCasesData) => void;
 }
 
+type ScenarioType = {
+  name: string;
+  steps: Array<{
+    type: string;
+    text: string;
+  }>;
+};
+
 export default function TestCasesForm({
   initialData,
   projectId,
@@ -161,7 +169,7 @@ export default function TestCasesForm({
 
   const handleTestCaseFormChange = (
     field: string,
-    value: string | string[] | FeatureModule[]
+    value: string | string[] | FeatureModule[] | ScenarioType[]
   ) => {
     setTestCaseForm({
       ...testCaseForm,
@@ -1037,7 +1045,7 @@ export default function TestCasesForm({
                 <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700">
                   <Tabs defaultValue="scenario0">
                     <TabsList className="mb-2">
-                      {testCase.scenarios.map((scenario, scenarioIndex) => (
+                      {testCase.scenarios.map((_scenario, scenarioIndex) => (
                         <TabsTrigger
                           key={scenarioIndex}
                           value={`scenario${scenarioIndex}`}

@@ -42,7 +42,7 @@ export function generateTestCasesMarkdown(
     });
 
     // Add separator between test cases if not the last one
-    if (index < data.testCases.length - 1) {
+    if (data.testCases && index < data.testCases.length - 1) {
       markdown += `---\n\n`;
     }
   });
