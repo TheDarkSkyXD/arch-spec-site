@@ -16,6 +16,10 @@ from ..core.config import settings
 # Set up logger at module level
 logger = logging.getLogger(__name__)
 
+INTELLIGENT_MODEL = "claude-3-7-sonnet-20250219"
+BACKUP_MODEL = "claude-3-5-sonnet-20241022"
+FAST_MODEL = "claude-3-5-haiku-20241022"
+
 class SetEncoder(json.JSONEncoder):
     """JSON encoder that can handle sets."""
     
@@ -57,7 +61,7 @@ class AnthropicClient():
             self.max_tokens = settings.anthropic.max_tokens
             self.temperature = settings.anthropic.temperature
     
-    def generate_response(self, messages: List[Dict[str, str]], system: Optional[str] = None) -> str:
+    def generate_response(self, messages: List[Dict[str, str]], system: Optional[str] = None, model: Optional[str] = None) -> str:
         """Generate a response from Claude given a conversation history.
         
         Args:
@@ -65,7 +69,8 @@ class AnthropicClient():
                 Each message should have a 'role' (either 'user' or 'assistant')
                 and 'content' (the text of the message).
             system: Optional system prompt to provide context to Claude.
-        
+            model: Optional model to use for generating responses.
+            
         Returns:
             The generated response from Claude.
         
@@ -77,8 +82,8 @@ class AnthropicClient():
             
         try:
             params: Dict[str, Any] = {
-                "model": self.model,
-                "max_tokens": self.max_tokens,
+                "model": model if model else self.model,
+                "max_tokens": 8192 if model != INTELLIGENT_MODEL else self.max_tokens,
                 "temperature": self.temperature,
                 "messages": messages
             }
@@ -94,7 +99,7 @@ class AnthropicClient():
         except Exception as e:
             raise Exception(f"Error calling Anthropic API: {str(e)}")
     
-    def stream_response(self, messages: List[Dict[str, str]], system: Optional[str] = None) -> Generator[str, None, None]:
+    def stream_response(self, messages: List[Dict[str, str]], system: Optional[str] = None, model: Optional[str] = None) -> Generator[str, None, None]:
         """Stream a response from Claude given a conversation history.
         
         Args:
@@ -102,7 +107,8 @@ class AnthropicClient():
                 Each message should have a 'role' (either 'user' or 'assistant')
                 and 'content' (the text of the message).
             system: Optional system prompt to provide context to Claude.
-        
+            model: Optional model to use for generating responses.
+            
         Yields:
             Chunks of the generated response from Claude.
         
@@ -115,8 +121,8 @@ class AnthropicClient():
             
         try:
             params: Dict[str, Any] = {
-                "model": self.model,
-                "max_tokens": self.max_tokens,
+                "model": model if model else self.model,
+                "max_tokens": 8192 if model != INTELLIGENT_MODEL else self.max_tokens,
                 "temperature": self.temperature,
                 "messages": messages,
                 "stream": True
@@ -132,7 +138,7 @@ class AnthropicClient():
         except Exception as e:
             raise Exception(f"Error streaming from Anthropic API: {str(e)}")
     
-    def get_tool_use_response(self, system_prompt: str, tools: List[Dict[str, Any]], messages: List[Dict[str, str]]) -> Dict[str, Any]:
+    def get_tool_use_response(self, system_prompt: str, tools: List[Dict[str, Any]], messages: List[Dict[str, str]], model: Optional[str] = None) -> Dict[str, Any]:
         """Process a response from the Anthropic API that may contain tool use.
         
         This method handles the asynchronous nature of tool use in the Anthropic API.
@@ -143,21 +149,22 @@ class AnthropicClient():
             system_prompt: The system prompt to provide context to Claude.
             tools: The tools to make available to Claude.
             messages: A list of messages in the conversation history.
-            
+            model: Optional model to use for generating responses.
+
         Returns:
             The tool input if found, or a dictionary with an error message if not.
         """
         try:
             params = {
-                "model": self.model,
-                "max_tokens": self.max_tokens,
+                "model": model if model else self.model,
+                "max_tokens": 8192 if model != INTELLIGENT_MODEL else self.max_tokens,
                 "temperature": self.temperature,
                 "system": system_prompt,
                 "tools": tools,
                 "messages": messages,
             }
             
-            if self.model == "claude-3-7-sonnet-20250219":
+            if model == INTELLIGENT_MODEL:
                 params["betas"] = ["token-efficient-tools-2025-02-19"]
                 logger.info(f"Params using Claude 3.7 and token-efficient-tools-2025-02-19: {params}")
                 

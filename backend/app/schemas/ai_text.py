@@ -751,5 +751,55 @@ class TestCasesEnhanceResponse(BaseModel):
     data: TestCasesData = Field(
         ...,
         title="Test Cases Data",
-        description="AI-generated test cases in Gherkin format",
+        description="The structured test cases data"
+    )
+
+
+class EnhanceReadmeRequest(BaseModel):
+    """Request model for enhancing project README."""
+    
+    project_name: str = Field(
+        ...,
+        title="Project Name",
+        description="The name of the project",
+    )
+    
+    project_description: str = Field(
+        ...,
+        title="Project Description",
+        description="The project description",
+    )
+    
+    business_goals: List[str] = Field(
+        ...,
+        title="Business Goals",
+        description="List of business goals for the project",
+    )
+    
+    requirements: Dict[str, List[str]] = Field(
+        ...,
+        title="Requirements",
+        description="Dictionary of project requirements (functional and non-functional)",
+    )
+    
+    features: Dict[str, Any] = Field(
+        ...,
+        title="Features",
+        description="Dictionary of project features (core and optional modules)",
+    )
+    
+    tech_stack: Dict[str, Any] = Field(
+        ...,
+        title="Tech Stack",
+        description="Dictionary of technology stack recommendations",
+    )
+
+
+class EnhanceReadmeResponse(BaseModel):
+    """Response model for enhanced README."""
+    
+    enhanced_readme: str = Field(
+        ...,
+        title="Enhanced README",
+        description="The AI-enhanced README markdown content",
     ) 

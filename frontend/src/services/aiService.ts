@@ -187,6 +187,26 @@ interface TestCasesEnhanceResponse {
   data: TestCasesData;
 }
 
+// Add new interfaces for README enhancement
+interface EnhanceReadmeRequest {
+  project_name: string;
+  project_description: string;
+  business_goals: string[];
+  requirements: {
+    functional: string[];
+    non_functional: string[];
+  };
+  features: {
+    coreModules: FeatureModule[];
+    optionalModules?: FeatureModule[];
+  };
+  tech_stack: Record<string, unknown>;
+}
+
+interface EnhanceReadmeResponse {
+  enhanced_readme: string;
+}
+
 class AIService {
   /**
    * Enhance a project description using AI.
@@ -512,6 +532,51 @@ class AIService {
       return null;
     } catch (error) {
       console.error("Error enhancing test cases:", error);
+      return null;
+    }
+  }
+
+  /**
+   * Enhance README markdown content using AI.
+   *
+   * @param projectName The project name
+   * @param projectDescription The project description
+   * @param businessGoals The business goals
+   * @param requirements The project requirements
+   * @param features The project features
+   * @param techStack The technology stack
+   * @returns The enhanced README content or null if an error occurred
+   */
+  async enhanceReadme(
+    projectName: string,
+    projectDescription: string,
+    businessGoals: string[],
+    requirements: {
+      functional: string[];
+      non_functional: string[];
+    },
+    features: {
+      coreModules: FeatureModule[];
+      optionalModules?: FeatureModule[];
+    },
+    techStack: Record<string, unknown>
+  ): Promise<string | null> {
+    try {
+      const response = await apiClient.post<EnhanceReadmeResponse>(
+        "/api/ai-text/enhance-readme",
+        {
+          project_name: projectName,
+          project_description: projectDescription,
+          business_goals: businessGoals,
+          requirements: requirements,
+          features: features,
+          tech_stack: techStack,
+        } as EnhanceReadmeRequest
+      );
+
+      return response.data.enhanced_readme;
+    } catch (error) {
+      console.error("Error enhancing README:", error);
       return null;
     }
   }

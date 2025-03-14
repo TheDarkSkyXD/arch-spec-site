@@ -252,4 +252,61 @@ def test_enhance_requirements_empty_requirements(mock_anthropic_client, test_cli
     assert len(args[0]) == 1
     assert "Project description" in args[0][0]["content"]
     assert "Business goals" in args[0][0]["content"]
-    assert "Original requirements:" in args[0][0]["content"] 
+    assert "Original requirements:" in args[0][0]["content"]
+
+
+@patch('app.api.routes.ai_text.AnthropicClient')
+async def test_enhance_readme(mock_anthropic_client, authorized_client):
+    # Mock AI client response
+    mock_client_instance = mock_anthropic_client.return_value
+    mock_client_instance.generate_response.return_value = "# Test Project\n\nThis is an AI-enhanced README"
+    
+    # Prepare test data
+    test_data = {
+        "project_name": "Test Project",
+        "project_description": "This is a test project",
+        "business_goals": ["Goal 1", "Goal 2"],
+        "requirements": {
+            "functional": ["Functional req 1"],
+            "non_functional": ["Non-functional req 1"]
+        },
+        "features": {
+            "coreModules": [
+                {
+                    "name": "Authentication",
+                    "description": "User authentication",
+                    "enabled": True,
+                    "optional": False
+                }
+            ],
+            "optionalModules": []
+        },
+        "tech_stack": {
+            "frontend": {
+                "framework": "React",
+                "language": "TypeScript"
+            },
+            "backend": {
+                "type": "API",
+                "service": "Node.js"
+            }
+        }
+    }
+    
+    # Make request
+    response = await authorized_client.post("/api/ai-text/enhance-readme", json=test_data)
+    
+    # Verify response
+    assert response.status_code == 200
+    response_data = response.json()
+    assert "enhanced_readme" in response_data
+    assert response_data["enhanced_readme"] == "# Test Project\n\nThis is an AI-enhanced README"
+    
+    # Verify AI client was called correctly
+    mock_client_instance.generate_response.assert_called_once()
+    args, kwargs = mock_client_instance.generate_response.call_args
+    assert len(args) == 2
+    messages = args[0]
+    assert len(messages) == 1
+    assert messages[0]["role"] == "user"
+    assert "Test Project" in messages[0]["content"] 

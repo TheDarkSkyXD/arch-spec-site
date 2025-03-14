@@ -9,6 +9,7 @@ import {
 } from "../../types/templates";
 import { FeaturesData } from "../featuresService";
 import { TestCasesData } from "../testCasesService";
+import { aiService } from "../aiService";
 import { generateApiEndpointsMarkdown } from "./apiEndpoints";
 import { generateDataModelMarkdown } from "./dataModel";
 import { generateFeaturesMarkdown } from "./features";
@@ -91,20 +92,63 @@ export async function generateMarkdownZip(
     zip.file(generateFileName(project.name, "test-cases"), testCasesMarkdown);
   }
 
-  // Generate a README file for the zip
-  const readme =
-    `# ${project.name} Project Specification\n\n` +
-    `This archive contains markdown files for all sections of the ${project.name} project specification.\n\n` +
-    `## Contents\n\n` +
-    `- Project Basics\n` +
-    `- Tech Stack\n` +
-    `- Requirements\n` +
-    `- Features\n` +
-    `- Pages\n` +
-    `- Data Model\n` +
-    `- API Endpoints\n` +
-    `- Test Cases\n\n` +
-    `Generated on: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`;
+  // Generate a README file for the zip using AI
+  let readme = "";
+
+  try {
+    // Attempt to generate an AI-enhanced README
+    const enhancedReadme = await aiService.enhanceReadme(
+      project.name,
+      project.description,
+      project.business_goals || [],
+      {
+        functional: requirements?.functional || [],
+        non_functional: requirements?.non_functional || [],
+      },
+      {
+        coreModules: features?.coreModules || [],
+        optionalModules: features?.optionalModules || [],
+      },
+      techStack ? { ...techStack } : {}
+    );
+
+    // Use the AI-enhanced README if available
+    if (enhancedReadme) {
+      readme = enhancedReadme;
+    } else {
+      // Fallback to basic README if AI enhancement fails
+      readme =
+        `# ${project.name} Project Specification\n\n` +
+        `This archive contains markdown files for all sections of the ${project.name} project specification.\n\n` +
+        `## Contents\n\n` +
+        `- Project Basics\n` +
+        `- Tech Stack\n` +
+        `- Requirements\n` +
+        `- Features\n` +
+        `- Pages\n` +
+        `- Data Model\n` +
+        `- API Endpoints\n` +
+        `- Test Cases\n\n` +
+        `Generated on: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`;
+    }
+  } catch (error) {
+    console.error("Error generating AI README:", error);
+
+    // Fallback to basic README if any error occurs
+    readme =
+      `# ${project.name} Project Specification\n\n` +
+      `This archive contains markdown files for all sections of the ${project.name} project specification.\n\n` +
+      `## Contents\n\n` +
+      `- Project Basics\n` +
+      `- Tech Stack\n` +
+      `- Requirements\n` +
+      `- Features\n` +
+      `- Pages\n` +
+      `- Data Model\n` +
+      `- API Endpoints\n` +
+      `- Test Cases\n\n` +
+      `Generated on: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`;
+  }
 
   zip.file("README.md", readme);
 

@@ -23,6 +23,7 @@ from app.ai.prompts.data_model import get_data_model_user_prompt
 from app.ai.prompts.api_endpoints import get_api_endpoints_user_prompt
 from app.ai.prompts.tech_stack import get_tech_stack_user_prompt
 from app.ai.prompts.test_cases import get_test_cases_user_prompt
+from app.ai.prompts.readme import readme_system_prompt, get_readme_user_prompt
 
 from ...schemas.ai_text import (
     DescriptionEnhanceRequest, 
@@ -50,9 +51,11 @@ from ...schemas.ai_text import (
     TechStackRecommendation,
     TestCasesEnhanceRequest,
     TestCasesEnhanceResponse,
-    TestCasesData
+    TestCasesData,
+    EnhanceReadmeRequest,
+    EnhanceReadmeResponse
 )
-from ...services.ai_service import AnthropicClient
+from ...services.ai_service import FAST_MODEL, AnthropicClient
 from ...core.firebase_auth import get_current_user
 
 logger = logging.getLogger(__name__)
@@ -163,7 +166,7 @@ async def enhance_project_description(
         
         # Generate the response
         messages = [{"role": "user", "content": user_message}]
-        response = client.generate_response(messages, system_prompt)
+        response = client.generate_response(messages, system_prompt, FAST_MODEL)
         
         # Return the enhanced description
         return DescriptionEnhanceResponse(enhanced_description=response)
@@ -213,7 +216,7 @@ async def enhance_business_goals(
         
         # Generate the response
         messages = [{"role": "user", "content": user_message}]
-        response = client.generate_response(messages, system_message)
+        response = client.generate_response(messages, system_message, FAST_MODEL)
         
         # Parse the bulleted list response into an array of goals
         enhanced_goals = []
@@ -287,7 +290,7 @@ async def enhance_target_users(
         
         # Generate the response
         messages = [{"role": "user", "content": user_message}]
-        response = client.generate_response(messages, system_message)
+        response = client.generate_response(messages, system_message, FAST_MODEL)
         
         # Return the enhanced target users description
         return TargetUsersEnhanceResponse(enhanced_target_users=response.strip())
@@ -739,4 +742,45 @@ async def generate_test_cases(
         return {"data": test_cases_data}
     except Exception as e:
         logger.error(f"Error generating test cases: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error generating test cases: {str(e)}") 
+        raise HTTPException(status_code=500, detail=f"Error generating test cases: {str(e)}")
+
+@router.post("/enhance-readme", response_model=EnhanceReadmeResponse)
+async def enhance_readme(
+    request: EnhanceReadmeRequest,
+    current_user: Dict[str, Any] = Depends(get_current_user)
+):
+    """
+    Enhance project README using AI.
+    
+    This endpoint takes project information including name, description, business goals,
+    requirements, features, and tech stack, and generates a comprehensive README markdown file.
+    """
+    try:
+        # Initialize the AI client
+        client = AnthropicClient()
+        
+        # Create the system message
+        system_message = readme_system_prompt()
+        
+        # Create the user message
+        user_message = get_readme_user_prompt(
+            request.project_name,
+            request.project_description,
+            request.business_goals,
+            request.requirements,
+            request.features,
+            request.tech_stack
+        )
+        
+        # Generate the response
+        messages = [{"role": "user", "content": user_message}]
+        response = client.generate_response(messages, system_message, FAST_MODEL)
+        
+        # Return the enhanced README
+        return EnhanceReadmeResponse(enhanced_readme=response.strip())
+    except Exception as e:
+        logger.error(f"Error generating README: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to generate README: {str(e)}"
+        ) 
