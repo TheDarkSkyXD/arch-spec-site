@@ -738,7 +738,7 @@ class TestCasesEnhanceRequest(BaseModel):
         description="The features implemented in the project",
     )
     
-    existing_test_cases: Optional[Dict[str, Any]] = Field(
+    existing_test_cases: Optional[List[Dict[str, Any]]] = Field(
         None,
         title="Existing Test Cases",
         description="Existing test cases that need enhancement",

@@ -81,5 +81,6 @@ def print_features_input_schema():
                 }
             },
             "required": ["data"]
-        }
+        },
+        "cache_control": {"type": "ephemeral"}
     }

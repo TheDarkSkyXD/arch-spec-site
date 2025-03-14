@@ -163,5 +163,6 @@ def print_tech_stack_input_schema():
                 }
             },
             "required": ["data"]
-        }
+        },
+        "cache_control": {"type": "ephemeral"}
     } 

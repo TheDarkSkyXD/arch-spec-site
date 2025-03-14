@@ -76,5 +76,6 @@ def print_test_cases_input_schema():
                 }
             },
             "required": ["data"]
-        }
+        },
+        "cache_control": {"type": "ephemeral"}
     } 

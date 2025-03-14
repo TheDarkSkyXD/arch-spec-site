@@ -51,5 +51,6 @@ def print_api_endpoints_input_schema():
                 }
             },
             "required": ["data"]
-        }
+        },
+        "cache_control": {"type": "ephemeral"}
     } 

@@ -101,5 +101,6 @@ def print_pages_input_schema():
               }
           },
           "required": ["data"]
-      }
+      },
+      "cache_control": {"type": "ephemeral"}
   }

@@ -107,5 +107,6 @@ def print_data_model_input_schema():
               }
           },
           "required": ["data"]
-      }
+      },
+      "cache_control": {"type": "ephemeral"}
   }

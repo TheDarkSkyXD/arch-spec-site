@@ -187,16 +187,6 @@ interface TestCasesEnhanceResponse {
   data: TestCasesData;
 }
 
-interface EnhanceTestCasesRequest {
-  existing_test_cases: GherkinTestCase[];
-  requirements: string[];
-  features: FeatureModule[];
-}
-
-interface EnhanceTestCasesResponse {
-  testCases: GherkinTestCase[];
-}
-
 class AIService {
   /**
    * Enhance a project description using AI.

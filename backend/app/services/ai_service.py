@@ -8,8 +8,7 @@ specifications.
 import json
 import logging
 from typing import List, Dict, Any, Optional, Generator
-import httpx
-from anthropic import Anthropic, DefaultHttpxClient
+from anthropic import Anthropic
 from anthropic.types import ContentBlockDeltaEvent
 
 from ..core.config import settings
@@ -44,20 +43,7 @@ class AnthropicClient():
     def __init__(self) -> None:
         """Initialize the Anthropic client."""
         try:
-            # Create a custom HTTP client with compatible configuration
-            # Avoid using socket_options which is causing compatibility issues
-            http_client = DefaultHttpxClient(
-                # Use a basic transport without socket_options
-                transport=httpx.HTTPTransport(),
-                # Set a reasonable timeout
-                timeout=httpx.Timeout(60.0)
-            )
-            
-            # Initialize the Anthropic client with the custom HTTP client
-            self.client = Anthropic(
-                api_key=settings.anthropic.api_key,
-                http_client=http_client
-            )
+            self.client = Anthropic(api_key=settings.anthropic.api_key)
             self.model = settings.anthropic.model
             self.max_tokens = settings.anthropic.max_tokens
             self.temperature = settings.anthropic.temperature
@@ -162,17 +148,25 @@ class AnthropicClient():
             The tool input if found, or a dictionary with an error message if not.
         """
         try:
-            # Create the message with specific parameter handling
-            # Note: We're ignoring type issues here as the Anthropic API expects these types
-            # but mypy doesn't recognize them correctly
-            response = self.client.messages.create(
-                model=self.model,
-                max_tokens=self.max_tokens,
-                temperature=self.temperature,
-                system=system_prompt,
-                tools=tools,  # type: ignore
-                messages=messages  # type: ignore
-            )
+            params = {
+                "model": self.model,
+                "max_tokens": self.max_tokens,
+                "temperature": self.temperature,
+                "system": system_prompt,
+                "tools": tools,
+                "messages": messages,
+            }
+            
+            if self.model == "claude-3-7-sonnet-20250219":
+                params["betas"] = ["token-efficient-tools-2025-02-19"]
+                logger.info(f"Params using Claude 3.7 and token-efficient-tools-2025-02-19: {params}")
+                
+                response = self.client.beta.messages.create(**params)
+            else:
+                logger.info(f"Params: {params}")
+                response = self.client.messages.create(**params)
+            
+            logger.info(f"Response: {response.model_dump_json()}")
 
             # Iterate through content blocks to find tool use
             for content_block in response.content:
