@@ -1,8 +1,10 @@
 import axios from "axios";
 import { getAuthToken } from "../services/auth";
 
-// Define API base URL
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+// Define API base URL based on environment
+const API_BASE_URL = import.meta.env.DEV
+  ? "http://localhost:8000" // Development
+  : ""; // Production - empty string means requests will be relative to current domain
 
 // Create axios instance with auth header
 const apiClient = axios.create({
