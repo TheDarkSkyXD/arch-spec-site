@@ -105,6 +105,8 @@ origins = [
     "http://localhost:5173",
     "https://localhost:3000",
     "https://localhost:5173",
+    "https://archspec.dev",
+    "https://www.archspec.dev",
 ]
 
 app.add_middleware(
