@@ -29,8 +29,8 @@ services:
       # Only expose to localhost in production
       - "127.0.0.1:8000:8000"
     environment:
-      - MONGODB_URI=mongodb://mongo:27017
-      - MONGODB_DB_NAME=archspec
+      - MONGODB_URI=mongodb://${MONGO_APP_USERNAME:-archspec_user}:${MONGO_APP_PASSWORD:-archspec_password}@mongo:27017/${MONGODB_DB_NAME:-archspec}?authSource=admin
+      - MONGODB_DB_NAME=${MONGODB_DB_NAME:-archspec}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       - ANTHROPIC_MODEL=${ANTHROPIC_MODEL}
       - ANTHROPIC_MAX_TOKENS=${ANTHROPIC_MAX_TOKENS}
@@ -71,6 +71,10 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:-admin}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-password}
+      MONGO_INITDB_DATABASE: ${MONGODB_DB_NAME:-archspec}
+      # Application-specific user credentials
+      MONGO_APP_USERNAME: ${MONGO_APP_USERNAME:-archspec_user}
+      MONGO_APP_PASSWORD: ${MONGO_APP_PASSWORD:-archspec_password}
 
 networks:
   archspec-network:
