@@ -4,7 +4,7 @@ import { getAuthToken } from "../services/auth";
 // Define API base URL based on environment
 const API_BASE_URL = import.meta.env.DEV
   ? "http://localhost:8000" // Development
-  : ""; // Production - empty string means requests will be relative to current domain
+  : import.meta.env.VITE_API_URL || "https://api.archspec.dev"; // Use env variable with fallback
 
 // Create axios instance with auth header
 const apiClient = axios.create({
