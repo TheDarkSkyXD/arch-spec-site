@@ -291,17 +291,181 @@ const LandingPage = () => {
               Choose Your Plan
             </p>
             <p className="mt-4 max-w-2xl text-xl text-slate-500 dark:text-slate-300 lg:mx-auto">
-              Whether you need a hosted solution or prefer to run it yourself,
-              we've got you covered.
+              Whether you're just getting started or need advanced AI-powered
+              capabilities, we have options for every team.
             </p>
           </div>
 
-          <div className="mt-16 space-y-12 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-x-8">
-            {/* SaaS Plan */}
+          <div className="mt-16 space-y-12 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-x-8">
+            {/* Free Plan */}
             <div className="relative p-8 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-2xl shadow-sm flex flex-col">
               <div className="flex-1">
                 <h3 className="text-xl font-semibold text-slate-900 dark:text-white">
-                  SaaS Solution
+                  Free Plan
+                </h3>
+                <p className="mt-4 flex items-baseline text-slate-900 dark:text-white">
+                  <span className="text-5xl font-extrabold tracking-tight">
+                    $0
+                  </span>
+                  <span className="ml-1 text-xl font-semibold">/month</span>
+                </p>
+                <p className="mt-6 text-slate-500 dark:text-slate-300">
+                  Perfect for individuals and small teams who want to create
+                  specifications manually.
+                </p>
+
+                <ul className="mt-6 space-y-4">
+                  <li className="flex items-start">
+                    <div className="flex-shrink-0">
+                      <svg
+                        className="h-6 w-6 text-green-500"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    </div>
+                    <p className="ml-3 text-base text-slate-700 dark:text-slate-300">
+                      Up to 5 active projects
+                    </p>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="flex-shrink-0">
+                      <svg
+                        className="h-6 w-6 text-green-500"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    </div>
+                    <p className="ml-3 text-base text-slate-700 dark:text-slate-300">
+                      Manual specification creation
+                    </p>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="flex-shrink-0">
+                      <svg
+                        className="h-6 w-6 text-green-500"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    </div>
+                    <p className="ml-3 text-base text-slate-700 dark:text-slate-300">
+                      Basic project templates
+                    </p>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="flex-shrink-0">
+                      <svg
+                        className="h-6 w-6 text-green-500"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    </div>
+                    <p className="ml-3 text-base text-slate-700 dark:text-slate-300">
+                      Cloud storage for specifications
+                    </p>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="flex-shrink-0">
+                      <svg
+                        className="h-6 w-6 text-green-500"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    </div>
+                    <p className="ml-3 text-base text-slate-700 dark:text-slate-300">
+                      Community support
+                    </p>
+                  </li>
+                  <li className="flex items-start opacity-50">
+                    <div className="flex-shrink-0">
+                      <svg
+                        className="h-6 w-6 text-slate-400"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </div>
+                    <p className="ml-3 text-base text-slate-700 dark:text-slate-300">
+                      No AI enhancement capabilities
+                    </p>
+                  </li>
+                </ul>
+              </div>
+
+              <Link
+                to="/register"
+                className="mt-8 block w-full bg-slate-600 dark:bg-slate-500 py-3 px-6 border border-transparent rounded-md text-center font-medium text-white hover:bg-slate-700 dark:hover:bg-slate-600"
+              >
+                Get Started Free
+              </Link>
+            </div>
+
+            {/* AI-powered Plan */}
+            <div className="relative p-8 bg-white dark:bg-slate-700 border-2 border-primary-500 dark:border-primary-400 rounded-2xl shadow-lg flex flex-col">
+              <div className="absolute top-0 right-0 -mt-3 mr-3 px-3 py-1 bg-primary-500 text-white text-xs font-bold rounded">
+                RECOMMENDED
+              </div>
+              <div className="flex-1">
+                <h3 className="text-xl font-semibold text-slate-900 dark:text-white">
+                  AI-Powered Premium
                 </h3>
                 <p className="mt-4 flex items-baseline text-slate-900 dark:text-white">
                   <span className="text-5xl font-extrabold tracking-tight">
@@ -310,8 +474,8 @@ const LandingPage = () => {
                   <span className="ml-1 text-xl font-semibold">/month</span>
                 </p>
                 <p className="mt-6 text-slate-500 dark:text-slate-300">
-                  The quickest way to get started with ArchSpec. Everything you
-                  need, no setup required.
+                  Unlock the full power of AI to create detailed specifications
+                  with minimal effort.
                 </p>
 
                 <ul className="mt-6 space-y-4">
@@ -414,6 +578,28 @@ const LandingPage = () => {
                       </svg>
                     </div>
                     <p className="ml-3 text-base text-slate-700 dark:text-slate-300">
+                      Premium project templates
+                    </p>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="flex-shrink-0">
+                      <svg
+                        className="h-6 w-6 text-green-500"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    </div>
+                    <p className="ml-3 text-base text-slate-700 dark:text-slate-300">
                       Cloud storage for all your specifications
                     </p>
                   </li>
@@ -465,7 +651,7 @@ const LandingPage = () => {
               </div>
 
               <Link
-                to="/register"
+                to="/register?checkout=true"
                 className="mt-8 block w-full bg-primary-600 py-3 px-6 border border-transparent rounded-md text-center font-medium text-white hover:bg-primary-700"
               >
                 Start Building Now
@@ -652,7 +838,7 @@ const LandingPage = () => {
             planning.
           </p>
           <Link
-            to="/register"
+            to="/register?checkout=true"
             className="mt-8 w-full inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-primary-600 bg-white hover:bg-primary-50 sm:w-auto"
           >
             Get Started Today

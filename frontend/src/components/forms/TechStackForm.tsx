@@ -24,7 +24,7 @@ import { aiService } from "../../services/aiService";
 import Button from "../ui/Button";
 import Card from "../ui/Card";
 // Import Lucide icons for AI enhancement buttons
-import { Loader2, Sparkles } from "lucide-react";
+import { Loader2, Sparkles, Lock } from "lucide-react";
 
 // Import schema
 import {
@@ -45,6 +45,8 @@ import { useToast } from "../../contexts/ToastContext";
 // Import services to fetch project info for AI enhancement
 import { projectsService } from "../../services/projectsService";
 import { requirementsService } from "../../services/requirementsService";
+import { useSubscription } from "../../contexts/SubscriptionContext";
+import { PremiumFeatureBadge } from "../ui/index";
 
 interface TechStackFormProps {
   initialData?: ProjectTechStack;
@@ -58,6 +60,7 @@ const TechStackForm = ({
   onSuccess,
 }: TechStackFormProps) => {
   const { showToast } = useToast();
+  const { hasAIFeatures } = useSubscription();
   // State for options
   const [techStackOptions, setTechStackOptions] =
     useState<TechStackData | null>(null);
@@ -347,6 +350,17 @@ const TechStackForm = ({
       return;
     }
 
+    // Check if user has access to AI features
+    if (!hasAIFeatures) {
+      showToast({
+        title: "Premium Feature",
+        description:
+          "AI enhancement is only available on Premium and Open Source plans. Please upgrade to use this feature.",
+        type: "warning",
+      });
+      return;
+    }
+
     if (!projectDescription) {
       showToast({
         title: "Warning",
@@ -612,13 +626,20 @@ const TechStackForm = ({
 
       {/* AI Enhancement Button */}
       <div className="flex justify-end items-center gap-3 mb-4">
+        {!hasAIFeatures && <PremiumFeatureBadge />}
         <Button
           type="button"
           onClick={enhanceTechStack}
-          disabled={isEnhancing || !projectId}
-          variant="outline"
-          className="flex items-center gap-2"
-          title="Replace tech stack with AI-generated recommendations"
+          disabled={isEnhancing || !projectId || !hasAIFeatures}
+          variant={hasAIFeatures ? "outline" : "ghost"}
+          className={`flex items-center gap-2 relative ${
+            !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
+          }`}
+          title={
+            hasAIFeatures
+              ? "Replace tech stack with AI-generated recommendations"
+              : "Upgrade to Premium to use AI-powered features"
+          }
         >
           {isEnhancing ? (
             <>
@@ -627,7 +648,11 @@ const TechStackForm = ({
             </>
           ) : (
             <>
-              <Sparkles className="h-4 w-4" />
+              {hasAIFeatures ? (
+                <Sparkles className="h-4 w-4" />
+              ) : (
+                <Lock className="h-4 w-4" />
+              )}
               <span>AI Recommendations</span>
             </>
           )}

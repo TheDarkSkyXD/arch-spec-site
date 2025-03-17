@@ -11,9 +11,9 @@ services:
     ports:
       - "80:80"
     environment:
-      - VIRTUAL_HOST: aiapparchitect.com,www.aiapparchitect.com
+      - VIRTUAL_HOST: archspec.dev,www.archspec.dev
       - VIRTUAL_PORT: 80
-      - LETSENCRYPT_HOST: aiapparchitect.com,www.aiapparchitect.com
+      - LETSENCRYPT_HOST: archspec.dev,www.archspec.dev
       - LETSENCRYPT_EMAIL: mamerto@codefrost.com
     depends_on:
       - backend
@@ -46,9 +46,9 @@ services:
       - FIREBASE_AUTH_PROVIDER_X509_CERT_URL=${FIREBASE_AUTH_PROVIDER_X509_CERT_URL}
       - FIREBASE_CLIENT_X509_CERT_URL=${FIREBASE_CLIENT_X509_CERT_URL}
       - FIREBASE_UNIVERSE_DOMAIN=${FIREBASE_UNIVERSE_DOMAIN}
-      - VIRTUAL_HOST: api.aiapparchitect.com,www.api.aiapparchitect.com
+      - VIRTUAL_HOST: api.archspec.dev,www.api.archspec.dev
       - VIRTUAL_PORT: 80
-      - LETSENCRYPT_HOST: api.aiapparchitect.com,www.api.aiapparchitect.com
+      - LETSENCRYPT_HOST: api.archspec.dev,www.api.archspec.dev
       - LETSENCRYPT_EMAIL: mamerto@codefrost.com
     depends_on:
       - mongo

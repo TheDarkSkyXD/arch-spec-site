@@ -9,6 +9,7 @@ import {
   RefreshCw,
   Plus,
   Tag,
+  Lock,
 } from "lucide-react";
 import {
   GherkinTestCase,
@@ -19,6 +20,7 @@ import { useToast } from "../../contexts/ToastContext";
 import { aiService } from "../../services/aiService";
 import { requirementsService } from "../../services/requirementsService";
 import { FeatureModule, featuresService } from "../../services/featuresService";
+import { useSubscription } from "../../contexts/SubscriptionContext";
 
 // Import shadcn UI components
 import Button from "../ui/Button";
@@ -30,6 +32,7 @@ import { Select } from "../ui/select";
 import { Badge } from "../ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { projectsService } from "../../services/projectsService";
+import PremiumFeatureBadge from "../ui/PremiumFeatureBadge";
 
 interface TestCasesFormProps {
   initialData?: TestCasesData;
@@ -51,6 +54,7 @@ export default function TestCasesForm({
   onSuccess,
 }: TestCasesFormProps) {
   const { showToast } = useToast();
+  const { hasAIFeatures } = useSubscription();
   const [testCases, setTestCases] = useState<GherkinTestCase[]>(
     initialData?.testCases || []
   );
@@ -438,6 +442,16 @@ export default function TestCasesForm({
       return;
     }
 
+    // Check if user has access to AI features
+    if (!hasAIFeatures) {
+      showToast({
+        title: "Premium Feature",
+        description: "Upgrade to Premium to use AI-powered features",
+        type: "info",
+      });
+      return;
+    }
+
     if (projectRequirements.length === 0 && projectFeatures.length === 0) {
       showToast({
         title: "Warning",
@@ -492,6 +506,16 @@ export default function TestCasesForm({
         title: "Error",
         description: "Project must be saved before test cases can be enhanced",
         type: "error",
+      });
+      return;
+    }
+
+    // Check if user has access to AI features
+    if (!hasAIFeatures) {
+      showToast({
+        title: "Premium Feature",
+        description: "Upgrade to Premium to use AI-powered features",
+        type: "info",
       });
       return;
     }
@@ -645,13 +669,25 @@ export default function TestCasesForm({
 
         {/* AI Generation Buttons */}
         <div className="flex justify-end items-center gap-3 mb-4">
+          {!hasAIFeatures && <PremiumFeatureBadge />}
           <Button
             type="button"
             onClick={generateTestCases}
-            disabled={isGeneratingTestCases || isEnhancing || !projectId}
-            variant="outline"
-            className="flex items-center gap-2"
-            title="Generate new test cases based on requirements and features"
+            disabled={
+              isGeneratingTestCases ||
+              isEnhancing ||
+              !projectId ||
+              !hasAIFeatures
+            }
+            variant={hasAIFeatures ? "outline" : "ghost"}
+            className={`flex items-center gap-2 relative ${
+              !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+            title={
+              hasAIFeatures
+                ? "Generate new test cases based on requirements and features"
+                : "Upgrade to Premium to use AI-powered features"
+            }
           >
             {isGeneratingTestCases ? (
               <>
@@ -660,7 +696,11 @@ export default function TestCasesForm({
               </>
             ) : (
               <>
-                <Sparkles className="h-4 w-4" />
+                {hasAIFeatures ? (
+                  <Sparkles className="h-4 w-4" />
+                ) : (
+                  <Lock className="h-4 w-4" />
+                )}
                 <span>Generate Test Cases</span>
               </>
             )}
@@ -672,11 +712,18 @@ export default function TestCasesForm({
               isEnhancing ||
               isGeneratingTestCases ||
               !projectId ||
-              testCases.length === 0
+              testCases.length === 0 ||
+              !hasAIFeatures
             }
-            variant="outline"
-            className="flex items-center gap-2"
-            title="Enhance existing test cases with AI"
+            variant={hasAIFeatures ? "outline" : "ghost"}
+            className={`flex items-center gap-2 relative ${
+              !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+            title={
+              hasAIFeatures
+                ? "Enhance existing test cases with AI"
+                : "Upgrade to Premium to use AI-powered features"
+            }
           >
             {isEnhancing ? (
               <>
@@ -685,7 +732,11 @@ export default function TestCasesForm({
               </>
             ) : (
               <>
-                <RefreshCw className="h-4 w-4" />
+                {hasAIFeatures ? (
+                  <RefreshCw className="h-4 w-4" />
+                ) : (
+                  <Lock className="h-4 w-4" />
+                )}
                 <span>Enhance Test Cases</span>
               </>
             )}

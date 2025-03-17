@@ -58,6 +58,13 @@ try:
     except Exception as e:
         logger.error(f"Failed to load AI Text router: {str(e)}")
     
+    try:
+        from .endpoints import payments
+        api_router.include_router(payments.router, prefix="/payments", tags=["payments"])
+        logger.info("Payments router loaded successfully")
+    except Exception as e:
+        logger.error(f"Failed to load Payments router: {str(e)}")
+    
     logger.info("API routes imported successfully")
 except Exception as e:
     logger.error(f"Failed to import API routes: {str(e)}") 

@@ -12,6 +12,7 @@ import {
   Plus,
   Sparkles,
   RefreshCw,
+  Lock,
 } from "lucide-react";
 import { Pages } from "../../types/templates";
 import { pagesService } from "../../services/pagesService";
@@ -21,12 +22,14 @@ import { featuresService } from "../../services/featuresService";
 import { requirementsService } from "../../services/requirementsService";
 import { aiService } from "../../services/aiService";
 import { PageComponent } from "../../services/aiService";
+import { useSubscription } from "../../contexts/SubscriptionContext";
 
 // Import shadcn UI components
 import Button from "../ui/Button";
 import Input from "../ui/Input";
 import Card from "../ui/Card";
 import { Label } from "../ui/label";
+import { PremiumFeatureBadge } from "../ui/index";
 
 interface PagesFormProps {
   initialData?: Pages;
@@ -40,6 +43,7 @@ export default function PagesForm({
   onSuccess,
 }: PagesFormProps) {
   const { showToast } = useToast();
+  const { hasAIFeatures } = useSubscription();
   const [publicPages, setPublicPages] = useState<PageComponent[]>(
     initialData?.public || []
   );
@@ -178,6 +182,16 @@ export default function PagesForm({
 
   // Function to enhance pages using AI (replace existing pages)
   const enhancePages = async () => {
+    // Return early if the user doesn't have access to AI features
+    if (!hasAIFeatures) {
+      showToast({
+        title: "Premium Feature",
+        description: "Upgrade to Premium to use AI-powered features",
+        type: "info",
+      });
+      return;
+    }
+
     if (!projectId) {
       showToast({
         title: "Error",
@@ -260,6 +274,16 @@ export default function PagesForm({
 
   // Function to add AI-generated pages without replacing existing ones
   const addAIPages = async () => {
+    // Return early if the user doesn't have access to AI features
+    if (!hasAIFeatures) {
+      showToast({
+        title: "Premium Feature",
+        description: "Upgrade to Premium to use AI-powered features",
+        type: "info",
+      });
+      return;
+    }
+
     if (!projectId) {
       showToast({
         title: "Error",
@@ -939,13 +963,22 @@ export default function PagesForm({
 
         {/* AI Enhancement Buttons */}
         <div className="flex justify-end items-center gap-3 mb-4">
+          {!hasAIFeatures && <PremiumFeatureBadge />}
           <Button
             type="button"
             onClick={addAIPages}
-            disabled={isAddingPages || isEnhancing || !projectId}
-            variant="outline"
-            className="flex items-center gap-2"
-            title="Generate new pages to complement existing ones"
+            disabled={
+              isAddingPages || isEnhancing || !projectId || !hasAIFeatures
+            }
+            variant={hasAIFeatures ? "outline" : "ghost"}
+            className={`flex items-center gap-2 relative ${
+              !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+            title={
+              hasAIFeatures
+                ? "Generate additional pages to complement existing ones"
+                : "Upgrade to Premium to use AI-powered features"
+            }
           >
             {isAddingPages ? (
               <>
@@ -954,7 +987,11 @@ export default function PagesForm({
               </>
             ) : (
               <>
-                <Sparkles className="h-4 w-4" />
+                {hasAIFeatures ? (
+                  <Sparkles className="h-4 w-4" />
+                ) : (
+                  <Lock className="h-4 w-4" />
+                )}
                 <span>Add AI Pages</span>
               </>
             )}
@@ -962,10 +999,18 @@ export default function PagesForm({
           <Button
             type="button"
             onClick={enhancePages}
-            disabled={isEnhancing || isAddingPages || !projectId}
-            variant="outline"
-            className="flex items-center gap-2"
-            title="Replace all pages with AI-generated ones"
+            disabled={
+              isEnhancing || isAddingPages || !projectId || !hasAIFeatures
+            }
+            variant={hasAIFeatures ? "outline" : "ghost"}
+            className={`flex items-center gap-2 relative ${
+              !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+            title={
+              hasAIFeatures
+                ? "Replace all pages with AI-generated ones"
+                : "Upgrade to Premium to use AI-powered features"
+            }
           >
             {isEnhancing ? (
               <>
@@ -974,7 +1019,11 @@ export default function PagesForm({
               </>
             ) : (
               <>
-                <RefreshCw className="h-4 w-4" />
+                {hasAIFeatures ? (
+                  <RefreshCw className="h-4 w-4" />
+                ) : (
+                  <Lock className="h-4 w-4" />
+                )}
                 <span>Replace All</span>
               </>
             )}

@@ -21,6 +21,7 @@ import { projectsService } from "../../services/projectsService";
 import { featuresService } from "../../services/featuresService";
 import { dataModelService } from "../../services/dataModelService";
 import { requirementsService } from "../../services/requirementsService";
+import { useSubscription } from "../../contexts/SubscriptionContext";
 
 // Import shadcn UI components
 import Button from "../ui/Button";
@@ -28,6 +29,7 @@ import Input from "../ui/Input";
 import { Textarea } from "../ui/textarea";
 import { Checkbox } from "../ui/checkbox";
 import Card from "../ui/Card";
+import PremiumFeatureBadge from "../ui/PremiumFeatureBadge";
 
 interface ApiEndpointsFormProps {
   initialData?: Api;
@@ -41,6 +43,7 @@ export default function ApiEndpointsForm({
   onSuccess,
 }: ApiEndpointsFormProps) {
   const { showToast } = useToast();
+  const { hasAIFeatures } = useSubscription();
   const [endpoints, setEndpoints] = useState<ApiEndpoint[]>(
     initialData?.endpoints || []
   );
@@ -81,6 +84,16 @@ export default function ApiEndpointsForm({
         title: "Error",
         description: "Project must be saved before endpoints can be enhanced",
         type: "error",
+      });
+      return;
+    }
+
+    // Check if user has access to AI features
+    if (!hasAIFeatures) {
+      showToast({
+        title: "Premium Feature",
+        description: "Upgrade to Premium to use AI-powered features",
+        type: "info",
       });
       return;
     }
@@ -152,6 +165,16 @@ export default function ApiEndpointsForm({
       return;
     }
 
+    // Check if user has access to AI features
+    if (!hasAIFeatures) {
+      showToast({
+        title: "Premium Feature",
+        description: "Upgrade to Premium to use AI-powered features",
+        type: "info",
+      });
+      return;
+    }
+
     if (!projectDescription) {
       showToast({
         title: "Warning",
@@ -163,7 +186,6 @@ export default function ApiEndpointsForm({
 
     setIsAddingEndpoints(true);
     try {
-      // When adding new endpoints, we don't pass the existing endpoints to avoid duplication
       const enhancedEndpoints = await aiService.enhanceApiEndpoints(
         projectDescription,
         features,
@@ -558,13 +580,22 @@ export default function ApiEndpointsForm({
 
         {/* AI Enhancement Buttons */}
         <div className="flex justify-end items-center gap-3 mb-4">
+          {!hasAIFeatures && <PremiumFeatureBadge />}
           <Button
             type="button"
             onClick={addAIEndpoints}
-            disabled={isAddingEndpoints || isEnhancing || !projectId}
-            variant="outline"
-            className="flex items-center gap-2"
-            title="Generate new endpoints to complement existing ones"
+            disabled={
+              isAddingEndpoints || isEnhancing || !projectId || !hasAIFeatures
+            }
+            variant={hasAIFeatures ? "outline" : "ghost"}
+            className={`flex items-center gap-2 relative ${
+              !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+            title={
+              hasAIFeatures
+                ? "Generate new endpoints to complement existing ones"
+                : "Upgrade to Premium to use AI-powered features"
+            }
           >
             {isAddingEndpoints ? (
               <>
@@ -573,7 +604,11 @@ export default function ApiEndpointsForm({
               </>
             ) : (
               <>
-                <Sparkles className="h-4 w-4" />
+                {hasAIFeatures ? (
+                  <Sparkles className="h-4 w-4" />
+                ) : (
+                  <Lock className="h-4 w-4" />
+                )}
                 <span>Add AI Endpoints</span>
               </>
             )}
@@ -581,10 +616,18 @@ export default function ApiEndpointsForm({
           <Button
             type="button"
             onClick={enhanceEndpoints}
-            disabled={isEnhancing || isAddingEndpoints || !projectId}
-            variant="outline"
-            className="flex items-center gap-2"
-            title="Replace all endpoints with AI-generated ones"
+            disabled={
+              isEnhancing || isAddingEndpoints || !projectId || !hasAIFeatures
+            }
+            variant={hasAIFeatures ? "outline" : "ghost"}
+            className={`flex items-center gap-2 relative ${
+              !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+            title={
+              hasAIFeatures
+                ? "Replace all endpoints with AI-generated ones"
+                : "Upgrade to Premium to use AI-powered features"
+            }
           >
             {isEnhancing ? (
               <>
@@ -593,7 +636,11 @@ export default function ApiEndpointsForm({
               </>
             ) : (
               <>
-                <RefreshCw className="h-4 w-4" />
+                {hasAIFeatures ? (
+                  <RefreshCw className="h-4 w-4" />
+                ) : (
+                  <Lock className="h-4 w-4" />
+                )}
                 <span>Replace All</span>
               </>
             )}

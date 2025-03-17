@@ -1,5 +1,5 @@
 from datetime import datetime, UTC
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Literal
 from pydantic import BaseModel, Field, EmailStr, ConfigDict
 from bson import ObjectId
 
@@ -34,6 +34,10 @@ class UserUpdate(BaseModel):
     display_name: Optional[str] = None
     photo_url: Optional[str] = None
     settings: Optional[Dict[str, Any]] = None
+    plan: Optional[Literal["free", "premium", "open_source"]] = None
+    subscription_id: Optional[str] = None
+    ai_credits: Optional[int] = None
+    ai_credits_used: Optional[int] = None
     
 
 class UserInDB(UserBase):
@@ -45,6 +49,10 @@ class UserInDB(UserBase):
     last_login: Optional[datetime] = None
     is_active: bool = True
     settings: Dict[str, Any] = Field(default_factory=dict)
+    plan: Literal["free", "premium", "open_source"] = Field(default="free", description="User's subscription plan")
+    subscription_id: Optional[str] = Field(None, description="ID of the user's subscription if applicable")
+    ai_credits: int = Field(default=0, description="Available AI enhancement credits")
+    ai_credits_used: int = Field(default=0, description="AI enhancement credits used so far")
     
     model_config = ConfigDict(
         populate_by_name=True,
@@ -60,7 +68,11 @@ class UserInDB(UserBase):
                 "updated_at": "2023-01-01T00:00:00",
                 "last_login": "2023-01-01T00:00:00",
                 "is_active": True,
-                "settings": {"theme": "dark"}
+                "settings": {"theme": "dark"},
+                "plan": "free",
+                "subscription_id": None,
+                "ai_credits": 0,
+                "ai_credits_used": 0
             }
         }
     )
@@ -76,6 +88,10 @@ class UserResponse(BaseModel):
     updated_at: datetime
     last_login: Optional[datetime] = None
     settings: Dict[str, Any] = Field(default_factory=dict)
+    plan: Literal["free", "premium", "open_source"] = Field(default="free")
+    subscription_id: Optional[str] = None
+    ai_credits: int = Field(default=0)
+    ai_credits_used: int = Field(default=0)
     
     model_config = ConfigDict(
         populate_by_name=True,

@@ -10,6 +10,8 @@ import {
   Trash2,
   Sparkles,
   RefreshCw,
+  Lock,
+  Tag,
 } from "lucide-react";
 import {
   FeatureModule,
@@ -20,6 +22,8 @@ import { useToast } from "../../contexts/ToastContext";
 import { projectsService } from "../../services/projectsService";
 import { requirementsService } from "../../services/requirementsService";
 import { aiService } from "../../services/aiService";
+import { useSubscription } from "../../contexts/SubscriptionContext";
+import { PremiumFeatureBadge } from "../ui/index";
 
 // Import shadcn UI components
 import Button from "../ui/Button";
@@ -42,6 +46,7 @@ export default function FeaturesForm({
   onSuccess,
 }: FeaturesFormProps) {
   const { showToast } = useToast();
+  const { hasAIFeatures } = useSubscription();
   const [coreModules, setCoreModules] = useState<FeatureModule[]>(
     initialData?.coreModules || []
   );
@@ -79,6 +84,7 @@ export default function FeaturesForm({
   const [projectDescription, setProjectDescription] = useState<string>("");
   const [businessGoals, setBusinessGoals] = useState<string[]>([]);
   const [requirements, setRequirements] = useState<string[]>([]);
+  const [stripPrefixes, setStripPrefixes] = useState(true);
 
   // Add debug logging for initialData
   // useEffect(() => {
@@ -325,6 +331,16 @@ export default function FeaturesForm({
 
   // New function to enhance features using AI (replace existing features)
   const enhanceFeatures = async () => {
+    // Return early if the user doesn't have access to AI features
+    if (!hasAIFeatures) {
+      showToast({
+        title: "Premium Feature",
+        description: "Upgrade to Premium to use AI-powered features",
+        type: "info",
+      });
+      return;
+    }
+
     if (!projectId) {
       showToast({
         title: "Error",
@@ -353,7 +369,11 @@ export default function FeaturesForm({
     }
 
     setIsEnhancing(true);
+    setError("");
+    setSuccess("");
+
     try {
+      // Continue with the rest of the function...
       console.log("Enhancing features with AI...");
       console.log("Core modules:", coreModules);
       const enhancedFeatures = await aiService.enhanceFeatures(
@@ -396,6 +416,16 @@ export default function FeaturesForm({
 
   // New function to add AI-generated features without replacing existing ones
   const addAIFeatures = async () => {
+    // Return early if the user doesn't have access to AI features
+    if (!hasAIFeatures) {
+      showToast({
+        title: "Premium Feature",
+        description: "Upgrade to Premium to use AI-powered features",
+        type: "info",
+      });
+      return;
+    }
+
     if (!projectId) {
       showToast({
         title: "Error",
@@ -415,8 +445,13 @@ export default function FeaturesForm({
     }
 
     setIsAddingFeatures(true);
+    setError("");
+    setSuccess("");
+
     try {
-      // When adding new features, we don't pass the existing features to avoid duplication
+      // Continue with the rest of the function...
+      console.log("Adding AI features...");
+      console.log("Core modules:", coreModules);
       const enhancedFeatures = await aiService.enhanceFeatures(
         projectDescription,
         businessGoals,
@@ -551,47 +586,91 @@ export default function FeaturesForm({
         </div>
 
         {/* AI Enhancement Buttons */}
-        <div className="flex justify-end items-center gap-3 mb-4">
-          <Button
-            type="button"
-            onClick={addAIFeatures}
-            disabled={isAddingFeatures || isEnhancing || !projectId}
-            variant="outline"
-            className="flex items-center gap-2"
-            title="Generate new features to complement existing ones"
-          >
-            {isAddingFeatures ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                <span>Adding...</span>
-              </>
-            ) : (
-              <>
-                <Sparkles className="h-4 w-4" />
-                <span>Add AI Features</span>
-              </>
-            )}
-          </Button>
-          <Button
-            type="button"
-            onClick={enhanceFeatures}
-            disabled={isEnhancing || isAddingFeatures || !projectId}
-            variant="outline"
-            className="flex items-center gap-2"
-            title="Replace all features with AI-generated ones"
-          >
-            {isEnhancing ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                <span>Enhancing...</span>
-              </>
-            ) : (
-              <>
-                <RefreshCw className="h-4 w-4" />
-                <span>Replace All</span>
-              </>
-            )}
-          </Button>
+        <div className="flex justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              onClick={() => setStripPrefixes(!stripPrefixes)}
+              variant="ghost"
+              size="sm"
+              className="flex items-center gap-1 text-xs"
+              title={
+                stripPrefixes
+                  ? "Show category prefixes"
+                  : "Hide category prefixes"
+              }
+            >
+              <Tag className="h-3 w-3" />
+              {stripPrefixes ? "Show prefixes" : "Hide prefixes"}
+            </Button>
+          </div>
+          <div className="flex justify-end items-center gap-3 mb-4">
+            {!hasAIFeatures && <PremiumFeatureBadge />}
+            <Button
+              type="button"
+              onClick={addAIFeatures}
+              disabled={
+                isAddingFeatures || isEnhancing || !projectId || !hasAIFeatures
+              }
+              variant={hasAIFeatures ? "outline" : "ghost"}
+              className={`flex items-center gap-2 relative ${
+                !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+              title={
+                hasAIFeatures
+                  ? "Generate new features to complement existing ones"
+                  : "Upgrade to Premium to use AI-powered features"
+              }
+            >
+              {isAddingFeatures ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Adding...</span>
+                </>
+              ) : (
+                <>
+                  {hasAIFeatures ? (
+                    <Sparkles className="h-4 w-4" />
+                  ) : (
+                    <Lock className="h-4 w-4" />
+                  )}
+                  <span>Add AI Features</span>
+                </>
+              )}
+            </Button>
+            <Button
+              type="button"
+              onClick={enhanceFeatures}
+              disabled={
+                isEnhancing || isAddingFeatures || !projectId || !hasAIFeatures
+              }
+              variant={hasAIFeatures ? "outline" : "ghost"}
+              className={`flex items-center gap-2 relative ${
+                !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+              title={
+                hasAIFeatures
+                  ? "Replace all features with enhanced versions"
+                  : "Upgrade to Premium to use AI-powered features"
+              }
+            >
+              {isEnhancing ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Enhancing...</span>
+                </>
+              ) : (
+                <>
+                  {hasAIFeatures ? (
+                    <RefreshCw className="h-4 w-4" />
+                  ) : (
+                    <Lock className="h-4 w-4" />
+                  )}
+                  <span>Replace All</span>
+                </>
+              )}
+            </Button>
+          </div>
         </div>
 
         {/* Add new feature button */}

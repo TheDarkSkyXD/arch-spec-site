@@ -5,7 +5,16 @@ import { useState, useEffect } from "react";
 import { projectsService } from "../../services/projectsService";
 import { aiService } from "../../services/aiService";
 import { useToast } from "../../contexts/ToastContext";
-import { PlusCircle, Trash2, Sparkles, Wand2, Users } from "lucide-react";
+import {
+  PlusCircle,
+  Trash2,
+  Sparkles,
+  Wand2,
+  Users,
+  Lock,
+  Loader2,
+} from "lucide-react";
+import { useSubscription } from "../../contexts/SubscriptionContext";
 
 // Import shadcn UI components
 import { Label } from "../ui/label";
@@ -13,6 +22,7 @@ import { Textarea } from "../ui/textarea";
 import Button from "../ui/Button";
 import Input from "../ui/Input";
 import Card from "../ui/Card";
+import PremiumFeatureBadge from "../ui/PremiumFeatureBadge";
 
 const projectBasicsSchema = z.object({
   name: z.string().min(3, "Project name must be at least 3 characters"),
@@ -38,6 +48,7 @@ const ProjectBasicsForm = ({
   const [isEnhancingGoals, setIsEnhancingGoals] = useState(false);
   const [isEnhancingTargetUsers, setIsEnhancingTargetUsers] = useState(false);
   const { showToast } = useToast();
+  const { hasAIFeatures } = useSubscription();
   // Track the project ID internally for subsequent updates
   const [projectId, setProjectId] = useState<string | undefined>(
     initialData?.id
@@ -116,6 +127,16 @@ const ProjectBasicsForm = ({
         title: "Description too short",
         description: "Please provide a longer description to enhance",
         type: "warning",
+      });
+      return;
+    }
+
+    // Check if user has access to AI features
+    if (!hasAIFeatures) {
+      showToast({
+        title: "Premium Feature",
+        description: "Upgrade to Premium to use AI-powered features",
+        type: "info",
       });
       return;
     }
@@ -358,7 +379,41 @@ const ProjectBasicsForm = ({
       </div>
 
       <div>
-        <Label htmlFor="description">Description</Label>
+        <div className="flex justify-between items-center mb-1">
+          <Label htmlFor="description">Description</Label>
+
+          <div className="flex justify-end items-center gap-3 mb-1">
+            {!hasAIFeatures && <PremiumFeatureBadge />}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={enhanceDescription}
+              disabled={isEnhancing || !currentDescription || !hasAIFeatures}
+              className={`flex items-center gap-1 text-xs ${
+                !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+              title={
+                hasAIFeatures
+                  ? "Enhance description with AI"
+                  : "Upgrade to Premium to use AI-powered features"
+              }
+            >
+              {isEnhancing ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-1" />
+              ) : (
+                <>
+                  {hasAIFeatures ? (
+                    <Sparkles size={14} className="mr-1" />
+                  ) : (
+                    <Lock size={14} className="mr-1" />
+                  )}
+                </>
+              )}
+              {isEnhancing ? "Enhancing..." : "Enhance Description"}
+            </Button>
+          </div>
+        </div>
         <div className="relative">
           <Textarea
             id="description"
@@ -367,20 +422,6 @@ const ProjectBasicsForm = ({
             error={errors.description?.message?.toString()}
             placeholder="Describe your project"
           />
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="absolute right-2 top-2 text-slate-400 dark:text-slate-500 hover:text-blue-500 dark:hover:text-blue-400"
-            onClick={enhanceDescription}
-            disabled={isEnhancing || !currentDescription}
-            title="Enhance with AI"
-          >
-            <Sparkles
-              size={18}
-              className={isEnhancing ? "animate-pulse" : ""}
-            />
-          </Button>
         </div>
         {isEnhancing && (
           <div className="text-sm text-slate-500 dark:text-slate-400 mt-1">
@@ -389,28 +430,45 @@ const ProjectBasicsForm = ({
         )}
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-2">
         <div className="flex justify-between items-center">
           <Label htmlFor="business_goals">Business Goals</Label>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={enhanceBusinessGoals}
-            disabled={isEnhancingGoals || !currentDescription}
-            className="text-xs flex items-center gap-1"
-            title={
-              businessGoals.length > 0
-                ? "Enhance business goals with AI"
-                : "Generate business goals with AI"
-            }
-          >
-            <Wand2
-              size={14}
-              className={isEnhancingGoals ? "animate-pulse" : ""}
-            />
-            {businessGoals.length > 0 ? "Enhance Goals" : "Generate Goals"}
-          </Button>
+
+          <div className="flex justify-end items-center gap-3">
+            {!hasAIFeatures && <PremiumFeatureBadge />}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={enhanceBusinessGoals}
+              disabled={
+                isEnhancingGoals || !currentDescription || !hasAIFeatures
+              }
+              className={`text-xs flex items-center gap-1 ${
+                !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+              title={
+                hasAIFeatures
+                  ? businessGoals.length > 0
+                    ? "Enhance business goals with AI"
+                    : "Generate business goals with AI"
+                  : "Upgrade to Premium to use AI-powered features"
+              }
+            >
+              {isEnhancingGoals ? (
+                <Loader2 size={14} className="animate-spin mr-1" />
+              ) : (
+                <>
+                  {hasAIFeatures ? (
+                    <Wand2 size={14} className="mr-1" />
+                  ) : (
+                    <Lock size={14} className="mr-1" />
+                  )}
+                </>
+              )}
+              {businessGoals.length > 0 ? "Enhance Goals" : "Generate Goals"}
+            </Button>
+          </div>
         </div>
 
         {isEnhancingGoals && (
@@ -473,25 +531,42 @@ const ProjectBasicsForm = ({
       <div>
         <div className="flex justify-between items-center mb-1">
           <Label htmlFor="target_users">Target Users</Label>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={enhanceTargetUsers}
-            disabled={isEnhancingTargetUsers || !currentDescription}
-            className="text-xs flex items-center gap-1"
-            title={
-              currentTargetUsers
-                ? "Enhance target users with AI"
-                : "Generate target users with AI"
-            }
-          >
-            <Users
-              size={14}
-              className={isEnhancingTargetUsers ? "animate-pulse" : ""}
-            />
-            {currentTargetUsers ? "Enhance Users" : "Generate Users"}
-          </Button>
+
+          <div className="flex justify-end items-center gap-3 mb-1">
+            {!hasAIFeatures && <PremiumFeatureBadge />}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={enhanceTargetUsers}
+              disabled={
+                isEnhancingTargetUsers || !currentDescription || !hasAIFeatures
+              }
+              className={`text-xs flex items-center gap-1 ${
+                !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+              title={
+                hasAIFeatures
+                  ? currentTargetUsers
+                    ? "Enhance target users with AI"
+                    : "Generate target users with AI"
+                  : "Upgrade to Premium to use AI-powered features"
+              }
+            >
+              {isEnhancingTargetUsers ? (
+                <Loader2 size={14} className="animate-spin mr-1" />
+              ) : (
+                <>
+                  {hasAIFeatures ? (
+                    <Users size={14} className="mr-1" />
+                  ) : (
+                    <Lock size={14} className="mr-1" />
+                  )}
+                </>
+              )}
+              {currentTargetUsers ? "Enhance Users" : "Generate Users"}
+            </Button>
+          </div>
         </div>
 
         {isEnhancingTargetUsers && (

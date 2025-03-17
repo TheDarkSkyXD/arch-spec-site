@@ -1,5 +1,6 @@
 import axios from "axios";
 import { getAuthToken } from "../services/auth";
+import { SubscriptionPlan } from "../contexts/SubscriptionContext";
 
 // Define API base URL
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
@@ -58,6 +59,10 @@ apiClient.interceptors.response.use(
 
 // User interfaces
 export interface UserProfile {
+  plan: SubscriptionPlan;
+  subscription_id: string | null;
+  ai_credits: number;
+  ai_credits_used: number;
   _id: string;
   firebase_uid: string;
   email: string;
@@ -74,6 +79,10 @@ export interface UserUpdateData {
   display_name?: string;
   photo_url?: string;
   settings?: Record<string, unknown>;
+  plan?: "free" | "premium" | "open_source";
+  subscription_id?: string | null;
+  ai_credits?: number;
+  ai_credits_used?: number;
 }
 
 // User API functions
@@ -96,6 +105,25 @@ export const userApi = {
       return response.data;
     } catch (error) {
       console.error("Error updating user profile:", error);
+      throw error;
+    }
+  },
+
+  // Update user subscription
+  updateUserSubscription: async (subscriptionData: {
+    plan?: "free" | "premium" | "open_source";
+    subscription_id?: string | null;
+    ai_credits?: number;
+    ai_credits_used?: number;
+  }): Promise<UserProfile> => {
+    try {
+      const response = await apiClient.put(
+        "/api/users/me/subscription",
+        subscriptionData
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error updating user subscription:", error);
       throw error;
     }
   },
