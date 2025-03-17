@@ -3,7 +3,9 @@ import { getAuthToken } from "../services/auth";
 import { SubscriptionPlan } from "../contexts/SubscriptionContext";
 
 // Define API base URL
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const API_BASE_URL = import.meta.env.DEV
+  ? "http://localhost:8000" // Development
+  : import.meta.env.VITE_API_URL || "https://api.archspec.dev"; // Use env variable with fallback
 
 // Create axios instance with auth header
 export const apiClient = axios.create({

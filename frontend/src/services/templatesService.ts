@@ -41,9 +41,14 @@ export const templatesService = {
    */
   async getTemplates(): Promise<ProjectTemplate[]> {
     try {
+      console.log(
+        "Fetching templates with apiClient, baseURL:",
+        apiClient.defaults.baseURL
+      );
       const response = await apiClient.get<TemplatesListResponse>(
         `/api/templates`
       );
+      console.log("Templates API response:", response.config.url);
 
       // Validate response structure
       if (
@@ -80,9 +85,14 @@ export const templatesService = {
    */
   async getTemplateById(id: string): Promise<ProjectTemplate | null> {
     try {
+      console.log(
+        "Fetching template by ID with apiClient, baseURL:",
+        apiClient.defaults.baseURL
+      );
       const response = await apiClient.get<TemplateResponse>(
         `/api/templates/${id}`
       );
+      console.log("Template by ID API response:", response.config.url);
 
       if (
         !response.data ||
@@ -119,10 +129,15 @@ export const templatesService = {
     templateData: Partial<ProjectTemplate>
   ): Promise<ProjectTemplate | null> {
     try {
+      console.log(
+        "Updating template with apiClient, baseURL:",
+        apiClient.defaults.baseURL
+      );
       const response = await apiClient.put<TemplateResponse>(
         `/api/templates/${id}`,
         templateData
       );
+      console.log("Update template API response:", response.config.url);
 
       if (
         !response.data ||
