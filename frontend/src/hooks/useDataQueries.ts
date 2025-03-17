@@ -50,8 +50,15 @@ export function useTemplates() {
   return useQuery({
     queryKey: [QUERY_KEYS.TEMPLATES],
     queryFn: async () => {
-      const templates = await templatesService.getTemplates();
-      return templates;
+      // Use the templatesService but with explicit HTTPS handling
+      try {
+        // Force the use of HTTPS for templates endpoint
+        const templates = await templatesService.getTemplates();
+        return templates;
+      } catch (error) {
+        console.error("Error in useTemplates queryFn:", error);
+        throw error;
+      }
     },
   });
 }

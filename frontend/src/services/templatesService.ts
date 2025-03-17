@@ -3,6 +3,7 @@
  */
 import apiClient from "../api/apiClient";
 import { ProjectTemplate } from "../types";
+import { queryAxios } from "../lib/query-client";
 
 // Define interface for API response structure
 interface TemplateResponse {
@@ -42,13 +43,13 @@ export const templatesService = {
   async getTemplates(): Promise<ProjectTemplate[]> {
     try {
       console.log(
-        "Fetching templates with apiClient, baseURL:",
-        apiClient.defaults.baseURL
+        "Fetching templates with queryAxios, baseURL:",
+        queryAxios.defaults.baseURL
       );
-      const response = await apiClient.get<TemplatesListResponse>(
+      const response = await queryAxios.get<TemplatesListResponse>(
         `/api/templates`
       );
-      console.log("Templates API response:", response.config.url);
+      console.log("Templates API response URL:", response.config.url);
 
       // Validate response structure
       if (
@@ -86,13 +87,13 @@ export const templatesService = {
   async getTemplateById(id: string): Promise<ProjectTemplate | null> {
     try {
       console.log(
-        "Fetching template by ID with apiClient, baseURL:",
-        apiClient.defaults.baseURL
+        "Fetching template by ID with queryAxios, baseURL:",
+        queryAxios.defaults.baseURL
       );
-      const response = await apiClient.get<TemplateResponse>(
+      const response = await queryAxios.get<TemplateResponse>(
         `/api/templates/${id}`
       );
-      console.log("Template by ID API response:", response.config.url);
+      console.log("Template by ID API response URL:", response.config.url);
 
       if (
         !response.data ||
