@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-@router.get("/", response_model=ProjectTemplateList)
+@router.get("", response_model=ProjectTemplateList)
 async def get_templates(current_user: Dict[str, Any] = Depends(get_current_user)):
     """
     Get all project templates.
