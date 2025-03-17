@@ -10,7 +10,7 @@ const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
 
 const SubscriptionPage = () => {
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
 
   // Get auth context with proper typing
   const { currentUser, loading: authLoading } = useAuth();

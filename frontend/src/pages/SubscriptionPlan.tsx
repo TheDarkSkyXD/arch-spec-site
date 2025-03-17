@@ -195,7 +195,7 @@ const SubscriptionPlan = () => {
                           <Button
                             href="/subscription"
                             size="sm"
-                            variant="primary"
+                            variant="default"
                           >
                             Upgrade Now
                           </Button>
@@ -398,7 +398,7 @@ const SubscriptionPlan = () => {
 
               {subscriptionData.plan !== "premium" && (
                 <div className="mt-6 text-center">
-                  <Button href="/subscription" variant="primary">
+                  <Button href="/subscription" variant="default">
                     Upgrade to Premium
                   </Button>
                 </div>
