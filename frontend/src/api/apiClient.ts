@@ -27,6 +27,16 @@ apiClient.interceptors.request.use(
       config.headers["X-Dev-Bypass"] = "true";
     }
 
+    // Ensure HTTPS is used in production
+    if (!import.meta.env.DEV && config.url) {
+      // Force HTTPS for all API requests
+      const url = new URL(config.url, API_BASE_URL);
+      if (url.protocol === "http:") {
+        url.protocol = "https:";
+        config.url = url.toString();
+      }
+    }
+
     return config;
   },
   (error) => Promise.reject(error)
