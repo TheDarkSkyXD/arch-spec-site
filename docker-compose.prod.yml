@@ -78,7 +78,7 @@ services:
 
 networks:
   archspec-network:
-    driver: bridge
+    external: true
 
 volumes:
   mongo-data:
