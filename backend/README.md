@@ -78,7 +78,7 @@ FIREBASE_UNIVERSE_DOMAIN=googleapis.com
 1. Start the application and MongoDB with Docker Compose:
 
 ```bash
-docker-compose up
+docker compose up
 ```
 
 2. The API will be available at http://localhost:8000

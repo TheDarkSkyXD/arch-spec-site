@@ -45,9 +45,9 @@ jobs:
             echo "BACKEND_API_URL=${{ secrets.BACKEND_API_URL }}" >> .env
             
             # Build and restart the containers using production compose file
-            docker-compose -f docker-compose.prod.yml down
-            docker-compose -f docker-compose.prod.yml build --no-cache
-            docker-compose -f docker-compose.prod.yml up -d
+            docker compose -f docker-compose.prod.yml down
+            docker compose -f docker-compose.prod.yml build --no-cache
+            docker compose -f docker-compose.prod.yml up -d
             
             # Clean up unused images
             docker image prune -f
