@@ -9,10 +9,10 @@ services:
         # In production, this must be a publicly accessible URL that browsers can reach
         VITE_API_URL: ${BACKEND_API_URL:-https://api.yourdomain.com}
     ports:
-      - "3000:3000"
+      - "3081:3081"
     environment:
       - "VIRTUAL_HOST=archspec.dev,www.archspec.dev"
-      - "VIRTUAL_PORT=3000"
+      - "VIRTUAL_PORT=3081"
       - "LETSENCRYPT_HOST=archspec.dev,www.archspec.dev"
       - "LETSENCRYPT_EMAIL=mamerto@codefrost.com"
     depends_on:
