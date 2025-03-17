@@ -66,7 +66,7 @@ The application consists of three main services:
 3. Build and start the containers:
 
    ```
-   docker-compose up -d
+   docker compose up -d
    ```
 
 4. Access the application:
@@ -76,7 +76,7 @@ The application consists of three main services:
 
 5. Stop the containers:
    ```
-   docker-compose down
+   docker compose down
    ```
 
 ## Digital Ocean Deployment
@@ -121,7 +121,7 @@ The application consists of three main services:
 
 5. Start the application using the production docker-compose file:
    ```
-   docker-compose -f docker-compose.prod.yml up -d
+   docker compose -f docker-compose.prod.yml up -d
    ```
 
 ### Setting Up GitHub Actions for Continuous Deployment
@@ -166,16 +166,16 @@ The application consists of three main services:
 ### Viewing Logs
 
 ```
-docker-compose logs -f [service_name]
+docker compose logs -f [service_name]
 ```
 
 ### Updating the Application
 
 ```
 git pull
-docker-compose down
-docker-compose build --no-cache
-docker-compose up -d
+docker compose down
+docker compose build --no-cache
+docker compose up -d
 ```
 
 ### Backing Up MongoDB Data
@@ -192,7 +192,7 @@ docker cp <mongo_container_id>:/dump ./backup
 Check logs for errors:
 
 ```
-docker-compose logs [service_name]
+docker compose logs [service_name]
 ```
 
 ### Network Issues
