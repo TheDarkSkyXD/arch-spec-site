@@ -534,13 +534,13 @@ const LandingPage = () => {
                 </h3>
                 <p className="mt-4 flex items-baseline text-slate-900 dark:text-white">
                   <span className="text-5xl font-extrabold tracking-tight">
-                    Free
+                    Basic
                   </span>
-                  <span className="ml-1 text-xl font-semibold">for now</span>
+                  <span className="ml-1 text-xl font-semibold">+ AI costs</span>
                 </p>
                 <p className="mt-6 text-slate-500 dark:text-slate-300">
-                  Use our hosted version at archspec.dev during the early access
-                  period with manual setup.
+                  Use our hosted version at archspec.dev with no setup. AI
+                  features require payment to cover API costs.
                 </p>
 
                 <ul className="mt-6 space-y-4">
@@ -585,7 +585,7 @@ const LandingPage = () => {
                       </svg>
                     </div>
                     <p className="ml-3 text-base text-slate-700 dark:text-slate-300">
-                      All current features available
+                      Basic features available for free
                     </p>
                   </li>
                   <li className="flex items-start">
@@ -607,7 +607,8 @@ const LandingPage = () => {
                       </svg>
                     </div>
                     <p className="ml-3 text-base text-slate-700 dark:text-slate-300">
-                      Manually contact us for AI features access
+                      Contact us for AI features (payment required for API
+                      costs)
                     </p>
                   </li>
                   <li className="flex items-start">

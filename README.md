@@ -48,9 +48,9 @@ There are two ways to use ArchSpec:
 
 [Sign up at archspec.dev](https://archspec.dev/register) to use the hosted version without any setup.
 
-- Free during early access
-- All current features available
-- For AI feature access, contact us after signup
+- Basic features available for free
+- AI features require payment to cover API costs
+- Contact us after signup for AI feature access
 - Be among the first to try new features
 
 ### 2. Self-Hosted Open Source

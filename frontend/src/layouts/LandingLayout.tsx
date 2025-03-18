@@ -40,7 +40,7 @@ const LandingLayout: React.FC<LandingLayoutProps> = ({ children }) => {
       <footer className="bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700">
         <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="flex items-center mb-4 md:mb-0">
+            <div className="flex flex-col md:flex-row md:items-center mb-4 md:mb-0">
               <p className="text-sm text-slate-500 dark:text-slate-400">
                 © {new Date().getFullYear()} ArchSpec by AI-Driven Coder,
                 powered by{" "}
@@ -53,6 +53,24 @@ const LandingLayout: React.FC<LandingLayoutProps> = ({ children }) => {
                   Codefrost
                 </a>
               </p>
+              <div className="mt-2 md:mt-0 md:ml-6 flex space-x-4">
+                <a
+                  href="/legal/terms-of-use.html"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-500"
+                >
+                  Terms of Use
+                </a>
+                <a
+                  href="/legal/privacy-policy.html"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-500"
+                >
+                  Privacy Policy
+                </a>
+              </div>
             </div>
             <div className="flex space-x-6">
               <a
