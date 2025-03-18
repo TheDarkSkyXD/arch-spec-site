@@ -26,7 +26,7 @@ ArchSpec consists of four primary subsystems:
 ## Technology Stack
 
 - **Frontend**: React with TypeScript
-- **Backend**: Node.js with Express
+- **Backend**: Python FastAPI
 - **AI Integration**: OpenAI GPT or equivalent LLM
 - **Database**: MongoDB
 - **Diagramming**: Mermaid.js
@@ -48,8 +48,7 @@ ArchSpec consists of four primary subsystems:
 
 - Node.js (v20+) with pnpm for frontend development
 - Python 3.12+ with uv for backend development
-- Docker and Docker Compose for containerized deployment
-- MongoDB (local instance or containerized)
+- MongoDB (local instance or containerized for development)
 - Firebase project with Authentication configured
 
 ### Development Setup
@@ -60,8 +59,14 @@ See [dev-scripts-README.md](dev-scripts-README.md) for detailed development setu
 
 This project uses Firebase Authentication. For authentication setup details, see [README-firebase-auth.md](README-firebase-auth.md).
 
-### Docker Deployment
+### Deployment
 
-For Docker-based deployment instructions, including CI/CD with GitHub Actions, see the [Docker Deployment Guide](DOCKER-DEPLOYMENT.md).
+The application is deployed using:
+
+- **Database**: MongoDB Atlas
+- **Backend**: fly.io
+- **Frontend**: Vercel
+
+For local development, a Docker Compose file is provided for running MongoDB.
 
 _Additional implementation details to be added as the project progresses._

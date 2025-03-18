@@ -5,12 +5,14 @@ This guide explains how to use the provided PowerShell scripts to automate your 
 ## Requirements
 
 - Windows with PowerShell 7+ (comes with Windows 10/11)
-- Docker Desktop installed and running
+- Docker installed and running
 - Backend requirements:
+  - Python 3.12+
+  - uv package manager
   - Python virtual environment set up in `backend/.venv/`
   - MongoDB (handled by Docker Compose)
 - Frontend requirements:
-  - Node.js
+  - Node.js v20+
   - pnpm package manager
 
 ## Scripts
@@ -54,6 +56,16 @@ This script gracefully stops all development services:
 ```powershell
 .\stop-dev.ps1
 ```
+
+## Deployment Information
+
+The application uses the following deployment strategy:
+
+- **Database**: MongoDB Atlas
+- **Backend**: fly.io
+- **Frontend**: Vercel
+
+For local development, only MongoDB is containerized. The backend and frontend run directly on your machine.
 
 ## Troubleshooting
 

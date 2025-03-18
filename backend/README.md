@@ -7,13 +7,14 @@ This is the backend for the ArchSpec application, an AI-driven software specific
 - **Framework**: FastAPI
 - **Database**: MongoDB
 - **AI Integration**: Anthropic Claude API
+- **Deployment**: fly.io
 
 ## Getting Started
 
 ### Prerequisites
 
 - Python 3.12 or higher
-- Docker and Docker Compose (for running MongoDB)
+- MongoDB (local instance or containerized for development)
 
 ### Setup
 
@@ -35,10 +36,10 @@ python -m venv .venv
 source .venv/bin/activate
 ```
 
-5. Install dependencies:
+5. Install dependencies with uv:
 
 ```bash
-pip install -r requirements.txt
+uv pip install -r requirements.txt
 ```
 
 6. Create a `.env` file with the following content:
@@ -73,22 +74,12 @@ FIREBASE_UNIVERSE_DOMAIN=googleapis.com
    - Click "Generate new private key"
    - Use the values from the downloaded JSON file to populate the environment variables
 
-### Running with Docker
+### Running the Development Environment
 
-1. Start the application and MongoDB with Docker Compose:
-
-```bash
-docker compose up
-```
-
-2. The API will be available at http://localhost:8000
-
-### Running Locally
-
-1. Start MongoDB with Docker:
+1. Start MongoDB using Docker Compose:
 
 ```bash
-docker run -d -p 27017:27017 --name mongodb mongo:6
+docker compose up -d
 ```
 
 2. Start the FastAPI application:
@@ -99,12 +90,40 @@ uvicorn app.main:app --reload
 
 3. The API will be available at http://localhost:8000
 
+### Running Tests
+
+Tests can be run using pytest:
+
+```bash
+uv run pytest tests
+```
+
 ## API Documentation
 
 Once the application is running, you can access the API documentation at:
 
 - Swagger UI: http://localhost:8000/docs
 - ReDoc: http://localhost:8000/redoc
+
+## Deployment
+
+The backend is deployed to fly.io. The deployment configuration is in the `fly.toml` file.
+
+### Deployment Process
+
+1. Install the flyctl CLI.
+2. Log in to fly.io.
+3. Deploy the application:
+
+```bash
+fly deploy
+```
+
+4. Set necessary secrets:
+
+```bash
+fly secrets set MONGODB_URI=mongodb+srv://...
+```
 
 ## Project Structure
 
@@ -134,7 +153,6 @@ backend/
 │   ├── api/
 │   └── services/
 ├── .env
-├── Dockerfile
-├── docker-compose.yml
+├── fly.toml
 └── requirements.txt
 ```
