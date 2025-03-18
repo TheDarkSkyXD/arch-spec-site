@@ -19,17 +19,17 @@ function Write-ColorOutput {
 }
 
 # Detect OS platform
-$isWindows = $PSVersionTable.Platform -eq 'Win32NT' -or [string]::IsNullOrEmpty($PSVersionTable.Platform)
-$isLinux = $PSVersionTable.Platform -eq 'Unix' -and $PSVersionTable.OS -like '*Linux*'
-$isMacOS = $PSVersionTable.Platform -eq 'Unix' -and $PSVersionTable.OS -like '*Darwin*'
+$isPlatformWindows = $PSVersionTable.Platform -eq 'Win32NT' -or [string]::IsNullOrEmpty($PSVersionTable.Platform)
+$isPlatformLinux = $PSVersionTable.Platform -eq 'Unix' -and $PSVersionTable.OS -like '*Linux*'
+$isPlatformMacOS = $PSVersionTable.Platform -eq 'Unix' -and $PSVersionTable.OS -like '*Darwin*'
 
 if ($null -eq $PSVersionTable.Platform) {
     # Old PowerShell on Windows doesn't have Platform property
-    $isWindows = $true
+    $isPlatformWindows = $true
 }
 
 Write-ColorOutput "🛑 Stopping development environment..." "Cyan"
-Write-ColorOutput "💻 Detected Platform: $(if($isWindows){'Windows'}elseif($isMacOS){'macOS'}elseif($isLinux){'Linux'}else{'Unknown'})" "Cyan"
+Write-ColorOutput "💻 Detected Platform: $(if($isPlatformWindows){'Windows'}elseif($isPlatformMacOS){'macOS'}elseif($isPlatformLinux){'Linux'}else{'Unknown'})" "Cyan"
 
 # Cross-platform function to stop processes
 function Stop-DevProcess {
@@ -41,7 +41,7 @@ function Stop-DevProcess {
     
     Write-ColorOutput "🔍 Finding and stopping $FriendlyName..." "Yellow"
     
-    if ($isWindows) {
+    if ($isPlatformWindows) {
         $process = Get-Process -Name $ProcessName -ErrorAction SilentlyContinue | 
                    Where-Object { $_.CommandLine -like "*$ProcessPattern*" }
         if ($process) {
@@ -51,7 +51,7 @@ function Stop-DevProcess {
         }
     } else {
         # Unix-based systems use different approach
-        $pidCommand = if ($isMacOS) {
+        $pidCommand = if ($isPlatformMacOS) {
             "pgrep -f '$ProcessPattern'"
         } else {
             "pgrep -f '$ProcessPattern'"
@@ -66,7 +66,7 @@ function Stop-DevProcess {
                     try {
                         Invoke-Expression "kill -9 $pid"
                     } catch {
-                        Write-ColorOutput "  ⚠️ Failed to kill process $pid: $_" "Yellow"
+                        Write-ColorOutput "  ⚠️ Failed to kill process $pid`: ${_}" "Yellow"
                     }
                 }
             }
