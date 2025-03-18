@@ -48,6 +48,21 @@ const LandingPage = () => {
                 />
                 <h2 className="text-white text-3xl font-bold">Arch Spec</h2>
               </div>
+              <div className="mb-6 inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                <svg
+                  className="w-4 h-4 mr-1.5"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9z"
+                    clipRule="evenodd"
+                  ></path>
+                </svg>
+                Early Access / Open Source Release
+              </div>
               <h1 className="text-4xl tracking-tight font-extrabold text-white sm:text-5xl md:text-6xl lg:text-6xl">
                 <span className="block">Revolutionary Software</span>
                 <span className="block text-blue-200">
@@ -65,7 +80,7 @@ const LandingPage = () => {
                     to="/register"
                     className="flex items-center justify-center px-4 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-primary-700 bg-white hover:bg-blue-50 sm:px-8"
                   >
-                    Start Building Now
+                    Try For Free
                   </Link>
                   <a
                     href="https://github.com/mamertofabian/arch-spec"
@@ -131,6 +146,98 @@ const LandingPage = () => {
                     </svg>
                     Watch Video
                   </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Current Status Section */}
+      <div className="py-16 bg-blue-50 dark:bg-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="lg:text-center">
+            <h2 className="text-base text-primary-600 font-semibold tracking-wide uppercase">
+              Development Status
+            </h2>
+            <p className="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
+              Current Stage & Roadmap
+            </p>
+            <p className="mt-4 max-w-2xl text-xl text-slate-500 dark:text-slate-300 lg:mx-auto">
+              ArchSpec is currently in early access, with core functionality
+              working and additional features in active development.
+            </p>
+          </div>
+
+          <div className="mt-10">
+            <div className="space-y-10 md:space-y-0 md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-10">
+              {/* What's Working */}
+              <div className="relative">
+                <div className="absolute flex items-center justify-center h-12 w-12 rounded-md bg-green-500 text-white">
+                  <svg
+                    className="h-6 w-6"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                </div>
+                <div className="ml-16">
+                  <h3 className="text-lg leading-6 font-medium text-slate-900 dark:text-white">
+                    What's Working Now
+                  </h3>
+                  <ul className="mt-2 text-base text-slate-500 dark:text-slate-300 space-y-2">
+                    <li>✅ User signup and authentication</li>
+                    <li>✅ Project management (create/update/delete)</li>
+                    <li>
+                      ✅ Software specs sections (Requirements, Features, Pages,
+                      Data Model, API Endpoints, Test Cases)
+                    </li>
+                    <li>✅ Preview and export options (markdown, zip)</li>
+                    <li>✅ Free manual data entry for all spec sections</li>
+                    <li>✅ One template available (more coming soon)</li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* Coming Soon */}
+              <div className="relative">
+                <div className="absolute flex items-center justify-center h-12 w-12 rounded-md bg-blue-500 text-white">
+                  <svg
+                    className="h-6 w-6"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                    />
+                  </svg>
+                </div>
+                <div className="ml-16">
+                  <h3 className="text-lg leading-6 font-medium text-slate-900 dark:text-white">
+                    In Development
+                  </h3>
+                  <ul className="mt-2 text-base text-slate-500 dark:text-slate-300 space-y-2">
+                    <li>⏳ LemonSqueezy payment integration</li>
+                    <li>⏳ AI credit-based plans</li>
+                    <li>⏳ Optimized AI calls (batching)</li>
+                    <li>⏳ Intelligent knowledge graphs for gaps detection</li>
+                    <li>⏳ Implementation sequence generator</li>
+                    <li>⏳ Additional project templates</li>
+                    <li>⏳ UI polishing and bug fixes</li>
+                  </ul>
                 </div>
               </div>
             </div>
@@ -280,446 +387,41 @@ const LandingPage = () => {
         </div>
       </div>
 
-      {/* Compare Plans Section */}
+      {/* Open Source Section */}
       <div className="bg-slate-50 dark:bg-slate-800 py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="lg:text-center">
             <h2 className="text-base text-primary-600 font-semibold tracking-wide uppercase">
-              Pricing
+              Current Status
             </h2>
             <p className="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
-              Choose Your Plan
+              Open Source First Approach
             </p>
             <p className="mt-4 max-w-2xl text-xl text-slate-500 dark:text-slate-300 lg:mx-auto">
-              Whether you're just getting started or need advanced AI-powered
-              capabilities, we have options for every team.
+              ArchSpec is currently available as an open source project. Try it
+              yourself or use our hosted version.
             </p>
           </div>
 
-          <div className="mt-16 space-y-12 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-x-8">
-            {/* Free Plan */}
+          <div className="mt-16 space-y-12 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-x-8">
+            {/* Open Source Option */}
             <div className="relative p-8 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-2xl shadow-sm flex flex-col">
               <div className="flex-1">
                 <h3 className="text-xl font-semibold text-slate-900 dark:text-white">
-                  Free Plan
+                  Self-Hosted Open Source
                 </h3>
                 <p className="mt-4 flex items-baseline text-slate-900 dark:text-white">
                   <span className="text-5xl font-extrabold tracking-tight">
-                    $0
-                  </span>
-                  <span className="ml-1 text-xl font-semibold">/month</span>
-                </p>
-                <p className="mt-6 text-slate-500 dark:text-slate-300">
-                  Perfect for individuals and small teams who want to create
-                  specifications manually.
-                </p>
-
-                <ul className="mt-6 space-y-4">
-                  <li className="flex items-start">
-                    <div className="flex-shrink-0">
-                      <svg
-                        className="h-6 w-6 text-green-500"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        aria-hidden="true"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    </div>
-                    <p className="ml-3 text-base text-slate-700 dark:text-slate-300">
-                      Up to 5 active projects
-                    </p>
-                  </li>
-                  <li className="flex items-start">
-                    <div className="flex-shrink-0">
-                      <svg
-                        className="h-6 w-6 text-green-500"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        aria-hidden="true"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    </div>
-                    <p className="ml-3 text-base text-slate-700 dark:text-slate-300">
-                      Manual specification creation
-                    </p>
-                  </li>
-                  <li className="flex items-start">
-                    <div className="flex-shrink-0">
-                      <svg
-                        className="h-6 w-6 text-green-500"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        aria-hidden="true"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    </div>
-                    <p className="ml-3 text-base text-slate-700 dark:text-slate-300">
-                      Basic project templates
-                    </p>
-                  </li>
-                  <li className="flex items-start">
-                    <div className="flex-shrink-0">
-                      <svg
-                        className="h-6 w-6 text-green-500"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        aria-hidden="true"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    </div>
-                    <p className="ml-3 text-base text-slate-700 dark:text-slate-300">
-                      Cloud storage for specifications
-                    </p>
-                  </li>
-                  <li className="flex items-start">
-                    <div className="flex-shrink-0">
-                      <svg
-                        className="h-6 w-6 text-green-500"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        aria-hidden="true"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    </div>
-                    <p className="ml-3 text-base text-slate-700 dark:text-slate-300">
-                      Community support
-                    </p>
-                  </li>
-                  <li className="flex items-start opacity-50">
-                    <div className="flex-shrink-0">
-                      <svg
-                        className="h-6 w-6 text-slate-400"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        aria-hidden="true"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
-                    </div>
-                    <p className="ml-3 text-base text-slate-700 dark:text-slate-300">
-                      No AI enhancement capabilities
-                    </p>
-                  </li>
-                </ul>
-              </div>
-
-              <Link
-                to="/register"
-                className="mt-8 block w-full bg-slate-600 dark:bg-slate-500 py-3 px-6 border border-transparent rounded-md text-center font-medium text-white hover:bg-slate-700 dark:hover:bg-slate-600"
-              >
-                Get Started Free
-              </Link>
-            </div>
-
-            {/* AI-powered Plan */}
-            <div className="relative p-8 bg-white dark:bg-slate-700 border-2 border-primary-500 dark:border-primary-400 rounded-2xl shadow-lg flex flex-col">
-              <div className="absolute top-0 right-0 -mt-3 mr-3 px-3 py-1 bg-primary-500 text-white text-xs font-bold rounded">
-                RECOMMENDED
-              </div>
-              <div className="flex-1">
-                <h3 className="text-xl font-semibold text-slate-900 dark:text-white">
-                  AI-Powered Premium
-                </h3>
-                <p className="mt-4 flex items-baseline text-slate-900 dark:text-white">
-                  <span className="text-5xl font-extrabold tracking-tight">
-                    $10
-                  </span>
-                  <span className="ml-1 text-xl font-semibold">/month</span>
-                </p>
-                <p className="mt-6 text-slate-500 dark:text-slate-300">
-                  Unlock the full power of AI to create detailed specifications
-                  with minimal effort.
-                </p>
-
-                <ul className="mt-6 space-y-4">
-                  <li className="flex items-start">
-                    <div className="flex-shrink-0">
-                      <svg
-                        className="h-6 w-6 text-green-500"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        aria-hidden="true"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    </div>
-                    <p className="ml-3 text-base text-slate-700 dark:text-slate-300">
-                      Unlimited projects
-                    </p>
-                  </li>
-                  <li className="flex items-start">
-                    <div className="flex-shrink-0">
-                      <svg
-                        className="h-6 w-6 text-green-500"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        aria-hidden="true"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    </div>
-                    <p className="ml-3 text-base text-slate-700 dark:text-slate-300">
-                      100 AI enhancement credits per month
-                      <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800 dark:bg-primary-800 dark:text-primary-100">
-                        <svg
-                          className="mr-1 h-3 w-3"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                        Credits used for AI-powered specification enhancements
-                      </span>
-                    </p>
-                  </li>
-                  <li className="flex items-start">
-                    <div className="flex-shrink-0">
-                      <svg
-                        className="h-6 w-6 text-green-500"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        aria-hidden="true"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    </div>
-                    <p className="ml-3 text-base text-slate-700 dark:text-slate-300">
-                      Premium AI models included
-                    </p>
-                  </li>
-                  <li className="flex items-start">
-                    <div className="flex-shrink-0">
-                      <svg
-                        className="h-6 w-6 text-green-500"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        aria-hidden="true"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    </div>
-                    <p className="ml-3 text-base text-slate-700 dark:text-slate-300">
-                      Premium project templates
-                    </p>
-                  </li>
-                  <li className="flex items-start">
-                    <div className="flex-shrink-0">
-                      <svg
-                        className="h-6 w-6 text-green-500"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        aria-hidden="true"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    </div>
-                    <p className="ml-3 text-base text-slate-700 dark:text-slate-300">
-                      Cloud storage for all your specifications
-                    </p>
-                  </li>
-                  <li className="flex items-start">
-                    <div className="flex-shrink-0">
-                      <svg
-                        className="h-6 w-6 text-green-500"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        aria-hidden="true"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    </div>
-                    <p className="ml-3 text-base text-slate-700 dark:text-slate-300">
-                      Regular updates and new features
-                    </p>
-                  </li>
-                  <li className="flex items-start">
-                    <div className="flex-shrink-0">
-                      <svg
-                        className="h-6 w-6 text-green-500"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        aria-hidden="true"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    </div>
-                    <p className="ml-3 text-base text-slate-700 dark:text-slate-300">
-                      Priority support
-                    </p>
-                  </li>
-                </ul>
-              </div>
-
-              <Link
-                to="/register?checkout=true"
-                className="mt-8 block w-full bg-primary-600 py-3 px-6 border border-transparent rounded-md text-center font-medium text-white hover:bg-primary-700"
-              >
-                Start Building Now
-              </Link>
-            </div>
-
-            {/* Open Source Plan */}
-            <div className="relative p-8 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-2xl shadow-sm flex flex-col">
-              <div className="flex-1">
-                <h3 className="text-xl font-semibold text-slate-900 dark:text-white">
-                  Open Source
-                </h3>
-                <p className="mt-4 flex items-baseline text-slate-900 dark:text-white">
-                  <span className="text-5xl font-extrabold tracking-tight">
-                    $0
+                    Free
                   </span>
                   <span className="ml-1 text-xl font-semibold">/forever</span>
                 </p>
                 <p className="mt-6 text-slate-500 dark:text-slate-300">
-                  Self-host and customize ArchSpec to fit your specific needs.
-                  You'll need your own API keys.
+                  Run ArchSpec on your own infrastructure with complete control
+                  over your data and customization options.
                 </p>
 
                 <ul className="mt-6 space-y-4">
-                  <li className="flex items-start">
-                    <div className="flex-shrink-0">
-                      <svg
-                        className="h-6 w-6 text-green-500"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        aria-hidden="true"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    </div>
-                    <p className="ml-3 text-base text-slate-700 dark:text-slate-300">
-                      Unlimited projects
-                    </p>
-                  </li>
-                  <li className="flex items-start">
-                    <div className="flex-shrink-0">
-                      <svg
-                        className="h-6 w-6 text-green-500"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        aria-hidden="true"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    </div>
-                    <p className="ml-3 text-base text-slate-700 dark:text-slate-300">
-                      No usage limits (you pay for your own API usage)
-                    </p>
-                  </li>
                   <li className="flex items-start">
                     <div className="flex-shrink-0">
                       <svg
@@ -761,7 +463,7 @@ const LandingPage = () => {
                       </svg>
                     </div>
                     <p className="ml-3 text-base text-slate-700 dark:text-slate-300">
-                      Requires your own Anthropic API key
+                      Unlimited projects and specifications
                     </p>
                   </li>
                   <li className="flex items-start">
@@ -783,7 +485,7 @@ const LandingPage = () => {
                       </svg>
                     </div>
                     <p className="ml-3 text-base text-slate-700 dark:text-slate-300">
-                      Community support
+                      Requires your own AI API keys for AI features
                     </p>
                   </li>
                   <li className="flex items-start">
@@ -805,7 +507,7 @@ const LandingPage = () => {
                       </svg>
                     </div>
                     <p className="ml-3 text-base text-slate-700 dark:text-slate-300">
-                      Full customization options
+                      Customize and contribute to the codebase
                     </p>
                   </li>
                 </ul>
@@ -820,6 +522,126 @@ const LandingPage = () => {
                 View on GitHub
               </a>
             </div>
+
+            {/* Early Access Hosted */}
+            <div className="relative p-8 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-2xl shadow-sm flex flex-col">
+              <div className="absolute top-0 right-0 -mt-3 mr-3 px-3 py-1 bg-blue-500 text-white text-xs font-bold rounded">
+                EARLY ACCESS
+              </div>
+              <div className="flex-1">
+                <h3 className="text-xl font-semibold text-slate-900 dark:text-white">
+                  Hosted Early Access
+                </h3>
+                <p className="mt-4 flex items-baseline text-slate-900 dark:text-white">
+                  <span className="text-5xl font-extrabold tracking-tight">
+                    Free
+                  </span>
+                  <span className="ml-1 text-xl font-semibold">for now</span>
+                </p>
+                <p className="mt-6 text-slate-500 dark:text-slate-300">
+                  Use our hosted version at archspec.dev during the early access
+                  period with manual setup.
+                </p>
+
+                <ul className="mt-6 space-y-4">
+                  <li className="flex items-start">
+                    <div className="flex-shrink-0">
+                      <svg
+                        className="h-6 w-6 text-green-500"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    </div>
+                    <p className="ml-3 text-base text-slate-700 dark:text-slate-300">
+                      No setup required - use our hosted version
+                    </p>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="flex-shrink-0">
+                      <svg
+                        className="h-6 w-6 text-green-500"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    </div>
+                    <p className="ml-3 text-base text-slate-700 dark:text-slate-300">
+                      All current features available
+                    </p>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="flex-shrink-0">
+                      <svg
+                        className="h-6 w-6 text-green-500"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    </div>
+                    <p className="ml-3 text-base text-slate-700 dark:text-slate-300">
+                      Manually contact us for AI features access
+                    </p>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="flex-shrink-0">
+                      <svg
+                        className="h-6 w-6 text-green-500"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    </div>
+                    <p className="ml-3 text-base text-slate-700 dark:text-slate-300">
+                      Be among the first to try new features
+                    </p>
+                  </li>
+                </ul>
+              </div>
+
+              <Link
+                to="/register"
+                className="mt-8 block w-full bg-primary-600 py-3 px-6 border border-transparent rounded-md text-center font-medium text-white hover:bg-primary-700"
+              >
+                Sign Up for Early Access
+              </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -833,16 +655,36 @@ const LandingPage = () => {
             </span>
           </h2>
           <p className="mt-4 text-lg leading-6 text-primary-200">
-            Join the revolution in software specification and development.
-            Create better, more maintainable software with comprehensive
-            planning.
+            Join the revolution in software specification and development. Try
+            the open source version or sign up for our hosted early access.
           </p>
-          <Link
-            to="/register?checkout=true"
-            className="mt-8 w-full inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-primary-600 bg-white hover:bg-primary-50 sm:w-auto"
-          >
-            Get Started Today
-          </Link>
+          <div className="mt-8 flex flex-col sm:flex-row sm:justify-center sm:space-x-4 space-y-4 sm:space-y-0">
+            <a
+              href="https://github.com/mamertofabian/arch-spec"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary-800 hover:bg-primary-900 sm:w-auto"
+            >
+              <svg
+                className="w-5 h-5 mr-2"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              View on GitHub
+            </a>
+            <Link
+              to="/register"
+              className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-primary-600 bg-white hover:bg-primary-50 sm:w-auto"
+            >
+              Try Early Access
+            </Link>
+          </div>
         </div>
       </div>
     </LandingLayout>

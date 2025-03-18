@@ -2,9 +2,65 @@
   <img src="frontend/public/assets/images/arch-spec-logo-horizontal.png" alt="ArchSpec Logo" width="500"/>
 </p>
 
-# ArchSpec
+# ArchSpec - Early Access / Open Source Release
 
 ArchSpec is an AI-powered software specification system that transforms the software development process by creating comprehensive, implementation-ready specifications before any code is written.
+
+[![GitHub Repo](https://img.shields.io/badge/GitHub-Repo-blue)](https://github.com/mamertofabian/arch-spec)
+[![Website](https://img.shields.io/badge/Website-archspec.dev-green)](https://archspec.dev)
+[![Development Status](https://img.shields.io/badge/Status-Early%20Access-orange)](https://archspec.dev)
+
+## Project Status
+
+ArchSpec is currently in **early access**. The core functionality is working, while more advanced features are under active development.
+
+### What's Working Now
+
+- ✅ User signup and authentication
+- ✅ Project management (create/update/delete)
+- ✅ All major specification sections:
+  - Requirements
+  - Features
+  - Pages/UI
+  - Data Model
+  - API Endpoints
+  - Test Cases
+- ✅ Preview and file export (markdown) of each specs section
+- ✅ Download All (zip) of complete specifications
+- ✅ One project template (more coming soon)
+- ✅ Manual data entry for all specification sections
+
+### In Development
+
+- ⏳ LemonSqueezy payment integration
+- ⏳ AI credit-based enhancement plans
+- ⏳ Optimized AI calls (batching) for efficiency and error handling
+- ⏳ Intelligent knowledge graphs for "gaps" detection
+- ⏳ Implementation sequence generator
+- ⏳ Additional project templates
+- ⏳ UI polishing and bug fixes
+
+## Try ArchSpec
+
+There are two ways to use ArchSpec:
+
+### 1. Hosted Early Access
+
+[Sign up at archspec.dev](https://archspec.dev/register) to use the hosted version without any setup.
+
+- Free during early access
+- All current features available
+- For AI feature access, contact us after signup
+- Be among the first to try new features
+
+### 2. Self-Hosted Open Source
+
+Clone and self-host the application with complete control over your data.
+
+- Full customization options
+- Unlimited projects and specifications
+- Requires your own AI API keys for AI features
+- Self-hosting instructions available below
 
 ## Core Principles
 
@@ -42,7 +98,7 @@ ArchSpec consists of four primary subsystems:
 - Testing Framework
 - Implementation Planning
 
-## Getting Started
+## Self-Hosting Setup
 
 ### Prerequisites
 
@@ -69,4 +125,11 @@ The application is deployed using:
 
 For local development, a Docker Compose file is provided for running MongoDB.
 
-_Additional implementation details to be added as the project progresses._
+## Contact
+
+For questions about the hosted early access version or to provide feedback, please reach out:
+
+- GitHub Issues: [Open an issue](https://github.com/mamertofabian/arch-spec/issues)
+- YouTube: [@aidrivencoder](https://youtube.com/@aidrivencoder)
+
+_The application is under active development. Contributors welcome!_
