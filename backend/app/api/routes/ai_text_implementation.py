@@ -214,6 +214,15 @@ async def generate_implementation_prompt(
             metadata={
                 "user_id": current_user.get("uid") if current_user else None,
                 "model": FAST_MODEL,
+                "system_message": system_message,
+                "user_message": meta_prompt,
+                "project_description": project_description,
+                "tech_stack": tech_stack,
+                "data_models": data_models,
+                "api_endpoints": api_endpoints,
+                "features": features,
+                "security_requirements": security_requirements,
+                "architecture_spec": architecture_spec,
             }
         )
         

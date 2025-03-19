@@ -60,6 +60,8 @@ async def enhance_requirements(
             metadata={
                 "user_id": current_user.get("uid") if current_user else None,
                 "model": FAST_MODEL,
+                "system_message": system_message,
+                "user_message": user_message,
                 "project_description": request.project_description,
                 "business_goals": request.business_goals,
                 "original_requirements": request.user_requirements
