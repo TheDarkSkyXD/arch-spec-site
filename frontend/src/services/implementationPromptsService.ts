@@ -5,6 +5,7 @@ import apiClient from "../api/apiClient";
 import {
   ImplementationPrompts,
   ImplementationPrompt,
+  ImplementationPromptType,
 } from "../types/templates";
 
 // Interface to match the backend response format
@@ -16,6 +17,21 @@ interface ImplementationPromptsSpec {
   version: number;
   last_modified_by?: string;
   data: Record<string, ImplementationPrompt[]>;
+}
+
+// Interface for AI prompt generation request
+interface GenerateImplementationPromptRequest {
+  category: string;
+  project_id: string;
+  prompt_type?: ImplementationPromptType;
+}
+
+// Interface for AI prompt generation response
+interface GenerateImplementationPromptResponse {
+  prompts: {
+    type: ImplementationPromptType;
+    content: string;
+  }[];
 }
 
 // Define the API base URL to be consistent with other services
@@ -122,6 +138,57 @@ export const implementationPromptsService = {
       };
     } catch (error) {
       console.error("Error fetching sample implementation prompts:", error);
+      return null;
+    }
+  },
+
+  /**
+   * Generate implementation prompts for a specific category using AI
+   *
+   * @param projectId - Project ID
+   * @param category - Category to generate prompts for
+   * @param promptType - Optional specific prompt type to generate
+   * @returns Promise containing the generated implementation prompts
+   */
+  async generateImplementationPrompts(
+    projectId: string,
+    category: string,
+    promptType?: ImplementationPromptType
+  ): Promise<ImplementationPrompt[] | null> {
+    try {
+      const payload: GenerateImplementationPromptRequest = {
+        category,
+        project_id: projectId,
+        prompt_type: promptType,
+      };
+
+      const response =
+        await apiClient.post<GenerateImplementationPromptResponse>(
+          `${API_BASE_URL}/ai-text/generate-implementation-prompt`,
+          payload
+        );
+
+      if (!response.data || !response.data.prompts) {
+        console.error(
+          "Invalid generated implementation prompts response:",
+          response.data
+        );
+        return null;
+      }
+
+      // Convert the response to ImplementationPrompt array
+      return response.data.prompts.map((prompt) => ({
+        id: crypto.randomUUID(),
+        type: prompt.type,
+        content: prompt.content,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }));
+    } catch (error) {
+      console.error(
+        `Error generating implementation prompts for category ${category}:`,
+        error
+      );
       return null;
     }
   },
