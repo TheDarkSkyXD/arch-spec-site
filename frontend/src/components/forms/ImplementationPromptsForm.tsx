@@ -61,6 +61,9 @@ export default function ImplementationPromptsForm({
   const [generatingCategories, setGeneratingCategories] = useState<
     Record<string, boolean>
   >({});
+  const [loadingSampleCategories, setLoadingSampleCategories] = useState<
+    Record<string, boolean>
+  >({});
 
   // Effect to update local state when initial data changes
   useEffect(() => {
@@ -337,6 +340,48 @@ export default function ImplementationPromptsForm({
     }
   };
 
+  const loadSamplePromptsForCategory = async (category: string) => {
+    setLoadingSampleCategories((prev) => ({ ...prev, [category]: true }));
+    try {
+      const samplePrompts =
+        await implementationPromptsService.getSampleImplementationPrompts();
+
+      if (samplePrompts && samplePrompts.data && samplePrompts.data[category]) {
+        // Only update the specific category with samples
+        const updatedPrompts = { ...promptsData };
+        updatedPrompts[category] = samplePrompts.data[category];
+
+        setPromptsData(updatedPrompts);
+
+        // Call onSuccess to update the parent component's state
+        if (onSuccess) {
+          onSuccess({ data: updatedPrompts });
+        }
+
+        showToast({
+          title: "Success",
+          description: `Sample implementation prompts for ${CATEGORY_LABELS[category]} loaded successfully`,
+          type: "success",
+        });
+      } else {
+        showToast({
+          title: "Error",
+          description: `No sample implementation prompts found for ${CATEGORY_LABELS[category]}`,
+          type: "error",
+        });
+      }
+    } catch (error) {
+      console.error(`Error loading sample prompts for ${category}:`, error);
+      showToast({
+        title: "Error",
+        description: `Failed to load sample implementation prompts for ${CATEGORY_LABELS[category]}`,
+        type: "error",
+      });
+    } finally {
+      setLoadingSampleCategories((prev) => ({ ...prev, [category]: false }));
+    }
+  };
+
   const generatePromptsForCategory = async (category: string) => {
     if (!projectId) {
       const errorMessage =
@@ -428,44 +473,6 @@ export default function ImplementationPromptsForm({
     } finally {
       // Reset loading state for this category
       setGeneratingCategories((prev) => ({ ...prev, [category]: false }));
-    }
-  };
-
-  const loadSamplePrompts = async () => {
-    setIsLoading(true);
-    try {
-      const samplePrompts =
-        await implementationPromptsService.getSampleImplementationPrompts();
-
-      if (samplePrompts && samplePrompts.data) {
-        setPromptsData(samplePrompts.data);
-
-        // Call onSuccess to update the parent component's state
-        if (onSuccess) {
-          onSuccess(samplePrompts);
-        }
-
-        showToast({
-          title: "Success",
-          description: "Sample implementation prompts loaded successfully",
-          type: "success",
-        });
-      } else {
-        showToast({
-          title: "Error",
-          description: "No sample implementation prompts found",
-          type: "error",
-        });
-      }
-    } catch (error) {
-      console.error("Error loading sample prompts:", error);
-      showToast({
-        title: "Error",
-        description: "Failed to load sample implementation prompts",
-        type: "error",
-      });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -597,7 +604,7 @@ export default function ImplementationPromptsForm({
         </p>
       </div>
 
-      {/* AI Generation Button */}
+      {/* Download All Button */}
       <div className="flex justify-end items-center gap-3 mb-4">
         {!hasAIFeatures && <PremiumFeatureBadge />}
         <Button
@@ -609,41 +616,6 @@ export default function ImplementationPromptsForm({
         >
           <FileDown className="h-4 w-4" />
           <span>Download All</span>
-        </Button>
-        <Button
-          type="button"
-          onClick={loadSamplePrompts}
-          disabled={isLoading}
-          variant="outline"
-          className="flex items-center gap-2 relative"
-          title="Load sample implementation prompts"
-        >
-          {isLoading ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              <span>Loading...</span>
-            </>
-          ) : (
-            <>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v4" />
-                <polyline points="14 2 14 8 20 8" />
-                <path d="M2 15h10" />
-                <path d="m9 18 3-3-3-3" />
-              </svg>
-              <span>Use Sample Prompts</span>
-            </>
-          )}
         </Button>
       </div>
 
@@ -689,31 +661,69 @@ export default function ImplementationPromptsForm({
             {CATEGORY_LABELS[currentCategory]} Prompts
           </h3>
 
-          {/* Category-level Generate Button */}
-          {hasAIFeatures && (
+          {/* Category-level buttons */}
+          <div className="flex gap-2">
+            {/* Use Sample Prompts button */}
             <Button
               type="button"
-              onClick={() => generatePromptsForCategory(currentCategory)}
-              disabled={generatingCategories[currentCategory] || !projectId}
+              onClick={() => loadSamplePromptsForCategory(currentCategory)}
+              disabled={loadingSampleCategories[currentCategory]}
               variant="outline"
               className="flex items-center gap-2"
-              title={`Generate prompts for ${CATEGORY_LABELS[currentCategory]} using AI`}
+              title={`Load sample prompts for ${CATEGORY_LABELS[currentCategory]}`}
             >
-              {generatingCategories[currentCategory] ? (
+              {loadingSampleCategories[currentCategory] ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>Generating...</span>
+                  <span>Loading...</span>
                 </>
               ) : (
                 <>
-                  <Sparkles className="h-4 w-4" />
-                  <span>
-                    Generate {CATEGORY_LABELS[currentCategory]} Prompts
-                  </span>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v4" />
+                    <polyline points="14 2 14 8 20 8" />
+                    <path d="M2 15h10" />
+                    <path d="m9 18 3-3-3-3" />
+                  </svg>
+                  <span>Use Sample Prompts</span>
                 </>
               )}
             </Button>
-          )}
+
+            {/* Generate Prompts button */}
+            {hasAIFeatures && (
+              <Button
+                type="button"
+                onClick={() => generatePromptsForCategory(currentCategory)}
+                disabled={generatingCategories[currentCategory] || !projectId}
+                variant="outline"
+                className="flex items-center gap-2"
+                title={`Generate prompts for ${CATEGORY_LABELS[currentCategory]} using AI`}
+              >
+                {generatingCategories[currentCategory] ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>Generating...</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-4 w-4" />
+                    <span>Generate Prompts</span>
+                  </>
+                )}
+              </Button>
+            )}
+          </div>
         </div>
 
         <div className="space-y-4">
