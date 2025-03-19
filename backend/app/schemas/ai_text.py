@@ -3,6 +3,9 @@ Schemas for AI text generation.
 """
 from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
+from enum import Enum
+
+from .shared_schemas import ImplementationPromptType
 
 
 class DescriptionEnhanceRequest(BaseModel):
@@ -802,4 +805,22 @@ class EnhanceReadmeResponse(BaseModel):
         ...,
         title="Enhanced README",
         description="The AI-enhanced README markdown content",
-    ) 
+    )
+
+
+class ImplementationPromptGenerateRequest(BaseModel):
+    """Request for generating implementation prompts."""
+    category: str = Field(..., description="The category to generate prompts for")
+    project_id: str = Field(..., description="The project ID to generate prompts for")
+    prompt_type: Optional[ImplementationPromptType] = Field(None, description="Optional specific prompt type to generate")
+    
+
+class ImplementationPromptResponse(BaseModel):
+    """Response containing a generated implementation prompt."""
+    type: ImplementationPromptType
+    content: str
+    
+
+class ImplementationPromptsGenerateResponse(BaseModel):
+    """Response containing generated implementation prompts."""
+    prompts: List[ImplementationPromptResponse] 

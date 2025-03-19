@@ -1,0 +1,16 @@
+I'm implementing tests for my application based on these test specifications. Help me create the test files.
+
+Test Cases (Gherkin):
+{test_cases}
+
+Features Being Tested:
+{features_to_test}
+
+Create the following:
+1. Unit tests for critical business logic
+2. Integration tests for API endpoints
+3. UI component tests
+4. End-to-end tests based on the Gherkin scenarios
+5. Test utilities and mocks
+
+Implement proper test setup and teardown. Use appropriate testing libraries for our tech stack (Jest, React Testing Library, Cypress, etc.). Focus on test coverage for critical paths first.

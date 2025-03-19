@@ -6,6 +6,7 @@ import {
   Pages,
   DataModel,
   Api,
+  ImplementationPrompts,
 } from "../../types/templates";
 import { FeaturesData } from "../featuresService";
 import { TestCasesData } from "../testCasesService";
@@ -19,6 +20,7 @@ import { generateRequirementsMarkdown } from "./requirements";
 import { generateTechStackMarkdown } from "./techStack";
 import { generateTestCasesMarkdown } from "./testCases";
 import { generateFileName } from "./utils";
+import { generateImplementationPromptsMarkdown } from "./implementationPrompts";
 
 /**
  * Creates a zip file containing all markdown files for a project
@@ -31,6 +33,7 @@ import { generateFileName } from "./utils";
  * @param dataModel The data model
  * @param apiEndpoints The API endpoints
  * @param testCases The test cases
+ * @param implementationPrompts The implementation prompts
  * @returns Promise that resolves to a Blob containing the zip file
  */
 export async function generateMarkdownZip(
@@ -41,7 +44,8 @@ export async function generateMarkdownZip(
   pages: Pages | null,
   dataModel: Partial<DataModel> | null,
   apiEndpoints: Api | null,
-  testCases: TestCasesData | null
+  testCases: TestCasesData | null,
+  implementationPrompts: ImplementationPrompts | null
 ): Promise<Blob> {
   const zip = new JSZip();
 
@@ -92,8 +96,16 @@ export async function generateMarkdownZip(
     zip.file(generateFileName(project.name, "test-cases"), testCasesMarkdown);
   }
 
-  // Generate a README file for the zip using AI
-  let readme = "";
+  // Implementation Prompts markdown
+  if (implementationPrompts) {
+    const implementationPromptsMarkdown = generateImplementationPromptsMarkdown(
+      implementationPrompts
+    );
+    zip.file("implementation-prompts.md", implementationPromptsMarkdown);
+  }
+
+  // Initialize readme variable
+  let readme: string;
 
   try {
     // Attempt to generate an AI-enhanced README

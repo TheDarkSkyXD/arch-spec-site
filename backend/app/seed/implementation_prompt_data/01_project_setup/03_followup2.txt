@@ -1,0 +1,8 @@
+We need to finish the project foundation by implementing the development tooling. Create:
+
+1. Linting and formatting configuration
+2. Git hooks setup (pre-commit, etc.)
+3. The remaining Docker configuration files
+4. Development environment documentation
+
+Reference the same architecture patterns we established earlier.

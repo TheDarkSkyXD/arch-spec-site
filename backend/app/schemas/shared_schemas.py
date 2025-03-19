@@ -4,6 +4,8 @@ Shared schema definitions to avoid circular imports.
 from pydantic import BaseModel, Field, model_validator
 from typing import Dict, Any, List, Optional, Union, Literal, Self
 from datetime import datetime
+from enum import Enum
+import uuid
 
 
 class Requirements(BaseModel):
@@ -144,12 +146,33 @@ class Deployment(BaseModel):
     class Config:
         populate_by_name = True
 
+class Diagram(BaseModel):
+    """Diagram in a documentation."""
+    name: str
+    type: str
+    template: str
+
+
+class ImplementationPromptType(str, Enum):
+    """Types of implementation prompts."""
+    MAIN = "main"
+    FOLLOWUP_1 = "followup_1"
+    FOLLOWUP_2 = "followup_2"
+
+
+class ImplementationPrompt(BaseModel):
+    """Implementation prompt for a project."""
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    content: str
+    type: ImplementationPromptType
+    created_at: Optional[datetime] = Field(default_factory=datetime.utcnow)
+    updated_at: Optional[datetime] = Field(default_factory=datetime.utcnow)
+
+
 class Documentation(BaseModel):
-    """Schema for documentation spec"""
-    content: Dict[str, Any] = Field(default_factory=dict)
-    
-    class Config:
-        populate_by_name = True 
+    """Documentation for a project."""
+    sections: List[str] = Field(default_factory=list)
+    diagrams: List[Diagram] = Field(default_factory=list)
 
 
 # Timeline-related schemas

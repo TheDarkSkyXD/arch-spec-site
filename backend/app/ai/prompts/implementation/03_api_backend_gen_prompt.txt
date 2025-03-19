@@ -1,0 +1,17 @@
+Generate implementation prompts for creating the API/backend of a software project based on the provided specifications. The implementation prompts should guide an AI development agent to create API endpoints, controllers, and business logic.
+
+Specifications:
+- API Endpoints: {api_endpoints}
+- Data Models: {data_models}
+- Security Requirements: {security_requirements}
+- Architecture (Backend): {architecture_backend}
+
+Create:
+1. An initial implementation prompt for core API structure, authentication, and foundational endpoints
+2. Two follow-up prompts for implementing remaining endpoints, services, and middleware
+3. Ensure the prompts include guidance on validation, error handling, and security implementation
+
+Format each prompt to be directly usable with AI development agents like GitHub Copilot.
+
+Place the main prompt within the <MAIN></MAIN> tag.
+Place the follow up prompt 1 within the <FOLLOWUP1></FOLLOWUP1> and <FOLLOWUP2></FOLLOWUP2> tags.

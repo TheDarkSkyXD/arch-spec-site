@@ -49,6 +49,10 @@ import {
 } from "../components/ui/tabs";
 import { userApi } from "../api/userApi";
 import { useSubscription } from "../contexts/SubscriptionContext";
+import ImplementationPromptsForm from "../components/forms/ImplementationPromptsForm";
+import ImplementationPromptsPreview from "../components/previews/ImplementationPromptsPreview";
+import { implementationPromptsService } from "../services/implementationPromptsService";
+import { ImplementationPrompts } from "../types/templates";
 
 // Define section IDs for consistency
 enum SectionId {
@@ -60,6 +64,7 @@ enum SectionId {
   DATA_MODEL = "dataModel",
   API_ENDPOINTS = "apiEndpoints",
   TEST_CASES = "testCases",
+  IMPLEMENTATION_PROMPTS = "implementationPrompts",
 }
 
 // Define view modes
@@ -90,6 +95,7 @@ const ProjectDetails = () => {
     [SectionId.DATA_MODEL]: false,
     [SectionId.API_ENDPOINTS]: false,
     [SectionId.TEST_CASES]: false,
+    [SectionId.IMPLEMENTATION_PROMPTS]: false,
   });
 
   // State to track view mode (edit or preview) for each section
@@ -104,6 +110,7 @@ const ProjectDetails = () => {
     [SectionId.DATA_MODEL]: ViewMode.EDIT,
     [SectionId.API_ENDPOINTS]: ViewMode.EDIT,
     [SectionId.TEST_CASES]: ViewMode.EDIT,
+    [SectionId.IMPLEMENTATION_PROMPTS]: ViewMode.EDIT,
   });
 
   // Function to toggle section expansion
@@ -136,6 +143,14 @@ const ProjectDetails = () => {
     useApiEndpoints(id);
 
   const { data: testCases, isLoading: testCasesLoading } = useTestCases(id);
+
+  // const { data: implementationPrompts, isLoading: implementationPromptsLoading } = useImplementationPrompts(id);
+
+  // Add implementation prompts state
+  const [implementationPrompts, setImplementationPrompts] =
+    useState<ImplementationPrompts | null>(null);
+  const [implementationPromptsLoading, setImplementationPromptsLoading] =
+    useState(true);
 
   useEffect(() => {
     const loadUserProfile = async () => {
@@ -195,6 +210,26 @@ const ProjectDetails = () => {
     fetchTechStack();
   }, [id]);
 
+  // Fetch implementation prompts
+  useEffect(() => {
+    const fetchImplementationPrompts = async () => {
+      if (!id) return;
+
+      setImplementationPromptsLoading(true);
+      try {
+        const data =
+          await implementationPromptsService.getImplementationPrompts(id);
+        setImplementationPrompts(data);
+      } catch (err) {
+        console.error("Error fetching implementation prompts:", err);
+      } finally {
+        setImplementationPromptsLoading(false);
+      }
+    };
+
+    fetchImplementationPrompts();
+  }, [id]);
+
   const handleProjectUpdate = (projectId: string) => {
     // Refresh project data after successful update
     projectsService.getProjectById(projectId).then((data) => {
@@ -250,6 +285,14 @@ const ProjectDetails = () => {
   const handleTestCasesUpdate = (_updatedTestCases: TestCasesData) => {
     // Update is handled by refetching from the backend
     console.log("Test Cases updated:", _updatedTestCases);
+  };
+
+  const handleImplementationPromptsUpdate = (
+    updatedPrompts: Partial<ImplementationPrompts>
+  ) => {
+    // Update local state immediately so the preview shows the latest changes
+    setImplementationPrompts(updatedPrompts as ImplementationPrompts);
+    console.log("Implementation Prompts updated:", updatedPrompts);
   };
 
   // Process arrays from the backend's comma-separated strings
@@ -906,6 +949,65 @@ const ProjectDetails = () => {
                           data={testCases}
                           projectName={project.name}
                           isLoading={testCasesLoading}
+                        />
+                      </TabsContent>
+                    </Tabs>
+                  )}
+                </div>
+              )}
+            </Card>
+
+            {/* Implementation Prompts Section */}
+            <Card className="overflow-hidden">
+              <SectionHeader
+                title="Implementation Prompts"
+                description="Define prompts for implementing different aspects of your project using AI tools."
+                sectionId={SectionId.IMPLEMENTATION_PROMPTS}
+                isExpanded={expandedSections[SectionId.IMPLEMENTATION_PROMPTS]}
+              />
+
+              {expandedSections[SectionId.IMPLEMENTATION_PROMPTS] && (
+                <div className="p-6">
+                  {implementationPromptsLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="h-6 w-6 text-primary-600 animate-spin mr-3" />
+                      <span className="text-slate-600 dark:text-slate-300">
+                        Loading implementation prompts data...
+                      </span>
+                    </div>
+                  ) : (
+                    <Tabs
+                      value={sectionViewModes[SectionId.IMPLEMENTATION_PROMPTS]}
+                      onValueChange={(value) =>
+                        changeViewMode(
+                          SectionId.IMPLEMENTATION_PROMPTS,
+                          value as ViewMode
+                        )
+                      }
+                      className="w-full"
+                    >
+                      <TabsList className="mb-4">
+                        <TabsTrigger value={ViewMode.EDIT}>Edit</TabsTrigger>
+                        <TabsTrigger value={ViewMode.PREVIEW}>
+                          Preview
+                        </TabsTrigger>
+                      </TabsList>
+
+                      <TabsContent value={ViewMode.EDIT}>
+                        <ImplementationPromptsForm
+                          projectId={id}
+                          initialData={implementationPrompts || undefined}
+                          onSuccess={handleImplementationPromptsUpdate}
+                        />
+                      </TabsContent>
+
+                      <TabsContent
+                        value={ViewMode.PREVIEW}
+                        className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg"
+                      >
+                        <ImplementationPromptsPreview
+                          data={implementationPrompts || undefined}
+                          isLoading={implementationPromptsLoading}
                         />
                       </TabsContent>
                     </Tabs>

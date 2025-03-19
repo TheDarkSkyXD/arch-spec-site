@@ -1,0 +1,7 @@
+Let's continue implementing our data layer. We've completed [list models/schemas implemented]. Now help me implement:
+
+1. The remaining entity models: [list specific entities]
+2. Relationship mappings between these entities
+3. Database indexing strategies based on our performance requirements
+
+Reference our data model specifications for entity details and relationships.

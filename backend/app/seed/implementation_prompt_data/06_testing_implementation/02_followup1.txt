@@ -1,0 +1,7 @@
+Let's continue implementing our test suite. So far, we've created [list tests completed]. Now implement:
+
+1. Unit tests for [specific services/components]
+2. Integration tests for [specific API endpoints]
+3. Test fixtures and factories for [specific entities]
+
+Focus on critical paths and edge cases as specified in our test requirements.

@@ -237,6 +237,24 @@ export interface Documentation {
   diagrams: Diagram[];
 }
 
+export enum ImplementationPromptType {
+  MAIN = "main",
+  FOLLOWUP_1 = "followup_1",
+  FOLLOWUP_2 = "followup_2",
+}
+
+export interface ImplementationPrompt {
+  id: string;
+  content: string;
+  type: ImplementationPromptType;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface ImplementationPrompts {
+  data: Record<string, ImplementationPrompt[]>;
+}
+
 export interface ProjectTemplate {
   id?: string;
   name: string;

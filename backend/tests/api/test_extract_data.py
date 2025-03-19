@@ -7,7 +7,7 @@ from fastapi import HTTPException
 from pydantic import BaseModel, Field
 from typing import List, Optional
 
-from app.api.routes.ai_text import extract_data_from_response
+from app.api.routes.ai_text_utils import extract_data_from_response
 from app.schemas.ai_text import TestCasesData, TestCase
 
 

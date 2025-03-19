@@ -1,0 +1,17 @@
+Generate implementation prompts for creating the data layer of a software project based on the provided specifications. The implementation prompts should guide an AI development agent to create database models, schemas, and data access components.
+
+Specifications:
+- Data Models: {data_models}
+- Architecture (Data Layer): {architecture_data_layer}
+- Non-Functional Requirements: {nfr_data_related}
+- Technology Stack (Database): {database_tech}
+
+Create:
+1. An initial implementation prompt for database setup, models/schemas, and basic data access
+2. Two follow-up prompts for implementing remaining entities, relationships, and optimizations
+3. Ensure the prompts reference specific entities, relationships, and patterns from the specifications
+
+Format each prompt to be directly usable with AI development agents like GitHub Copilot.
+
+Place the main prompt within the <MAIN></MAIN> tag.
+Place the follow up prompt 1 within the <FOLLOWUP1></FOLLOWUP1> and <FOLLOWUP2></FOLLOWUP2> tags.

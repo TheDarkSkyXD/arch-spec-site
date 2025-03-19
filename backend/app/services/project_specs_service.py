@@ -37,11 +37,13 @@ from ..schemas.project_specs import (
     TestCasesSpecUpdate,
     ProjectStructureSpecUpdate,
     DeploymentSpecUpdate,
-    DocumentationSpecUpdate
+    DocumentationSpecUpdate,
+    ImplementationPromptsSpec,
+    ImplementationPromptsSpecUpdate
 )
 from ..schemas.shared_schemas import (
     BudgetItem, ProjectTechStack, Features, Pages, DataModel, Api, 
-    Testing, TestCases, ProjectStructure, Deployment, Documentation, TimelineItem
+    Testing, TestCases, ProjectStructure, Deployment, Documentation, TimelineItem, ImplementationPrompt
 )
 
 logger = logging.getLogger(__name__)
@@ -644,6 +646,73 @@ class ProjectSpecsService:
         user_id: Optional[str],
         database: AsyncIOMotorDatabase
     ) -> DocumentationSpec:
+        """Create or update the documentation spec for a project."""
         return await ProjectSpecsService._generic_spec_handler(
-            project_id, "documentation", data, user_id, database, DocumentationSpec, DocumentationSpecUpdate
-        ) 
+            project_id=project_id,
+            spec_type="documentation",
+            data=data,
+            user_id=user_id,
+            database=database,
+            spec_class=DocumentationSpec,
+            update_class=DocumentationSpecUpdate
+        )
+    
+    @staticmethod
+    async def get_implementation_prompts_spec(
+        project_id: str, database: AsyncIOMotorDatabase
+    ) -> Optional[ImplementationPromptsSpec]:
+        """Get the implementation prompts spec for a project."""
+        spec_doc = await database.implementation_prompts_specs.find_one({"project_id": project_id})
+        if spec_doc:
+            return ImplementationPromptsSpec(**spec_doc)
+        return None
+    
+    @staticmethod
+    async def create_or_update_implementation_prompts_spec(
+        project_id: str, 
+        data: Union[Dict[str, List[ImplementationPrompt]], ImplementationPromptsSpecUpdate], 
+        user_id: Optional[str],
+        database: AsyncIOMotorDatabase
+    ) -> ImplementationPromptsSpec:
+        """Create or update the implementation prompts spec for a project."""
+        # Check if spec exists
+        existing = await database.implementation_prompts_specs.find_one({"project_id": project_id})
+        
+        # Convert Dict to ImplementationPromptsSpecUpdate if needed
+        if isinstance(data, dict):
+            update_data = ImplementationPromptsSpecUpdate(data=data, last_modified_by=user_id)
+        else:
+            update_data = data
+            if user_id:
+                update_data.last_modified_by = user_id
+        
+        if existing:
+            # Update existing spec
+            update_dict = {k: v for k, v in update_data.model_dump(exclude_unset=True).items() if v is not None}
+            if update_dict:
+                update_dict["updated_at"] = datetime.now(timezone.utc)
+                update_dict["version"] = existing.get("version", 1) + 1
+                
+                await database.implementation_prompts_specs.update_one(
+                    {"project_id": project_id},
+                    {"$set": update_dict}
+                )
+            
+            updated_doc = await database.implementation_prompts_specs.find_one({"project_id": project_id})
+            return ImplementationPromptsSpec(**updated_doc)
+        else:
+            # Create new spec
+            new_spec = ImplementationPromptsSpec(
+                project_id=project_id,
+                data=update_data.data if update_data.data else {},
+                last_modified_by=user_id
+            )
+            await database.implementation_prompts_specs.insert_one(new_spec.model_dump())
+            
+            # Update project to indicate it has this spec
+            await database.projects.update_one(
+                {"id": project_id},
+                {"$set": {"updated_at": datetime.now(timezone.utc)}}
+            )
+            
+            return new_spec 

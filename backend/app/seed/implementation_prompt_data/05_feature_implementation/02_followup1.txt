@@ -1,0 +1,7 @@
+Let's continue implementing the [specific feature] feature. We've completed [list what's done]. Now implement:
+
+1. The remaining UI components: [specific components]
+2. State management for the feature's remaining functionality
+3. Integration with the backend for the remaining operations
+
+Follow the user flow we defined to ensure a complete implementation.

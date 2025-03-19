@@ -1,0 +1,23 @@
+I'm implementing the {specific_feature_name} feature. Help me create all the necessary components and logic.
+
+Feature Description:
+{feature_details}
+
+UI Screens for this Feature:
+{feature_ui_screens}
+
+User Flow:
+{user_flow_diagram_description}
+
+Related API Endpoints:
+{feature_api_endpoints}
+
+Create the following:
+1. All UI components needed for this feature
+2. State management for this feature
+3. API integration
+4. Form validation (if applicable)
+5. Error handling and edge cases
+6. Any necessary utilities or helpers
+
+The implementation should follow the user flow described and handle all the requirements specified.

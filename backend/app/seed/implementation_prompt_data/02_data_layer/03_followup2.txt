@@ -1,0 +1,8 @@
+We need to complete our data access layer implementation. Create:
+
+1. Repository/data access methods for [specific entities]
+2. Transaction handling utilities
+3. Query optimization for our most complex data operations
+4. Data migration scripts
+
+Follow the same patterns we established for the previously implemented repositories.

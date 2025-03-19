@@ -37,7 +37,9 @@ from ...schemas.project_specs import (
     TestCasesSpecUpdate,
     ProjectStructureSpecUpdate,
     DeploymentSpecUpdate,
-    DocumentationSpecUpdate
+    DocumentationSpecUpdate,
+    ImplementationPromptsSpec,
+    ImplementationPromptsSpecUpdate
 )
 from ...services.project_specs_service import ProjectSpecsService
 from ...schemas.shared_schemas import (
@@ -427,4 +429,39 @@ add_spec_routes(
     ProjectSpecsService.get_test_cases_spec,
     ProjectSpecsService.create_or_update_test_cases_spec,
     "test cases"
-) 
+)
+
+# Implementation Prompts routes
+@router.get("/{project_id}/implementation-prompts", response_model=ImplementationPromptsSpec)
+async def get_implementation_prompts_spec(
+    project_id: str = Path(..., description="The project ID"),
+    database: AsyncIOMotorDatabase = Depends(get_db),
+    current_user: Dict[str, Any] = Depends(get_current_user)
+):
+    """Get the implementation prompts spec for a project."""
+    await validate_project_exists_and_owned(project_id, database, current_user)
+    
+    spec = await ProjectSpecsService.get_implementation_prompts_spec(project_id, database)
+    if spec is None:
+        # Return an empty spec structure instead of 404
+        spec = ImplementationPromptsSpec(project_id=project_id, data={})
+    
+    return spec
+
+
+@router.put("/{project_id}/implementation-prompts", response_model=ImplementationPromptsSpec)
+async def update_implementation_prompts_spec(
+    update_data: ImplementationPromptsSpecUpdate = Body(..., description="The implementation prompts spec update data"),
+    project_id: str = Path(..., description="The project ID"),
+    database: AsyncIOMotorDatabase = Depends(get_db),
+    current_user: Dict[str, Any] = Depends(get_current_user)
+):
+    """Update the implementation prompts spec for a project."""
+    await validate_project_exists_and_owned(project_id, database, current_user)
+    
+    user_id = str(current_user["_id"])
+    spec = await ProjectSpecsService.create_or_update_implementation_prompts_spec(
+        project_id, update_data, user_id, database
+    )
+    
+    return spec 

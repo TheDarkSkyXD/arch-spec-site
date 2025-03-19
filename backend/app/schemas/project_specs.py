@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field
 import uuid
 
 from .shared_schemas import (
-    BudgetItem, ProjectTechStack, Features, Pages, DataModel, Api, Testing, TestCases, ProjectStructure, Deployment, Documentation, TimelineItem
+    BudgetItem, ProjectTechStack, Features, Pages, DataModel, Api, Testing, TestCases, ProjectStructure, Deployment, Documentation, TimelineItem, ImplementationPrompt
 )
 
 
@@ -138,6 +138,11 @@ class DocumentationSpec(ProjectSpec):
     data: Optional[Documentation] = None
 
 
+class ImplementationPromptsSpec(ProjectSpec):
+    """Implementation prompts spec of a project."""
+    data: Dict[str, List[ImplementationPrompt]] = Field(default_factory=dict)
+
+
 # Update DTOs for core architecture specs
 
 class TechStackSpecUpdate(BaseModel):
@@ -224,6 +229,15 @@ class DeploymentSpecUpdate(BaseModel):
 class DocumentationSpecUpdate(BaseModel):
     """Model for updating documentation spec."""
     data: Optional[Documentation] = None
+    last_modified_by: Optional[str] = None
+
+    class Config:
+        populate_by_name = True
+
+
+class ImplementationPromptsSpecUpdate(BaseModel):
+    """Model for updating implementation prompts spec."""
+    data: Optional[Dict[str, List[ImplementationPrompt]]] = None
     last_modified_by: Optional[str] = None
 
     class Config:

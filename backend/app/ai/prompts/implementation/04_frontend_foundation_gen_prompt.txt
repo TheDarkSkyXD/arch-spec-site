@@ -1,0 +1,17 @@
+Generate implementation prompts for creating the frontend foundation of a software project based on the provided specifications. The implementation prompts should guide an AI development agent to set up the core UI components and architecture.
+
+Specifications:
+- UI Screens: {ui_screens}
+- Frontend Features: {frontend_features}
+- API Endpoints: {api_endpoints}
+- Technology Stack (Frontend): {frontend_tech}
+
+Create:
+1. An initial implementation prompt for frontend project structure, core components, and state management
+2. Two follow-up prompts for implementing layout components, API integration, and common utilities
+3. Ensure the prompts reference specific UI components, patterns, and architecture from the specifications
+
+Format each prompt to be directly usable with AI development agents like GitHub Copilot.
+
+Place the main prompt within the <MAIN></MAIN> tag.
+Place the follow up prompt 1 within the <FOLLOWUP1></FOLLOWUP1> and <FOLLOWUP2></FOLLOWUP2> tags.

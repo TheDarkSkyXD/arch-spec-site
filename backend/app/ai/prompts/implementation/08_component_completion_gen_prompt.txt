@@ -1,0 +1,16 @@
+Generate an implementation prompt for completing a partially implemented component in a software project. The implementation prompt should guide an AI development agent to finish the component based on specifications.
+
+Specifications:
+- Component Details: {component_details}
+- Current Implementation Status: {implementation_status}
+- Related Specifications: {related_specs}
+
+Create:
+1. An implementation prompt that focuses on completing the specific remaining aspects of the component
+2. Ensure the prompt references existing code patterns and architectural decisions
+3. Include guidance on testing the completed component
+
+Format the prompt to be directly usable with AI development agents like GitHub Copilot.
+
+Place the main prompt within the <MAIN></MAIN> tag.
+Place the follow up prompt 1 within the <FOLLOWUP1></FOLLOWUP1> and <FOLLOWUP2></FOLLOWUP2> tags.

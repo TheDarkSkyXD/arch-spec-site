@@ -168,7 +168,7 @@ class UserService:
     async def update_user_settings(user_id: str, settings: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """Update a user's settings."""
         database = db.get_db()
-        if not database:
+        if database is None:
             return None
             
         try:
