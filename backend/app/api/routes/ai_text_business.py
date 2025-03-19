@@ -15,6 +15,7 @@ from app.schemas.ai_text import (
 )
 from app.services.ai_service import FAST_MODEL, AnthropicClient
 from app.core.firebase_auth import get_current_user
+from app.utils.llm_logging import log_llm_response
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/ai-text", tags=["AI Text"])
@@ -38,8 +39,10 @@ async def enhance_business_goals(
         # Create the system message, adjusting based on whether goals were provided
         if request.user_goals and len(request.user_goals) > 0:
             system_message = business_goals_system_prompt_enhance()
+            operation_type = "enhance_business_goals"
         else:
             system_message = business_goals_system_prompt_create()
+            operation_type = "create_business_goals"
         
         # Create the user message, adjusting based on whether goals were provided
         if request.user_goals and len(request.user_goals) > 0:
@@ -58,6 +61,23 @@ async def enhance_business_goals(
         # Generate the response
         messages = [{"role": "user", "content": user_message}]
         response = client.generate_response(messages, system_message, FAST_MODEL)
+        
+        # Log the LLM response
+        log_llm_response(
+            project_id=request.project_id if hasattr(request, "project_id") else "unknown",
+            response_type=operation_type,
+            response=response,
+            parsed_data={"enhanced_goals": [line.strip()[1:].strip() for line in response.split("\n") 
+                                          if line.strip().startswith("-") or line.strip().startswith("•")]},
+            metadata={
+                "user_id": current_user.get("uid") if current_user else None,
+                "model": FAST_MODEL,
+                "system_message": system_message,
+                "user_message": user_message,
+                "project_description": request.project_description,
+                "original_goals": request.user_goals if hasattr(request, "user_goals") else None
+            }
+        )
         
         # Parse the bulleted list response into an array of goals
         enhanced_goals = []
@@ -117,8 +137,10 @@ async def enhance_target_users(
         # Create the system message
         if request.target_users and len(request.target_users.strip()) > 0:
             system_message = target_users_system_prompt_enhance()
+            operation_type = "enhance_target_users"
         else:
             system_message = target_users_system_prompt_create()
+            operation_type = "create_target_users"
         
         # Create the user message
         if request.target_users and len(request.target_users.strip()) > 0:
@@ -132,6 +154,22 @@ async def enhance_target_users(
         # Generate the response
         messages = [{"role": "user", "content": user_message}]
         response = client.generate_response(messages, system_message, FAST_MODEL)
+        
+        # Log the LLM response
+        log_llm_response(
+            project_id=request.project_id if hasattr(request, "project_id") else "unknown",
+            response_type=operation_type,
+            response=response,
+            parsed_data={"enhanced_target_users": response.strip()},
+            metadata={
+                "user_id": current_user.get("uid") if current_user else None,
+                "model": FAST_MODEL,
+                "system_message": system_message,
+                "user_message": user_message,
+                "project_description": request.project_description,
+                "original_target_users": request.target_users if hasattr(request, "target_users") else None
+            }
+        )
         
         # Return the enhanced target users description
         return TargetUsersEnhanceResponse(enhanced_target_users=response.strip())

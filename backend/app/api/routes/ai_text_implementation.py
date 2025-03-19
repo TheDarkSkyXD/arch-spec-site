@@ -4,8 +4,6 @@ API routes for implementation prompts generation.
 import logging
 import json
 import re
-import os
-from datetime import datetime
 from fastapi import APIRouter, HTTPException, Depends
 from typing import Dict, Any, List, Optional
 
@@ -20,33 +18,11 @@ from app.services.ai_service import FAST_MODEL, AnthropicClient
 from app.services.project_specs_service import ProjectSpecsService
 from app.core.firebase_auth import get_current_user
 from app.db.base import db
+from app.utils.llm_logging import log_llm_response, CustomEncoder
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/ai-text", tags=["AI Text"])
-
-# Set up a dedicated logger for LLM responses
-llm_logger = logging.getLogger("llm_responses")
-llm_logger.setLevel(logging.INFO)
-
-# Ensure we have a directory for logs
-os.makedirs("logs/llm_responses", exist_ok=True)
-file_handler = logging.FileHandler("logs/llm_responses/implementation_prompts.log")
-file_handler.setFormatter(logging.Formatter('%(asctime)s - %(message)s'))
-llm_logger.addHandler(file_handler)
-
-# Custom encoder to handle non-serializable objects
-class CustomEncoder(json.JSONEncoder):
-    def default(self, obj):
-        # Handle any objects that need custom serialization
-        if hasattr(obj, "model_dump"):
-            # For Pydantic models
-            return obj.model_dump()
-        elif hasattr(obj, "__dict__"):
-            # For regular Python classes
-            return obj.__dict__
-        # Let the base class handle the rest or fail
-        return super().default(obj)
 
 def convert_to_serializable(obj):
     """Convert objects to serializable format."""
@@ -100,44 +76,6 @@ def extract_prompts_from_response(response_text: str) -> Dict[str, str]:
         prompts['main'] = response_text.strip()
     
     return prompts
-
-def log_llm_response(project_id: str, category: str, response: str, parsed_prompts: Dict[str, str]):
-    """
-    Log LLM response to both file and database for later retrieval.
-    
-    Args:
-        project_id: The project ID
-        category: The category of implementation prompts
-        response: The raw LLM response
-        parsed_prompts: The parsed prompts extracted from the response
-    """
-    timestamp = datetime.now().isoformat()
-    log_entry = {
-        "timestamp": timestamp,
-        "project_id": project_id,
-        "category": category,
-        "raw_response": response,
-        "parsed_prompts": parsed_prompts
-    }
-    
-    # Log to file
-    llm_logger.info(json.dumps(log_entry, cls=CustomEncoder))
-    
-    # Log to database if available
-    try:
-        database = db.get_db()
-        if database is not None:
-            # Store in a collection for LLM responses
-            database.llm_responses.insert_one({
-                "timestamp": timestamp,
-                "project_id": project_id,
-                "category": category,
-                "type": "implementation_prompt",
-                "raw_response": response,
-                "parsed_prompts": parsed_prompts
-            })
-    except Exception as e:
-        logger.error(f"Error logging LLM response to database: {str(e)}")
 
 @router.post("/generate-implementation-prompt", response_model=ImplementationPromptsGenerateResponse)
 async def generate_implementation_prompt(
@@ -266,8 +204,18 @@ async def generate_implementation_prompt(
         # Parse the response to extract the different prompt types
         parsed_prompts = extract_prompts_from_response(response)
         
-        # Log the response for future retrieval
-        log_llm_response(request.project_id, request.category, response, parsed_prompts)
+        # Log the response for future retrieval using the centralized utility
+        log_llm_response(
+            project_id=request.project_id,
+            response_type="implementation_prompt",
+            response=response,
+            parsed_data=parsed_prompts,
+            category=request.category,
+            metadata={
+                "user_id": current_user.get("uid") if current_user else None,
+                "model": FAST_MODEL,
+            }
+        )
         
         # Convert the parsed prompts to the expected response format
         generated_prompts = []

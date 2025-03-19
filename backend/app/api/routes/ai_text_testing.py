@@ -13,9 +13,10 @@ from app.schemas.ai_text import (
     TestCasesEnhanceResponse,
     TestCasesData,
 )
-from app.services.ai_service import AnthropicClient
+from app.services.ai_service import AnthropicClient, INTELLIGENT_MODEL
 from app.core.firebase_auth import get_current_user
 from app.api.routes.ai_text_utils import extract_data_from_response
+from app.utils.llm_logging import log_llm_response
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/ai-text", tags=["AI Text"])
@@ -30,6 +31,9 @@ async def enhance_test_cases(
     """
     try:
         client = AnthropicClient()
+        
+        # Create system message
+        system_message = "You are an expert QA engineer specializing in writing Gherkin test cases for software applications."
         
         # Format requirements as string
         formatted_requirements = "\n".join(f"- {req}" for req in request.requirements)
@@ -49,13 +53,27 @@ async def enhance_test_cases(
             formatted_test_cases
         )
 
+        # Generate the tool use response
         messages = [{"role": "user", "content": user_prompt}]
+        tools = [print_test_cases_input_schema()]
+        response = client.get_tool_use_response(system_message, tools, messages, model=INTELLIGENT_MODEL)
         
-        # Call the AI service
-        response = client.get_tool_use_response(
-            system_prompt="You are an expert QA engineer specializing in writing Gherkin test cases for software applications.",
-            tools=[print_test_cases_input_schema()],
-            messages=messages
+        # Log the LLM response
+        log_llm_response(
+            project_id=request.project_id if hasattr(request, "project_id") else "unknown",
+            response_type="enhance_test_cases",
+            response=json.dumps(response),  # Convert response object to string for logging
+            parsed_data=response,  # Store the structured response directly
+            metadata={
+                "user_id": current_user.get("uid") if current_user else None,
+                "model": INTELLIGENT_MODEL,
+                "system_message": system_message,
+                "user_message": user_prompt,
+                "tools": tools,
+                "requirements": request.requirements,
+                "features": request.features,
+                "existing_test_cases": request.existing_test_cases
+            }
         )
         
         # Extract the response data
@@ -79,6 +97,9 @@ async def generate_test_cases(
     try:
         client = AnthropicClient()
         
+        # Create system message
+        system_message = "You are an expert QA engineer specializing in writing comprehensive Gherkin test cases for software applications. Focus on creating test cases that cover all functional requirements and important edge cases."
+        
         # Format requirements as string
         formatted_requirements = "\n".join(f"- {req}" for req in request.requirements)
         
@@ -92,13 +113,26 @@ async def generate_test_cases(
             None  # No existing test cases for generation from scratch
         )
         
+        # Generate the tool use response
         messages = [{"role": "user", "content": user_prompt}]
+        tools = [print_test_cases_input_schema()]
+        response = client.get_tool_use_response(system_message, tools, messages, model=INTELLIGENT_MODEL)
         
-        # Call the AI service
-        response = client.get_tool_use_response(
-            system_prompt="You are an expert QA engineer specializing in writing comprehensive Gherkin test cases for software applications. Focus on creating test cases that cover all functional requirements and important edge cases.",
-            tools=[print_test_cases_input_schema()],
-            messages=messages
+        # Log the LLM response
+        log_llm_response(
+            project_id=request.project_id if hasattr(request, "project_id") else "unknown",
+            response_type="generate_test_cases",
+            response=json.dumps(response),  # Convert response object to string for logging
+            parsed_data=response,  # Store the structured response directly
+            metadata={
+                "user_id": current_user.get("uid") if current_user else None,
+                "model": INTELLIGENT_MODEL,
+                "system_message": system_message,
+                "user_message": user_prompt,
+                "tools": tools,
+                "requirements": request.requirements,
+                "features": request.features
+            }
         )
         
         # Extract the response data
