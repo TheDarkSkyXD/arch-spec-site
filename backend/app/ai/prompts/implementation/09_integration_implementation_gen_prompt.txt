@@ -1,0 +1,14 @@
+Generate implementation prompts for integrating with external systems in a software project based on the provided specifications. The implementation prompts should guide an AI development agent to create integration components.
+
+Specifications:
+- Integration Requirements: {integration_requirements}
+- External Systems: {external_systems}
+- API Endpoints: {api_endpoints}
+- Security Requirements: {security_requirements}
+
+Create:
+1. An initial implementation prompt for core integration clients, authentication, and basic operations
+2. A follow-up prompt for implementing error handling, retries, and additional operations
+3. Ensure the prompts include guidance on testing integrations and mocking external systems
+
+Format each prompt to be directly usable with AI development agents like GitHub Copilot.

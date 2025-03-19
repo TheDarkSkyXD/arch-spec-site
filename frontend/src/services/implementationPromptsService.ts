@@ -97,4 +97,32 @@ export const implementationPromptsService = {
       return null;
     }
   },
+
+  /**
+   * Get sample implementation prompts that can be imported into a project
+   *
+   * @returns Promise containing the sample implementation prompts
+   */
+  async getSampleImplementationPrompts(): Promise<ImplementationPrompts | null> {
+    try {
+      const response = await apiClient.get<{
+        data: Record<string, ImplementationPrompt[]>;
+      }>(`${API_BASE_URL}/implementation-prompts/sample`);
+
+      if (!response.data) {
+        console.error(
+          "Invalid sample implementation prompts response:",
+          response.data
+        );
+        return null;
+      }
+
+      return {
+        data: response.data.data || {},
+      };
+    } catch (error) {
+      console.error("Error fetching sample implementation prompts:", error);
+      return null;
+    }
+  },
 };

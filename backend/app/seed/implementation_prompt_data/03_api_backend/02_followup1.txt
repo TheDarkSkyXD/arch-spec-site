@@ -1,0 +1,5 @@
+Let's continue implementing our API endpoints. So far, we've built [list completed endpoints]. Help me implement these additional endpoints:
+
+1. [List specific endpoint paths]
+
+Include proper validation, error handling, and authorization checks consistent with our earlier implementations.

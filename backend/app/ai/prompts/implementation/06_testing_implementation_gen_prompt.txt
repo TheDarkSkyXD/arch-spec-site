@@ -1,0 +1,15 @@
+Generate implementation prompts for creating tests for a software project based on the provided specifications. The implementation prompts should guide an AI development agent to create various types of tests.
+
+Specifications:
+- Test Cases: {test_cases}
+- Features: {features_to_test}
+- API Endpoints: {endpoints_to_test}
+- Data Models: {models_to_test}
+- Non-Functional Requirements: {nfr_to_test}
+
+Create:
+1. An initial implementation prompt for core unit tests, test utilities, and test configuration
+2. Two follow-up prompts for implementing integration tests, E2E tests, and performance tests
+3. Ensure the prompts reference specific test cases, scenarios, and acceptance criteria from the specifications
+
+Format each prompt to be directly usable with AI development agents like GitHub Copilot.

@@ -65,6 +65,13 @@ try:
     except Exception as e:
         logger.error(f"Failed to load Payments router: {str(e)}")
     
+    try:
+        from .routes import implementation_prompts
+        api_router.include_router(implementation_prompts.router, prefix="/implementation-prompts", tags=["implementation-prompts"])
+        logger.info("Implementation Prompts router loaded successfully")
+    except Exception as e:
+        logger.error(f"Failed to load Implementation Prompts router: {str(e)}")
+    
     logger.info("API routes imported successfully")
 except Exception as e:
     logger.error(f"Failed to import API routes: {str(e)}") 

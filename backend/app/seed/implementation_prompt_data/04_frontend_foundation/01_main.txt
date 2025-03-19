@@ -1,0 +1,20 @@
+I'm implementing the frontend foundation for my application. Help me set up the core UI components and structure.
+
+UI Screen Specifications:
+{ui_screens}
+
+Frontend Features:
+{frontend_features}
+
+API Endpoints (for integration):
+{api_endpoints}
+
+Create the following:
+1. Frontend project structure (components, pages, services)
+2. Core layout components and navigation
+3. State management setup
+4. API service layer for backend communication
+5. Authentication flow implementation
+6. Theme/styling foundation
+
+Focus on creating reusable components and a maintainable architecture. Implement proper type definitions if using TypeScript.

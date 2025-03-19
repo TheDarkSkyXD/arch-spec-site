@@ -1,0 +1,19 @@
+I'm implementing a new project based on these specifications. Help me set up the project structure and core configuration files.
+
+Project Description:
+{project_description}
+
+Architecture Specifications:
+{architecture_specs}
+
+Technology Stack:
+{tech_stack}
+
+Create the following:
+1. Project folder structure following best practices for this stack
+2. Core configuration files (package.json, webpack/vite config, tsconfig, etc.)
+3. Base Docker/containerization setup if applicable
+4. CI/CD pipeline configuration
+5. README.md with project overview and setup instructions
+
+Focus on creating a clean, maintainable foundation that follows modern development practices.

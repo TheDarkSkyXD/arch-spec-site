@@ -1,0 +1,14 @@
+Generate implementation prompts for setting up a new software project based on the provided specifications. The implementation prompts should guide an AI development agent to create the foundational project structure and configuration.
+
+Specifications:
+- Project Description: {project_description}
+- Architecture: {architecture_spec}
+- Technology Stack: {tech_stack}
+- Non-Functional Requirements: {nfr_spec}
+
+Create:
+1. An initial implementation prompt that covers project structure, configuration files, basic setup, and documentation
+2. Two follow-up prompts for continuing implementation if the initial prompt exceeds the AI agent's limitations
+3. Ensure the prompts are specific, actionable, and reference the provided specifications
+
+Format each prompt to be directly usable with AI development agents like GitHub Copilot.

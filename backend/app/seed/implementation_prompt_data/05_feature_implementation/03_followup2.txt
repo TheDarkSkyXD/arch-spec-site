@@ -1,0 +1,8 @@
+Let's finish the [specific feature] feature by implementing:
+
+1. Error handling for edge cases
+2. Loading states and optimistic updates
+3. Unit tests for the key components
+4. Required accessibility improvements
+
+Ensure all the feature requirements from our specifications are met.

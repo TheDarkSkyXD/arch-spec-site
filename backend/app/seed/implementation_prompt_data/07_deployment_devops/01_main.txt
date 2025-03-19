@@ -1,0 +1,20 @@
+I'm implementing the deployment and DevOps infrastructure for my application. Help me create the necessary configuration and scripts.
+
+Deployment Strategy:
+{deployment_strategy}
+
+Non-Functional Requirements:
+{nfr_deployment_related}
+
+Security Requirements:
+{security_requirements}
+
+Create the following:
+1. Production Dockerfile/container configuration
+2. Kubernetes manifests or other orchestration configs
+3. Environment-specific configuration
+4. Monitoring and logging setup
+5. Backup and recovery processes
+6. Performance optimization configurations
+
+Focus on creating a secure, scalable deployment that meets the specified non-functional requirements.

@@ -114,11 +114,17 @@ export default function ImplementationPromptsForm({
     if (!promptsData[category]) {
       return ImplementationPromptType.MAIN;
     }
-    
-    const hasMain = promptsData[category].some(p => p.type === ImplementationPromptType.MAIN);
-    const hasFollowup1 = promptsData[category].some(p => p.type === ImplementationPromptType.FOLLOWUP_1);
-    const hasFollowup2 = promptsData[category].some(p => p.type === ImplementationPromptType.FOLLOWUP_2);
-    
+
+    const hasMain = promptsData[category].some(
+      (p) => p.type === ImplementationPromptType.MAIN
+    );
+    const hasFollowup1 = promptsData[category].some(
+      (p) => p.type === ImplementationPromptType.FOLLOWUP_1
+    );
+    const hasFollowup2 = promptsData[category].some(
+      (p) => p.type === ImplementationPromptType.FOLLOWUP_2
+    );
+
     if (!hasMain) {
       return ImplementationPromptType.MAIN;
     } else if (!hasFollowup1) {
@@ -126,7 +132,7 @@ export default function ImplementationPromptsForm({
     } else if (!hasFollowup2) {
       return ImplementationPromptType.FOLLOWUP_2;
     }
-    
+
     // If all types exist, default to MAIN (though the add section won't be visible in this case)
     return ImplementationPromptType.MAIN;
   };
@@ -164,17 +170,23 @@ export default function ImplementationPromptsForm({
 
     setPromptsData(updatedPrompts);
     setNewPromptContent("");
-    
+
     // Call onSuccess to update the parent component's state
     if (onSuccess) {
       onSuccess({ data: updatedPrompts });
     }
-    
+
     // Select the next available prompt type automatically
-    const hasMain = updatedPrompts[currentCategory].some(p => p.type === ImplementationPromptType.MAIN);
-    const hasFollowup1 = updatedPrompts[currentCategory].some(p => p.type === ImplementationPromptType.FOLLOWUP_1);
-    const hasFollowup2 = updatedPrompts[currentCategory].some(p => p.type === ImplementationPromptType.FOLLOWUP_2);
-    
+    const hasMain = updatedPrompts[currentCategory].some(
+      (p) => p.type === ImplementationPromptType.MAIN
+    );
+    const hasFollowup1 = updatedPrompts[currentCategory].some(
+      (p) => p.type === ImplementationPromptType.FOLLOWUP_1
+    );
+    const hasFollowup2 = updatedPrompts[currentCategory].some(
+      (p) => p.type === ImplementationPromptType.FOLLOWUP_2
+    );
+
     if (!hasMain) {
       setCurrentPromptType(ImplementationPromptType.MAIN);
     } else if (!hasFollowup1) {
@@ -210,7 +222,7 @@ export default function ImplementationPromptsForm({
       setPromptsData(updatedPrompts);
       setEditingPrompt(null);
       setEditPromptContent("");
-      
+
       // Call onSuccess to update the parent component's state
       if (onSuccess) {
         onSuccess({ data: updatedPrompts });
@@ -226,20 +238,20 @@ export default function ImplementationPromptsForm({
   const removePrompt = (category: string, promptId: string) => {
     const prompt = promptsData[category]?.find((p) => p.id === promptId);
     if (!prompt) return;
-    
+
     // Store the type of the prompt being removed
     const removedPromptType = prompt.type;
-    
+
     const updatedPrompts = { ...promptsData };
     updatedPrompts[category] = updatedPrompts[category].filter(
       (p) => p.id !== promptId
     );
 
     setPromptsData(updatedPrompts);
-    
+
     // Set the current prompt type to the one that was just removed
     setCurrentPromptType(removedPromptType);
-    
+
     // Call onSuccess to update the parent component's state
     if (onSuccess) {
       onSuccess({ data: updatedPrompts });
@@ -255,7 +267,7 @@ export default function ImplementationPromptsForm({
         description: "Prompt copied to clipboard",
         type: "success",
       });
-      
+
       // Reset the copied state after 2 seconds
       setTimeout(() => {
         setCopiedPromptId(null);
@@ -326,13 +338,14 @@ export default function ImplementationPromptsForm({
 
   const generateAIPrompts = async () => {
     if (!projectId) {
-      const errorMessage = "Project must be saved before prompts can be generated";
+      const errorMessage =
+        "Project must be saved before prompts can be generated";
       showToast({
         title: "Error",
         description: errorMessage,
         type: "error",
       });
-      setErrors({ general: errorMessage }); 
+      setErrors({ general: errorMessage });
       return;
     }
 
@@ -349,6 +362,8 @@ export default function ImplementationPromptsForm({
 
     setIsGenerating(true);
     try {
+      console.log("AI prompt generation will be implemented in the future");
+
       // This would normally call the AI service to generate prompts
       // For now, we'll just create placeholders
       const placeholderPrompts: Record<string, ImplementationPrompt[]> = {};
@@ -380,7 +395,7 @@ export default function ImplementationPromptsForm({
       });
 
       setPromptsData(placeholderPrompts);
-      
+
       // Call onSuccess to update the parent component's state
       if (onSuccess) {
         onSuccess({ data: placeholderPrompts });
@@ -398,9 +413,47 @@ export default function ImplementationPromptsForm({
         description: "Failed to generate implementation prompts",
         type: "error",
       });
-      setErrors({ general: "Failed to generate implementation prompts" }); 
+      setErrors({ general: "Failed to generate implementation prompts" });
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  const loadSamplePrompts = async () => {
+    setIsLoading(true);
+    try {
+      const samplePrompts =
+        await implementationPromptsService.getSampleImplementationPrompts();
+
+      if (samplePrompts && samplePrompts.data) {
+        setPromptsData(samplePrompts.data);
+
+        // Call onSuccess to update the parent component's state
+        if (onSuccess) {
+          onSuccess(samplePrompts);
+        }
+
+        showToast({
+          title: "Success",
+          description: "Sample implementation prompts loaded successfully",
+          type: "success",
+        });
+      } else {
+        showToast({
+          title: "Error",
+          description: "No sample implementation prompts found",
+          type: "error",
+        });
+      }
+    } catch (error) {
+      console.error("Error loading sample prompts:", error);
+      showToast({
+        title: "Error",
+        description: "Failed to load sample implementation prompts",
+        type: "error",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -478,9 +531,15 @@ export default function ImplementationPromptsForm({
     }
 
     // Check if all three prompt types exist for this category
-    const hasMain = promptsData[category].some(p => p.type === ImplementationPromptType.MAIN);
-    const hasFollowup1 = promptsData[category].some(p => p.type === ImplementationPromptType.FOLLOWUP_1);
-    const hasFollowup2 = promptsData[category].some(p => p.type === ImplementationPromptType.FOLLOWUP_2);
+    const hasMain = promptsData[category].some(
+      (p) => p.type === ImplementationPromptType.MAIN
+    );
+    const hasFollowup1 = promptsData[category].some(
+      (p) => p.type === ImplementationPromptType.FOLLOWUP_1
+    );
+    const hasFollowup2 = promptsData[category].some(
+      (p) => p.type === ImplementationPromptType.FOLLOWUP_2
+    );
 
     return hasMain && hasFollowup1 && hasFollowup2;
   };
@@ -538,6 +597,41 @@ export default function ImplementationPromptsForm({
         >
           <FileDown className="h-4 w-4" />
           <span>Download All</span>
+        </Button>
+        <Button
+          type="button"
+          onClick={loadSamplePrompts}
+          disabled={isLoading}
+          variant="outline"
+          className="flex items-center gap-2 relative"
+          title="Load sample implementation prompts"
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span>Loading...</span>
+            </>
+          ) : (
+            <>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v4" />
+                <polyline points="14 2 14 8 20 8" />
+                <path d="M2 15h10" />
+                <path d="m9 18 3-3-3-3" />
+              </svg>
+              <span>Use Sample Prompts</span>
+            </>
+          )}
         </Button>
         <Button
           type="button"
@@ -627,7 +721,9 @@ export default function ImplementationPromptsForm({
                     type="button"
                     variant="ghost"
                     size="sm"
-                    onClick={() => copyPromptToClipboard(prompt.content, prompt.id)}
+                    onClick={() =>
+                      copyPromptToClipboard(prompt.content, prompt.id)
+                    }
                     className="text-slate-500 hover:text-primary-500"
                     title="Copy prompt to clipboard"
                   >
@@ -729,19 +825,33 @@ export default function ImplementationPromptsForm({
                 id="prompt-type"
                 value={currentPromptType}
                 onChange={(e) =>
-                  setCurrentPromptType(e.target.value as ImplementationPromptType)
+                  setCurrentPromptType(
+                    e.target.value as ImplementationPromptType
+                  )
                 }
                 className="w-40"
               >
                 {/* Only show prompt types that don't exist for this category */}
-                {!promptsData[currentCategory]?.some(p => p.type === ImplementationPromptType.MAIN) && (
-                  <option value={ImplementationPromptType.MAIN}>Main Prompt</option>
+                {!promptsData[currentCategory]?.some(
+                  (p) => p.type === ImplementationPromptType.MAIN
+                ) && (
+                  <option value={ImplementationPromptType.MAIN}>
+                    Main Prompt
+                  </option>
                 )}
-                {!promptsData[currentCategory]?.some(p => p.type === ImplementationPromptType.FOLLOWUP_1) && (
-                  <option value={ImplementationPromptType.FOLLOWUP_1}>Follow-up 1</option>
+                {!promptsData[currentCategory]?.some(
+                  (p) => p.type === ImplementationPromptType.FOLLOWUP_1
+                ) && (
+                  <option value={ImplementationPromptType.FOLLOWUP_1}>
+                    Follow-up 1
+                  </option>
                 )}
-                {!promptsData[currentCategory]?.some(p => p.type === ImplementationPromptType.FOLLOWUP_2) && (
-                  <option value={ImplementationPromptType.FOLLOWUP_2}>Follow-up 2</option>
+                {!promptsData[currentCategory]?.some(
+                  (p) => p.type === ImplementationPromptType.FOLLOWUP_2
+                ) && (
+                  <option value={ImplementationPromptType.FOLLOWUP_2}>
+                    Follow-up 2
+                  </option>
                 )}
               </Select>
             </div>

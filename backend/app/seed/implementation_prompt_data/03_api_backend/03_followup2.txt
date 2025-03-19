@@ -1,0 +1,7 @@
+We need to finish our backend service layer. Create:
+
+1. Service implementations for [specific features]
+2. Additional middleware for [specific functionality]
+3. Integration with external services for [specific feature]
+
+These should integrate with the data layer components we've already created.

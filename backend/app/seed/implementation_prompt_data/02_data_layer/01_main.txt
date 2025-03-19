@@ -1,0 +1,19 @@
+I'm implementing the data layer for my application. Help me create the database models, migrations, and data access layer.
+
+Data Models/Schema:
+{data_models}
+
+Architecture Details (Data Layer):
+{architecture_data_layer}
+
+Non-Functional Requirements (Data-Related):
+{nfr_data_related}
+
+Create the following:
+1. Database models/schemas in the appropriate format (ORM models, MongoDB schemas, SQL migrations, etc.)
+2. Database configuration and connection setup
+3. Data access layer / repositories
+4. Database seeding scripts for development
+5. Data validation utilities
+
+The implementation should follow the architectural pattern specified and handle all the entity relationships correctly.

@@ -1,0 +1,19 @@
+I'm implementing the API/backend for my application. Help me create the API endpoints and business logic based on these specifications.
+
+API Endpoints Design:
+{api_endpoints}
+
+Data Models:
+{data_models}
+
+Security Requirements:
+{security_requirements}
+
+Create the following:
+1. API route definitions
+2. Controller/handler implementations for each endpoint
+3. Middleware for authentication, validation, error handling
+4. Business logic / service layer
+5. Integration with the data layer
+
+Ensure the implementation handles validation, error cases, and follows RESTful best practices. Security requirements should be properly implemented, especially around authentication and data protection.

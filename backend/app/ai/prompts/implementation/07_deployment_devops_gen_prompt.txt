@@ -1,0 +1,14 @@
+Generate implementation prompts for creating deployment and DevOps infrastructure for a software project based on the provided specifications. The implementation prompts should guide an AI development agent to set up CI/CD, environments, and monitoring.
+
+Specifications:
+- Deployment Strategy: {deployment_strategy}
+- Non-Functional Requirements: {nfr_deployment}
+- Security Requirements: {security_requirements}
+- Architecture: {architecture_deployment}
+
+Create:
+1. An initial implementation prompt for core infrastructure setup, CI/CD pipeline, and configuration
+2. Two follow-up prompts for environment-specific settings, monitoring, and optimizations
+3. Ensure the prompts include specific guidance on security, scaling, and reliability requirements
+
+Format each prompt to be directly usable with AI development agents like GitHub Copilot.

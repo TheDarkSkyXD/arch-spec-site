@@ -1,0 +1,16 @@
+Generate implementation prompts for creating a specific feature in a software project based on the provided specifications. The implementation prompts should guide an AI development agent to create all components needed for the feature.
+
+Specifications:
+- Feature Details: {feature_details}
+- UI Screens: {feature_ui_screens}
+- User Flow: {user_flow}
+- API Endpoints: {feature_api_endpoints}
+- Data Models: {feature_data_models}
+
+Create:
+1. An initial implementation prompt for the feature's core components and functionality
+2. Two follow-up prompts for completing remaining parts of the feature
+3. Ensure the prompts cover both frontend and backend aspects of the feature, if applicable
+4. Include guidance on testing the feature's critical paths
+
+Format each prompt to be directly usable with AI development agents like GitHub Copilot.

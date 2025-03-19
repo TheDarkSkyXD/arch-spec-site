@@ -30,6 +30,7 @@ from .db.base import db
 from .api.api import api_router
 from .seed.templates import seed_templates
 from .seed.tech_stack import seed_tech_stack
+from .seed.implementation_prompts import seed_sample_implementation_prompts
 
 HAS_API_ROUTER = True
 
@@ -47,6 +48,8 @@ async def lifespan(app: FastAPI):
        - See /app/seed/README.md for more information
     3. Seeds project templates to the database (creates, updates, or marks deprecated)
        - Templates are validated against the tech stack for consistency
+    4. Seeds sample implementation prompts to the database (creates or updates)
+       - These are example prompts that users can import into their projects
     
     During shutdown, it:
     1. Closes MongoDB connection
@@ -69,6 +72,9 @@ async def lifespan(app: FastAPI):
 
                 # Seed template data
                 await seed_templates(database, clean_all=False)
+                
+                # Seed sample implementation prompts
+                await seed_sample_implementation_prompts(database, clean_all=False)
             else:
                 print("Database connection not available, skipping seeding")
         except Exception as e:
