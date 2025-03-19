@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, MouseEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Plus,
@@ -8,6 +8,7 @@ import {
   Filter,
   AlertCircle,
   Trash2,
+  MoreVertical,
 } from "lucide-react";
 import MainLayout from "../layouts/MainLayout";
 import { useProjectStore } from "../store/projectStore";
@@ -30,6 +31,7 @@ const Projects = () => {
   const [filteredProjects, setFilteredProjects] = useState(projects);
   const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchProjects();
@@ -67,6 +69,22 @@ const Projects = () => {
     setProjectToDelete(projectId);
     setIsDeleteDialogOpen(true);
   };
+
+  const handleCardClick = (projectId: string) => {
+    navigate(`/projects/${projectId}`);
+  };
+
+  const toggleMenu = (e: MouseEvent<HTMLButtonElement>, projectId: string) => {
+    e.stopPropagation();
+    setOpenMenuId(openMenuId === projectId ? null : projectId);
+  };
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => setOpenMenuId(null);
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, []);
 
   return (
     <MainLayout>
@@ -159,10 +177,41 @@ const Projects = () => {
               {filteredProjects.map((project) => (
                 <div
                   key={project.id}
-                  className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden hover:shadow-md transition-shadow duration-200"
+                  className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden hover:shadow-md transition-shadow duration-200 cursor-pointer group"
+                  onClick={() => handleCardClick(project.id)}
                 >
-                  <div className="p-4">
-                    <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-1">
+                  <div className="p-4 relative">
+                    <div className="absolute top-4 right-4 z-10">
+                      <div className="relative">
+                        <button
+                          className="p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700"
+                          onClick={(e) => toggleMenu(e, project.id)}
+                        >
+                          <MoreVertical
+                            size={18}
+                            className="text-slate-500 dark:text-slate-400"
+                          />
+                        </button>
+
+                        {openMenuId === project.id && (
+                          <div className="absolute right-0 mt-1 w-48 bg-white dark:bg-slate-800 rounded-md shadow-lg py-1 z-20 border border-slate-200 dark:border-slate-700">
+                            <button
+                              className="w-full px-4 py-2 text-left text-red-500 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-2"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openDeleteDialog(project.id);
+                                setOpenMenuId(null);
+                              }}
+                            >
+                              <Trash2 size={14} />
+                              Delete Project
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-1 pr-8">
                       {project.name}
                     </h3>
                     <p className="text-slate-500 dark:text-slate-400 text-sm line-clamp-2 mb-4">
@@ -182,23 +231,13 @@ const Projects = () => {
                     <div className="flex justify-between items-center text-xs text-slate-500 dark:text-slate-400 pt-4 border-t border-slate-100 dark:border-slate-700">
                       <span>
                         Updated{" "}
-                        {project.updated_at ? new Date(project.updated_at).toLocaleDateString() : 'N/A'}
+                        {project.updated_at
+                          ? new Date(project.updated_at).toLocaleDateString()
+                          : "N/A"}
                       </span>
-                      <div className="flex space-x-3">
-                        <button
-                          onClick={() => openDeleteDialog(project.id)}
-                          className="text-red-500 hover:text-red-600 font-medium flex items-center gap-1"
-                        >
-                          <Trash2 size={14} />
-                          Delete
-                        </button>
-                        <button
-                          onClick={() => navigate(`/projects/${project.id}`)}
-                          className="text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1"
-                        >
-                          View Project
-                        </button>
-                      </div>
+                      <span className="text-primary-600 group-hover:text-primary-700 font-medium">
+                        View Project
+                      </span>
                     </div>
                   </div>
                 </div>
