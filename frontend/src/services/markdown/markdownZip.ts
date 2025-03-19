@@ -104,6 +104,9 @@ export async function generateMarkdownZip(
     zip.file("implementation-prompts.md", implementationPromptsMarkdown);
   }
 
+  // Initialize readme variable
+  let readme: string;
+
   try {
     // Attempt to generate an AI-enhanced README
     const enhancedReadme = await aiService.enhanceReadme(

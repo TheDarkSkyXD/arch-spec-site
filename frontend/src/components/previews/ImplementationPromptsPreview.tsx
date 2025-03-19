@@ -18,6 +18,7 @@ interface ImplementationPromptsPreviewProps {
   projectId?: string; // Making this optional since it's not used
   data?: ImplementationPrompts;
   isLoading?: boolean;
+  projectName?: string; // Add projectName prop since it's used in ProjectDetails.tsx
 }
 
 export default function ImplementationPromptsPreview({
@@ -27,7 +28,10 @@ export default function ImplementationPromptsPreview({
   const { showToast } = useToast();
   const [expandedCategory, setExpandedCategory] = useState<string | null>(
     // Start with the first category expanded if it has prompts
-    data?.data?.[IMPLEMENTATION_CATEGORIES[0]]?.length > 0
+    // Add null check to prevent TypeScript error
+    data?.data && 
+    IMPLEMENTATION_CATEGORIES[0] in data.data && 
+    data.data[IMPLEMENTATION_CATEGORIES[0]]?.length > 0
       ? IMPLEMENTATION_CATEGORIES[0]
       : null
   );

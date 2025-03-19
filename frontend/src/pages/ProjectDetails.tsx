@@ -1007,7 +1007,6 @@ const ProjectDetails = () => {
                       >
                         <ImplementationPromptsPreview
                           data={implementationPrompts || undefined}
-                          projectName={project.name}
                           isLoading={implementationPromptsLoading}
                         />
                       </TabsContent>

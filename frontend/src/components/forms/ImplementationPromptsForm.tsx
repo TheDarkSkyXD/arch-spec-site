@@ -55,7 +55,6 @@ export default function ImplementationPromptsForm({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
   const [copiedPromptId, setCopiedPromptId] = useState<string | null>(null);
@@ -429,53 +428,6 @@ export default function ImplementationPromptsForm({
     } finally {
       // Reset loading state for this category
       setGeneratingCategories((prev) => ({ ...prev, [category]: false }));
-    }
-  };
-
-  const generateAIPrompts = async () => {
-    if (!projectId) {
-      const errorMessage =
-        "Project must be saved before prompts can be generated";
-      showToast({
-        title: "Error",
-        description: errorMessage,
-        type: "error",
-      });
-      setErrors({ general: errorMessage });
-      return;
-    }
-
-    // Check if user has access to AI features
-    if (!hasAIFeatures) {
-      showToast({
-        title: "Premium Feature",
-        description:
-          "AI prompt generation is only available on Premium and Open Source plans. Please upgrade to use this feature.",
-        type: "warning",
-      });
-      return;
-    }
-
-    setIsGenerating(true);
-    try {
-      // This is for backward compatibility, no longer used as we now have per-category generation
-      console.log("AI prompt generation now happens at the category level");
-
-      showToast({
-        title: "Info",
-        description: "Please use the generate button for each category instead",
-        type: "info",
-      });
-    } catch (error) {
-      console.error("Error generating prompts:", error);
-      showToast({
-        title: "Error",
-        description: "Failed to generate implementation prompts",
-        type: "error",
-      });
-      setErrors({ general: "Failed to generate implementation prompts" });
-    } finally {
-      setIsGenerating(false);
     }
   };
 
