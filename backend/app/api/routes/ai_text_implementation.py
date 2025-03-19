@@ -3,6 +3,9 @@ API routes for implementation prompts generation.
 """
 import logging
 import json
+import re
+import os
+from datetime import datetime
 from fastapi import APIRouter, HTTPException, Depends
 from typing import Dict, Any, List, Optional
 
@@ -17,9 +20,20 @@ from app.services.ai_service import FAST_MODEL, AnthropicClient
 from app.services.project_specs_service import ProjectSpecsService
 from app.core.firebase_auth import get_current_user
 from app.db.base import db
+from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/ai-text", tags=["AI Text"])
+
+# Set up a dedicated logger for LLM responses
+llm_logger = logging.getLogger("llm_responses")
+llm_logger.setLevel(logging.INFO)
+
+# Ensure we have a directory for logs
+os.makedirs("logs/llm_responses", exist_ok=True)
+file_handler = logging.FileHandler("logs/llm_responses/implementation_prompts.log")
+file_handler.setFormatter(logging.Formatter('%(asctime)s - %(message)s'))
+llm_logger.addHandler(file_handler)
 
 # Custom encoder to handle non-serializable objects
 class CustomEncoder(json.JSONEncoder):
@@ -53,6 +67,77 @@ def convert_to_serializable(obj):
 def extract_project_specs(project_id: str, db):
     """Extract project specifications from the database."""
     return {}
+
+def extract_prompts_from_response(response_text: str) -> Dict[str, str]:
+    """
+    Extract prompts from the LLM response using tags.
+    
+    Args:
+        response_text: The raw LLM response text
+        
+    Returns:
+        Dictionary mapping prompt types to extracted content
+    """
+    prompts = {}
+    
+    # Extract main prompt
+    main_match = re.search(r'<MAIN>(.*?)</MAIN>', response_text, re.DOTALL)
+    if main_match:
+        prompts['main'] = main_match.group(1).strip()
+    
+    # Extract followup prompt 1
+    followup1_match = re.search(r'<FOLLOWUP1>(.*?)</FOLLOWUP1>', response_text, re.DOTALL)
+    if followup1_match:
+        prompts['followup_1'] = followup1_match.group(1).strip()
+    
+    # Extract followup prompt 2
+    followup2_match = re.search(r'<FOLLOWUP2>(.*?)</FOLLOWUP2>', response_text, re.DOTALL)
+    if followup2_match:
+        prompts['followup_2'] = followup2_match.group(1).strip()
+    
+    # If no tags found but there's content, assume it's a main prompt
+    if not prompts and response_text.strip():
+        prompts['main'] = response_text.strip()
+    
+    return prompts
+
+def log_llm_response(project_id: str, category: str, response: str, parsed_prompts: Dict[str, str]):
+    """
+    Log LLM response to both file and database for later retrieval.
+    
+    Args:
+        project_id: The project ID
+        category: The category of implementation prompts
+        response: The raw LLM response
+        parsed_prompts: The parsed prompts extracted from the response
+    """
+    timestamp = datetime.now().isoformat()
+    log_entry = {
+        "timestamp": timestamp,
+        "project_id": project_id,
+        "category": category,
+        "raw_response": response,
+        "parsed_prompts": parsed_prompts
+    }
+    
+    # Log to file
+    llm_logger.info(json.dumps(log_entry, cls=CustomEncoder))
+    
+    # Log to database if available
+    try:
+        database = db.get_db()
+        if database is not None:
+            # Store in a collection for LLM responses
+            database.llm_responses.insert_one({
+                "timestamp": timestamp,
+                "project_id": project_id,
+                "category": category,
+                "type": "implementation_prompt",
+                "raw_response": response,
+                "parsed_prompts": parsed_prompts
+            })
+    except Exception as e:
+        logger.error(f"Error logging LLM response to database: {str(e)}")
 
 @router.post("/generate-implementation-prompt", response_model=ImplementationPromptsGenerateResponse)
 async def generate_implementation_prompt(
@@ -151,45 +236,73 @@ async def generate_implementation_prompt(
         if not meta_prompt:
             raise HTTPException(status_code=400, detail=f"Invalid category: {request.category}")
         
-        # Define the prompt types to generate
-        prompt_types = [request.prompt_type] if request.prompt_type else [
-            ImplementationPromptType.MAIN,
-            ImplementationPromptType.FOLLOWUP_1,
-            ImplementationPromptType.FOLLOWUP_2
-        ]
+        # Create a system message that instructs the model about the expected format
+        system_message = """
+        You are an expert AI systems architect and developer that specializes in generating implementation prompts.
         
-        # Generate prompts for each type
+        A user will provide you with specifications and you need to generate implementation prompts that will guide an AI assistant to implement the code.
+        
+        Generate three implementation prompts:
+        1. A main prompt covering the core implementation steps
+        2. A first follow-up prompt assuming the main prompt was partially implemented
+        3. A second follow-up prompt for finishing the implementation
+        
+        Place the main prompt within the <MAIN></MAIN> tag.
+        Place the first follow-up prompt within the <FOLLOWUP1></FOLLOWUP1> tag.
+        Place the second follow-up prompt within the <FOLLOWUP2></FOLLOWUP2> tag.
+        
+        The implementation prompts should be clear, specific, and actionable.
+        """
+        
+        # Generate the response with a single API call
+        messages = [{"role": "user", "content": meta_prompt}]
+        
+        response = client.generate_response(
+            messages=messages,
+            system=system_message,
+            model=FAST_MODEL
+        )
+        
+        # Parse the response to extract the different prompt types
+        parsed_prompts = extract_prompts_from_response(response)
+        
+        # Log the response for future retrieval
+        log_llm_response(request.project_id, request.category, response, parsed_prompts)
+        
+        # Convert the parsed prompts to the expected response format
         generated_prompts = []
-        for prompt_type in prompt_types:
-            # Create a system message that instructs which type of prompt to generate
-            system_message = f"""
-            You are an expert AI systems architect and developer that specializes in generating implementation prompts.
-            
-            A user will provide you with specifications and you need to generate an implementation prompt that will guide an AI assistant to implement the code.
-            
-            You are generating a {prompt_type.value} implementation prompt for the category {request.category}.
-            
-            If this is a MAIN prompt, focus on the core implementation steps.
-            If this is a FOLLOWUP_1 prompt, assume the main prompt was partially implemented and focus on continuing the implementation.
-            If this is a FOLLOWUP_2 prompt, assume both main and followup_1 prompts were executed, and focus on finalizing the implementation.
-            
-            The implementation prompt should be clear, specific, and actionable.
-            """
-            
-            # Generate the response
-            messages = [{"role": "user", "content": meta_prompt}]
-            
-            response = client.generate_response(
-                messages=messages,
-                system=system_message,
-                model=FAST_MODEL
-            )
-            
-            # Add the generated prompt to the list
+        
+        # Add the main prompt if it exists
+        if 'main' in parsed_prompts:
             generated_prompts.append(ImplementationPromptResponse(
-                type=prompt_type,
+                type=ImplementationPromptType.MAIN,
+                content=parsed_prompts['main']
+            ))
+        
+        # Add the follow-up 1 prompt if it exists
+        if 'followup_1' in parsed_prompts:
+            generated_prompts.append(ImplementationPromptResponse(
+                type=ImplementationPromptType.FOLLOWUP_1,
+                content=parsed_prompts['followup_1']
+            ))
+        
+        # Add the follow-up 2 prompt if it exists
+        if 'followup_2' in parsed_prompts:
+            generated_prompts.append(ImplementationPromptResponse(
+                type=ImplementationPromptType.FOLLOWUP_2,
+                content=parsed_prompts['followup_2']
+            ))
+        
+        # If no prompts were extracted but there was a response, use the whole response as a main prompt
+        if not generated_prompts and response.strip():
+            generated_prompts.append(ImplementationPromptResponse(
+                type=ImplementationPromptType.MAIN,
                 content=response.strip()
             ))
+        
+        # Check if we need to filter results based on requested prompt type
+        if request.prompt_type:
+            generated_prompts = [p for p in generated_prompts if p.type == request.prompt_type]
         
         # Return the generated prompts
         return ImplementationPromptsGenerateResponse(prompts=generated_prompts)

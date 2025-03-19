@@ -12,3 +12,6 @@ Create:
 3. Ensure the prompts include guidance on validation, error handling, and security implementation
 
 Format each prompt to be directly usable with AI development agents like GitHub Copilot.
+
+Place the main prompt within the <MAIN></MAIN> tag.
+Place the follow up prompt 1 within the <FOLLOWUP1></FOLLOWUP1> and <FOLLOWUP2></FOLLOWUP2> tags.
