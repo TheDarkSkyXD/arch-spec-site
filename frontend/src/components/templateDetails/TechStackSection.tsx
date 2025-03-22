@@ -5,9 +5,15 @@ import CollapsibleSection from "./CollapsibleSection";
 
 interface TechStackSectionProps {
   techStack: ProjectTechStack;
+  isOpen: boolean;
+  onToggle: () => void;
 }
 
-const TechStackSection: React.FC<TechStackSectionProps> = ({ techStack }) => {
+const TechStackSection: React.FC<TechStackSectionProps> = ({
+  techStack,
+  isOpen,
+  onToggle,
+}) => {
   // Create a reusable tech stack item component for consistent styling
   const TechStackItem = ({
     title,
@@ -43,7 +49,7 @@ const TechStackSection: React.FC<TechStackSectionProps> = ({ techStack }) => {
   );
 
   return (
-    <CollapsibleSection title="Tech Stack">
+    <CollapsibleSection title="Tech Stack" isOpen={isOpen} onToggle={onToggle}>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Frontend */}
         <TechStackItem title="Frontend">

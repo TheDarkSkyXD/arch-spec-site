@@ -4,11 +4,17 @@ import CollapsibleSection from "./CollapsibleSection";
 
 interface FeaturesSectionProps {
   features: Features;
+  isOpen: boolean;
+  onToggle: () => void;
 }
 
-const FeaturesSection: React.FC<FeaturesSectionProps> = ({ features }) => {
+const FeaturesSection: React.FC<FeaturesSectionProps> = ({
+  features,
+  isOpen,
+  onToggle,
+}) => {
   return (
-    <CollapsibleSection title="Features">
+    <CollapsibleSection title="Features" isOpen={isOpen} onToggle={onToggle}>
       {features?.coreModules && features.coreModules.length > 0 ? (
         <div className="space-y-4">
           {features.coreModules.map((feature, index) => (

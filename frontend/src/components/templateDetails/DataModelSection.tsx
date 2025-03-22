@@ -4,11 +4,17 @@ import CollapsibleSection from "./CollapsibleSection";
 
 interface DataModelSectionProps {
   dataModel: DataModel;
+  isOpen: boolean;
+  onToggle: () => void;
 }
 
-const DataModelSection: React.FC<DataModelSectionProps> = ({ dataModel }) => {
+const DataModelSection: React.FC<DataModelSectionProps> = ({
+  dataModel,
+  isOpen,
+  onToggle,
+}) => {
   return (
-    <CollapsibleSection title="Data Model">
+    <CollapsibleSection title="Data Model" isOpen={isOpen} onToggle={onToggle}>
       <div className="space-y-6">
         {/* Entities */}
         <div>

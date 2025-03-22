@@ -4,11 +4,21 @@ import CollapsibleSection from "./CollapsibleSection";
 
 interface PagesSectionProps {
   pages: Pages;
+  isOpen: boolean;
+  onToggle: () => void;
 }
 
-const PagesSection: React.FC<PagesSectionProps> = ({ pages }) => {
+const PagesSection: React.FC<PagesSectionProps> = ({
+  pages,
+  isOpen,
+  onToggle,
+}) => {
   return (
-    <CollapsibleSection title="Application Pages">
+    <CollapsibleSection
+      title="Application Pages"
+      isOpen={isOpen}
+      onToggle={onToggle}
+    >
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div>
           <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">

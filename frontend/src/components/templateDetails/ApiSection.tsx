@@ -3,16 +3,22 @@ import { Api } from "../../types/templates";
 import CollapsibleSection from "./CollapsibleSection";
 
 interface ApiSectionProps {
-  api?: Api;
+  api: Api;
+  isOpen: boolean;
+  onToggle: () => void;
 }
 
-const ApiSection: React.FC<ApiSectionProps> = ({ api }) => {
+const ApiSection: React.FC<ApiSectionProps> = ({ api, isOpen, onToggle }) => {
   if (!api || !api.endpoints || api.endpoints.length === 0) {
     return null;
   }
 
   return (
-    <CollapsibleSection title="API Endpoints">
+    <CollapsibleSection
+      title="API Endpoints"
+      isOpen={isOpen}
+      onToggle={onToggle}
+    >
       <div className="space-y-4">
         {api.endpoints.map((endpoint, index) => (
           <div

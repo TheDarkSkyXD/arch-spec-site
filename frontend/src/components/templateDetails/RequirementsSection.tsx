@@ -4,13 +4,21 @@ import CollapsibleSection from "./CollapsibleSection";
 
 interface RequirementsSectionProps {
   requirements: Requirements;
+  isOpen: boolean;
+  onToggle: () => void;
 }
 
 const RequirementsSection: React.FC<RequirementsSectionProps> = ({
   requirements,
+  isOpen,
+  onToggle,
 }) => {
   return (
-    <CollapsibleSection title="Requirements">
+    <CollapsibleSection
+      title="Requirements"
+      isOpen={isOpen}
+      onToggle={onToggle}
+    >
       <div className="space-y-6">
         {/* Functional Requirements */}
         <div>
