@@ -222,7 +222,7 @@ export default function ApiEndpointsForm({
     }
   };
 
-  // Effect to update local state when initial data changes
+  // Effect to update local state when initialData changes
   useEffect(() => {
     if (initialData) {
       setEndpoints(initialData.endpoints || []);
@@ -689,11 +689,11 @@ export default function ApiEndpointsForm({
           </div>
         )}
 
-        {/* New Endpoint Form */}
-        {showNewEndpointForm && (
+        {/* New/Edit Endpoint Form */}
+        {(showNewEndpointForm || editingEndpointIndex !== null) && (
           <Card className="p-4 border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
             <h3 className="text-lg font-medium text-slate-800 dark:text-slate-200 mb-4">
-              Add New Endpoint
+              {editingEndpointIndex !== null ? "Edit Endpoint" : "Add New Endpoint"}
             </h3>
 
             <div className="space-y-4">
@@ -880,129 +880,129 @@ export default function ApiEndpointsForm({
           </Card>
         )}
 
-        {/* Endpoints List */}
-        {endpoints.length === 0 &&
-        !showNewEndpointForm &&
-        editingEndpointIndex === null ? (
-          <Card className="p-6 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-center">
-            <p className="text-slate-600 dark:text-slate-400">
-              No API endpoints defined yet
-            </p>
-          </Card>
-        ) : (
-          <div className="space-y-4">
-            {endpoints.map((endpoint, index) => (
-              <Card
-                key={index}
-                className="border border-slate-200 dark:border-slate-700 overflow-hidden"
-              >
-                <div
-                  className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700"
-                  onClick={() => toggleEndpointExpand(index)}
+        {/* Endpoints List - Only show when not editing or adding new endpoint */}
+        {!showNewEndpointForm && editingEndpointIndex === null && (
+          endpoints.length === 0 ? (
+            <Card className="p-6 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-center">
+              <p className="text-slate-600 dark:text-slate-400">
+                No API endpoints defined yet
+              </p>
+            </Card>
+          ) : (
+            <div className="space-y-4">
+              {endpoints.map((endpoint, index) => (
+                <Card
+                  key={index}
+                  className="border border-slate-200 dark:border-slate-700 overflow-hidden"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center space-x-1">
-                      {endpoint.methods.map((method) => (
-                        <span
-                          key={method}
-                          className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                            method === "GET"
-                              ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300"
-                              : method === "POST"
-                              ? "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300"
-                              : method === "PUT"
-                              ? "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300"
-                              : method === "DELETE"
-                              ? "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300"
-                              : "bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-300"
-                          }`}
-                        >
-                          {method}
-                        </span>
-                      ))}
-                    </div>
-                    <span className="font-medium text-slate-800 dark:text-slate-200">
-                      {endpoint.path}
-                    </span>
-                    {endpoint.auth && (
-                      <span className="flex items-center text-xs text-slate-500 dark:text-slate-400">
-                        <Lock size={12} className="mr-1" />
-                        Protected
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleEditEndpoint(index);
-                      }}
-                      className="text-slate-400 dark:text-slate-500 hover:text-blue-500 dark:hover:text-blue-400"
-                    >
-                      <Edit size={16} />
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleRemoveEndpoint(index);
-                      }}
-                      className="text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400"
-                    >
-                      <Trash2 size={16} />
-                    </Button>
-                    {expandedEndpoint === index ? (
-                      <ChevronUp
-                        size={16}
-                        className="text-slate-500 dark:text-slate-400"
-                      />
-                    ) : (
-                      <ChevronDown
-                        size={16}
-                        className="text-slate-500 dark:text-slate-400"
-                      />
-                    )}
-                  </div>
-                </div>
-
-                {expandedEndpoint === index && (
-                  <div className="p-3 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
-                    <div className="mb-3">
-                      <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1">
-                        Description
-                      </label>
-                      <p className="text-sm text-slate-700 dark:text-slate-300">
-                        {endpoint.description}
-                      </p>
-                    </div>
-
-                    {endpoint.roles && endpoint.roles.length > 0 && (
-                      <div>
-                        <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1">
-                          Required Roles
-                        </label>
-                        <div className="flex flex-wrap gap-1 mt-1">
-                          {endpoint.roles.map((role) => (
-                            <span
-                              key={role}
-                              className="inline-flex px-2 py-1 text-xs rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300"
-                            >
-                              {role}
-                            </span>
-                          ))}
-                        </div>
+                  <div
+                    className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700"
+                    onClick={() => toggleEndpointExpand(index)}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center space-x-1">
+                        {endpoint.methods.map((method) => (
+                          <span
+                            key={method}
+                            className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                              method === "GET"
+                                ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300"
+                                : method === "POST"
+                                ? "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300"
+                                : method === "PUT"
+                                ? "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300"
+                                : method === "DELETE"
+                                ? "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300"
+                                : "bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-300"
+                            }`}
+                          >
+                            {method}
+                          </span>
+                        ))}
                       </div>
-                    )}
+                      <span className="font-medium text-slate-800 dark:text-slate-200">
+                        {endpoint.path}
+                      </span>
+                      {endpoint.auth && (
+                        <span className="flex items-center text-xs text-slate-500 dark:text-slate-400">
+                          <Lock size={12} className="mr-1" />
+                          Protected
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditEndpoint(index);
+                        }}
+                        className="text-slate-400 dark:text-slate-500 hover:text-blue-500 dark:hover:text-blue-400"
+                      >
+                        <Edit size={16} />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemoveEndpoint(index);
+                        }}
+                        className="text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400"
+                      >
+                        <Trash2 size={16} />
+                      </Button>
+                      {expandedEndpoint === index ? (
+                        <ChevronUp
+                          size={16}
+                          className="text-slate-500 dark:text-slate-400"
+                        />
+                      ) : (
+                        <ChevronDown
+                          size={16}
+                          className="text-slate-500 dark:text-slate-400"
+                        />
+                      )}
+                    </div>
                   </div>
-                )}
-              </Card>
-            ))}
-          </div>
+
+                  {expandedEndpoint === index && (
+                    <div className="p-3 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+                      <div className="mb-3">
+                        <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1">
+                          Description
+                        </label>
+                        <p className="text-sm text-slate-700 dark:text-slate-300">
+                          {endpoint.description}
+                        </p>
+                      </div>
+
+                      {endpoint.roles && endpoint.roles.length > 0 && (
+                        <div>
+                          <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1">
+                            Required Roles
+                          </label>
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {endpoint.roles.map((role) => (
+                              <span
+                                key={role}
+                                className="inline-flex px-2 py-1 text-xs rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300"
+                              >
+                                {role}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </Card>
+              ))}
+            </div>
+          )
         )}
       </div>
 
