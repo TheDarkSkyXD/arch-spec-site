@@ -50,6 +50,15 @@ check_venv() {
     fi
 }
 
+# Function to check if ngrok is installed
+check_ngrok_installed() {
+    if command -v ngrok &> /dev/null; then
+        return 0  # exists
+    else
+        return 1  # does not exist
+    fi
+}
+
 # Detect operating system
 OS="unknown"
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
@@ -160,6 +169,40 @@ else
     (cd "$BACKEND_DIR" && source "$VENV_PATH/bin/activate" 2>/dev/null && python -m uvicorn app.main:app --reload > backend.log 2>&1) &
 fi
 
+# Start ngrok for Lemonsqueezy webhook endpoint
+print_message "$YELLOW" "🔄 Setting up ngrok for LemonSqueezy webhook..."
+
+# Check if ngrok is installed
+if check_ngrok_installed; then
+    print_message "$GREEN" "  ✅ ngrok is installed"
+    
+    # Start ngrok in a new terminal
+    if [[ "$OS" == "macOS" ]]; then
+        # macOS terminal
+        osascript -e "tell application \"Terminal\" to do script \"ngrok http --url=camel-square-airedale.ngrok-free.app 8000\""
+    elif [[ "$OS" == "Linux" ]]; then
+        # Try to detect and use available terminal emulator
+        if command -v gnome-terminal &> /dev/null; then
+            gnome-terminal -- bash -c "ngrok http --url=camel-square-airedale.ngrok-free.app 8000; exec bash"
+        elif command -v xterm &> /dev/null; then
+            xterm -e "ngrok http --url=camel-square-airedale.ngrok-free.app 8000" &
+        else
+            # Fallback to background process
+            print_message "$YELLOW" "  ⚠️ No terminal emulator found, running ngrok in background"
+            (ngrok http --url=camel-square-airedale.ngrok-free.app 8000 > ngrok.log 2>&1) &
+        fi
+    else
+        # Fallback for other platforms
+        print_message "$YELLOW" "  ⚠️ Unsupported OS for terminal spawning, running ngrok in background"
+        (ngrok http --url=camel-square-airedale.ngrok-free.app 8000 > ngrok.log 2>&1) &
+    fi
+    print_message "$GREEN" "  ✅ ngrok started for LemonSqueezy webhook endpoint"
+    print_message "$BLUE" "  ℹ️ Webhook URL: https://camel-square-airedale.ngrok-free.app/api/payments/webhooks/lemonsqueezy"
+else
+    print_message "$YELLOW" "  ⚠️ ngrok is not installed. Install it to expose the LemonSqueezy webhook endpoint."
+    print_message "$BLUE" "  ℹ️ Install ngrok from https://ngrok.com/download and make sure it's in your PATH"
+fi
+
 # Return to root directory
 cd "$ROOT_DIR"
 
@@ -200,11 +243,9 @@ else
     cd "$FRONTEND_DIR" && pnpm run dev > frontend.log 2>&1 &
 fi
 
-# Return to root directory
-cd "$ROOT_DIR"
+print_message "$CYAN" "🎉 Development environment is up and running!"
+print_message "$CYAN" "   Backend: http://localhost:8000"
+print_message "$CYAN" "   Frontend: http://localhost:5173"
+print_message "$CYAN" "   API Docs: http://localhost:8000/docs"
 
-print_message "$GREEN" "✨ Development environment is ready!"
-print_message "$CYAN" "   Backend is running at http://localhost:8000"
-print_message "$CYAN" "   Frontend is running at http://localhost:5173"
-print_message "$CYAN" "   MongoDB is running on port 27017"
-print_message "$YELLOW" "   Press Ctrl+C in each terminal window to stop the services." 
+cd "$ROOT_DIR"

@@ -50,6 +50,16 @@ function Test-VirtualEnvExists {
     return Test-Path $venvPath
 }
 
+# Function to check if ngrok is installed
+function Test-NgrokInstalled {
+    try {
+        $ngrokVersion = (& ngrok version) 2>&1
+        return $ngrokVersion -match "ngrok version"
+    } catch {
+        return $false
+    }
+}
+
 # Detect OS platform
 $isWindowsOS = $PSVersionTable.Platform -eq 'Win32NT' -or [string]::IsNullOrEmpty($PSVersionTable.Platform)
 $isLinuxOS = $PSVersionTable.Platform -eq 'Unix' -and $PSVersionTable.OS -like '*Linux*'
@@ -175,6 +185,26 @@ if ($isWindowsOS) {
     } else {
         Start-Process -FilePath "pwsh" -ArgumentList "-NoExit", "-Command", "cd '$backendDir'; if (Test-Path .venv/bin/activate) { bash -c 'source .venv/bin/activate && python -m uvicorn app.main:app --reload' } else { python -m uvicorn app.main:app --reload }"
     }
+}
+
+# Start ngrok for Lemonsqueezy webhook endpoint
+Write-ColorOutput "🔄 Setting up ngrok for LemonSqueezy webhook..." "Yellow"
+
+# Check if ngrok is installed
+if (Test-NgrokInstalled) {
+    Write-ColorOutput "  ✅ ngrok is installed" "Green"
+    
+    # Start ngrok in a new window targeting the webhook endpoint
+    if ($isWindowsOS) {
+        Start-Process -FilePath "pwsh" -ArgumentList "-NoExit", "-Command", "ngrok http --url=camel-square-airedale.ngrok-free.app 8000" -WindowStyle Normal
+    } else {
+        Start-Process -FilePath "pwsh" -ArgumentList "-NoExit", "-Command", "ngrok http --url=camel-square-airedale.ngrok-free.app 8000"
+    }
+    Write-ColorOutput "  ✅ ngrok started for LemonSqueezy webhook endpoint" "Green"
+    Write-ColorOutput "  ℹ️ Webhook URL: https://camel-square-airedale.ngrok-free.app/api/payments/webhooks/lemonsqueezy" "Blue"
+} else {
+    Write-ColorOutput "  ⚠️ ngrok is not installed. Install it to expose the LemonSqueezy webhook endpoint." "Yellow"
+    Write-ColorOutput "  ℹ️ Install ngrok from https://ngrok.com/download and make sure it's in your PATH" "Blue"
 }
 
 # Return to root directory
