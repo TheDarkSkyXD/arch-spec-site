@@ -70,7 +70,11 @@ const TemplateSelectionStep = ({
         </div>
       </div>
 
-      <TemplateSelector onTemplateSelect={onTemplateSelect} />
+      <TemplateSelector
+        onTemplateSelect={onTemplateSelect}
+        selectedTemplateId={selectedTemplate?.id}
+        initialSelectedTemplate={selectedTemplate}
+      />
 
       {selectedTemplate && (
         <div className="mt-8 border-t border-slate-200 dark:border-slate-700 pt-6">
