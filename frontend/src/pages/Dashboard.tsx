@@ -53,7 +53,7 @@ const Dashboard = () => {
             <div className="flex flex-col sm:flex-row gap-3">
               <Button
                 onClick={() => navigate("/new-project")}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 whitespace-nowrap"
               >
                 <PlusCircle size={18} />
                 <span>New Project</span>
@@ -61,7 +61,7 @@ const Dashboard = () => {
               <Button
                 onClick={() => navigate("/templates")}
                 variant="outline"
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 whitespace-nowrap"
               >
                 <Package size={18} />
                 <span>Browse Templates</span>
