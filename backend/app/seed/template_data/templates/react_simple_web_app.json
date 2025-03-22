@@ -1,0 +1,388 @@
+{
+  "id": "react_simple_web_app",
+  "template": {
+    "name": "Simple React Web App",
+    "version": "1.0.0",
+    "description": "A lightweight React web application template with minimal external dependencies, perfect for demos and prototypes",
+    "businessGoals": [],
+    "targetUsers": "",
+    "domain": "",
+    "techStack": {
+      "frontend": {
+        "framework": "React",
+        "language": "TypeScript",
+        "stateManagement": "Context API",
+        "uiLibrary": "Tailwind CSS",
+        "formHandling": "React Hook Form",
+        "routing": "React Router"
+      },
+      "backend": {
+        "type": "serverless",
+        "service": "Vercel Functions",
+        "language": "JavaScript",
+        "note": "Client-side only application using browser storage"
+      },
+      "database": {
+        "type": "nosql",
+        "system": "Embedded",
+        "hosting": "Self-hosted"
+      },
+      "authentication": {
+        "provider": "Custom JWT",
+        "methods": ["Email/Password"]
+      },
+      "hosting": {
+        "frontend": "Netlify",
+        "backend": "n/a",
+        "database": "n/a"
+      },
+      "storage": {
+        "type": "fileSystem",
+        "service": "Local File System"
+      },
+      "deployment": {
+        "ci_cd": "GitHub Actions"
+      }
+    },
+    "requirements": {
+      "functional": [
+        "Simple Authentication System: Implement a simulated authentication flow that uses localStorage to persist user sessions. Include registration, login, and logout functionality.",
+        "Responsive UI: Create a clean, modern interface that works well on desktop and mobile devices.",
+        "Data Management: Include a simple CRUD interface for managing items, using localStorage for persistence.",
+        "Offline Support: Ensure the application works offline by caching necessary assets and data.",
+        "Theme Support: Implement light and dark theme options that persist between sessions."
+      ],
+      "non_functional": [
+        "Performance: Ensure fast load times and responsiveness with code splitting and lazy loading of components.",
+        "Accessibility: Build with accessibility in mind, following WCAG guidelines for keyboard navigation, screen reader support, and proper color contrast.",
+        "Code Quality: Maintain clean code with consistent styling, comprehensive documentation, and type safety throughout the application.",
+        "Dev Experience: Set up a smooth development environment with fast refresh, linting, and formatting tools.",
+        "Simplicity: Keep dependencies to a minimum to reduce complexity and maintenance burden."
+      ]
+    },
+    "features": {
+      "coreModules": [
+        {
+          "name": "Authentication",
+          "description": "Simulated login/register with localStorage persistence",
+          "enabled": true
+        },
+        {
+          "name": "User Preferences",
+          "description": "Theme selection and app settings",
+          "enabled": true
+        },
+        {
+          "name": "Data Management",
+          "description": "CRUD operations for demo items",
+          "enabled": true
+        },
+        {
+          "name": "Offline Support",
+          "description": "Service worker for offline functionality",
+          "enabled": true
+        },
+        {
+          "name": "Import/Export",
+          "description": "Export data as JSON, import from file",
+          "enabled": true
+        }
+      ]
+    },
+    "pages": {
+      "public": [
+        {
+          "name": "Home",
+          "path": "/",
+          "components": ["Hero", "Features", "CallToAction"],
+          "enabled": true
+        },
+        {
+          "name": "Login",
+          "path": "/login",
+          "components": ["LoginForm"],
+          "enabled": true
+        },
+        {
+          "name": "Register",
+          "path": "/register",
+          "components": ["RegistrationForm"],
+          "enabled": true
+        },
+        {
+          "name": "About",
+          "path": "/about",
+          "components": ["AboutContent"],
+          "enabled": true
+        }
+      ],
+      "authenticated": [
+        {
+          "name": "Dashboard",
+          "path": "/dashboard",
+          "components": ["Summary", "ItemList"],
+          "enabled": true
+        },
+        {
+          "name": "Item",
+          "path": "/item/:id",
+          "components": ["ItemDetails", "ItemEdit"],
+          "enabled": true
+        },
+        {
+          "name": "Settings",
+          "path": "/settings",
+          "components": ["ThemeSelector", "UserSettings", "DataManagement"],
+          "enabled": true
+        },
+        {
+          "name": "Profile",
+          "path": "/profile",
+          "components": ["UserInfo", "ProfileForm"],
+          "enabled": true
+        }
+      ],
+      "admin": []
+    },
+    "dataModel": {
+      "entities": [
+        {
+          "name": "User",
+          "description": "Application user information",
+          "fields": [
+            {
+              "name": "id",
+              "type": "string",
+              "primaryKey": true,
+              "generated": true
+            },
+            {
+              "name": "email",
+              "type": "string",
+              "unique": true,
+              "required": true
+            },
+            {
+              "name": "displayName",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "passwordHash",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "createdAt",
+              "type": "number",
+              "default": "Date.now()"
+            },
+            {
+              "name": "updatedAt",
+              "type": "number",
+              "default": "Date.now()"
+            }
+          ]
+        },
+        {
+          "name": "Settings",
+          "description": "User application settings",
+          "fields": [
+            {
+              "name": "userId",
+              "type": "string",
+              "primaryKey": true
+            },
+            {
+              "name": "theme",
+              "type": "string",
+              "enum": ["light", "dark", "system"],
+              "default": "system"
+            },
+            {
+              "name": "notifications",
+              "type": "boolean",
+              "default": true
+            },
+            {
+              "name": "preferences",
+              "type": "object"
+            }
+          ]
+        },
+        {
+          "name": "Item",
+          "description": "Generic data item for demonstrations",
+          "fields": [
+            {
+              "name": "id",
+              "type": "string",
+              "primaryKey": true,
+              "generated": true
+            },
+            {
+              "name": "userId",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "title",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "description",
+              "type": "string"
+            },
+            {
+              "name": "isCompleted",
+              "type": "boolean",
+              "default": false
+            },
+            {
+              "name": "priority",
+              "type": "number",
+              "default": 0
+            },
+            {
+              "name": "tags",
+              "type": "string[]",
+              "default": "[]"
+            },
+            {
+              "name": "createdAt",
+              "type": "number",
+              "default": "Date.now()"
+            },
+            {
+              "name": "updatedAt",
+              "type": "number",
+              "default": "Date.now()"
+            }
+          ]
+        }
+      ],
+      "relationships": [
+        {
+          "type": "oneToOne",
+          "from_entity": "User",
+          "to_entity": "Settings",
+          "field": "userId"
+        },
+        {
+          "type": "oneToMany",
+          "from_entity": "User",
+          "to_entity": "Item",
+          "field": "userId"
+        }
+      ]
+    },
+    "api": {
+      "endpoints": []
+    },
+    "testing": {
+      "unit": {
+        "framework": "Vitest",
+        "coverage": 70,
+        "directories": ["components", "hooks", "utils", "store"]
+      },
+      "integration": {
+        "framework": "React Testing Library",
+        "coverage": 60,
+        "focus": [
+          "Form submissions",
+          "State management",
+          "Component interactions"
+        ]
+      },
+      "e2e": {
+        "framework": "Playwright",
+        "coverage": 40,
+        "scenarios": [
+          "User registration",
+          "Login and logout",
+          "Item CRUD operations",
+          "Theme switching"
+        ]
+      }
+    },
+    "projectStructure": {
+      "frontend": {
+        "directories": [
+          "src/components",
+          "src/context",
+          "src/hooks",
+          "src/pages",
+          "src/services",
+          "src/styles",
+          "src/types",
+          "src/utils",
+          "public"
+        ],
+        "files": [
+          "src/App.tsx",
+          "src/index.tsx",
+          "src/routes.tsx",
+          "src/vite-env.d.ts",
+          "src/storage.ts",
+          "src/serviceWorker.ts",
+          "src/types/index.d.ts",
+          ".eslintrc.js",
+          "tsconfig.json",
+          "vite.config.ts",
+          "index.html"
+        ]
+      }
+    },
+    "deployment": {
+      "environments": [
+        {
+          "name": "Development",
+          "url": "localhost:5173",
+          "variables": []
+        },
+        {
+          "name": "Production",
+          "url": "${PROJECT_NAME}.${GITHUB_USERNAME}.github.io",
+          "variables": []
+        }
+      ],
+      "cicd": {
+        "provider": "GitHub Actions",
+        "steps": [
+          "Install dependencies",
+          "Run tests",
+          "Build application",
+          "Deploy to GitHub Pages"
+        ]
+      }
+    },
+    "documentation": {
+      "sections": [
+        "Overview",
+        "Getting Started",
+        "Component Library",
+        "Offline Support",
+        "Storage Approach",
+        "Testing"
+      ],
+      "diagrams": [
+        {
+          "name": "Architecture Diagram",
+          "type": "mermaid",
+          "template": "flowchart TD\n  User[User] --> React[React App]\n  React --> Context[Context API]\n  Context --> LocalStorage[Local Storage]\n  Context --> IndexedDB[Indexed DB]\n  Context --> ServiceWorker[Service Worker]"
+        },
+        {
+          "name": "Entity Relationship",
+          "type": "mermaid",
+          "template": "erDiagram\n  USER ||--o{ ITEM : manages\n  USER ||--|| SETTINGS : has"
+        },
+        {
+          "name": "Authentication Flow",
+          "type": "mermaid",
+          "template": "sequenceDiagram\n  participant User\n  participant App\n  participant AuthContext\n  participant LocalStorage\n  User->>App: Enter credentials\n  App->>AuthContext: Login request\n  AuthContext->>LocalStorage: Store credentials\n  LocalStorage-->>AuthContext: Confirm storage\n  AuthContext-->>App: Authentication success\n  App-->>User: Redirect to dashboard"
+        }
+      ]
+    }
+  }
+}
