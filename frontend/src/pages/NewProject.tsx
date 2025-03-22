@@ -11,6 +11,8 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, ChevronDown, ChevronUp } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useProjectTemplateSection } from "../hooks/useProjectTemplateSection";
+import { useSubscription } from "../contexts/SubscriptionContext";
+import { userApi } from "../api/userApi";
 
 // Import shadcn UI components
 import Button from "../components/ui/Button";
@@ -31,6 +33,7 @@ enum SectionId {
 const NewProject = () => {
   const navigate = useNavigate();
   const [projectId, setProjectId] = useState<string | undefined>(undefined);
+  const { refreshSubscriptionData } = useSubscription();
 
   // State to track expanded sections
   const [expandedSections, setExpandedSections] = useState<
@@ -61,6 +64,16 @@ const NewProject = () => {
     handleTemplateSelect,
     handleBlankProjectSelect,
   } = useProjectTemplateSection();
+
+  // Load subscription data when component mounts
+  useEffect(() => {
+    const loadUserProfile = async () => {
+      await userApi.getCurrentUser();
+      refreshSubscriptionData();
+    };
+    loadUserProfile();
+  }, [refreshSubscriptionData]);
+
   useEffect(() => {
     console.log("Selected Template:", selectedTemplate);
   }, [selectedTemplate]);
