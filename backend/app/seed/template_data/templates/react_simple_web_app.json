@@ -24,8 +24,9 @@
       },
       "database": {
         "type": "nosql",
-        "system": "Embedded",
-        "hosting": "Self-hosted"
+        "system": "MongoDB",
+        "hosting": "MongoDB Atlas",
+        "note": "For simplicity in initial development, the app can run with browser storage (localStorage/IndexedDB) only"
       },
       "authentication": {
         "provider": "Custom JWT",
