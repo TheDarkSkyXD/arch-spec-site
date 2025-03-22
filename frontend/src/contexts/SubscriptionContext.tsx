@@ -124,6 +124,17 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
     fetchSubscriptionData();
   }, [authLoading, currentUser]);
 
+  // Update feature flags whenever the plan changes
+  useEffect(() => {
+    setHasAIFeatures(
+      currentPlan === "premium" || currentPlan === "open_source"
+    );
+    setHasPremiumTemplates(currentPlan === "premium");
+    setHasUnlimitedProjects(
+      currentPlan === "premium" || currentPlan === "open_source"
+    );
+  }, [currentPlan]);
+
   // Function to refresh subscription data
   const refreshSubscriptionData = async (): Promise<void> => {
     const user = await userApi.getCurrentUser();

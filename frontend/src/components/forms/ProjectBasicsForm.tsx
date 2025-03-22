@@ -48,7 +48,11 @@ const ProjectBasicsForm = ({
   const [isEnhancingGoals, setIsEnhancingGoals] = useState(false);
   const [isEnhancingTargetUsers, setIsEnhancingTargetUsers] = useState(false);
   const { showToast } = useToast();
-  const { hasAIFeatures } = useSubscription();
+  const { hasAIFeatures, isLoading: isSubscriptionLoading } = useSubscription();
+
+  // Add local loading state with forced delay
+  const [localLoading, setLocalLoading] = useState(true);
+
   // Track the project ID internally for subsequent updates
   const [projectId, setProjectId] = useState<string | undefined>(
     initialData?.id
@@ -63,6 +67,25 @@ const ProjectBasicsForm = ({
   const [newBusinessGoal, setNewBusinessGoal] = useState<string>("");
 
   const isEditMode = Boolean(projectId);
+
+  // Force a minimum loading time to prevent flickering
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLocalLoading(false);
+    }, 1000); // Force a 1-second minimum loading time
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Reset local loading if subscription loading state changes
+  useEffect(() => {
+    if (isSubscriptionLoading) {
+      setLocalLoading(true);
+    }
+  }, [isSubscriptionLoading]);
+
+  // Composite loading state - true if either local or subscription is loading
+  const isLoading = localLoading || isSubscriptionLoading;
 
   const {
     register,
@@ -382,37 +405,39 @@ const ProjectBasicsForm = ({
         <div className="flex justify-between items-center mb-1">
           <Label htmlFor="description">Description</Label>
 
-          <div className="flex justify-end items-center gap-3 mb-1">
-            {!hasAIFeatures && <PremiumFeatureBadge />}
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={enhanceDescription}
-              disabled={isEnhancing || !currentDescription || !hasAIFeatures}
-              className={`flex items-center gap-1 text-xs ${
-                !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
-              }`}
-              title={
-                hasAIFeatures
-                  ? "Enhance description with AI"
-                  : "Upgrade to Premium to use AI-powered features"
-              }
-            >
-              {isEnhancing ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-1" />
-              ) : (
-                <>
-                  {hasAIFeatures ? (
-                    <Sparkles size={14} className="mr-1" />
-                  ) : (
-                    <Lock size={14} className="mr-1" />
-                  )}
-                </>
-              )}
-              {isEnhancing ? "Enhancing..." : "Enhance Description"}
-            </Button>
-          </div>
+          {!isLoading && (
+            <div className="flex justify-end items-center gap-3 mb-1">
+              {!hasAIFeatures && <PremiumFeatureBadge />}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={enhanceDescription}
+                disabled={isEnhancing || !currentDescription || !hasAIFeatures}
+                className={`flex items-center gap-1 text-xs ${
+                  !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+                title={
+                  hasAIFeatures
+                    ? "Enhance description with AI"
+                    : "Upgrade to Premium to use AI-powered features"
+                }
+              >
+                {isEnhancing ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                ) : (
+                  <>
+                    {hasAIFeatures ? (
+                      <Sparkles size={14} className="mr-1" />
+                    ) : (
+                      <Lock size={14} className="mr-1" />
+                    )}
+                  </>
+                )}
+                {isEnhancing ? "Enhancing..." : "Enhance Description"}
+              </Button>
+            </div>
+          )}
         </div>
         <div className="relative">
           <Textarea
@@ -434,41 +459,43 @@ const ProjectBasicsForm = ({
         <div className="flex justify-between items-center">
           <Label htmlFor="business_goals">Business Goals</Label>
 
-          <div className="flex justify-end items-center gap-3">
-            {!hasAIFeatures && <PremiumFeatureBadge />}
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={enhanceBusinessGoals}
-              disabled={
-                isEnhancingGoals || !currentDescription || !hasAIFeatures
-              }
-              className={`text-xs flex items-center gap-1 ${
-                !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
-              }`}
-              title={
-                hasAIFeatures
-                  ? businessGoals.length > 0
-                    ? "Enhance business goals with AI"
-                    : "Generate business goals with AI"
-                  : "Upgrade to Premium to use AI-powered features"
-              }
-            >
-              {isEnhancingGoals ? (
-                <Loader2 size={14} className="animate-spin mr-1" />
-              ) : (
-                <>
-                  {hasAIFeatures ? (
-                    <Wand2 size={14} className="mr-1" />
-                  ) : (
-                    <Lock size={14} className="mr-1" />
-                  )}
-                </>
-              )}
-              {businessGoals.length > 0 ? "Enhance Goals" : "Generate Goals"}
-            </Button>
-          </div>
+          {!isLoading && (
+            <div className="flex justify-end items-center gap-3">
+              {!hasAIFeatures && <PremiumFeatureBadge />}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={enhanceBusinessGoals}
+                disabled={
+                  isEnhancingGoals || !currentDescription || !hasAIFeatures
+                }
+                className={`text-xs flex items-center gap-1 ${
+                  !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+                title={
+                  hasAIFeatures
+                    ? businessGoals.length > 0
+                      ? "Enhance business goals with AI"
+                      : "Generate business goals with AI"
+                    : "Upgrade to Premium to use AI-powered features"
+                }
+              >
+                {isEnhancingGoals ? (
+                  <Loader2 size={14} className="animate-spin mr-1" />
+                ) : (
+                  <>
+                    {hasAIFeatures ? (
+                      <Wand2 size={14} className="mr-1" />
+                    ) : (
+                      <Lock size={14} className="mr-1" />
+                    )}
+                  </>
+                )}
+                {businessGoals.length > 0 ? "Enhance Goals" : "Generate Goals"}
+              </Button>
+            </div>
+          )}
         </div>
 
         {isEnhancingGoals && (
@@ -532,41 +559,45 @@ const ProjectBasicsForm = ({
         <div className="flex justify-between items-center mb-1">
           <Label htmlFor="target_users">Target Users</Label>
 
-          <div className="flex justify-end items-center gap-3 mb-1">
-            {!hasAIFeatures && <PremiumFeatureBadge />}
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={enhanceTargetUsers}
-              disabled={
-                isEnhancingTargetUsers || !currentDescription || !hasAIFeatures
-              }
-              className={`text-xs flex items-center gap-1 ${
-                !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
-              }`}
-              title={
-                hasAIFeatures
-                  ? currentTargetUsers
-                    ? "Enhance target users with AI"
-                    : "Generate target users with AI"
-                  : "Upgrade to Premium to use AI-powered features"
-              }
-            >
-              {isEnhancingTargetUsers ? (
-                <Loader2 size={14} className="animate-spin mr-1" />
-              ) : (
-                <>
-                  {hasAIFeatures ? (
-                    <Users size={14} className="mr-1" />
-                  ) : (
-                    <Lock size={14} className="mr-1" />
-                  )}
-                </>
-              )}
-              {currentTargetUsers ? "Enhance Users" : "Generate Users"}
-            </Button>
-          </div>
+          {!isLoading && (
+            <div className="flex justify-end items-center gap-3 mb-1">
+              {!hasAIFeatures && <PremiumFeatureBadge />}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={enhanceTargetUsers}
+                disabled={
+                  isEnhancingTargetUsers ||
+                  !currentDescription ||
+                  !hasAIFeatures
+                }
+                className={`text-xs flex items-center gap-1 ${
+                  !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+                title={
+                  hasAIFeatures
+                    ? currentTargetUsers
+                      ? "Enhance target users with AI"
+                      : "Generate target users with AI"
+                    : "Upgrade to Premium to use AI-powered features"
+                }
+              >
+                {isEnhancingTargetUsers ? (
+                  <Loader2 size={14} className="animate-spin mr-1" />
+                ) : (
+                  <>
+                    {hasAIFeatures ? (
+                      <Users size={14} className="mr-1" />
+                    ) : (
+                      <Lock size={14} className="mr-1" />
+                    )}
+                  </>
+                )}
+                {currentTargetUsers ? "Enhance Users" : "Generate Users"}
+              </Button>
+            </div>
+          )}
         </div>
 
         {isEnhancingTargetUsers && (
