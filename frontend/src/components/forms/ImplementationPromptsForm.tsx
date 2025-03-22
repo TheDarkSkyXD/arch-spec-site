@@ -24,7 +24,7 @@ import {
 } from "../../constants/implementationPrompts";
 import Button from "../ui/Button";
 import Card from "../ui/Card";
-import { PremiumFeatureBadge } from "../ui/index";
+import { PremiumFeatureBadge, ProcessingOverlay } from "../ui/index";
 import { Textarea } from "../ui/textarea";
 import { Select } from "../ui/select";
 
@@ -112,6 +112,11 @@ export default function ImplementationPromptsForm({
       setPromptsData(initializedData);
     }
   }, [promptsData]);
+
+  // Helper function to check if any AI generation is in progress
+  const isAnyGenerationInProgress = () => {
+    return Object.values(generatingCategories).some(Boolean);
+  };
 
   // Add a helper function to find the next available prompt type for a category
   const getNextAvailablePromptType = (category: string) => {
@@ -578,8 +583,15 @@ export default function ImplementationPromptsForm({
     <form
       id="implementation-prompts-form"
       onSubmit={handleSubmit}
-      className="space-y-8"
+      className="space-y-8 relative"
     >
+      {/* Processing Overlay */}
+      <ProcessingOverlay
+        isVisible={isAnyGenerationInProgress()}
+        message="AI prompt generation in progress. Please wait while we create high-quality prompts for you..."
+        opacity={0.6}
+      />
+
       {/* Error and Success Messages */}
       {error && (
         <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-md mb-4">
@@ -613,6 +625,7 @@ export default function ImplementationPromptsForm({
           variant="outline"
           className="flex items-center gap-2 relative"
           title="Download all prompts as a markdown file"
+          disabled={isAnyGenerationInProgress()}
         >
           <FileDown className="h-4 w-4" />
           <span>Download All</span>
@@ -635,6 +648,7 @@ export default function ImplementationPromptsForm({
               className={
                 errors[category] ? "border-red-500 dark:border-red-700" : ""
               }
+              disabled={isAnyGenerationInProgress()}
             >
               {CATEGORY_LABELS[category]}
               {promptsData[category] && promptsData[category].length > 0 && (
@@ -667,7 +681,10 @@ export default function ImplementationPromptsForm({
             <Button
               type="button"
               onClick={() => loadSamplePromptsForCategory(currentCategory)}
-              disabled={loadingSampleCategories[currentCategory]}
+              disabled={
+                loadingSampleCategories[currentCategory] ||
+                isAnyGenerationInProgress()
+              }
               variant="outline"
               className="flex items-center gap-2"
               title={`Load sample prompts for ${CATEGORY_LABELS[currentCategory]}`}
@@ -746,6 +763,7 @@ export default function ImplementationPromptsForm({
                     }
                     className="text-slate-500 hover:text-primary-500"
                     title="Copy prompt to clipboard"
+                    disabled={isAnyGenerationInProgress()}
                   >
                     {copiedPromptId === prompt.id ? (
                       <Check size={16} className="text-green-500" />
@@ -764,6 +782,7 @@ export default function ImplementationPromptsForm({
                         }
                         className="text-slate-500 hover:text-blue-500"
                         title="Edit prompt"
+                        disabled={isAnyGenerationInProgress()}
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -786,6 +805,7 @@ export default function ImplementationPromptsForm({
                         onClick={() => removePrompt(currentCategory, prompt.id)}
                         className="text-slate-500 hover:text-red-500"
                         title="Delete prompt"
+                        disabled={isAnyGenerationInProgress()}
                       >
                         <Trash2 size={16} />
                       </Button>
@@ -808,6 +828,7 @@ export default function ImplementationPromptsForm({
                       variant="outline"
                       size="sm"
                       onClick={cancelEditingPrompt}
+                      disabled={isAnyGenerationInProgress()}
                     >
                       Cancel
                     </Button>
@@ -818,7 +839,9 @@ export default function ImplementationPromptsForm({
                       onClick={() =>
                         saveEditedPrompt(currentCategory, prompt.id)
                       }
-                      disabled={!editPromptContent.trim()}
+                      disabled={
+                        !editPromptContent.trim() || isAnyGenerationInProgress()
+                      }
                     >
                       Save
                     </Button>
@@ -887,10 +910,16 @@ export default function ImplementationPromptsForm({
             <Button
               type="button"
               onClick={addPrompt}
-              disabled={!newPromptContent.trim()}
-              variant={!newPromptContent.trim() ? "outline" : "default"}
+              disabled={!newPromptContent.trim() || isAnyGenerationInProgress()}
+              variant={
+                !newPromptContent.trim() || isAnyGenerationInProgress()
+                  ? "outline"
+                  : "default"
+              }
               className={`flex gap-2 ${
-                !newPromptContent.trim() ? "cursor-not-allowed" : ""
+                !newPromptContent.trim() || isAnyGenerationInProgress()
+                  ? "cursor-not-allowed"
+                  : ""
               }`}
             >
               <PlusCircle size={18} />
@@ -903,10 +932,14 @@ export default function ImplementationPromptsForm({
       <div className="mt-6 flex justify-end">
         <Button
           type="submit"
-          disabled={isSubmitting || !projectId}
-          variant={!projectId || isSubmitting ? "outline" : "default"}
+          disabled={isSubmitting || !projectId || isAnyGenerationInProgress()}
+          variant={
+            !projectId || isSubmitting || isAnyGenerationInProgress()
+              ? "outline"
+              : "default"
+          }
           className={
-            !projectId || isSubmitting
+            !projectId || isSubmitting || isAnyGenerationInProgress()
               ? "bg-gray-400 text-white hover:bg-gray-400"
               : ""
           }

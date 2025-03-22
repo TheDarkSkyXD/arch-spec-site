@@ -18,7 +18,7 @@ import { Requirements } from "../../types/templates";
 import Button from "../ui/Button";
 import Input from "../ui/Input";
 import Card from "../ui/Card";
-import { PremiumFeatureBadge } from "../ui/index";
+import { PremiumFeatureBadge, ProcessingOverlay } from "../ui/index";
 
 interface RequirementsFormProps {
   initialData?: Partial<Requirements>;
@@ -526,6 +526,22 @@ export default function RequirementsForm({
     }
   };
 
+  // Helper function to check if any AI operation is in progress
+  const isAnyEnhancementInProgress = () => {
+    return isEnhancing || isAddingRequirements;
+  };
+
+  // Helper to get the appropriate message for the overlay
+  const getEnhancementMessage = () => {
+    if (isEnhancing) {
+      return "AI is enhancing your requirements. Please wait...";
+    }
+    if (isAddingRequirements) {
+      return "AI is generating new requirements for your project. Please wait...";
+    }
+    return "AI enhancement in progress...";
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -538,7 +554,18 @@ export default function RequirementsForm({
   }
 
   return (
-    <form id="requirements-form" onSubmit={handleSubmit} className="space-y-8">
+    <form
+      id="requirements-form"
+      onSubmit={handleSubmit}
+      className="space-y-8 relative"
+    >
+      {/* Processing Overlay */}
+      <ProcessingOverlay
+        isVisible={isAnyEnhancementInProgress()}
+        message={getEnhancementMessage()}
+        opacity={0.6}
+      />
+
       {/* Error and Success Messages */}
       {error && (
         <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-md mb-4">
@@ -594,7 +621,7 @@ export default function RequirementsForm({
             variant={hasAIFeatures ? "outline" : "ghost"}
             className={`flex items-center gap-2 relative ${
               !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            } ${isAddingRequirements ? "relative z-[60]" : ""}`}
             title={
               hasAIFeatures
                 ? "Generate new requirements to complement existing ones"
@@ -629,7 +656,7 @@ export default function RequirementsForm({
             variant={hasAIFeatures ? "outline" : "ghost"}
             className={`flex items-center gap-2 relative ${
               !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            } ${isEnhancing ? "relative z-[60]" : ""}`}
             title={
               hasAIFeatures
                 ? "Replace all requirements with enhanced versions"

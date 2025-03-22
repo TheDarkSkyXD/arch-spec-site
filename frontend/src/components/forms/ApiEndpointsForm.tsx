@@ -30,6 +30,7 @@ import { Textarea } from "../ui/textarea";
 import { Checkbox } from "../ui/checkbox";
 import Card from "../ui/Card";
 import PremiumFeatureBadge from "../ui/PremiumFeatureBadge";
+import { ProcessingOverlay } from "../ui/index";
 
 interface ApiEndpointsFormProps {
   initialData?: Api;
@@ -543,6 +544,22 @@ export default function ApiEndpointsForm({
     }
   };
 
+  // Helper function to check if any AI operation is in progress
+  const isAnyEnhancementInProgress = () => {
+    return isEnhancing || isAddingEndpoints;
+  };
+
+  // Helper to get the appropriate message for the overlay
+  const getEnhancementMessage = () => {
+    if (isEnhancing) {
+      return "AI is analyzing your project to create optimal API endpoints. Please wait...";
+    }
+    if (isAddingEndpoints) {
+      return "AI is generating additional API endpoints based on your project requirements. Please wait...";
+    }
+    return "AI enhancement in progress...";
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -555,7 +572,18 @@ export default function ApiEndpointsForm({
   }
 
   return (
-    <form id="api-endpoints-form" onSubmit={handleSubmit} className="space-y-8">
+    <form
+      id="api-endpoints-form"
+      onSubmit={handleSubmit}
+      className="space-y-8 relative"
+    >
+      {/* Processing Overlay */}
+      <ProcessingOverlay
+        isVisible={isAnyEnhancementInProgress()}
+        message={getEnhancementMessage()}
+        opacity={0.6}
+      />
+
       {/* Error and Success Messages */}
       {error && (
         <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-md mb-4">
@@ -590,7 +618,7 @@ export default function ApiEndpointsForm({
             variant={hasAIFeatures ? "outline" : "ghost"}
             className={`flex items-center gap-2 relative ${
               !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            } ${isAddingEndpoints ? "relative z-[60]" : ""}`}
             title={
               hasAIFeatures
                 ? "Generate new endpoints to complement existing ones"
@@ -622,7 +650,7 @@ export default function ApiEndpointsForm({
             variant={hasAIFeatures ? "outline" : "ghost"}
             className={`flex items-center gap-2 relative ${
               !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            } ${isEnhancing ? "relative z-[60]" : ""}`}
             title={
               hasAIFeatures
                 ? "Replace all endpoints with AI-generated ones"

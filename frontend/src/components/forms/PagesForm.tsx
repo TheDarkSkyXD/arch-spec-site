@@ -29,7 +29,7 @@ import Button from "../ui/Button";
 import Input from "../ui/Input";
 import Card from "../ui/Card";
 import { Label } from "../ui/label";
-import { PremiumFeatureBadge } from "../ui/index";
+import { PremiumFeatureBadge, ProcessingOverlay } from "../ui/index";
 
 interface PagesFormProps {
   initialData?: Pages;
@@ -926,6 +926,22 @@ export default function PagesForm({
     );
   };
 
+  // Helper function to check if any AI operation is in progress
+  const isAnyEnhancementInProgress = () => {
+    return isEnhancing || isAddingPages;
+  };
+
+  // Helper to get the appropriate message for the overlay
+  const getEnhancementMessage = () => {
+    if (isEnhancing) {
+      return "AI is analyzing your project to generate an optimal page structure. Please wait...";
+    }
+    if (isAddingPages) {
+      return "AI is generating additional pages based on your project requirements. Please wait...";
+    }
+    return "AI enhancement in progress...";
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -938,7 +954,18 @@ export default function PagesForm({
   }
 
   return (
-    <form id="pages-form" onSubmit={handleSubmit} className="space-y-8">
+    <form
+      id="pages-form"
+      onSubmit={handleSubmit}
+      className="space-y-8 relative"
+    >
+      {/* Processing Overlay */}
+      <ProcessingOverlay
+        isVisible={isAnyEnhancementInProgress()}
+        message={getEnhancementMessage()}
+        opacity={0.6}
+      />
+
       {/* Error and Success Messages */}
       {error && (
         <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-md mb-4">
@@ -973,7 +1000,7 @@ export default function PagesForm({
             variant={hasAIFeatures ? "outline" : "ghost"}
             className={`flex items-center gap-2 relative ${
               !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            } ${isAddingPages ? "relative z-[60]" : ""}`}
             title={
               hasAIFeatures
                 ? "Generate additional pages to complement existing ones"
@@ -1005,7 +1032,7 @@ export default function PagesForm({
             variant={hasAIFeatures ? "outline" : "ghost"}
             className={`flex items-center gap-2 relative ${
               !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            } ${isEnhancing ? "relative z-[60]" : ""}`}
             title={
               hasAIFeatures
                 ? "Replace all pages with AI-generated ones"

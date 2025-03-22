@@ -23,7 +23,7 @@ import { projectsService } from "../../services/projectsService";
 import { requirementsService } from "../../services/requirementsService";
 import { aiService } from "../../services/aiService";
 import { useSubscription } from "../../contexts/SubscriptionContext";
-import { PremiumFeatureBadge } from "../ui/index";
+import { PremiumFeatureBadge, ProcessingOverlay } from "../ui/index";
 
 // Import shadcn UI components
 import Button from "../ui/Button";
@@ -550,6 +550,22 @@ export default function FeaturesForm({
     }
   };
 
+  // Helper function to check if any AI operation is in progress
+  const isAnyEnhancementInProgress = () => {
+    return isEnhancing || isAddingFeatures;
+  };
+
+  // Helper to get the appropriate message for the overlay
+  const getEnhancementMessage = () => {
+    if (isEnhancing) {
+      return "AI is analyzing your project to enhance all features. Please wait...";
+    }
+    if (isAddingFeatures) {
+      return "AI is generating new features based on your project requirements. Please wait...";
+    }
+    return "AI enhancement in progress...";
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -562,7 +578,18 @@ export default function FeaturesForm({
   }
 
   return (
-    <form id="features-form" onSubmit={handleSubmit} className="space-y-8">
+    <form
+      id="features-form"
+      onSubmit={handleSubmit}
+      className="space-y-8 relative"
+    >
+      {/* Processing Overlay */}
+      <ProcessingOverlay
+        isVisible={isAnyEnhancementInProgress()}
+        message={getEnhancementMessage()}
+        opacity={0.6}
+      />
+
       {/* Error and Success Messages */}
       {error && (
         <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-md mb-4">
@@ -615,7 +642,7 @@ export default function FeaturesForm({
               variant={hasAIFeatures ? "outline" : "ghost"}
               className={`flex items-center gap-2 relative ${
                 !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
-              }`}
+              } ${isAddingFeatures ? "relative z-[60]" : ""}`}
               title={
                 hasAIFeatures
                   ? "Generate new features to complement existing ones"
@@ -647,7 +674,7 @@ export default function FeaturesForm({
               variant={hasAIFeatures ? "outline" : "ghost"}
               className={`flex items-center gap-2 relative ${
                 !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
-              }`}
+              } ${isEnhancing ? "relative z-[60]" : ""}`}
               title={
                 hasAIFeatures
                   ? "Replace all features with enhanced versions"

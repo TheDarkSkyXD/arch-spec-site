@@ -46,7 +46,7 @@ import { useToast } from "../../contexts/ToastContext";
 import { projectsService } from "../../services/projectsService";
 import { requirementsService } from "../../services/requirementsService";
 import { useSubscription } from "../../contexts/SubscriptionContext";
-import { PremiumFeatureBadge } from "../ui/index";
+import { PremiumFeatureBadge, ProcessingOverlay } from "../ui/index";
 
 interface TechStackFormProps {
   initialData?: ProjectTechStack;
@@ -540,6 +540,19 @@ const TechStackForm = ({
     }
   }, [projectId]);
 
+  // Helper function to check if any AI operation is in progress
+  const isAnyEnhancementInProgress = () => {
+    return isEnhancing;
+  };
+
+  // Helper to get the appropriate message for the overlay
+  const getEnhancementMessage = () => {
+    if (isEnhancing) {
+      return "AI is analyzing your project requirements and recommending the optimal tech stack. Please wait...";
+    }
+    return "AI enhancement in progress...";
+  };
+
   if (isLoading || !techStackOptions) {
     return <Card className="p-4">Loading tech stack options...</Card>;
   }
@@ -604,8 +617,15 @@ const TechStackForm = ({
     <form
       id="tech-stack-form"
       onSubmit={handleSubmit(onSubmit)}
-      className="space-y-8"
+      className="space-y-8 relative"
     >
+      {/* Processing Overlay */}
+      <ProcessingOverlay
+        isVisible={isAnyEnhancementInProgress()}
+        message={getEnhancementMessage()}
+        opacity={0.6}
+      />
+
       {/* Error and Success Messages */}
       {error && (
         <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-md mb-4">
@@ -634,7 +654,7 @@ const TechStackForm = ({
           variant={hasAIFeatures ? "outline" : "ghost"}
           className={`flex items-center gap-2 relative ${
             !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
-          }`}
+          } ${isEnhancing ? "relative z-[60]" : ""}`}
           title={
             hasAIFeatures
               ? "Replace tech stack with AI-generated recommendations"

@@ -33,6 +33,7 @@ import { Badge } from "../ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { projectsService } from "../../services/projectsService";
 import PremiumFeatureBadge from "../ui/PremiumFeatureBadge";
+import { ProcessingOverlay } from "../ui/index";
 
 interface TestCasesFormProps {
   initialData?: TestCasesData;
@@ -632,6 +633,22 @@ export default function TestCasesForm({
     }
   };
 
+  // Helper function to check if any AI operation is in progress
+  const isAnyEnhancementInProgress = () => {
+    return isEnhancing || isGeneratingTestCases;
+  };
+
+  // Helper to get the appropriate message for the overlay
+  const getEnhancementMessage = () => {
+    if (isEnhancing) {
+      return "AI is enhancing your test cases based on project requirements. Please wait...";
+    }
+    if (isGeneratingTestCases) {
+      return "AI is generating test cases from your project requirements and features. Please wait...";
+    }
+    return "AI enhancement in progress...";
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -644,7 +661,18 @@ export default function TestCasesForm({
   }
 
   return (
-    <form id="test-cases-form" onSubmit={handleSubmit} className="space-y-8">
+    <form
+      id="test-cases-form"
+      onSubmit={handleSubmit}
+      className="space-y-8 relative"
+    >
+      {/* Processing Overlay */}
+      <ProcessingOverlay
+        isVisible={isAnyEnhancementInProgress()}
+        message={getEnhancementMessage()}
+        opacity={0.6}
+      />
+
       {/* Error and Success Messages */}
       {error && (
         <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-md mb-4">
@@ -682,7 +710,7 @@ export default function TestCasesForm({
             variant={hasAIFeatures ? "outline" : "ghost"}
             className={`flex items-center gap-2 relative ${
               !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            } ${isGeneratingTestCases ? "relative z-[60]" : ""}`}
             title={
               hasAIFeatures
                 ? "Generate new test cases based on requirements and features"
@@ -718,7 +746,7 @@ export default function TestCasesForm({
             variant={hasAIFeatures ? "outline" : "ghost"}
             className={`flex items-center gap-2 relative ${
               !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            } ${isEnhancing ? "relative z-[60]" : ""}`}
             title={
               hasAIFeatures
                 ? "Enhance existing test cases with AI"

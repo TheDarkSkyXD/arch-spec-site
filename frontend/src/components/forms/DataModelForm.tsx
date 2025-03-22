@@ -45,7 +45,7 @@ import {
   EntityField,
 } from "../../types/templates";
 import { Textarea } from "../ui/textarea";
-import { PremiumFeatureBadge } from "../ui/index";
+import { PremiumFeatureBadge, ProcessingOverlay } from "../ui/index";
 
 interface DataModelFormProps {
   initialData?: Partial<DataModel>;
@@ -667,6 +667,22 @@ export default function DataModelForm({
     }
   };
 
+  // Helper function to check if any AI operation is in progress
+  const isAnyEnhancementInProgress = () => {
+    return isEnhancing || isAddingEntities;
+  };
+
+  // Helper to get the appropriate message for the overlay
+  const getEnhancementMessage = () => {
+    if (isEnhancing) {
+      return "AI is analyzing your project to create an optimal data model. Please wait...";
+    }
+    if (isAddingEntities) {
+      return "AI is generating additional entities based on your project requirements. Please wait...";
+    }
+    return "AI enhancement in progress...";
+  };
+
   return (
     <div className="space-y-6">
       {loading ? (
@@ -686,7 +702,14 @@ export default function DataModelForm({
             </div>
           )}
 
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} className="relative">
+            {/* Processing Overlay */}
+            <ProcessingOverlay
+              isVisible={isAnyEnhancementInProgress()}
+              message={getEnhancementMessage()}
+              opacity={0.6}
+            />
+
             <div className="grid grid-cols-1 gap-6">
               {/* AI Enhancement Buttons */}
               <div className="flex justify-end items-center gap-3 mb-4">
@@ -703,7 +726,7 @@ export default function DataModelForm({
                   variant={hasAIFeatures ? "outline" : "ghost"}
                   className={`flex items-center gap-2 relative ${
                     !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
+                  } ${isAddingEntities ? "relative z-[60]" : ""}`}
                   title={
                     hasAIFeatures
                       ? "Generate new entities to complement existing ones"
@@ -738,7 +761,7 @@ export default function DataModelForm({
                   variant={hasAIFeatures ? "outline" : "ghost"}
                   className={`flex items-center gap-2 relative ${
                     !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
+                  } ${isEnhancing ? "relative z-[60]" : ""}`}
                   title={
                     hasAIFeatures
                       ? "Replace entire data model with AI-generated one"

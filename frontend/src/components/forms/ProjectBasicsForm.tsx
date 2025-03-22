@@ -23,6 +23,7 @@ import Button from "../ui/Button";
 import Input from "../ui/Input";
 import Card from "../ui/Card";
 import PremiumFeatureBadge from "../ui/PremiumFeatureBadge";
+import { ProcessingOverlay } from "../ui/index";
 
 const projectBasicsSchema = z.object({
   name: z.string().min(3, "Project name must be at least 3 characters"),
@@ -372,12 +373,42 @@ const ProjectBasicsForm = ({
     }
   };
 
+  // Helper function to check if any AI enhancement is in progress
+  const isAnyEnhancementInProgress = () => {
+    return isEnhancing || isEnhancingGoals || isEnhancingTargetUsers;
+  };
+
+  // Helper to get the appropriate message based on which enhancement is in progress
+  const getEnhancementMessage = () => {
+    if (isEnhancing) {
+      return "AI is enhancing your project description. Please wait...";
+    }
+    if (isEnhancingGoals) {
+      return businessGoals.length > 0
+        ? "AI is improving your business goals. Please wait..."
+        : "AI is generating business goals based on your description. Please wait...";
+    }
+    if (isEnhancingTargetUsers) {
+      return currentTargetUsers
+        ? "AI is enhancing your target users description. Please wait..."
+        : "AI is generating target users based on your description. Please wait...";
+    }
+    return "AI enhancement in progress...";
+  };
+
   return (
     <form
       id="project-basics-form"
       onSubmit={handleSubmit(onSubmit)}
-      className="space-y-6"
+      className="space-y-6 relative"
     >
+      {/* Processing Overlay */}
+      <ProcessingOverlay
+        isVisible={isAnyEnhancementInProgress()}
+        message={getEnhancementMessage()}
+        opacity={0.6}
+      />
+
       {/* Error and Success Messages */}
       {error && (
         <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-md mb-4">
@@ -416,7 +447,7 @@ const ProjectBasicsForm = ({
                 disabled={isEnhancing || !currentDescription || !hasAIFeatures}
                 className={`flex items-center gap-1 text-xs ${
                   !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
-                }`}
+                } ${isEnhancing ? "relative z-[60]" : ""}`}
                 title={
                   hasAIFeatures
                     ? "Enhance description with AI"
@@ -472,7 +503,7 @@ const ProjectBasicsForm = ({
                 }
                 className={`text-xs flex items-center gap-1 ${
                   !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
-                }`}
+                } ${isEnhancingGoals ? "relative z-[60]" : ""}`}
                 title={
                   hasAIFeatures
                     ? businessGoals.length > 0
@@ -574,7 +605,7 @@ const ProjectBasicsForm = ({
                 }
                 className={`text-xs flex items-center gap-1 ${
                   !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
-                }`}
+                } ${isEnhancingTargetUsers ? "relative z-[60]" : ""}`}
                 title={
                   hasAIFeatures
                     ? currentTargetUsers
