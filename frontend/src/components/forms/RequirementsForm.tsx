@@ -8,6 +8,7 @@ import {
   Tag,
   RefreshCw,
   Lock,
+  Edit,
 } from "lucide-react";
 import { requirementsService } from "../../services/requirementsService";
 import { projectsService } from "../../services/projectsService";
@@ -41,6 +42,10 @@ export default function RequirementsForm({
   );
   const [newFunctionalReq, setNewFunctionalReq] = useState("");
   const [newNonFunctionalReq, setNewNonFunctionalReq] = useState("");
+  // Add state for inline editing
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [editingType, setEditingType] = useState<"functional" | "non-functional" | null>(null);
+  const [editingValue, setEditingValue] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -542,6 +547,40 @@ export default function RequirementsForm({
     return "AI enhancement in progress...";
   };
 
+  const handleStartEdit = (index: number, type: "functional" | "non-functional", value: string) => {
+    setEditingIndex(index);
+    setEditingType(type);
+    setEditingValue(value);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingIndex(null);
+    setEditingType(null);
+    setEditingValue("");
+  };
+
+  const handleSaveEdit = () => {
+    if (!editingValue.trim() || editingIndex === null || !editingType) return;
+
+    if (editingType === "functional") {
+      const newReqs = [...functionalReqs];
+      newReqs[editingIndex] = editingValue.trim();
+      setFunctionalReqs(newReqs);
+    } else {
+      const newReqs = [...nonFunctionalReqs];
+      newReqs[editingIndex] = editingValue.trim();
+      setNonFunctionalReqs(newReqs);
+    }
+
+    showToast({
+      title: "Success",
+      description: "Requirement updated successfully",
+      type: "success",
+    });
+
+    handleCancelEdit();
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -712,18 +751,63 @@ export default function RequirementsForm({
                 key={index}
                 className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
               >
-                <p className="dark:text-slate-300">
-                  {stripCategoryPrefix(req)}
-                </p>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => removeFunctionalRequirement(index)}
-                  className="text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400"
-                >
-                  <Trash2 size={18} />
-                </Button>
+                {editingIndex === index && editingType === "functional" ? (
+                  <div className="flex gap-2 w-full">
+                    <Input
+                      type="text"
+                      value={editingValue}
+                      onChange={(e) => setEditingValue(e.target.value)}
+                      className="flex-1"
+                      autoFocus
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handleSaveEdit();
+                        if (e.key === "Escape") handleCancelEdit();
+                      }}
+                    />
+                    <Button
+                      type="button"
+                      onClick={handleSaveEdit}
+                      variant="default"
+                      size="sm"
+                    >
+                      Save
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={handleCancelEdit}
+                      variant="outline"
+                      size="sm"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <p className="dark:text-slate-300">
+                      {stripCategoryPrefix(req)}
+                    </p>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleStartEdit(index, "functional", req)}
+                        className="text-slate-400 dark:text-slate-500 hover:text-blue-500 dark:hover:text-blue-400"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeFunctionalRequirement(index)}
+                        className="text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </>
+                )}
               </Card>
             )
           )}
@@ -773,18 +857,65 @@ export default function RequirementsForm({
                 key={index}
                 className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
               >
-                <p className="dark:text-slate-300">
-                  {stripCategoryPrefix(req)}
-                </p>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => removeNonFunctionalRequirement(index)}
-                  className="text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400"
-                >
-                  <Trash2 size={18} />
-                </Button>
+                {editingIndex === index && editingType === "non-functional" ? (
+                  <div className="flex gap-2 w-full">
+                    <Input
+                      type="text"
+                      value={editingValue}
+                      onChange={(e) => setEditingValue(e.target.value)}
+                      className="flex-1"
+                      autoFocus
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handleSaveEdit();
+                        if (e.key === "Escape") handleCancelEdit();
+                      }}
+                    />
+                    <Button
+                      type="button"
+                      onClick={handleSaveEdit}
+                      variant="default"
+                      size="sm"
+                    >
+                      Save
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={handleCancelEdit}
+                      variant="outline"
+                      size="sm"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <p className="dark:text-slate-300">
+                      {stripCategoryPrefix(req)}
+                    </p>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() =>
+                          handleStartEdit(index, "non-functional", req)
+                        }
+                        className="text-slate-400 dark:text-slate-500 hover:text-blue-500 dark:hover:text-blue-400"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeNonFunctionalRequirement(index)}
+                        className="text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </>
+                )}
               </Card>
             )
           )}
