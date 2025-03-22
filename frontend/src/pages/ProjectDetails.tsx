@@ -468,75 +468,6 @@ const ProjectDetails = () => {
               )}
             </Card>
 
-            {/* Tech Stack */}
-            <Card className="overflow-hidden">
-              <SectionHeader
-                title="Technology Stack"
-                description="Configure the technology stack for your project"
-                sectionId={SectionId.TECH_STACK}
-                isExpanded={expandedSections[SectionId.TECH_STACK]}
-              />
-              {expandedSections[SectionId.TECH_STACK] && (
-                <div className="p-6">
-                  {techStackLoading ? (
-                    <div className="flex items-center justify-center py-8">
-                      <Loader2 className="h-6 w-6 text-primary-600 animate-spin mr-3" />
-                      <span className="text-slate-600 dark:text-slate-300">
-                        Loading tech stack data...
-                      </span>
-                    </div>
-                  ) : (
-                    <Tabs
-                      value={sectionViewModes[SectionId.TECH_STACK]}
-                      onValueChange={(value) =>
-                        changeViewMode(SectionId.TECH_STACK, value as ViewMode)
-                      }
-                      className="w-full"
-                    >
-                      <TabsList className="mb-4">
-                        <TabsTrigger value={ViewMode.EDIT}>Edit</TabsTrigger>
-                        <TabsTrigger value={ViewMode.PREVIEW}>
-                          Preview
-                        </TabsTrigger>
-                      </TabsList>
-
-                      <TabsContent value={ViewMode.EDIT}>
-                        {techStack && (
-                          <div className="flex justify-end mb-4">
-                            <MarkdownActions
-                              markdown={markdownService.generateTechStackMarkdown(
-                                techStack
-                              )}
-                              fileName={markdownService.generateFileName(
-                                project.name,
-                                "tech-stack"
-                              )}
-                            />
-                          </div>
-                        )}
-                        <TechStackForm
-                          initialData={techStack || undefined}
-                          projectId={id}
-                          onSuccess={handleTechStackUpdate}
-                        />
-                      </TabsContent>
-
-                      <TabsContent
-                        value={ViewMode.PREVIEW}
-                        className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg"
-                      >
-                        <TechStackPreview
-                          data={techStack}
-                          projectName={project.name}
-                          isLoading={techStackLoading}
-                        />
-                      </TabsContent>
-                    </Tabs>
-                  )}
-                </div>
-              )}
-            </Card>
-
             {/* Requirements Section */}
             <Card className="overflow-hidden">
               <SectionHeader
@@ -670,6 +601,75 @@ const ProjectDetails = () => {
                           data={features}
                           projectName={project.name}
                           isLoading={featuresLoading}
+                        />
+                      </TabsContent>
+                    </Tabs>
+                  )}
+                </div>
+              )}
+            </Card>
+
+            {/* Tech Stack */}
+            <Card className="overflow-hidden">
+              <SectionHeader
+                title="Technology Stack"
+                description="Configure the technology stack for your project"
+                sectionId={SectionId.TECH_STACK}
+                isExpanded={expandedSections[SectionId.TECH_STACK]}
+              />
+              {expandedSections[SectionId.TECH_STACK] && (
+                <div className="p-6">
+                  {techStackLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="h-6 w-6 text-primary-600 animate-spin mr-3" />
+                      <span className="text-slate-600 dark:text-slate-300">
+                        Loading tech stack data...
+                      </span>
+                    </div>
+                  ) : (
+                    <Tabs
+                      value={sectionViewModes[SectionId.TECH_STACK]}
+                      onValueChange={(value) =>
+                        changeViewMode(SectionId.TECH_STACK, value as ViewMode)
+                      }
+                      className="w-full"
+                    >
+                      <TabsList className="mb-4">
+                        <TabsTrigger value={ViewMode.EDIT}>Edit</TabsTrigger>
+                        <TabsTrigger value={ViewMode.PREVIEW}>
+                          Preview
+                        </TabsTrigger>
+                      </TabsList>
+
+                      <TabsContent value={ViewMode.EDIT}>
+                        {techStack && (
+                          <div className="flex justify-end mb-4">
+                            <MarkdownActions
+                              markdown={markdownService.generateTechStackMarkdown(
+                                techStack
+                              )}
+                              fileName={markdownService.generateFileName(
+                                project.name,
+                                "tech-stack"
+                              )}
+                            />
+                          </div>
+                        )}
+                        <TechStackForm
+                          initialData={techStack || undefined}
+                          projectId={id}
+                          onSuccess={handleTechStackUpdate}
+                        />
+                      </TabsContent>
+
+                      <TabsContent
+                        value={ViewMode.PREVIEW}
+                        className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg"
+                      >
+                        <TechStackPreview
+                          data={techStack}
+                          projectName={project.name}
+                          isLoading={techStackLoading}
                         />
                       </TabsContent>
                     </Tabs>

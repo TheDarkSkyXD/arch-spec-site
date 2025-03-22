@@ -197,28 +197,6 @@ const NewProject = () => {
             )}
           </Card>
 
-          {/* Tech Stack (Optional) */}
-          <Card className="overflow-hidden">
-            <SectionHeader
-              title="Tech Stack"
-              description="Define your project's technology stack"
-              sectionId={SectionId.TECH_STACK}
-              isExpanded={expandedSections[SectionId.TECH_STACK]}
-              disabled={!projectId}
-            />
-            {expandedSections[SectionId.TECH_STACK] && (
-              <div className="p-6">
-                <TechStackForm
-                  initialData={selectedTemplate?.techStack}
-                  projectId={projectId}
-                  onSuccess={() => {
-                    console.log("Tech stack updated");
-                  }}
-                />
-              </div>
-            )}
-          </Card>
-
           {/* Requirements (Optional) */}
           <Card className="overflow-hidden">
             <SectionHeader
@@ -266,6 +244,28 @@ const NewProject = () => {
                   projectId={projectId}
                   onSuccess={(updatedFeatures) => {
                     console.log("Features updated:", updatedFeatures);
+                  }}
+                />
+              </div>
+            )}
+          </Card>
+
+          {/* Tech Stack (Optional) */}
+          <Card className="overflow-hidden">
+            <SectionHeader
+              title="Tech Stack"
+              description="Define your project's technology stack"
+              sectionId={SectionId.TECH_STACK}
+              isExpanded={expandedSections[SectionId.TECH_STACK]}
+              disabled={!projectId}
+            />
+            {expandedSections[SectionId.TECH_STACK] && (
+              <div className="p-6">
+                <TechStackForm
+                  initialData={selectedTemplate?.techStack}
+                  projectId={projectId}
+                  onSuccess={() => {
+                    console.log("Tech stack updated");
                   }}
                 />
               </div>
