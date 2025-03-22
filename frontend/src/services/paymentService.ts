@@ -27,9 +27,9 @@ export interface SubscriptionPlan {
 export interface Subscription {
   id: string;
   status: "active" | "past_due" | "canceled" | "expired" | "on_trial";
-  currentPeriodEnd: Date;
-  planId: string;
-  customerId: string;
+  current_period_end: Date;
+  plan_id: string;
+  customer_id: string;
 }
 
 export interface Customer {
@@ -51,11 +51,21 @@ declare global {
   }
 }
 
+// Cache interfaces
+interface CacheItem<T> {
+  data: T;
+  timestamp: number;
+  expiresAt: number;
+}
+
 /**
  * Service for handling payments and subscriptions via LemonSqueezy
  */
 class PaymentService {
   private apiUrl = "/api/payments";
+  private planCache: CacheItem<SubscriptionPlan[]> | null = null;
+  private customerCache: Map<string, CacheItem<Customer>> = new Map();
+  private readonly CACHE_TTL = 5 * 60 * 1000; // 5 minutes in milliseconds
 
   /**
    * Initialize LemonSqueezy SDK
@@ -95,12 +105,35 @@ class PaymentService {
   /**
    * Get available subscription plans
    */
-  async getSubscriptionPlans(): Promise<SubscriptionPlan[]> {
+  async getSubscriptionPlans(
+    forceRefresh = false
+  ): Promise<SubscriptionPlan[]> {
     try {
+      // Return from cache if available and not forcing refresh
+      const now = Date.now();
+      if (!forceRefresh && this.planCache && now < this.planCache.expiresAt) {
+        console.log("Using cached subscription plans");
+        return this.planCache.data;
+      }
+
+      console.log("Fetching subscription plans from API");
       const response = await axios.get(`${this.apiUrl}/plans`);
+
+      // Cache the response
+      this.planCache = {
+        data: response.data,
+        timestamp: now,
+        expiresAt: now + this.CACHE_TTL,
+      };
+
       return response.data;
     } catch (error) {
       console.error("Failed to fetch subscription plans:", error);
+      // If cache exists but is expired, still return it as fallback
+      if (this.planCache) {
+        console.log("Using expired cached plans as fallback");
+        return this.planCache.data;
+      }
       throw error;
     }
   }
@@ -108,16 +141,46 @@ class PaymentService {
   /**
    * Get or create customer for the current user
    */
-  async getOrCreateCustomer(user: User): Promise<Customer> {
+  async getOrCreateCustomer(
+    user: User,
+    forceRefresh = false
+  ): Promise<Customer> {
     try {
+      const cacheKey = user.email;
+      const now = Date.now();
+
+      // Return from cache if available and not forcing refresh
+      if (
+        !forceRefresh &&
+        this.customerCache.has(cacheKey) &&
+        now < this.customerCache.get(cacheKey)!.expiresAt
+      ) {
+        console.log("Using cached customer data");
+        return this.customerCache.get(cacheKey)!.data;
+      }
+
+      console.log("Fetching or creating customer from API");
       const response = await axios.post(`${this.apiUrl}/customers`, {
         email: user.email,
         name: user.displayName || user.email,
-        userId: user.uid,
+        user_id: user.uid,
       });
+
+      // Cache the response
+      this.customerCache.set(cacheKey, {
+        data: response.data,
+        timestamp: now,
+        expiresAt: now + this.CACHE_TTL,
+      });
+
       return response.data;
     } catch (error) {
       console.error("Failed to get or create customer:", error);
+      // If cache exists, still return it as fallback
+      if (this.customerCache.has(user.email)) {
+        console.log("Using expired cached customer data as fallback");
+        return this.customerCache.get(user.email)!.data;
+      }
       throw error;
     }
   }
@@ -125,13 +188,37 @@ class PaymentService {
   /**
    * Get user's active subscription if any
    */
-  async getCurrentSubscription(email: string): Promise<Subscription | null> {
+  async getCurrentSubscription(
+    email: string,
+    shouldRefresh = false
+  ): Promise<Subscription | null> {
     try {
+      // Add a cache-busting parameter if we need a fresh fetch
+      const cacheBuster = shouldRefresh ? `&_=${Date.now()}` : "";
+      console.log(
+        `Fetching current subscription for ${email}, refresh=${shouldRefresh}`
+      );
       const response = await axios.get(
         `${this.apiUrl}/subscriptions/current?email=${encodeURIComponent(
           email
-        )}`
+        )}${cacheBuster}`
       );
+
+      // Log the response data to help diagnose issues
+      console.log("Subscription response:", response.data);
+
+      if (response.data) {
+        // Convert ISO string dates to Date objects
+        if (
+          response.data.currentPeriodEnd &&
+          typeof response.data.currentPeriodEnd === "string"
+        ) {
+          response.data.currentPeriodEnd = new Date(
+            response.data.currentPeriodEnd
+          );
+        }
+      }
+
       return response.data || null;
     } catch (error) {
       console.error("Failed to fetch current subscription:", error);
@@ -149,9 +236,9 @@ class PaymentService {
   ): Promise<{ url: string }> {
     try {
       const response = await axios.post(`${this.apiUrl}/checkout`, {
-        planId,
+        plan_id: planId,
         email: userEmail,
-        userId,
+        user_id: userId,
       });
       return { url: response.data.url };
     } catch (error) {
@@ -199,12 +286,21 @@ class PaymentService {
   }
 
   /**
+   * Clear all caches, useful when needing fresh data
+   */
+  clearCaches(): void {
+    console.log("Clearing all payment service caches");
+    this.planCache = null;
+    this.customerCache.clear();
+  }
+
+  /**
    * Create a customer portal URL for managing subscriptions
    */
   async createCustomerPortalUrl(customerId: string): Promise<{ url: string }> {
     try {
       const response = await axios.post(`${this.apiUrl}/customer-portal`, {
-        customerId,
+        customer_id: customerId,
       });
       return { url: response.data.url };
     } catch (error) {

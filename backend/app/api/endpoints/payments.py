@@ -35,7 +35,8 @@ async def create_customer(customer: CustomerCreate):
     try:
         return await subscription_service.get_or_create_customer(
             email=customer.email,
-            name=customer.name
+            name=customer.name,
+            user_id=customer.user_id
         )
     except Exception as e:
         logger.error(f"Error creating customer: {e}")
@@ -111,6 +112,8 @@ async def lemonsqueezy_webhook(
             await subscription_service.process_subscription_cancelled(body_json)
         elif event_name == "order_created":
             await subscription_service.process_order_created(body_json)
+        elif event_name == "subscription_payment_success":
+            await subscription_service.process_subscription_payment_success(body_json)
         else:
             # Log other event types but don't process them
             logger.info(f"Received unhandled webhook event: {event_name}")
