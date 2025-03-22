@@ -29,10 +29,10 @@ ArchSpec is currently in **early access**. The core functionality is working, wh
 - ✅ Download All (zip) of complete specifications
 - ✅ One project template (more coming soon)
 - ✅ Manual data entry for all specification sections
+- ✅ LemonSqueezy payment integration
 
 ### In Development
 
-- ⏳ LemonSqueezy payment integration
 - ⏳ AI credit-based enhancement plans
 - ⏳ Optimized AI calls (batching) for efficiency and error handling
 - ⏳ Intelligent knowledge graphs for "gaps" detection
@@ -49,8 +49,7 @@ There are two ways to use ArchSpec:
 [Sign up at archspec.dev](https://archspec.dev/register) to use the hosted version without any setup.
 
 - Basic features available for free
-- AI features require payment to cover API costs
-- Contact us after signup for AI feature access
+- Subscribe to access AI-powered features
 - Be among the first to try new features
 
 ### 2. Self-Hosted Open Source
@@ -114,6 +113,10 @@ See [dev-scripts-README.md](dev-scripts-README.md) for detailed development setu
 ### Authentication
 
 This project uses Firebase Authentication. For authentication setup details, see [README-firebase-auth.md](README-firebase-auth.md).
+
+### Payment Integration
+
+This project uses LemonSqueezy for payment and subscription management. For payment integration setup details, see [README-lemonsqueezy.md](README-lemonsqueezy.md).
 
 ### Deployment
 

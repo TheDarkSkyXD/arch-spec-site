@@ -203,6 +203,7 @@ const LandingPage = () => {
                     <li>✅ Preview and export options (markdown, zip)</li>
                     <li>✅ Free manual data entry for all spec sections</li>
                     <li>✅ One template available (more coming soon)</li>
+                    <li>✅ LemonSqueezy payment integration</li>
                   </ul>
                 </div>
               </div>
@@ -230,7 +231,6 @@ const LandingPage = () => {
                     In Development
                   </h3>
                   <ul className="mt-2 text-base text-slate-500 dark:text-slate-300 space-y-2">
-                    <li>⏳ LemonSqueezy payment integration</li>
                     <li>⏳ AI credit-based plans</li>
                     <li>⏳ Optimized AI calls (batching)</li>
                     <li>⏳ Intelligent knowledge graphs for gaps detection</li>
@@ -607,8 +607,7 @@ const LandingPage = () => {
                       </svg>
                     </div>
                     <p className="ml-3 text-base text-slate-700 dark:text-slate-300">
-                      Contact us for AI features (payment required for API
-                      costs)
+                      Subscribe to access AI-powered features
                     </p>
                   </li>
                   <li className="flex items-start">
