@@ -6,6 +6,8 @@ import FeaturesForm from "../components/forms/FeaturesForm";
 import PagesForm from "../components/forms/PagesForm";
 import ApiEndpointsForm from "../components/forms/ApiEndpointsForm";
 import DataModelForm from "../components/forms/DataModelForm";
+import TestCasesForm from "../components/forms/TestCasesForm";
+import ImplementationPromptsForm from "../components/forms/ImplementationPromptsForm";
 import TemplateSelectionStep from "../components/project/TemplateSelectionStep";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, ChevronDown, ChevronUp } from "lucide-react";
@@ -28,6 +30,8 @@ enum SectionId {
   PAGES = "pages",
   DATA_MODEL = "dataModel",
   API_ENDPOINTS = "apiEndpoints",
+  TEST_CASES = "testCases",
+  IMPLEMENTATION_PROMPTS = "implementationPrompts",
 }
 
 const NewProject = () => {
@@ -47,6 +51,8 @@ const NewProject = () => {
     [SectionId.PAGES]: false,
     [SectionId.DATA_MODEL]: false,
     [SectionId.API_ENDPOINTS]: false,
+    [SectionId.TEST_CASES]: false,
+    [SectionId.IMPLEMENTATION_PROMPTS]: false,
   });
 
   // Function to toggle section expansion
@@ -341,6 +347,57 @@ const NewProject = () => {
                   projectId={projectId}
                   onSuccess={(updatedApiEndpoints) => {
                     console.log("API Endpoints updated:", updatedApiEndpoints);
+                  }}
+                />
+              </div>
+            )}
+          </Card>
+
+          {/* Test Cases (Optional) */}
+          <Card className="overflow-hidden">
+            <SectionHeader
+              title="Test Cases"
+              description="Define Gherkin-style test cases to document expected behavior"
+              sectionId={SectionId.TEST_CASES}
+              isExpanded={expandedSections[SectionId.TEST_CASES]}
+              disabled={!projectId}
+            />
+            {expandedSections[SectionId.TEST_CASES] && (
+              <div className="p-6">
+                <TestCasesForm
+                  initialData={{
+                    testCases: [],
+                  }}
+                  projectId={projectId}
+                  onSuccess={(updatedTestCases) => {
+                    console.log("Test Cases updated:", updatedTestCases);
+                  }}
+                />
+              </div>
+            )}
+          </Card>
+
+          {/* Implementation Prompts (Optional) */}
+          <Card className="overflow-hidden">
+            <SectionHeader
+              title="Implementation Prompts"
+              description="Define prompts for implementing different aspects of your project"
+              sectionId={SectionId.IMPLEMENTATION_PROMPTS}
+              isExpanded={expandedSections[SectionId.IMPLEMENTATION_PROMPTS]}
+              disabled={!projectId}
+            />
+            {expandedSections[SectionId.IMPLEMENTATION_PROMPTS] && (
+              <div className="p-6">
+                <ImplementationPromptsForm
+                  initialData={{
+                    data: {},
+                  }}
+                  projectId={projectId}
+                  onSuccess={(updatedImplementationPrompts) => {
+                    console.log(
+                      "Implementation Prompts updated:",
+                      updatedImplementationPrompts
+                    );
                   }}
                 />
               </div>
