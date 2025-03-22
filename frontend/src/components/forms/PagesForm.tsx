@@ -69,7 +69,7 @@ export default function PagesForm({
   const [isEnhancing, setIsEnhancing] = useState<boolean>(false);
   const [isAddingPages, setIsAddingPages] = useState<boolean>(false);
   const [projectDescription, setProjectDescription] = useState<string>("");
-  const [projectFeatures, setProjectFeatures] = useState<any[]>([]);
+  const [projectFeatures, setProjectFeatures] = useState<{ name: string; description: string; enabled: boolean }[]>([]);
   const [requirements, setRequirements] = useState<string[]>([]);
 
   // Editing state
@@ -152,7 +152,12 @@ export default function PagesForm({
         // Fetch features
         const featuresData = await featuresService.getFeatures(projectId);
         if (featuresData && featuresData.coreModules) {
-          setProjectFeatures(featuresData.coreModules);
+          // Make sure each feature has the required 'enabled' property
+          const formattedFeatures = featuresData.coreModules.map(feature => ({
+            ...feature,
+            enabled: feature.enabled !== undefined ? feature.enabled : true
+          }));
+          setProjectFeatures(formattedFeatures);
         }
 
         // Fetch requirements
