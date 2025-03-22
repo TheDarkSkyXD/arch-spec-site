@@ -203,6 +203,28 @@ const SubscriptionPlan = () => {
                       </div>
                     </div>
                   )}
+
+                  {subscriptionData.plan !== "free" && (
+                    <div className="flex p-3 bg-green-50 text-green-800 rounded-md items-start dark:bg-green-900 dark:text-green-200">
+                      <Info size={16} className="mr-2 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <p className="font-medium">Premium Plan</p>
+                        <p className="mt-1">
+                          You have access to all premium features including
+                          AI-powered tools and unlimited projects.
+                        </p>
+                        <div className="mt-3 flex space-x-3">
+                          <Button
+                            href="/subscription"
+                            size="sm"
+                            variant="outline"
+                          >
+                            Manage Subscription
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -400,6 +422,14 @@ const SubscriptionPlan = () => {
                 <div className="mt-6 text-center">
                   <Button href="/subscription" variant="default">
                     Upgrade to Premium
+                  </Button>
+                </div>
+              )}
+
+              {subscriptionData.plan === "premium" && (
+                <div className="mt-6 text-center">
+                  <Button href="/subscription" variant="outline">
+                    Manage Subscription
                   </Button>
                 </div>
               )}

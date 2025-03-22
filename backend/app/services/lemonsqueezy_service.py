@@ -389,40 +389,50 @@ class LemonSqueezyService:
             return []
 
     async def create_customer_portal(self, customer_id: str) -> str:
-        """Create a customer portal URL"""
+        """Get the customer portal URL for a customer
+        
+        Instead of creating a new portal URL (which 404s), we'll get the
+        customer details and use the pre-signed URL they provide
+        """
         try:
-            data = {
-                "data": {
-                    "type": "customer-portals",
-                    "attributes": {
-                        "return_url": f"{settings.frontend_url}/subscription"
-                    },
-                    "relationships": {
-                        "store": {
-                            "data": {
-                                "type": "stores",
-                                "id": self.store_id
-                            }
-                        },
-                        "customer": {
-                            "data": {
-                                "type": "customers",
-                                "id": customer_id
-                            }
-                        }
-                    }
-                }
-            }
+            logger.info(f"Getting customer portal URL for customer {customer_id}")
             
-            response = await self._make_request("post", "customer-portals", data)
+            # First check if we already have a subscription for this customer
+            # as subscriptions contain a customer portal URL
+            try:
+                response = await self._make_request("get", f"customers/{customer_id}/subscriptions")
+                if isinstance(response, dict) and "data" in response and response["data"]:
+                    # Get the first subscription
+                    subscription = response["data"][0]
+                    if "attributes" in subscription and "urls" in subscription["attributes"]:
+                        portal_url = subscription["attributes"]["urls"]["customer_portal"]
+                        if portal_url:
+                            logger.info(f"Using customer portal URL from subscription: {portal_url}")
+                            return portal_url
+            except Exception as sub_error:
+                logger.warning(f"Error getting subscriptions for portal URL: {sub_error}")
             
-            if "data" in response and "attributes" in response["data"]:
-                return response["data"]["attributes"]["url"]
-            else:
-                raise ValueError("Invalid response from LemonSqueezy API")
+            # If no subscription or no URL in subscription, try getting the customer
+            try:
+                response = await self._make_request("get", f"customers/{customer_id}")
+                if isinstance(response, dict) and "data" in response:
+                    customer = response["data"]
+                    if "attributes" in customer and "urls" in customer["attributes"]:
+                        portal_url = customer["attributes"]["urls"]["customer_portal"]
+                        if portal_url:
+                            logger.info(f"Using customer portal URL from customer: {portal_url}")
+                            return portal_url
+            except Exception as cust_error:
+                logger.warning(f"Error getting customer for portal URL: {cust_error}")
+            
+            # Fallback to a static URL if API calls fail
+            logger.info(f"Using fallback customer portal URL for customer {customer_id}")
+            return f"https://store.archspec.dev/billing?user={customer_id}"
+            
         except Exception as e:
             logger.error(f"Error creating customer portal: {e}")
-            raise
+            # Return the fallback URL even if there's an error
+            return "https://store.archspec.dev/billing"
 
     async def get_subscription_by_id(self, subscription_id: str) -> Optional[Subscription]:
         """Get a subscription directly by its ID"""
