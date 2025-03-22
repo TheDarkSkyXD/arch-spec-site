@@ -102,6 +102,13 @@ try:
         logger.error(f"Failed to load AI Text API router: {str(e)}")
         
     try:
+        from .routes.ai_text_api_endpoints import router as ai_text_api_endpoints_router
+        api_router.include_router(ai_text_api_endpoints_router)
+        logger.info("AI Text API Endpoints router loaded successfully")
+    except Exception as e:
+        logger.error(f"Failed to load AI Text API Endpoints router: {str(e)}")
+        
+    try:
         from .routes.ai_text_tech import router as ai_text_tech_router
         api_router.include_router(ai_text_tech_router)
         logger.info("AI Text Tech router loaded successfully")
