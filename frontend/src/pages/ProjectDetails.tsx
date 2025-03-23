@@ -5,7 +5,12 @@ import { techStackService } from "../services/techStackService";
 import { ProjectBase } from "../types/project";
 import { ChevronLeft, Loader2 } from "lucide-react";
 import MainLayout from "../layouts/MainLayout";
-import { ProjectTechStack, Requirements, Api } from "../types/templates";
+import {
+  ProjectTechStack,
+  Requirements,
+  Api,
+  UIDesign,
+} from "../types/templates";
 import {
   useRequirements,
   useFeatures,
@@ -13,6 +18,7 @@ import {
   useApiEndpoints,
   useDataModel,
   useTestCases,
+  useUIDesign,
 } from "../hooks/useDataQueries";
 import { FeaturesData } from "../services/featuresService";
 import { TestCasesData } from "../services/testCasesService";
@@ -38,6 +44,7 @@ import DataModelSection from "../components/project/DataModelSection";
 import ApiEndpointsSection from "../components/project/ApiEndpointsSection";
 import TestCasesSection from "../components/project/TestCasesSection";
 import ImplementationPromptsSection from "../components/project/ImplementationPromptsSection";
+import UIDesignSection from "../components/project/UIDesignSection";
 
 const ProjectDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -50,12 +57,8 @@ const ProjectDetails = () => {
   const { refreshSubscriptionData } = useSubscription();
 
   // Use our custom hook for section state
-  const {
-    expandedSections,
-    sectionViewModes,
-    toggleSection,
-    changeViewMode,
-  } = useSectionState();
+  const { expandedSections, sectionViewModes, toggleSection, changeViewMode } =
+    useSectionState();
 
   // Use the hooks
   const { data: requirements, isLoading: requirementsLoading } =
@@ -71,6 +74,9 @@ const ProjectDetails = () => {
     useApiEndpoints(id);
 
   const { data: testCases, isLoading: testCasesLoading } = useTestCases(id);
+
+  // Add UI Design hook
+  const { data: uiDesign, isLoading: uiDesignLoading } = useUIDesign(id);
 
   // Add implementation prompts state
   const [implementationPrompts, setImplementationPrompts] =
@@ -211,6 +217,11 @@ const ProjectDetails = () => {
     console.log("Test Cases updated:", _updatedTestCases);
   };
 
+  const handleUIDesignUpdate = (_updatedUIDesign: UIDesign) => {
+    // Update is handled by refetching from the backend
+    console.log("UI Design updated:", _updatedUIDesign);
+  };
+
   const handleImplementationPromptsUpdate = (
     updatedPrompts: Partial<ImplementationPrompts>
   ) => {
@@ -246,6 +257,7 @@ const ProjectDetails = () => {
                 dataModel={dataModel || null}
                 apiEndpoints={apiEndpoints || null}
                 testCases={testCases || null}
+                uiDesign={uiDesign || null}
               />
             </div>
           )}
@@ -345,6 +357,20 @@ const ProjectDetails = () => {
               onToggle={toggleSection}
               onViewModeChange={changeViewMode}
               onSuccess={handleFeaturesUpdate}
+            />
+
+            {/* UI Design Section */}
+            <UIDesignSection
+              uiDesign={uiDesign}
+              projectId={id}
+              projectName={project.name}
+              sectionId={SectionId.UI_DESIGN}
+              isExpanded={expandedSections[SectionId.UI_DESIGN]}
+              viewMode={sectionViewModes[SectionId.UI_DESIGN]}
+              isLoading={uiDesignLoading}
+              onToggle={toggleSection}
+              onViewModeChange={changeViewMode}
+              onSuccess={handleUIDesignUpdate}
             />
 
             {/* Pages Section */}

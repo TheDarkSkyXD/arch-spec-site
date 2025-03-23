@@ -8,6 +8,7 @@ import ApiEndpointsForm from "../components/forms/ApiEndpointsForm";
 import DataModelForm from "../components/forms/DataModelForm";
 import TestCasesForm from "../components/forms/TestCasesForm";
 import ImplementationPromptsForm from "../components/forms/ImplementationPromptsForm";
+import UIDesignForm from "../components/forms/UIDesignForm";
 import TemplateSelectionStep from "../components/project/TemplateSelectionStep";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, ChevronDown, ChevronUp } from "lucide-react";
@@ -32,6 +33,7 @@ enum SectionId {
   API_ENDPOINTS = "apiEndpoints",
   TEST_CASES = "testCases",
   IMPLEMENTATION_PROMPTS = "implementationPrompts",
+  UI_DESIGN = "uiDesign",
 }
 
 const NewProject = () => {
@@ -53,6 +55,7 @@ const NewProject = () => {
     [SectionId.API_ENDPOINTS]: false,
     [SectionId.TEST_CASES]: false,
     [SectionId.IMPLEMENTATION_PROMPTS]: false,
+    [SectionId.UI_DESIGN]: false,
   });
 
   // Function to toggle section expansion
@@ -244,6 +247,28 @@ const NewProject = () => {
                   projectId={projectId}
                   onSuccess={(updatedFeatures) => {
                     console.log("Features updated:", updatedFeatures);
+                  }}
+                />
+              </div>
+            )}
+          </Card>
+
+          {/* UI Design (Optional) */}
+          <Card className="overflow-hidden">
+            <SectionHeader
+              title="UI Design"
+              description="Define your project's visual design system"
+              sectionId={SectionId.UI_DESIGN}
+              isExpanded={expandedSections[SectionId.UI_DESIGN]}
+              disabled={!projectId}
+            />
+            {expandedSections[SectionId.UI_DESIGN] && (
+              <div className="p-6">
+                <UIDesignForm
+                  initialData={selectedTemplate?.uiDesign}
+                  projectId={projectId}
+                  onSuccess={(updatedUIDesign) => {
+                    console.log("UI Design updated:", updatedUIDesign);
                   }}
                 />
               </div>

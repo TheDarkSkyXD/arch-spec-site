@@ -255,6 +255,109 @@ export interface ImplementationPrompts {
   data: Record<string, ImplementationPrompt[]>;
 }
 
+// UI Design Interfaces
+export interface Colors {
+  primary: string;
+  secondary: string;
+  accent: string;
+  background: string;
+  textPrimary: string;
+  textSecondary: string;
+  success: string;
+  warning: string;
+  error: string;
+  info: string;
+  surface: string;
+  border: string;
+}
+
+export interface HeadingSizes {
+  h1: string;
+  h2: string;
+  h3: string;
+  h4: string;
+  h5: string;
+  h6: string;
+}
+
+export interface Typography {
+  fontFamily: string;
+  headingFont: string;
+  fontSize: string;
+  lineHeight: number;
+  fontWeight: number;
+  headingSizes: HeadingSizes;
+}
+
+export interface Spacing {
+  unit: string;
+  scale: number[];
+}
+
+export interface BorderRadius {
+  small: string;
+  medium: string;
+  large: string;
+  xl: string;
+  pill: string;
+}
+
+export interface Shadows {
+  small: string;
+  medium: string;
+  large: string;
+  xl: string;
+}
+
+export interface Layout {
+  containerWidth: string;
+  responsive: boolean;
+  sidebarWidth: string;
+  topbarHeight: string;
+  gridColumns: number;
+  gutterWidth: string;
+}
+
+export interface Components {
+  buttonStyle: string;
+  inputStyle: string;
+  cardStyle: string;
+  tableStyle: string;
+  navStyle: string;
+}
+
+export interface DarkModeColors {
+  background: string;
+  textPrimary: string;
+  textSecondary: string;
+  surface: string;
+  border: string;
+}
+
+export interface DarkMode {
+  enabled: boolean;
+  colors: DarkModeColors;
+}
+
+export interface Animations {
+  transitionDuration: string;
+  transitionTiming: string;
+  hoverScale: number;
+  enableAnimations: boolean;
+}
+
+export interface UIDesign {
+  colors: Colors;
+  typography: Typography;
+  spacing: Spacing;
+  borderRadius: BorderRadius;
+  shadows: Shadows;
+  layout: Layout;
+  components: Components;
+  darkMode: DarkMode;
+  animations: Animations;
+}
+
 export interface ProjectTemplate {
   id?: string;
   name: string;
@@ -267,6 +370,7 @@ export interface ProjectTemplate {
   techStack: ProjectTechStack;
   requirements: Requirements;
   features: Features;
+  uiDesign: UIDesign;
   pages: Pages;
   dataModel: DataModel;
   api: Api;

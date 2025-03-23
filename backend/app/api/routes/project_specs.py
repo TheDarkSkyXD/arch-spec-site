@@ -8,6 +8,8 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 from typing import Dict, Any, Type
 import logging
 
+from ...schemas.templates import UIDesign
+
 from ...db.base import db
 from ...schemas.project_specs import (
     TimelineSpec,
@@ -350,7 +352,10 @@ def add_spec_routes(
         
         spec = await get_method(project_id, database)
         if spec is None:
-            # Return an empty spec structure instead of 404
+            # For UI design specs, return a default spec
+            if spec_class.__name__ == "UIDesignSpec":
+                spec = spec_class(project_id=project_id, data=UIDesign())
+            # For other specs, return an empty structure
             spec = spec_class(project_id=project_id, data={})
         
         return spec
