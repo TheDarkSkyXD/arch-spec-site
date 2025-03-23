@@ -1,6 +1,5 @@
 import React from "react";
 import { UIDesign } from "../../types/templates";
-import { Palette } from "lucide-react";
 import { CollapsibleSection } from ".";
 
 interface UIDesignSectionProps {
@@ -17,7 +16,6 @@ const UIDesignSection: React.FC<UIDesignSectionProps> = ({
   return (
     <CollapsibleSection
       title="UI Design"
-      icon={<Palette className="h-5 w-5 text-primary-500" />}
       isOpen={isOpen}
       onToggle={onToggle}
     >
