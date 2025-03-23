@@ -8,8 +8,10 @@ from typing import Dict, List, Optional, Any
 from pydantic import BaseModel, Field
 import uuid
 
+from .templates import UIDesign
+
 from .shared_schemas import (
-    BudgetItem, ProjectTechStack, Features, Pages, DataModel, Api, Testing, TestCases, ProjectStructure, Deployment, Documentation, TimelineItem, ImplementationPrompt, UIDesign
+    BudgetItem, ProjectTechStack, Features, Pages, DataModel, Api, Testing, TestCases, ProjectStructure, Deployment, Documentation, TimelineItem, ImplementationPrompt
 )
 
 

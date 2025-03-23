@@ -8,6 +8,8 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 from pydantic import BaseModel
 from datetime import timezone
 
+from ..schemas.templates import UIDesign
+
 from ..schemas.project_specs import (
     ProjectSpec,
     TimelineSpec,
@@ -45,8 +47,7 @@ from ..schemas.project_specs import (
 )
 from ..schemas.shared_schemas import (
     BudgetItem, ProjectTechStack, Features, Pages, DataModel, Api, 
-    Testing, TestCases, ProjectStructure, Deployment, Documentation, TimelineItem, ImplementationPrompt,
-    UIDesign
+    Testing, TestCases, ProjectStructure, Deployment, Documentation, TimelineItem, ImplementationPrompt
 )
 
 logger = logging.getLogger(__name__)

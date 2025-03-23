@@ -45,7 +45,7 @@ from ...schemas.project_specs import (
 )
 from ...services.project_specs_service import ProjectSpecsService
 from ...schemas.shared_schemas import (
-    ProjectTechStack, Features
+    Features
 )
 from ...core.firebase_auth import get_current_user
 
