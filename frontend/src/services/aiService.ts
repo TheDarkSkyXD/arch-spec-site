@@ -3,7 +3,7 @@
  */
 import apiClient from "../api/apiClient";
 import { FeatureModule } from "./featuresService";
-import { DataModel } from "../types/templates";
+import { DataModel, UIDesign } from "../types/templates";
 import { GherkinTestCase } from "./testCasesService";
 
 interface EnhanceDescriptionRequest {
@@ -205,6 +205,17 @@ interface EnhanceReadmeRequest {
 
 interface EnhanceReadmeResponse {
   enhanced_readme: string;
+}
+
+interface EnhanceUIDesignRequest {
+  project_description: string;
+  features: FeatureModule[];
+  requirements: string[];
+  existing_ui_design?: UIDesign;
+}
+
+interface EnhanceUIDesignResponse {
+  data: UIDesign;
 }
 
 class AIService {
@@ -577,6 +588,39 @@ class AIService {
       return response.data.enhanced_readme;
     } catch (error) {
       console.error("Error enhancing README:", error);
+      return null;
+    }
+  }
+
+  /**
+   * Enhance UI design using AI.
+   *
+   * @param projectDescription The project description
+   * @param features The project features
+   * @param requirements The project requirements
+   * @param existingUIDesign The original UI design (optional)
+   * @returns The enhanced UI design or null if an error occurred
+   */
+  async enhanceUIDesign(
+    projectDescription: string,
+    features: FeatureModule[],
+    requirements: string[],
+    existingUIDesign?: UIDesign
+  ): Promise<UIDesign | null> {
+    try {
+      const response = await apiClient.post<EnhanceUIDesignResponse>(
+        "/api/ai-text/enhance-ui-design",
+        {
+          project_description: projectDescription,
+          features: features,
+          requirements: requirements,
+          existing_ui_design: existingUIDesign,
+        } as EnhanceUIDesignRequest
+      );
+
+      return response.data.data;
+    } catch (error) {
+      console.error("Error enhancing UI design:", error);
       return null;
     }
   }

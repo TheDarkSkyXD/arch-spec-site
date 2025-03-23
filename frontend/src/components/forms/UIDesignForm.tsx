@@ -1,17 +1,24 @@
 import { useState, useEffect } from "react";
 import {
   Loader2,
-  Save,
   Palette,
   Type,
   Layout,
   Grid,
   Check,
   Copy,
+  Sparkles,
+  Lock,
 } from "lucide-react";
 import { UIDesign } from "../../types/templates";
 import { uiDesignService } from "../../services/uiDesignService";
 import { useToast } from "../../contexts/ToastContext";
+import { useSubscription } from "../../contexts/SubscriptionContext";
+import { aiService } from "../../services/aiService";
+import { requirementsService } from "../../services/requirementsService";
+import { projectsService } from "../../services/projectsService";
+import { featuresService } from "../../services/featuresService";
+import { PremiumFeatureBadge, ProcessingOverlay } from "../ui/index";
 
 // Import shadcn UI components
 import Button from "../ui/Button";
@@ -138,6 +145,7 @@ export default function UIDesignForm({
   onSuccess,
 }: UIDesignFormProps) {
   const { showToast } = useToast();
+  const { hasAIFeatures } = useSubscription();
   const [uiDesign, setUIDesign] = useState<UIDesign>(
     initialData || initialDesign
   );
@@ -145,6 +153,12 @@ export default function UIDesignForm({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const [copied, setCopied] = useState<boolean>(false);
+
+  // Add state for AI enhancement
+  const [isEnhancing, setIsEnhancing] = useState<boolean>(false);
+  const [projectDescription, setProjectDescription] = useState<string>("");
+  const [features, setFeatures] = useState<any[]>([]);
+  const [requirements, setRequirements] = useState<string[]>([]);
 
   // Effect to update local state when initial data changes
   useEffect(() => {
@@ -174,6 +188,117 @@ export default function UIDesignForm({
 
     fetchUIDesign();
   }, [projectId, initialData]);
+
+  // Fetch project info for AI enhancement
+  const fetchProjectInfo = async () => {
+    if (!projectId) return;
+
+    try {
+      // Fetch project details including description
+      const projectDetails = await projectsService.getProjectById(projectId);
+
+      if (projectDetails) {
+        setProjectDescription(projectDetails.description || "");
+
+        // Fetch requirements
+        const requirementsData = await requirementsService.getRequirements(
+          projectId
+        );
+        if (requirementsData) {
+          // Combine functional and non-functional requirements
+          const allRequirements = [
+            ...(requirementsData.functional || []),
+            ...(requirementsData.non_functional || []),
+          ];
+          setRequirements(allRequirements);
+        }
+
+        // Fetch features
+        const featuresData = await featuresService.getFeatures(projectId);
+        if (featuresData) {
+          setFeatures(featuresData.coreModules || []);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching project details:", error);
+    }
+  };
+
+  // Add effect to fetch project info
+  useEffect(() => {
+    if (projectId) {
+      fetchProjectInfo();
+    }
+  }, [projectId]);
+
+  // Function to enhance UI design using AI
+  const enhanceUIDesign = async () => {
+    // Return early if the user doesn't have access to AI features
+    if (!hasAIFeatures) {
+      showToast({
+        title: "Premium Feature",
+        description: "Upgrade to Premium to use AI-powered features",
+        type: "info",
+      });
+      return;
+    }
+
+    if (!projectId) {
+      showToast({
+        title: "Error",
+        description: "Project must be saved before UI design can be enhanced",
+        type: "error",
+      });
+      return;
+    }
+
+    if (!projectDescription) {
+      showToast({
+        title: "Warning",
+        description:
+          "Project description is missing. UI design may not be properly enhanced.",
+        type: "warning",
+      });
+    }
+
+    setIsEnhancing(true);
+    setError("");
+
+    try {
+      const enhancedUIDesign = await aiService.enhanceUIDesign(
+        projectDescription,
+        features,
+        requirements,
+        uiDesign
+      );
+
+      if (enhancedUIDesign) {
+        // Update UI design with enhanced version
+        setUIDesign(enhancedUIDesign);
+
+        showToast({
+          title: "Success",
+          description: "UI design enhanced successfully",
+          type: "success",
+        });
+      } else {
+        showToast({
+          title: "Warning",
+          description: "No enhanced UI design returned",
+          type: "warning",
+        });
+      }
+    } catch (error) {
+      console.error("Error enhancing UI design:", error);
+      showToast({
+        title: "Error",
+        description: "Failed to enhance UI design",
+        type: "error",
+      });
+    } finally {
+      setIsEnhancing(false);
+    }
+  };
 
   // Handle color change
   const handleColorChange = (
@@ -556,7 +681,18 @@ export default function UIDesignForm({
   }
 
   return (
-    <form id="ui-design-form" onSubmit={handleSubmit} className="space-y-6">
+    <form
+      id="ui-design-form"
+      onSubmit={handleSubmit}
+      className="space-y-6 relative"
+    >
+      {/* Processing Overlay */}
+      <ProcessingOverlay
+        isVisible={isEnhancing}
+        message="AI is analyzing your project to enhance the UI design. Please wait..."
+        opacity={0.6}
+      />
+
       {/* Error Message */}
       {error && (
         <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-md mb-4">
@@ -574,7 +710,7 @@ export default function UIDesignForm({
           </p>
         </div>
 
-        <div className="flex justify-end mb-4">
+        <div className="flex justify-between mb-4">
           <Button
             type="button"
             variant="outline"
@@ -588,6 +724,39 @@ export default function UIDesignForm({
             )}
             <span>{copied ? "Copied!" : "Copy CSS Variables"}</span>
           </Button>
+          <div className="flex justify-end items-center gap-3 mb-4">
+            {!hasAIFeatures && <PremiumFeatureBadge />}
+            <Button
+              type="button"
+              onClick={enhanceUIDesign}
+              disabled={isEnhancing || !projectId || !hasAIFeatures}
+              variant={hasAIFeatures ? "outline" : "ghost"}
+              className={`flex items-center gap-2 relative ${
+                !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
+              } ${isEnhancing ? "relative z-[60]" : ""}`}
+              title={
+                hasAIFeatures
+                  ? "Get AI recommendations for UI design"
+                  : "Upgrade to Premium to use AI-powered features"
+              }
+            >
+              {isEnhancing ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Enhancing...</span>
+                </>
+              ) : (
+                <>
+                  {hasAIFeatures ? (
+                    <Sparkles className="h-4 w-4" />
+                  ) : (
+                    <Lock className="h-4 w-4" />
+                  )}
+                  <span>AI Recommendations</span>
+                </>
+              )}
+            </Button>
+          </div>
         </div>
 
         <Tabs defaultValue="colors" className="w-full">
@@ -1138,10 +1307,7 @@ export default function UIDesignForm({
               Saving...
             </>
           ) : (
-            <>
-              <Save className="mr-2 h-4 w-4" />
-              Save UI Design
-            </>
+            <>Save UI Design</>
           )}
         </Button>
       </div>
