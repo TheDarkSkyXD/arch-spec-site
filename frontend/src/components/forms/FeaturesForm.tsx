@@ -24,6 +24,7 @@ import { requirementsService } from "../../services/requirementsService";
 import { aiService } from "../../services/aiService";
 import { useSubscription } from "../../contexts/SubscriptionContext";
 import { PremiumFeatureBadge, ProcessingOverlay } from "../ui/index";
+import AIInstructionsModal from "../ui/AIInstructionsModal";
 
 // Import shadcn UI components
 import Button from "../ui/Button";
@@ -84,6 +85,10 @@ export default function FeaturesForm({
   const [businessGoals, setBusinessGoals] = useState<string[]>([]);
   const [requirements, setRequirements] = useState<string[]>([]);
   const [stripPrefixes, setStripPrefixes] = useState(true);
+
+  // Add state for AI instructions modals
+  const [isEnhanceModalOpen, setIsEnhanceModalOpen] = useState<boolean>(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
 
   // Add debug logging for initialData
   // useEffect(() => {
@@ -328,9 +333,8 @@ export default function FeaturesForm({
     setEditingFeatureIndex(null);
   };
 
-  // New function to enhance features using AI (replace existing features)
-  const enhanceFeatures = async () => {
-    // Return early if the user doesn't have access to AI features
+  // Function to open the enhance features modal
+  const openEnhanceModal = () => {
     if (!hasAIFeatures) {
       showToast({
         title: "Premium Feature",
@@ -367,6 +371,43 @@ export default function FeaturesForm({
       });
     }
 
+    setIsEnhanceModalOpen(true);
+  };
+
+  // Function to open the add features modal
+  const openAddModal = () => {
+    if (!hasAIFeatures) {
+      showToast({
+        title: "Premium Feature",
+        description: "Upgrade to Premium to use AI-powered features",
+        type: "info",
+      });
+      return;
+    }
+
+    if (!projectId) {
+      showToast({
+        title: "Error",
+        description: "Project must be saved before features can be enhanced",
+        type: "error",
+      });
+      return;
+    }
+
+    if (!projectDescription) {
+      showToast({
+        title: "Warning",
+        description:
+          "Project description is missing. Features may not be properly generated.",
+        type: "warning",
+      });
+    }
+
+    setIsAddModalOpen(true);
+  };
+
+  // Modified function to enhance features using AI (replace existing features)
+  const enhanceFeatures = async (additionalInstructions?: string) => {
     setIsEnhancing(true);
     setError("");
 
@@ -378,7 +419,8 @@ export default function FeaturesForm({
         projectDescription,
         businessGoals,
         requirements,
-        coreModules.length > 0 ? coreModules : undefined
+        coreModules.length > 0 ? coreModules : undefined,
+        additionalInstructions
       );
 
       if (enhancedFeatures) {
@@ -412,36 +454,8 @@ export default function FeaturesForm({
     }
   };
 
-  // New function to add AI-generated features without replacing existing ones
-  const addAIFeatures = async () => {
-    // Return early if the user doesn't have access to AI features
-    if (!hasAIFeatures) {
-      showToast({
-        title: "Premium Feature",
-        description: "Upgrade to Premium to use AI-powered features",
-        type: "info",
-      });
-      return;
-    }
-
-    if (!projectId) {
-      showToast({
-        title: "Error",
-        description: "Project must be saved before features can be enhanced",
-        type: "error",
-      });
-      return;
-    }
-
-    if (!projectDescription) {
-      showToast({
-        title: "Warning",
-        description:
-          "Project description is missing. Features may not be properly generated.",
-        type: "warning",
-      });
-    }
-
+  // Modified function to add AI-generated features without replacing existing ones
+  const addAIFeatures = async (additionalInstructions?: string) => {
     setIsAddingFeatures(true);
     setError("");
 
@@ -452,7 +466,9 @@ export default function FeaturesForm({
       const enhancedFeatures = await aiService.enhanceFeatures(
         projectDescription,
         businessGoals,
-        requirements
+        requirements,
+        undefined,
+        additionalInstructions
       );
 
       if (enhancedFeatures && enhancedFeatures.coreModules.length > 0) {
@@ -583,6 +599,25 @@ export default function FeaturesForm({
         opacity={0.6}
       />
 
+      {/* AI Instructions Modals */}
+      <AIInstructionsModal
+        isOpen={isEnhanceModalOpen}
+        onClose={() => setIsEnhanceModalOpen(false)}
+        onConfirm={(instructions) => enhanceFeatures(instructions)}
+        title="Enhance All Features"
+        description="The AI will replace your current features with enhanced versions that are more specific, comprehensive, and aligned with your project goals."
+        confirmText="Replace Features"
+      />
+
+      <AIInstructionsModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onConfirm={(instructions) => addAIFeatures(instructions)}
+        title="Generate Additional Features"
+        description="The AI will generate new features to complement your existing ones based on your project description and requirements."
+        confirmText="Add Features"
+      />
+
       {/* Error Message */}
       {error && (
         <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-md mb-4">
@@ -623,7 +658,7 @@ export default function FeaturesForm({
             {!hasAIFeatures && <PremiumFeatureBadge />}
             <Button
               type="button"
-              onClick={addAIFeatures}
+              onClick={openAddModal}
               disabled={
                 isAddingFeatures || isEnhancing || !projectId || !hasAIFeatures
               }
@@ -655,7 +690,7 @@ export default function FeaturesForm({
             </Button>
             <Button
               type="button"
-              onClick={enhanceFeatures}
+              onClick={openEnhanceModal}
               disabled={
                 isEnhancing || isAddingFeatures || !projectId || !hasAIFeatures
               }

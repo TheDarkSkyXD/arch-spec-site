@@ -19,6 +19,7 @@ import { requirementsService } from "../../services/requirementsService";
 import { projectsService } from "../../services/projectsService";
 import { featuresService } from "../../services/featuresService";
 import { PremiumFeatureBadge, ProcessingOverlay } from "../ui/index";
+import AIInstructionsModal from "../ui/AIInstructionsModal";
 
 // Import shadcn UI components
 import Button from "../ui/Button";
@@ -160,6 +161,9 @@ export default function UIDesignForm({
   const [features, setFeatures] = useState<any[]>([]);
   const [requirements, setRequirements] = useState<string[]>([]);
 
+  // Add state for AI instructions modal
+  const [isAIModalOpen, setIsAIModalOpen] = useState<boolean>(false);
+
   // Effect to update local state when initial data changes
   useEffect(() => {
     if (initialData) {
@@ -231,8 +235,8 @@ export default function UIDesignForm({
     }
   }, [projectId]);
 
-  // Function to enhance UI design using AI
-  const enhanceUIDesign = async () => {
+  // Function to open the AI design enhancement modal
+  const openAIModal = () => {
     // Return early if the user doesn't have access to AI features
     if (!hasAIFeatures) {
       showToast({
@@ -261,6 +265,11 @@ export default function UIDesignForm({
       });
     }
 
+    setIsAIModalOpen(true);
+  };
+
+  // Modified function to enhance UI design using AI
+  const enhanceUIDesign = async (additionalInstructions?: string) => {
     setIsEnhancing(true);
     setError("");
 
@@ -269,7 +278,8 @@ export default function UIDesignForm({
         projectDescription,
         features,
         requirements,
-        uiDesign
+        uiDesign,
+        additionalInstructions
       );
 
       if (enhancedUIDesign) {
@@ -693,6 +703,16 @@ export default function UIDesignForm({
         opacity={0.6}
       />
 
+      {/* AI Instructions Modal */}
+      <AIInstructionsModal
+        isOpen={isAIModalOpen}
+        onClose={() => setIsAIModalOpen(false)}
+        onConfirm={(instructions) => enhanceUIDesign(instructions)}
+        title="Enhance UI Design"
+        description="The AI will analyze your project requirements and features to recommend optimal UI design settings that match your application's purpose."
+        confirmText="Generate Recommendations"
+      />
+
       {/* Error Message */}
       {error && (
         <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-md mb-4">
@@ -728,7 +748,7 @@ export default function UIDesignForm({
             {!hasAIFeatures && <PremiumFeatureBadge />}
             <Button
               type="button"
-              onClick={enhanceUIDesign}
+              onClick={openAIModal}
               disabled={isEnhancing || !projectId || !hasAIFeatures}
               variant={hasAIFeatures ? "outline" : "ghost"}
               className={`flex items-center gap-2 relative ${

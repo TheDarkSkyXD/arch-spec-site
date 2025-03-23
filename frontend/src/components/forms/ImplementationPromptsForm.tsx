@@ -27,6 +27,7 @@ import Card from "../ui/Card";
 import { PremiumFeatureBadge, ProcessingOverlay } from "../ui/index";
 import { Textarea } from "../ui/textarea";
 import { Select } from "../ui/select";
+import AIInstructionsModal from "../ui/AIInstructionsModal";
 
 interface ImplementationPromptsFormProps {
   initialData?: Partial<ImplementationPrompts>;
@@ -63,6 +64,10 @@ export default function ImplementationPromptsForm({
   const [loadingSampleCategories, setLoadingSampleCategories] = useState<
     Record<string, boolean>
   >({});
+  const [generatingCategory, setGeneratingCategory] = useState<string | null>(
+    null
+  );
+  const [isAIModalOpen, setIsAIModalOpen] = useState<boolean>(false);
 
   // Effect to update local state when initial data changes
   useEffect(() => {
@@ -386,7 +391,7 @@ export default function ImplementationPromptsForm({
     }
   };
 
-  const generatePromptsForCategory = async (category: string) => {
+  const openAIModal = (category: string) => {
     if (!projectId) {
       const errorMessage =
         "Project must be saved before prompts can be generated";
@@ -410,6 +415,14 @@ export default function ImplementationPromptsForm({
       return;
     }
 
+    setGeneratingCategory(category);
+    setIsAIModalOpen(true);
+  };
+
+  const generatePromptsForCategory = async (
+    category: string,
+    additionalInstructions?: string
+  ) => {
     // Set loading state for this category
     setGeneratingCategories((prev) => ({ ...prev, [category]: true }));
 
@@ -417,8 +430,9 @@ export default function ImplementationPromptsForm({
       // Call the API to generate prompts for this category
       const generatedPrompts =
         await implementationPromptsService.generateImplementationPrompts(
-          projectId,
-          category
+          projectId!,
+          category,
+          additionalInstructions
         );
 
       if (generatedPrompts && generatedPrompts.length > 0) {
@@ -478,6 +492,14 @@ export default function ImplementationPromptsForm({
       // Reset loading state for this category
       setGeneratingCategories((prev) => ({ ...prev, [category]: false }));
     }
+  };
+
+  const handleAIModalConfirm = (instructions: string) => {
+    if (generatingCategory) {
+      generatePromptsForCategory(generatingCategory, instructions);
+    }
+    setIsAIModalOpen(false);
+    setGeneratingCategory(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -585,6 +607,25 @@ export default function ImplementationPromptsForm({
         isVisible={isAnyGenerationInProgress()}
         message="AI prompt generation in progress. Please wait while we create high-quality prompts for you..."
         opacity={0.6}
+      />
+
+      {/* AI Instructions Modal */}
+      <AIInstructionsModal
+        isOpen={isAIModalOpen}
+        onClose={() => {
+          setIsAIModalOpen(false);
+          setGeneratingCategory(null);
+        }}
+        onConfirm={handleAIModalConfirm}
+        title={`Generate ${
+          generatingCategory ? CATEGORY_LABELS[generatingCategory] : ""
+        } Prompts`}
+        description={`The AI will generate implementation prompts for ${
+          generatingCategory
+            ? CATEGORY_LABELS[generatingCategory]
+            : "this category"
+        } based on your project requirements and specifications.`}
+        confirmText="Generate Prompts"
       />
 
       {/* Error Message */}
@@ -711,7 +752,7 @@ export default function ImplementationPromptsForm({
             {hasAIFeatures && (
               <Button
                 type="button"
-                onClick={() => generatePromptsForCategory(currentCategory)}
+                onClick={() => openAIModal(currentCategory)}
                 disabled={generatingCategories[currentCategory] || !projectId}
                 variant="outline"
                 className="flex items-center gap-2"

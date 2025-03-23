@@ -21,6 +21,7 @@ import { aiService } from "../../services/aiService";
 import { requirementsService } from "../../services/requirementsService";
 import { FeatureModule, featuresService } from "../../services/featuresService";
 import { useSubscription } from "../../contexts/SubscriptionContext";
+import AIInstructionsModal from "../ui/AIInstructionsModal";
 
 // Import shadcn UI components
 import Button from "../ui/Button";
@@ -104,6 +105,11 @@ export default function TestCasesForm({
     useState<boolean>(false);
   const [projectRequirements, setProjectRequirements] = useState<string[]>([]);
   const [projectFeatures, setProjectFeatures] = useState<FeatureModule[]>([]);
+
+  // Add state for AI instructions modals
+  const [isEnhanceModalOpen, setIsEnhanceModalOpen] = useState<boolean>(false);
+  const [isGenerateModalOpen, setIsGenerateModalOpen] =
+    useState<boolean>(false);
 
   // Effect to update local state when initial data changes
   useEffect(() => {
@@ -430,8 +436,8 @@ export default function TestCasesForm({
     setEditingTestCaseIndex(null);
   };
 
-  // Function to generate test cases using AI based on requirements and features
-  const generateTestCases = async () => {
+  // Function to open the generate test cases modal
+  const openGenerateModal = () => {
     if (!projectId) {
       showToast({
         title: "Error",
@@ -460,6 +466,44 @@ export default function TestCasesForm({
       return;
     }
 
+    setIsGenerateModalOpen(true);
+  };
+
+  // Function to open the enhance test cases modal
+  const openEnhanceModal = () => {
+    if (!projectId) {
+      showToast({
+        title: "Error",
+        description: "Project must be saved before test cases can be enhanced",
+        type: "error",
+      });
+      return;
+    }
+
+    // Check if user has access to AI features
+    if (!hasAIFeatures) {
+      showToast({
+        title: "Premium Feature",
+        description: "Upgrade to Premium to use AI-powered features",
+        type: "info",
+      });
+      return;
+    }
+
+    if (testCases.length === 0) {
+      showToast({
+        title: "Warning",
+        description: "No test cases to enhance",
+        type: "warning",
+      });
+      return;
+    }
+
+    setIsEnhanceModalOpen(true);
+  };
+
+  // Modified function to generate test cases using AI based on requirements and features
+  const generateTestCases = async (additionalInstructions?: string) => {
     setIsGeneratingTestCases(true);
     try {
       // This is a placeholder for the actual AI service call
@@ -467,7 +511,8 @@ export default function TestCasesForm({
       const generatedTestCases = await aiService.generateTestCases(
         projectDescription,
         projectRequirements,
-        projectFeatures
+        projectFeatures,
+        additionalInstructions
       );
 
       if (generatedTestCases && generatedTestCases.testCases) {
@@ -498,36 +543,8 @@ export default function TestCasesForm({
     }
   };
 
-  // Function to enhance existing test cases using AI
-  const enhanceTestCases = async () => {
-    if (!projectId) {
-      showToast({
-        title: "Error",
-        description: "Project must be saved before test cases can be enhanced",
-        type: "error",
-      });
-      return;
-    }
-
-    // Check if user has access to AI features
-    if (!hasAIFeatures) {
-      showToast({
-        title: "Premium Feature",
-        description: "Upgrade to Premium to use AI-powered features",
-        type: "info",
-      });
-      return;
-    }
-
-    if (testCases.length === 0) {
-      showToast({
-        title: "Warning",
-        description: "No test cases to enhance",
-        type: "warning",
-      });
-      return;
-    }
-
+  // Modified function to enhance existing test cases using AI
+  const enhanceTestCases = async (additionalInstructions?: string) => {
     setIsEnhancing(true);
     try {
       // This is a placeholder for the actual AI service call
@@ -535,7 +552,8 @@ export default function TestCasesForm({
         projectDescription,
         testCases,
         projectRequirements,
-        projectFeatures
+        projectFeatures,
+        additionalInstructions
       );
 
       if (enhancedTestCases && enhancedTestCases.testCases) {
@@ -667,6 +685,25 @@ export default function TestCasesForm({
         opacity={0.6}
       />
 
+      {/* AI Instructions Modals */}
+      <AIInstructionsModal
+        isOpen={isGenerateModalOpen}
+        onClose={() => setIsGenerateModalOpen(false)}
+        onConfirm={(instructions) => generateTestCases(instructions)}
+        title="Generate Test Cases"
+        description="The AI will generate test cases based on your project requirements and features. You can provide additional instructions to guide the test case generation."
+        confirmText="Generate Test Cases"
+      />
+
+      <AIInstructionsModal
+        isOpen={isEnhanceModalOpen}
+        onClose={() => setIsEnhanceModalOpen(false)}
+        onConfirm={(instructions) => enhanceTestCases(instructions)}
+        title="Enhance Test Cases"
+        description="The AI will enhance your existing test cases to make them more robust and comprehensive."
+        confirmText="Enhance Test Cases"
+      />
+
       {/* Error Message */}
       {error && (
         <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-md mb-4">
@@ -689,7 +726,7 @@ export default function TestCasesForm({
           {!hasAIFeatures && <PremiumFeatureBadge />}
           <Button
             type="button"
-            onClick={generateTestCases}
+            onClick={openGenerateModal}
             disabled={
               isGeneratingTestCases ||
               isEnhancing ||
@@ -724,7 +761,7 @@ export default function TestCasesForm({
           </Button>
           <Button
             type="button"
-            onClick={enhanceTestCases}
+            onClick={openEnhanceModal}
             disabled={
               isEnhancing ||
               isGeneratingTestCases ||

@@ -25,6 +25,7 @@ import Button from "../ui/Button";
 import Card from "../ui/Card";
 // Import Lucide icons for AI enhancement buttons
 import { Loader2, Sparkles, Lock } from "lucide-react";
+import AIInstructionsModal from "../ui/AIInstructionsModal";
 
 // Import schema
 import {
@@ -74,6 +75,9 @@ const TechStackForm = ({
   const [isEnhancing, setIsEnhancing] = useState<boolean>(false);
   const [projectDescription, setProjectDescription] = useState<string>("");
   const [projectRequirements, setProjectRequirements] = useState<string[]>([]);
+
+  // Add state for AI instructions modal
+  const [isAIModalOpen, setIsAIModalOpen] = useState<boolean>(false);
 
   const defaultValues: TechStackFormData = {
     frontend: "",
@@ -338,8 +342,8 @@ const TechStackForm = ({
     }
   };
 
-  // New function to enhance tech stack using AI (replace existing settings)
-  const enhanceTechStack = async () => {
+  // Function to open the AI modal
+  const openAIModal = () => {
     if (!projectId) {
       showToast({
         title: "Error",
@@ -378,6 +382,11 @@ const TechStackForm = ({
       });
     }
 
+    setIsAIModalOpen(true);
+  };
+
+  // New function to enhance tech stack using AI (replace existing settings)
+  const enhanceTechStack = async (additionalInstructions?: string) => {
     setIsEnhancing(true);
     setJustification("");
     try {
@@ -390,7 +399,8 @@ const TechStackForm = ({
       const techStackRecommendations = await aiService.enhanceTechStack(
         projectDescription,
         projectRequirements,
-        formValues
+        formValues,
+        additionalInstructions
       );
 
       if (techStackRecommendations) {
@@ -618,6 +628,16 @@ const TechStackForm = ({
         opacity={0.6}
       />
 
+      {/* AI Instructions Modal */}
+      <AIInstructionsModal
+        isOpen={isAIModalOpen}
+        onClose={() => setIsAIModalOpen(false)}
+        onConfirm={(instructions) => enhanceTechStack(instructions)}
+        title="AI Tech Stack Recommendations"
+        description="The AI will analyze your project description and requirements to recommend the optimal technology stack. You can provide additional context or constraints below."
+        confirmText="Generate Recommendations"
+      />
+
       {/* Error Message */}
       {error && (
         <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-md mb-4">
@@ -636,7 +656,7 @@ const TechStackForm = ({
         {!hasAIFeatures && <PremiumFeatureBadge />}
         <Button
           type="button"
-          onClick={enhanceTechStack}
+          onClick={openAIModal}
           disabled={isEnhancing || !projectId || !hasAIFeatures}
           variant={hasAIFeatures ? "outline" : "ghost"}
           className={`flex items-center gap-2 relative ${

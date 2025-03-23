@@ -20,6 +20,7 @@ import Button from "../ui/Button";
 import Input from "../ui/Input";
 import Card from "../ui/Card";
 import { PremiumFeatureBadge, ProcessingOverlay } from "../ui/index";
+import AIInstructionsModal from "../ui/AIInstructionsModal";
 
 interface RequirementsFormProps {
   initialData?: Partial<Requirements>;
@@ -63,6 +64,10 @@ export default function RequirementsForm({
   const [isAddingRequirements, setIsAddingRequirements] =
     useState<boolean>(false);
 
+  // Add state for AI instructions modals
+  const [isEnhanceModalOpen, setIsEnhanceModalOpen] = useState<boolean>(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
+
   // Effect to update local state when initial data changes
   useEffect(() => {
     if (initialData) {
@@ -95,7 +100,7 @@ export default function RequirementsForm({
     fetchRequirements();
   }, [projectId, initialData]);
 
-  // New function to fetch project description and business goals for AI enhancement
+  // New function to fetch project info for AI enhancement
   const fetchProjectInfo = async () => {
     if (!projectId) return;
 
@@ -186,8 +191,8 @@ export default function RequirementsForm({
     return req;
   };
 
-  // Enhanced function to enhance requirements using AI with subscription check
-  const enhanceRequirements = async () => {
+  // Function to open the enhance requirements modal
+  const openEnhanceModal = () => {
     if (!projectId) {
       showToast({
         title: "Error",
@@ -231,12 +236,56 @@ export default function RequirementsForm({
       return;
     }
 
+    setIsEnhanceModalOpen(true);
+  };
+
+  // Function to open the add requirements modal
+  const openAddModal = () => {
+    if (!projectId) {
+      showToast({
+        title: "Error",
+        description:
+          "Project must be saved before requirements can be enhanced",
+        type: "error",
+      });
+      return;
+    }
+
+    // Check if user has access to AI features
+    if (!hasAIFeatures) {
+      showToast({
+        title: "Premium Feature",
+        description:
+          "AI-generated requirements are only available on Premium and Open Source plans. Please upgrade to use this feature.",
+        type: "warning",
+      });
+      return;
+    }
+
+    if (!projectDescription) {
+      showToast({
+        title: "Warning",
+        description:
+          "Project description is missing. Requirements may not be properly enhanced.",
+        type: "warning",
+      });
+    }
+
+    setIsAddModalOpen(true);
+  };
+
+  // Enhanced function to enhance requirements using AI with subscription check
+  const enhanceRequirements = async (additionalInstructions?: string) => {
+    // Combine functional and non-functional requirements
+    const allRequirements = [...functionalReqs, ...nonFunctionalReqs];
+
     setIsEnhancing(true);
     try {
       const enhancedRequirements = await aiService.enhanceRequirements(
         projectDescription,
         businessGoals,
-        allRequirements
+        allRequirements,
+        additionalInstructions
       );
 
       if (enhancedRequirements && enhancedRequirements.length > 0) {
@@ -315,37 +364,7 @@ export default function RequirementsForm({
   };
 
   // Enhanced function to add AI-generated requirements with subscription check
-  const addAIRequirements = async () => {
-    if (!projectId) {
-      showToast({
-        title: "Error",
-        description:
-          "Project must be saved before requirements can be enhanced",
-        type: "error",
-      });
-      return;
-    }
-
-    // Check if user has access to AI features
-    if (!hasAIFeatures) {
-      showToast({
-        title: "Premium Feature",
-        description:
-          "AI-generated requirements are only available on Premium and Open Source plans. Please upgrade to use this feature.",
-        type: "warning",
-      });
-      return;
-    }
-
-    if (!projectDescription) {
-      showToast({
-        title: "Warning",
-        description:
-          "Project description is missing. Requirements may not be properly enhanced.",
-        type: "warning",
-      });
-    }
-
+  const addAIRequirements = async (additionalInstructions?: string) => {
     // Combine functional and non-functional requirements to provide context to the AI
     const allRequirements = [...functionalReqs, ...nonFunctionalReqs];
 
@@ -354,7 +373,8 @@ export default function RequirementsForm({
       const enhancedRequirements = await aiService.enhanceRequirements(
         projectDescription,
         businessGoals,
-        allRequirements
+        allRequirements,
+        additionalInstructions
       );
 
       if (enhancedRequirements && enhancedRequirements.length > 0) {
@@ -606,6 +626,25 @@ export default function RequirementsForm({
         opacity={0.6}
       />
 
+      {/* AI Instructions Modals */}
+      <AIInstructionsModal
+        isOpen={isEnhanceModalOpen}
+        onClose={() => setIsEnhanceModalOpen(false)}
+        onConfirm={(instructions) => enhanceRequirements(instructions)}
+        title="Enhance All Requirements"
+        description="The AI will replace your current requirements with enhanced versions that are more specific, measurable, and comprehensive."
+        confirmText="Replace Requirements"
+      />
+
+      <AIInstructionsModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onConfirm={(instructions) => addAIRequirements(instructions)}
+        title="Generate Additional Requirements"
+        description="The AI will generate new requirements to complement your existing ones based on your project description and goals."
+        confirmText="Add Requirements"
+      />
+
       {/* Error Message */}
       {error && (
         <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-md mb-4">
@@ -646,7 +685,7 @@ export default function RequirementsForm({
           {!hasAIFeatures && <PremiumFeatureBadge />}
           <Button
             type="button"
-            onClick={addAIRequirements}
+            onClick={openAddModal}
             disabled={
               isAddingRequirements ||
               isEnhancing ||
@@ -681,7 +720,7 @@ export default function RequirementsForm({
           </Button>
           <Button
             type="button"
-            onClick={enhanceRequirements}
+            onClick={openEnhanceModal}
             disabled={
               isEnhancing ||
               isAddingRequirements ||

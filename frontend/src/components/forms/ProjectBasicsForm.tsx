@@ -24,6 +24,7 @@ import Input from "../ui/Input";
 import Card from "../ui/Card";
 import PremiumFeatureBadge from "../ui/PremiumFeatureBadge";
 import { ProcessingOverlay } from "../ui/index";
+import AIInstructionsModal from "../ui/AIInstructionsModal";
 
 const projectBasicsSchema = z.object({
   name: z.string().min(3, "Project name must be at least 3 characters"),
@@ -39,6 +40,9 @@ interface ProjectBasicsFormProps {
   initialData?: Partial<ProjectBasicsFormData> & { id?: string };
   onSuccess?: (projectId: string) => void;
 }
+
+// Define the type for active modal
+type ActiveModal = "description" | "businessGoals" | "targetUsers" | null;
 
 const ProjectBasicsForm = ({
   initialData,
@@ -65,6 +69,9 @@ const ProjectBasicsForm = ({
     initialData?.business_goals || []
   );
   const [newBusinessGoal, setNewBusinessGoal] = useState<string>("");
+
+  // State for AI instructions modal
+  const [activeModal, setActiveModal] = useState<ActiveModal>(null);
 
   const isEditMode = Boolean(projectId);
 
@@ -144,16 +151,8 @@ const ProjectBasicsForm = ({
     setBusinessGoals(businessGoals.filter((_, i) => i !== index));
   };
 
-  const enhanceDescription = async () => {
-    if (!currentDescription || currentDescription.length < 5) {
-      showToast({
-        title: "Description too short",
-        description: "Please provide a longer description to enhance",
-        type: "warning",
-      });
-      return;
-    }
-
+  // Function to open AI instructions modal
+  const openAIInstructionsModal = (modal: ActiveModal) => {
     // Check if user has access to AI features
     if (!hasAIFeatures) {
       showToast({
@@ -164,10 +163,30 @@ const ProjectBasicsForm = ({
       return;
     }
 
+    setActiveModal(modal);
+  };
+
+  // Function to close the modal
+  const closeAIInstructionsModal = () => {
+    setActiveModal(null);
+  };
+
+  // Enhanced functions with AI instructions
+  const enhanceDescription = async (additionalInstructions?: string) => {
+    if (!currentDescription || currentDescription.length < 5) {
+      showToast({
+        title: "Description too short",
+        description: "Please provide a longer description to enhance",
+        type: "warning",
+      });
+      return;
+    }
+
     setIsEnhancing(true);
     try {
       const enhancedDescription = await aiService.enhanceDescription(
-        currentDescription
+        currentDescription,
+        additionalInstructions
       );
 
       if (enhancedDescription) {
@@ -196,7 +215,7 @@ const ProjectBasicsForm = ({
     }
   };
 
-  const enhanceBusinessGoals = async () => {
+  const enhanceBusinessGoals = async (additionalInstructions?: string) => {
     // Only need a valid description to generate/enhance goals
     if (!currentDescription || currentDescription.length < 5) {
       showToast({
@@ -211,7 +230,8 @@ const ProjectBasicsForm = ({
     try {
       const enhancedGoals = await aiService.enhanceBusinessGoals(
         currentDescription,
-        businessGoals
+        businessGoals,
+        additionalInstructions
       );
 
       if (enhancedGoals && enhancedGoals.length > 0) {
@@ -247,7 +267,7 @@ const ProjectBasicsForm = ({
     }
   };
 
-  const enhanceTargetUsers = async () => {
+  const enhanceTargetUsers = async (additionalInstructions?: string) => {
     // Need a valid description to generate/enhance target users
     if (!currentDescription || currentDescription.length < 5) {
       showToast({
@@ -262,7 +282,8 @@ const ProjectBasicsForm = ({
     try {
       const enhancedTargetUsers = await aiService.enhanceTargetUsers(
         currentDescription,
-        currentTargetUsers || ""
+        currentTargetUsers || "",
+        additionalInstructions
       );
 
       if (enhancedTargetUsers) {
@@ -404,6 +425,50 @@ const ProjectBasicsForm = ({
         opacity={0.6}
       />
 
+      {/* AI Instructions Modal */}
+      <AIInstructionsModal
+        isOpen={activeModal === "description"}
+        onClose={closeAIInstructionsModal}
+        onConfirm={(instructions) => enhanceDescription(instructions)}
+        title="Enhance Project Description"
+        description="The AI will improve your project description with better clarity, grammar, and technical precision."
+        confirmText="Enhance Description"
+      />
+
+      <AIInstructionsModal
+        isOpen={activeModal === "businessGoals"}
+        onClose={closeAIInstructionsModal}
+        onConfirm={(instructions) => enhanceBusinessGoals(instructions)}
+        title={
+          businessGoals.length > 0
+            ? "Enhance Business Goals"
+            : "Generate Business Goals"
+        }
+        description={
+          businessGoals.length > 0
+            ? "The AI will improve your existing business goals to be more specific, measurable, and actionable."
+            : "The AI will generate relevant business goals based on your project description."
+        }
+        confirmText={
+          businessGoals.length > 0 ? "Enhance Goals" : "Generate Goals"
+        }
+      />
+
+      <AIInstructionsModal
+        isOpen={activeModal === "targetUsers"}
+        onClose={closeAIInstructionsModal}
+        onConfirm={(instructions) => enhanceTargetUsers(instructions)}
+        title={
+          currentTargetUsers ? "Enhance Target Users" : "Generate Target Users"
+        }
+        description={
+          currentTargetUsers
+            ? "The AI will improve your target users description with more detail and precision."
+            : "The AI will generate a relevant target users description based on your project."
+        }
+        confirmText={currentTargetUsers ? "Enhance Users" : "Generate Users"}
+      />
+
       {/* Error Message */}
       {error && (
         <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-md mb-4">
@@ -433,7 +498,7 @@ const ProjectBasicsForm = ({
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={enhanceDescription}
+                onClick={() => openAIInstructionsModal("description")}
                 disabled={isEnhancing || !currentDescription || !hasAIFeatures}
                 className={`flex items-center gap-1 text-xs ${
                   !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
@@ -487,7 +552,7 @@ const ProjectBasicsForm = ({
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={enhanceBusinessGoals}
+                onClick={() => openAIInstructionsModal("businessGoals")}
                 disabled={
                   isEnhancingGoals || !currentDescription || !hasAIFeatures
                 }
@@ -587,7 +652,7 @@ const ProjectBasicsForm = ({
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={enhanceTargetUsers}
+                onClick={() => openAIInstructionsModal("targetUsers")}
                 disabled={
                   isEnhancingTargetUsers ||
                   !currentDescription ||

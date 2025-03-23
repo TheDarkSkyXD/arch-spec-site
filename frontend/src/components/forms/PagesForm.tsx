@@ -23,6 +23,7 @@ import { requirementsService } from "../../services/requirementsService";
 import { aiService } from "../../services/aiService";
 import { PageComponent } from "../../services/aiService";
 import { useSubscription } from "../../contexts/SubscriptionContext";
+import AIInstructionsModal from "../ui/AIInstructionsModal";
 
 // Import shadcn UI components
 import Button from "../ui/Button";
@@ -94,6 +95,10 @@ export default function PagesForm({
 
   // Add a ref for the new component input
   const newComponentInputRef = useRef<HTMLInputElement>(null);
+
+  // Add state for AI instructions modals
+  const [isEnhanceModalOpen, setIsEnhanceModalOpen] = useState<boolean>(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
 
   // Effect to update local state when initial data changes
   useEffect(() => {
@@ -186,8 +191,8 @@ export default function PagesForm({
     }
   }, [projectId]);
 
-  // Function to enhance pages using AI (replace existing pages)
-  const enhancePages = async () => {
+  // Function to open the enhance pages modal
+  const openEnhanceModal = () => {
     // Return early if the user doesn't have access to AI features
     if (!hasAIFeatures) {
       showToast({
@@ -225,6 +230,44 @@ export default function PagesForm({
       });
     }
 
+    setIsEnhanceModalOpen(true);
+  };
+
+  // Function to open the add pages modal
+  const openAddModal = () => {
+    // Return early if the user doesn't have access to AI features
+    if (!hasAIFeatures) {
+      showToast({
+        title: "Premium Feature",
+        description: "Upgrade to Premium to use AI-powered features",
+        type: "info",
+      });
+      return;
+    }
+
+    if (!projectId) {
+      showToast({
+        title: "Error",
+        description: "Project must be saved before pages can be enhanced",
+        type: "error",
+      });
+      return;
+    }
+
+    if (!projectDescription) {
+      showToast({
+        title: "Warning",
+        description:
+          "Project description is missing. Pages may not be properly generated.",
+        type: "warning",
+      });
+    }
+
+    setIsAddModalOpen(true);
+  };
+
+  // Modified function to enhance pages using AI (replace existing pages)
+  const enhancePages = async (additionalInstructions?: string) => {
     setIsEnhancing(true);
     try {
       console.log("Enhancing pages with AI...");
@@ -245,7 +288,8 @@ export default function PagesForm({
           authenticatedPages.length > 0 ||
           adminPages.length > 0
           ? currentPages
-          : undefined
+          : undefined,
+        additionalInstructions
       );
 
       if (enhancedPages) {
@@ -278,43 +322,17 @@ export default function PagesForm({
     }
   };
 
-  // Function to add AI-generated pages without replacing existing ones
-  const addAIPages = async () => {
-    // Return early if the user doesn't have access to AI features
-    if (!hasAIFeatures) {
-      showToast({
-        title: "Premium Feature",
-        description: "Upgrade to Premium to use AI-powered features",
-        type: "info",
-      });
-      return;
-    }
-
-    if (!projectId) {
-      showToast({
-        title: "Error",
-        description: "Project must be saved before pages can be enhanced",
-        type: "error",
-      });
-      return;
-    }
-
-    if (!projectDescription) {
-      showToast({
-        title: "Warning",
-        description:
-          "Project description is missing. Pages may not be properly generated.",
-        type: "warning",
-      });
-    }
-
+  // Modified function to add AI-generated pages without replacing existing ones
+  const addAIPages = async (additionalInstructions?: string) => {
     setIsAddingPages(true);
     try {
       // When adding new pages, we don't pass the existing pages to avoid duplication
       const enhancedPages = await aiService.enhancePages(
         projectDescription,
         projectFeatures,
-        requirements
+        requirements,
+        undefined,
+        additionalInstructions
       );
 
       if (enhancedPages) {
@@ -968,6 +986,25 @@ export default function PagesForm({
         opacity={0.6}
       />
 
+      {/* AI Instructions Modals */}
+      <AIInstructionsModal
+        isOpen={isEnhanceModalOpen}
+        onClose={() => setIsEnhanceModalOpen(false)}
+        onConfirm={(instructions) => enhancePages(instructions)}
+        title="Enhance All Pages"
+        description="The AI will replace your current pages with an optimized structure based on your project requirements and features."
+        confirmText="Replace Pages"
+      />
+
+      <AIInstructionsModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onConfirm={(instructions) => addAIPages(instructions)}
+        title="Generate Additional Pages"
+        description="The AI will generate new pages to complement your existing ones based on your project requirements and features."
+        confirmText="Add Pages"
+      />
+
       {/* Error Message */}
       {error && (
         <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-md mb-4">
@@ -990,7 +1027,7 @@ export default function PagesForm({
           {!hasAIFeatures && <PremiumFeatureBadge />}
           <Button
             type="button"
-            onClick={addAIPages}
+            onClick={openAddModal}
             disabled={
               isAddingPages || isEnhancing || !projectId || !hasAIFeatures
             }
@@ -1022,7 +1059,7 @@ export default function PagesForm({
           </Button>
           <Button
             type="button"
-            onClick={enhancePages}
+            onClick={openEnhanceModal}
             disabled={
               isEnhancing || isAddingPages || !projectId || !hasAIFeatures
             }

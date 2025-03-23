@@ -22,6 +22,7 @@ import { featuresService } from "../../services/featuresService";
 import { dataModelService } from "../../services/dataModelService";
 import { requirementsService } from "../../services/requirementsService";
 import { useSubscription } from "../../contexts/SubscriptionContext";
+import AIInstructionsModal from "../ui/AIInstructionsModal";
 
 // Import shadcn UI components
 import Button from "../ui/Button";
@@ -76,8 +77,12 @@ export default function ApiEndpointsForm({
   const [newRole, setNewRole] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // New function to enhance endpoints using AI (replace existing endpoints)
-  const enhanceEndpoints = async () => {
+  // Add state for AI instructions modals
+  const [isEnhanceModalOpen, setIsEnhanceModalOpen] = useState<boolean>(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
+
+  // Function to open enhance endpoints modal
+  const openEnhanceModal = () => {
     if (!projectId) {
       showToast({
         title: "Error",
@@ -115,6 +120,44 @@ export default function ApiEndpointsForm({
       });
     }
 
+    setIsEnhanceModalOpen(true);
+  };
+
+  // Function to open add endpoints modal
+  const openAddModal = () => {
+    if (!projectId) {
+      showToast({
+        title: "Error",
+        description: "Project must be saved before endpoints can be enhanced",
+        type: "error",
+      });
+      return;
+    }
+
+    // Check if user has access to AI features
+    if (!hasAIFeatures) {
+      showToast({
+        title: "Premium Feature",
+        description: "Upgrade to Premium to use AI-powered features",
+        type: "info",
+      });
+      return;
+    }
+
+    if (!projectDescription) {
+      showToast({
+        title: "Warning",
+        description:
+          "Project description is missing. Endpoints may not be properly generated.",
+        type: "warning",
+      });
+    }
+
+    setIsAddModalOpen(true);
+  };
+
+  // Modified function to enhance endpoints using AI (replace existing endpoints)
+  const enhanceEndpoints = async (additionalInstructions?: string) => {
     setIsEnhancing(true);
     try {
       const enhancedEndpoints = await aiService.enhanceApiEndpoints(
@@ -122,7 +165,8 @@ export default function ApiEndpointsForm({
         features,
         dataModels,
         requirements,
-        endpoints.length > 0 ? { endpoints } : undefined
+        endpoints.length > 0 ? { endpoints } : undefined,
+        additionalInstructions
       );
 
       if (enhancedEndpoints) {
@@ -153,43 +197,17 @@ export default function ApiEndpointsForm({
     }
   };
 
-  // New function to add AI-generated endpoints without replacing existing ones
-  const addAIEndpoints = async () => {
-    if (!projectId) {
-      showToast({
-        title: "Error",
-        description: "Project must be saved before endpoints can be enhanced",
-        type: "error",
-      });
-      return;
-    }
-
-    // Check if user has access to AI features
-    if (!hasAIFeatures) {
-      showToast({
-        title: "Premium Feature",
-        description: "Upgrade to Premium to use AI-powered features",
-        type: "info",
-      });
-      return;
-    }
-
-    if (!projectDescription) {
-      showToast({
-        title: "Warning",
-        description:
-          "Project description is missing. Endpoints may not be properly generated.",
-        type: "warning",
-      });
-    }
-
+  // Modified function to add AI-generated endpoints without replacing existing ones
+  const addAIEndpoints = async (additionalInstructions?: string) => {
     setIsAddingEndpoints(true);
     try {
       const enhancedEndpoints = await aiService.enhanceApiEndpoints(
         projectDescription,
         features,
         dataModels,
-        requirements
+        requirements,
+        undefined,
+        additionalInstructions
       );
 
       if (enhancedEndpoints && enhancedEndpoints.endpoints.length > 0) {
@@ -578,6 +596,25 @@ export default function ApiEndpointsForm({
         opacity={0.6}
       />
 
+      {/* AI Instructions Modals */}
+      <AIInstructionsModal
+        isOpen={isEnhanceModalOpen}
+        onClose={() => setIsEnhanceModalOpen(false)}
+        onConfirm={(instructions) => enhanceEndpoints(instructions)}
+        title="Enhance All Endpoints"
+        description="The AI will replace your current API endpoints with an optimized structure based on your project requirements and features."
+        confirmText="Replace Endpoints"
+      />
+
+      <AIInstructionsModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onConfirm={(instructions) => addAIEndpoints(instructions)}
+        title="Generate Additional Endpoints"
+        description="The AI will generate new API endpoints to complement your existing ones based on your project data models, requirements and features."
+        confirmText="Add Endpoints"
+      />
+
       {/* Error Message */}
       {error && (
         <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-md mb-4">
@@ -600,7 +637,7 @@ export default function ApiEndpointsForm({
           {!hasAIFeatures && <PremiumFeatureBadge />}
           <Button
             type="button"
-            onClick={addAIEndpoints}
+            onClick={openAddModal}
             disabled={
               isAddingEndpoints || isEnhancing || !projectId || !hasAIFeatures
             }
@@ -632,7 +669,7 @@ export default function ApiEndpointsForm({
           </Button>
           <Button
             type="button"
-            onClick={enhanceEndpoints}
+            onClick={openEnhanceModal}
             disabled={
               isEnhancing || isAddingEndpoints || !projectId || !hasAIFeatures
             }
