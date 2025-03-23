@@ -6,7 +6,7 @@ import {
   TabsTrigger,
 } from "../components/ui/tabs";
 import MainLayout from "../layouts/MainLayout";
-import TemplateManagement from "../components/settings/TemplateManagement";
+// import TemplateManagement from "../components/settings/TemplateManagement";
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState("templates");
@@ -30,15 +30,16 @@ const Settings = () => {
           className="w-full"
         >
           <TabsList className="mb-8">
-            <TabsTrigger value="templates">Templates</TabsTrigger>
+            {/* <TabsTrigger value="templates">Templates</TabsTrigger> */}
             <TabsTrigger value="general">General</TabsTrigger>
             <TabsTrigger value="account">Account</TabsTrigger>
             <TabsTrigger value="api">API</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="templates">
+          {/* TODO: Add back in when templates are implemented */}
+          {/* <TabsContent value="templates">
             <TemplateManagement />
-          </TabsContent>
+          </TabsContent> */}
 
           <TabsContent value="general">
             <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-6">
