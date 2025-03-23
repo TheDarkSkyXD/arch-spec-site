@@ -327,6 +327,104 @@ class PagesEnhanceResponse(BaseModel):
     )
 
 
+class UIDesignData(BaseModel):
+    """Model for UI design data."""
+    
+    colors: Dict[str, str] = Field(
+        ...,
+        title="Colors",
+        description="Color palette for the application"
+    )
+    
+    typography: Dict[str, Any] = Field(
+        ...,
+        title="Typography",
+        description="Typography settings for the application"
+    )
+    
+    spacing: Dict[str, Any] = Field(
+        ...,
+        title="Spacing",
+        description="Spacing system for the application"
+    )
+    
+    borderRadius: Dict[str, str] = Field(
+        ...,
+        title="Border Radius",
+        description="Border radius values for different elements"
+    )
+    
+    shadows: Dict[str, str] = Field(
+        ...,
+        title="Shadows",
+        description="Shadow values for different elements"
+    )
+    
+    layout: Dict[str, Any] = Field(
+        ...,
+        title="Layout",
+        description="Layout settings for the application"
+    )
+    
+    components: Dict[str, str] = Field(
+        ...,
+        title="Components",
+        description="Component-specific design settings"
+    )
+    
+    darkMode: Dict[str, Any] = Field(
+        ...,
+        title="Dark Mode",
+        description="Dark mode configuration"
+    )
+    
+    animations: Dict[str, Any] = Field(
+        ...,
+        title="Animations",
+        description="Animation and transition settings"
+    )
+
+
+class UIDesignEnhanceRequest(BaseModel):
+    """Request model for enhancing UI design."""
+    
+    project_description: str = Field(
+        ...,
+        title="Project Description",
+        description="The description of the project",
+        examples=["A web application for tracking daily fitness workouts and nutrition"],
+    )
+    
+    features: List[Dict[str, Any]] = Field(
+        default_factory=list,
+        title="Features",
+        description="The project features that need UI representation",
+    )
+    
+    requirements: List[str] = Field(
+        default_factory=list,
+        title="Requirements",
+        description="The project requirements",
+        examples=[["Track workouts", "Monitor progress", "Share with friends"]],
+    )
+    
+    existing_ui_design: Optional[UIDesignData] = Field(
+        default=None,
+        title="Existing UI Design",
+        description="The existing UI design that may need enhancement",
+    )
+
+
+class UIDesignEnhanceResponse(BaseModel):
+    """Response model for enhanced UI design."""
+    
+    data: UIDesignData = Field(
+        ...,
+        title="UI Design Data",
+        description="The structured UI design recommendations"
+    )
+
+
 class DataModelEnhanceRequest(BaseModel):
     """Request model for enhancing the data model."""
     

@@ -21,6 +21,7 @@ from ...schemas.project_specs import (
     TechStackSpec,
     FeaturesSpec,
     PagesSpec,
+    UIDesignSpec,
     DataModelSpec,
     ApiSpec,
     TestingSpec,
@@ -31,6 +32,7 @@ from ...schemas.project_specs import (
     TechStackSpecUpdate,
     FeaturesSpecUpdate,
     PagesSpecUpdate,
+    UIDesignSpecUpdate,
     DataModelSpecUpdate,
     ApiSpecUpdate,
     TestingSpecUpdate,
@@ -379,6 +381,13 @@ add_spec_routes(
     ProjectSpecsService.get_pages_spec,
     ProjectSpecsService.create_or_update_pages_spec,
     "pages"
+)
+
+add_spec_routes(
+    "ui_design", "ui-design", UIDesignSpec, UIDesignSpecUpdate,
+    ProjectSpecsService.get_ui_design_spec,
+    ProjectSpecsService.create_or_update_ui_design_spec,
+    "UI design"
 )
 
 add_spec_routes(

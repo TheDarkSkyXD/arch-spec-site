@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field
 import uuid
 
 from .shared_schemas import (
-    BudgetItem, ProjectTechStack, Features, Pages, DataModel, Api, Testing, TestCases, ProjectStructure, Deployment, Documentation, TimelineItem, ImplementationPrompt
+    BudgetItem, ProjectTechStack, Features, Pages, DataModel, Api, Testing, TestCases, ProjectStructure, Deployment, Documentation, TimelineItem, ImplementationPrompt, UIDesign
 )
 
 
@@ -103,6 +103,11 @@ class PagesSpec(ProjectSpec):
     data: Optional[Pages] = None
 
 
+class UIDesignSpec(ProjectSpec):
+    """UI Design spec of a project."""
+    data: Optional[UIDesign] = None
+
+
 class DataModelSpec(ProjectSpec):
     """Data model spec of a project."""
     data: Optional[DataModel] = None
@@ -166,6 +171,15 @@ class FeaturesSpecUpdate(BaseModel):
 class PagesSpecUpdate(BaseModel):
     """Model for updating pages spec."""
     data: Optional[Pages] = None
+    last_modified_by: Optional[str] = None
+
+    class Config:
+        populate_by_name = True
+
+
+class UIDesignSpecUpdate(BaseModel):
+    """Model for updating UI Design spec."""
+    data: Optional[UIDesign] = None
     last_modified_by: Optional[str] = None
 
     class Config:

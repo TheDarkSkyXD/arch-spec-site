@@ -123,6 +123,119 @@ class Documentation(BaseModel):
     """Documentation configuration."""
     specs: List[str] = Field(default_factory=list)
     diagrams: List[Diagram] = Field(default_factory=list)
+    
+class Colors(BaseModel):
+    """Colors schema for UI design."""
+    primary: str
+    secondary: str
+    accent: str
+    background: str
+    text_primary: str = Field(alias="textPrimary")
+    text_secondary: str = Field(alias="textSecondary")
+    success: str
+    warning: str
+    error: str
+    info: str
+    surface: str
+    border: str
+
+
+class HeadingSizes(BaseModel):
+    """Heading sizes schema for typography."""
+    h1: str
+    h2: str
+    h3: str
+    h4: str
+    h5: str
+    h6: str
+
+
+class Typography(BaseModel):
+    """Typography schema for UI design."""
+    font_family: str = Field(alias="fontFamily")
+    heading_font: str = Field(alias="headingFont")
+    font_size: str = Field(alias="fontSize")
+    line_height: float = Field(alias="lineHeight")
+    font_weight: int = Field(alias="fontWeight")
+    heading_sizes: HeadingSizes = Field(alias="headingSizes")
+
+
+class Spacing(BaseModel):
+    """Spacing schema for UI design."""
+    unit: str
+    scale: List[int]
+
+
+class BorderRadius(BaseModel):
+    """Border radius schema for UI design."""
+    small: str
+    medium: str
+    large: str
+    xl: str
+    pill: str
+
+
+class Shadows(BaseModel):
+    """Shadows schema for UI design."""
+    small: str
+    medium: str
+    large: str
+    xl: str
+
+
+class Layout(BaseModel):
+    """Layout schema for UI design."""
+    container_width: str = Field(alias="containerWidth")
+    responsive: bool
+    sidebar_width: str = Field(alias="sidebarWidth")
+    topbar_height: str = Field(alias="topbarHeight")
+    grid_columns: int = Field(alias="gridColumns")
+    gutter_width: str = Field(alias="gutterWidth")
+
+
+class Components(BaseModel):
+    """Components schema for UI design."""
+    button_style: str = Field(alias="buttonStyle")
+    input_style: str = Field(alias="inputStyle")
+    card_style: str = Field(alias="cardStyle")
+    table_style: str = Field(alias="tableStyle")
+    nav_style: str = Field(alias="navStyle")
+
+
+class DarkModeColors(BaseModel):
+    """Dark mode colors schema."""
+    background: str
+    text_primary: str = Field(alias="textPrimary")
+    text_secondary: str = Field(alias="textSecondary")
+    surface: str
+    border: str
+
+
+class DarkMode(BaseModel):
+    """Dark mode schema."""
+    enabled: bool
+    colors: DarkModeColors
+
+
+class Animations(BaseModel):
+    """Animations schema."""
+    transition_duration: str = Field(alias="transitionDuration")
+    transition_timing: str = Field(alias="transitionTiming")
+    hover_scale: float = Field(alias="hoverScale")
+    enable_animations: bool = Field(alias="enableAnimations")
+
+
+class UIDesign(BaseModel):
+    """UI design schema."""
+    colors: Colors
+    typography: Typography
+    spacing: Spacing
+    border_radius: BorderRadius = Field(alias="borderRadius")
+    shadows: Shadows
+    layout: Layout
+    components: Components
+    dark_mode: DarkMode = Field(alias="darkMode")
+    animations: Animations
 
 class ProjectTemplate(BaseModel):
     """Project template schema."""
@@ -135,6 +248,7 @@ class ProjectTemplate(BaseModel):
     tech_stack: ProjectTechStack = Field(alias="techStack")
     requirements: Requirements = Field(alias="requirements")
     features: Features
+    ui_design: UIDesign = Field(alias="uiDesign")
     pages: Pages
     data_model: DataModel = Field(alias="dataModel")
     api: Api

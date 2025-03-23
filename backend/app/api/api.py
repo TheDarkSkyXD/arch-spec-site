@@ -88,6 +88,13 @@ try:
         logger.error(f"Failed to load AI Text Pages router: {str(e)}")
         
     try:
+        from .routes.ai_text_ui_design import router as ai_text_ui_design_router
+        api_router.include_router(ai_text_ui_design_router)
+        logger.info("AI Text UI Design router loaded successfully")
+    except Exception as e:
+        logger.error(f"Failed to load AI Text UI Design router: {str(e)}")
+        
+    try:
         from .routes.ai_text_data_model import router as ai_text_data_model_router
         api_router.include_router(ai_text_data_model_router)
         logger.info("AI Text Data Model router loaded successfully")
