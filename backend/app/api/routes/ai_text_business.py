@@ -38,10 +38,10 @@ async def enhance_business_goals(
         
         # Create the system message, adjusting based on whether goals were provided
         if request.user_goals and len(request.user_goals) > 0:
-            system_message = business_goals_system_prompt_enhance()
+            system_message = business_goals_system_prompt_enhance(request.additional_user_instruction)
             operation_type = "enhance_business_goals"
         else:
-            system_message = business_goals_system_prompt_create()
+            system_message = business_goals_system_prompt_create(request.additional_user_instruction)
             operation_type = "create_business_goals"
         
         # Create the user message, adjusting based on whether goals were provided
@@ -75,7 +75,8 @@ async def enhance_business_goals(
                 "system_message": system_message,
                 "user_message": user_message,
                 "project_description": request.project_description,
-                "original_goals": request.user_goals if hasattr(request, "user_goals") else None
+                "original_goals": request.user_goals if hasattr(request, "user_goals") else None,
+                "additional_user_instruction": request.additional_user_instruction
             }
         )
         
@@ -136,10 +137,10 @@ async def enhance_target_users(
         
         # Create the system message
         if request.target_users and len(request.target_users.strip()) > 0:
-            system_message = target_users_system_prompt_enhance()
+            system_message = target_users_system_prompt_enhance(request.additional_user_instruction)
             operation_type = "enhance_target_users"
         else:
-            system_message = target_users_system_prompt_create()
+            system_message = target_users_system_prompt_create(request.additional_user_instruction)
             operation_type = "create_target_users"
         
         # Create the user message
@@ -167,7 +168,8 @@ async def enhance_target_users(
                 "system_message": system_message,
                 "user_message": user_message,
                 "project_description": request.project_description,
-                "original_target_users": request.target_users if hasattr(request, "target_users") else None
+                "original_target_users": request.target_users if hasattr(request, "target_users") else None,
+                "additional_user_instruction": request.additional_user_instruction
             }
         )
         

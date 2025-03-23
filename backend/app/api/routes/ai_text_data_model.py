@@ -56,7 +56,13 @@ async def enhance_data_model(
         ):
             formatted_data_model = json.dumps(request.existing_data_model, indent=2)
         
-        user_prompt = get_data_model_user_prompt(request.project_description, formatted_features, formatted_requirements, formatted_data_model)
+        user_prompt = get_data_model_user_prompt(
+            request.project_description, 
+            formatted_features, 
+            formatted_requirements, 
+            formatted_data_model,
+            request.additional_user_instruction
+        )
 
         # Generate the tool use response
         messages = [{"role": "user", "content": user_prompt}]
@@ -79,7 +85,8 @@ async def enhance_data_model(
                 "business_goals": request.business_goals,
                 "features": request.features,
                 "requirements": request.requirements,
-                "existing_data_model": request.existing_data_model
+                "existing_data_model": request.existing_data_model,
+                "additional_user_instruction": request.additional_user_instruction
             }
         )
         

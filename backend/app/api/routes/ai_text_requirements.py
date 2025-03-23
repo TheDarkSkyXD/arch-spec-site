@@ -34,7 +34,7 @@ async def enhance_requirements(
         client = AnthropicClient()
         
         # Create the system message
-        system_message = requirements_system_prompt_enhance()
+        system_message = requirements_system_prompt_enhance(request.additional_user_instruction)
         
         # Format the business goals and requirements as strings
         formatted_goals = "\n".join([f"- {goal}" for goal in request.business_goals])
@@ -64,7 +64,8 @@ async def enhance_requirements(
                 "user_message": user_message,
                 "project_description": request.project_description,
                 "business_goals": request.business_goals,
-                "original_requirements": request.user_requirements
+                "original_requirements": request.user_requirements,
+                "additional_user_instruction": request.additional_user_instruction
             }
         )
         

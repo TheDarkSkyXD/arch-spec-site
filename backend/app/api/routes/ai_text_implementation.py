@@ -169,6 +169,7 @@ async def generate_implementation_prompt(
             nfr_spec=nfr_spec,
             nfr_data_related=nfr_spec,  # Use same NFRs for data-related
             database_tech=database_tech,
+            additional_user_instruction=request.additional_user_instruction,
         )
         
         if not meta_prompt:
@@ -223,6 +224,7 @@ async def generate_implementation_prompt(
                 "features": features,
                 "security_requirements": security_requirements,
                 "architecture_spec": architecture_spec,
+                "additional_user_instruction": request.additional_user_instruction
             }
         )
         

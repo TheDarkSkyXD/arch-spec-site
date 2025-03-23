@@ -17,6 +17,12 @@ class DescriptionEnhanceRequest(BaseModel):
         description="The original project description provided by the user",
         examples=["An app for tracking my daily workouts"],
     )
+    
+    additional_user_instruction: Optional[str] = Field(
+        None,
+        title="Additional User Instruction",
+        description="Custom instructions for the AI when enhancing the description",
+    )
 
 
 class DescriptionEnhanceResponse(BaseModel):
@@ -44,6 +50,12 @@ class BusinessGoalsEnhanceRequest(BaseModel):
         title="User Goals",
         description="The original business goals provided by the user",
         examples=[["Track workouts", "Monitor progress", "Share with friends"]],
+    )
+    
+    additional_user_instruction: Optional[str] = Field(
+        None,
+        title="Additional User Instruction",
+        description="Custom instructions for the AI when enhancing business goals",
     )
 
 
@@ -73,6 +85,12 @@ class TargetUsersEnhanceRequest(BaseModel):
         description="The original target users description provided by the user",
         examples=["People who want to track their workouts"],
     )
+    
+    additional_user_instruction: Optional[str] = Field(
+        None,
+        title="Additional User Instruction",
+        description="Custom instructions for the AI when enhancing target users description",
+    )
 
 
 class TargetUsersEnhanceResponse(BaseModel):
@@ -83,32 +101,6 @@ class TargetUsersEnhanceResponse(BaseModel):
         title="Enhanced Target Users",
         description="The AI-enhanced target users description",
     )
-
-
-class EnhanceDescriptionRequest(BaseModel):
-    description: str = Field(..., min_length=5)
-
-
-class EnhanceDescriptionResponse(BaseModel):
-    enhanced_description: str
-
-
-class EnhanceBusinessGoalsRequest(BaseModel):
-    project_description: str = Field(..., min_length=5)
-    business_goals: List[str] = Field(default_factory=list)
-
-
-class EnhanceBusinessGoalsResponse(BaseModel):
-    enhanced_business_goals: List[str]
-
-
-class EnhanceTargetUsersRequest(BaseModel):
-    project_description: str = Field(..., min_length=5)
-    target_users: Optional[str] = Field(default="")
-
-
-class EnhanceTargetUsersResponse(BaseModel):
-    enhanced_target_users: str
 
 
 class RequirementsEnhanceRequest(BaseModel):
@@ -133,6 +125,12 @@ class RequirementsEnhanceRequest(BaseModel):
         title="User Requirements",
         description="The original requirements provided by the user",
         examples=[["Track workouts", "Monitor progress", "Share with friends"]],
+    )
+    
+    additional_user_instruction: Optional[str] = Field(
+        None,
+        title="Additional User Instruction",
+        description="Custom instructions for the AI when enhancing project requirements",
     )
 
 
@@ -174,6 +172,12 @@ class FeaturesEnhanceRequest(BaseModel):
         default=None,
         title="User Features",
         description="The original features provided by the user",
+    )
+    
+    additional_user_instruction: Optional[str] = Field(
+        None,
+        title="Additional User Instruction",
+        description="Custom instructions for the AI when enhancing project features",
     )
 
 
@@ -315,6 +319,12 @@ class PagesEnhanceRequest(BaseModel):
         title="Existing Pages",
         description="The existing pages that may need enhancement",
     )
+    
+    additional_user_instruction: Optional[str] = Field(
+        None,
+        title="Additional User Instruction",
+        description="Custom instructions for the AI when enhancing application pages",
+    )
 
 
 class PagesEnhanceResponse(BaseModel):
@@ -413,6 +423,12 @@ class UIDesignEnhanceRequest(BaseModel):
         title="Existing UI Design",
         description="The existing UI design that may need enhancement",
     )
+    
+    additional_user_instruction: Optional[str] = Field(
+        None,
+        title="Additional User Instruction",
+        description="Custom instructions for the AI when enhancing UI design",
+    )
 
 
 class UIDesignEnhanceResponse(BaseModel):
@@ -459,6 +475,12 @@ class DataModelEnhanceRequest(BaseModel):
         default=None,
         title="Existing Data Model",
         description="The existing data model that may need enhancement",
+    )
+    
+    additional_user_instruction: Optional[str] = Field(
+        None,
+        title="Additional User Instruction",
+        description="Custom instructions for the AI when enhancing data model",
     )
 
 
@@ -674,6 +696,12 @@ class ApiEndpointsEnhanceRequest(BaseModel):
         title="Existing Endpoints",
         description="The existing API endpoints that may need enhancement",
     )
+    
+    additional_user_instruction: Optional[str] = Field(
+        None,
+        title="Additional User Instruction",
+        description="Custom instructions for the AI when enhancing API endpoints",
+    )
 
 
 class ApiEndpointsEnhanceResponse(BaseModel):
@@ -707,6 +735,12 @@ class TechStackEnhanceRequest(BaseModel):
         default_factory=dict,
         title="User Preferences",
         description="The user's existing technology preferences",
+    )
+    
+    additional_user_instruction: Optional[str] = Field(
+        None,
+        title="Additional User Instruction",
+        description="Custom instructions for the AI when enhancing technology stack recommendations",
     )
 
 
@@ -844,6 +878,12 @@ class TestCasesEnhanceRequest(BaseModel):
         title="Existing Test Cases",
         description="Existing test cases that need enhancement",
     )
+    
+    additional_user_instruction: Optional[str] = Field(
+        None,
+        title="Additional User Instruction",
+        description="Custom instructions for the AI when enhancing test cases",
+    )
 
 
 class TestCasesEnhanceResponse(BaseModel):
@@ -894,6 +934,12 @@ class EnhanceReadmeRequest(BaseModel):
         title="Tech Stack",
         description="Dictionary of technology stack recommendations",
     )
+    
+    additional_user_instruction: Optional[str] = Field(
+        None,
+        title="Additional User Instruction",
+        description="Custom instructions for the AI when enhancing project README",
+    )
 
 
 class EnhanceReadmeResponse(BaseModel):
@@ -911,6 +957,11 @@ class ImplementationPromptGenerateRequest(BaseModel):
     category: str = Field(..., description="The category to generate prompts for")
     project_id: str = Field(..., description="The project ID to generate prompts for")
     prompt_type: Optional[ImplementationPromptType] = Field(None, description="Optional specific prompt type to generate")
+    additional_user_instruction: Optional[str] = Field(
+        None,
+        title="Additional User Instruction",
+        description="Custom instructions for the AI when generating implementation prompts",
+    )
     
 
 class ImplementationPromptResponse(BaseModel):

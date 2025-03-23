@@ -57,7 +57,13 @@ async def enhance_ui_design(
             formatted_existing_ui_design = json.dumps(request.existing_ui_design.dict(), indent=2)
         
         # Create the user message
-        user_prompt = get_ui_design_user_prompt(request.project_description, formatted_features, formatted_requirements, formatted_existing_ui_design)
+        user_prompt = get_ui_design_user_prompt(
+            request.project_description, 
+            formatted_features, 
+            formatted_requirements, 
+            formatted_existing_ui_design,
+            request.additional_user_instruction
+        )
         
         # Generate the tool use response
         messages = [{"role": "user", "content": user_prompt}]
@@ -79,7 +85,8 @@ async def enhance_ui_design(
                 "project_description": request.project_description,
                 "features": request.features,
                 "requirements": request.requirements,
-                "existing_ui_design": request.existing_ui_design.dict() if request.existing_ui_design else None
+                "existing_ui_design": request.existing_ui_design.dict() if request.existing_ui_design else None,
+                "additional_user_instruction": request.additional_user_instruction
             }
         )
         

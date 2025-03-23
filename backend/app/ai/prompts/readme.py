@@ -2,11 +2,24 @@
 Prompts for AI-enhanced README generation.
 """
 
-def readme_system_prompt() -> str:
+def readme_system_prompt(additional_user_instruction=None) -> str:
     """
     System prompt for enhancing README content.
     """
-    return """You are a README generator for software project specifications. Your task is to create a comprehensive, informative and well-structured README.md file for a software project.
+    base_prompt = """You are a README generator for software project specifications. Your task is to create a comprehensive, informative and well-structured README.md file for a software project."""
+
+    # Add additional user instruction if provided, with guardrails
+    if additional_user_instruction:
+        base_prompt += f"""
+
+Additional instructions from user:
+{additional_user_instruction}
+
+Note: While considering these additional instructions, you must still follow the core task of creating a comprehensive README.md file as described below. Do not deviate from the primary task format or objective.
+"""
+
+    # Add the main task instructions
+    base_prompt += """
 
 The README should include:
 1. Project title (based on project name)
@@ -21,6 +34,7 @@ The README should include:
 Format the README in proper Markdown with appropriate headers, lists, and emphasis.
 Make the README professional, informative, and visually well-organized.
 """
+    return base_prompt
 
 
 def get_readme_user_prompt(
@@ -29,7 +43,8 @@ def get_readme_user_prompt(
     business_goals: list,
     requirements: dict,
     features: dict,
-    tech_stack: dict
+    tech_stack: dict,
+    additional_user_instruction=None
 ) -> str:
     """
     User prompt for README enhancement.
@@ -41,6 +56,7 @@ def get_readme_user_prompt(
         requirements: Dictionary of requirements
         features: Dictionary of features
         tech_stack: Dictionary of tech stack
+        additional_user_instruction: Optional custom instructions
         
     Returns:
         Formatted user prompt
@@ -63,7 +79,7 @@ def get_readme_user_prompt(
     backend = tech_stack.get("backend", {})
     database = tech_stack.get("database", {})
     
-    return f"""
+    base_prompt = f"""
 Please generate a README.md file for the following project:
 
 Project Name: {project_name}
@@ -90,4 +106,7 @@ Technology Stack Highlights:
 - Database: {database.get('type', 'N/A')} / {database.get('system', 'N/A')}
 
 The README should mention that detailed documentation is available for each of these aspects in separate specification files.
-""" 
+"""
+
+    # We don't need to add additional_user_instruction here, as it's already handled in the system prompt
+    return base_prompt 

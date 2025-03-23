@@ -50,7 +50,8 @@ async def enhance_test_cases(
         user_prompt = get_test_cases_user_prompt(
             formatted_requirements,
             formatted_features,
-            formatted_test_cases
+            formatted_test_cases,
+            request.additional_user_instruction
         )
 
         # Generate the tool use response
@@ -72,7 +73,8 @@ async def enhance_test_cases(
                 "tools": tools,
                 "requirements": request.requirements,
                 "features": request.features,
-                "existing_test_cases": request.existing_test_cases
+                "existing_test_cases": request.existing_test_cases,
+                "additional_user_instruction": request.additional_user_instruction
             }
         )
         
@@ -110,7 +112,8 @@ async def generate_test_cases(
         user_prompt = get_test_cases_user_prompt(
             formatted_requirements,
             formatted_features,
-            None  # No existing test cases for generation from scratch
+            None,  # No existing test cases for generation from scratch
+            request.additional_user_instruction
         )
         
         # Generate the tool use response
@@ -131,7 +134,8 @@ async def generate_test_cases(
                 "user_message": user_prompt,
                 "tools": tools,
                 "requirements": request.requirements,
-                "features": request.features
+                "features": request.features,
+                "additional_user_instruction": request.additional_user_instruction
             }
         )
         

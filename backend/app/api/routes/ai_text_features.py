@@ -52,7 +52,13 @@ async def enhance_features(
         if request.user_features and len(request.user_features) > 0:
             formatted_features = json.dumps(request.user_features, indent=2)
         
-        user_prompt = get_features_user_prompt(request.project_description, formatted_goals, formatted_requirements, formatted_features)
+        user_prompt = get_features_user_prompt(
+            request.project_description, 
+            formatted_goals, 
+            formatted_requirements, 
+            formatted_features,
+            request.additional_user_instruction
+        )
         
         # Generate the tool use response
         messages = [{"role": "user", "content": user_prompt}]
@@ -74,7 +80,8 @@ async def enhance_features(
                 "project_description": request.project_description,
                 "business_goals": request.business_goals,
                 "requirements": request.requirements,
-                "user_features": request.user_features
+                "user_features": request.user_features,
+                "additional_user_instruction": request.additional_user_instruction
             }
         )
         

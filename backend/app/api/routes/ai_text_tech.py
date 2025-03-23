@@ -39,7 +39,8 @@ async def enhance_tech_stack(
         user_prompt = get_tech_stack_user_prompt(
             request.project_description, 
             request.project_requirements,
-            request.user_preferences
+            request.user_preferences,
+            request.additional_user_instruction
         )
         
         # Generate the tool use response
@@ -61,7 +62,8 @@ async def enhance_tech_stack(
                 "tools": tools,
                 "project_description": request.project_description,
                 "project_requirements": request.project_requirements,
-                "user_preferences": request.user_preferences
+                "user_preferences": request.user_preferences,
+                "additional_user_instruction": request.additional_user_instruction
             }
         )
         

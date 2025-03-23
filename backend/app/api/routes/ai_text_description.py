@@ -34,7 +34,7 @@ async def enhance_project_description(
         client = AnthropicClient()
         
         # Create the system message and user message
-        system_prompt = project_description_system_prompt()
+        system_prompt = project_description_system_prompt(request.additional_user_instruction)
         
         # Create the user message with the project description
         user_message = f"Original description: {request.user_description}"
@@ -54,7 +54,8 @@ async def enhance_project_description(
                 "model": FAST_MODEL,
                 "system_message": system_prompt,
                 "user_message": user_message,
-                "original_description": request.user_description
+                "original_description": request.user_description,
+                "additional_user_instruction": request.additional_user_instruction
             }
         )
         

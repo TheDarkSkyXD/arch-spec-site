@@ -59,7 +59,8 @@ async def enhance_api_endpoints(
             request.project_description, 
             formatted_features, 
             formatted_data_models, 
-            formatted_requirements
+            formatted_requirements,
+            request.additional_user_instruction
         )
 
         # Generate the tool use response
@@ -82,7 +83,8 @@ async def enhance_api_endpoints(
                 "project_description": request.project_description,
                 "features": request.features,
                 "data_models": request.data_models,
-                "requirements": request.requirements
+                "requirements": request.requirements,
+                "additional_user_instruction": request.additional_user_instruction
             }
         )
         

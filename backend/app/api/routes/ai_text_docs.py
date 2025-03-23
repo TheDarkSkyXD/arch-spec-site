@@ -33,7 +33,7 @@ async def enhance_readme(
         client = AnthropicClient()
         
         # Create the system message
-        system_message = readme_system_prompt()
+        system_message = readme_system_prompt(request.additional_user_instruction)
         
         # Create the user message
         user_message = get_readme_user_prompt(
@@ -42,7 +42,8 @@ async def enhance_readme(
             request.business_goals,
             request.requirements,
             request.features,
-            request.tech_stack
+            request.tech_stack,
+            request.additional_user_instruction
         )
         
         # Generate the response
@@ -65,7 +66,8 @@ async def enhance_readme(
                 "business_goals": request.business_goals,
                 "requirements": request.requirements,
                 "features": request.features,
-                "tech_stack": request.tech_stack
+                "tech_stack": request.tech_stack,
+                "additional_user_instruction": request.additional_user_instruction
             }
         )
         
