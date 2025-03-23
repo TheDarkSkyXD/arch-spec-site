@@ -108,7 +108,7 @@ export function useRequirements(projectId?: string) {
         const requirements = await requirementsService.getRequirements(
           projectId
         );
-        setData(requirements);
+        setData(requirements as Requirements);
       } catch (err) {
         console.error("Error fetching requirements:", err);
         setError(err instanceof Error ? err : new Error(String(err)));

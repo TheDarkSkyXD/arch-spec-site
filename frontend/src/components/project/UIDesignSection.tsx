@@ -51,13 +51,13 @@ export default function UIDesignSection({
             <div className="flex bg-slate-100 dark:bg-slate-800 rounded-md p-1 mr-2">
               <button
                 className={`px-3 py-1 rounded-md text-xs font-medium ${
-                  viewMode === "view"
+                  viewMode === ViewMode.PREVIEW
                     ? "bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 shadow-sm"
                     : "text-slate-600 dark:text-slate-400"
                 }`}
                 onClick={(e) => {
                   e.stopPropagation();
-                  onViewModeChange(sectionId, "view");
+                  onViewModeChange(sectionId, ViewMode.PREVIEW);
                 }}
               >
                 <Eye className="h-3.5 w-3.5 inline-block mr-1" />
@@ -65,13 +65,13 @@ export default function UIDesignSection({
               </button>
               <button
                 className={`px-3 py-1 rounded-md text-xs font-medium ${
-                  viewMode === "edit"
+                  viewMode === ViewMode.EDIT
                     ? "bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 shadow-sm"
                     : "text-slate-600 dark:text-slate-400"
                 }`}
                 onClick={(e) => {
                   e.stopPropagation();
-                  onViewModeChange(sectionId, "edit");
+                  onViewModeChange(sectionId, ViewMode.EDIT);
                 }}
               >
                 <Pencil className="h-3.5 w-3.5 inline-block mr-1" />
@@ -90,7 +90,7 @@ export default function UIDesignSection({
       {/* Content */}
       {isExpanded && (
         <div className="p-4">
-          {viewMode === "view" ? (
+          {viewMode === ViewMode.PREVIEW ? (
             <UIDesignPreview
               data={uiDesign}
               projectName={projectName}
