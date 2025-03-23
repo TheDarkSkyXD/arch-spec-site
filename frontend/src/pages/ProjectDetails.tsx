@@ -3,17 +3,9 @@ import { useParams, useNavigate } from "react-router-dom";
 import { projectsService } from "../services/projectsService";
 import { techStackService } from "../services/techStackService";
 import { ProjectBase } from "../types/project";
-import ProjectBasicsForm from "../components/forms/ProjectBasicsForm";
-import TechStackForm from "../components/forms/TechStackForm";
-import RequirementsForm from "../components/forms/RequirementsForm";
-import FeaturesForm from "../components/forms/FeaturesForm";
-import PagesForm from "../components/forms/PagesForm";
-import ApiEndpointsForm from "../components/forms/ApiEndpointsForm";
-import DataModelForm from "../components/forms/DataModelForm";
-import TestCasesForm from "../components/forms/TestCasesForm";
-import { ChevronLeft, Loader2, ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronLeft, Loader2 } from "lucide-react";
 import MainLayout from "../layouts/MainLayout";
-import { Api, ProjectTechStack, Requirements } from "../types/templates";
+import { ProjectTechStack, Requirements, Api } from "../types/templates";
 import {
   useRequirements,
   useFeatures,
@@ -24,54 +16,28 @@ import {
 } from "../hooks/useDataQueries";
 import { FeaturesData } from "../services/featuresService";
 import { TestCasesData } from "../services/testCasesService";
-import { Pages } from "../types/templates";
-import { DataModel } from "../types/templates";
-import ProjectBasicsPreview from "../components/previews/ProjectBasicsPreview";
-import TechStackPreview from "../components/previews/TechStackPreview";
-import RequirementsPreview from "../components/previews/RequirementsPreview";
-import FeaturesPreview from "../components/previews/FeaturesPreview";
-import PagesPreview from "../components/previews/PagesPreview";
-import DataModelPreview from "../components/previews/DataModelPreview";
-import ApiEndpointsPreview from "../components/previews/ApiEndpointsPreview";
-import TestCasesPreview from "../components/previews/TestCasesPreview";
-import MarkdownActions from "../components/common/MarkdownActions";
+import { Pages, DataModel } from "../types/templates";
 import DownloadAllMarkdown from "../components/common/DownloadAllMarkdown";
-import { markdownService } from "../services/markdown";
 
 // Import shadcn UI components
 import Button from "../components/ui/Button";
 import Card from "../components/ui/Card";
-import {
-  Tabs,
-  TabsList,
-  TabsTrigger,
-  TabsContent,
-} from "../components/ui/tabs";
 import { userApi } from "../api/userApi";
 import { useSubscription } from "../contexts/SubscriptionContext";
-import ImplementationPromptsForm from "../components/forms/ImplementationPromptsForm";
-import ImplementationPromptsPreview from "../components/previews/ImplementationPromptsPreview";
 import { implementationPromptsService } from "../services/implementationPromptsService";
 import { ImplementationPrompts } from "../types/templates";
 
-// Define section IDs for consistency
-enum SectionId {
-  BASICS = "basics",
-  TECH_STACK = "techStack",
-  REQUIREMENTS = "requirements",
-  FEATURES = "features",
-  PAGES = "pages",
-  DATA_MODEL = "dataModel",
-  API_ENDPOINTS = "apiEndpoints",
-  TEST_CASES = "testCases",
-  IMPLEMENTATION_PROMPTS = "implementationPrompts",
-}
-
-// Define view modes
-enum ViewMode {
-  EDIT = "edit",
-  PREVIEW = "preview",
-}
+// Import custom hook and section components
+import { SectionId, useSectionState } from "../hooks/useSectionState";
+import ProjectBasicsSection from "../components/project/ProjectBasicsSection";
+import TechStackSection from "../components/project/TechStackSection";
+import RequirementsSection from "../components/project/RequirementsSection";
+import FeaturesSection from "../components/project/FeaturesSection";
+import PagesSection from "../components/project/PagesSection";
+import DataModelSection from "../components/project/DataModelSection";
+import ApiEndpointsSection from "../components/project/ApiEndpointsSection";
+import TestCasesSection from "../components/project/TestCasesSection";
+import ImplementationPromptsSection from "../components/project/ImplementationPromptsSection";
 
 const ProjectDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -83,51 +49,13 @@ const ProjectDetails = () => {
   const [error, setError] = useState<string | null>(null);
   const { refreshSubscriptionData } = useSubscription();
 
-  // State to track expanded sections
-  const [expandedSections, setExpandedSections] = useState<
-    Record<SectionId, boolean>
-  >({
-    [SectionId.BASICS]: true,
-    [SectionId.TECH_STACK]: false,
-    [SectionId.REQUIREMENTS]: false,
-    [SectionId.FEATURES]: false,
-    [SectionId.PAGES]: false,
-    [SectionId.DATA_MODEL]: false,
-    [SectionId.API_ENDPOINTS]: false,
-    [SectionId.TEST_CASES]: false,
-    [SectionId.IMPLEMENTATION_PROMPTS]: false,
-  });
-
-  // State to track view mode (edit or preview) for each section
-  const [sectionViewModes, setSectionViewModes] = useState<
-    Record<SectionId, ViewMode>
-  >({
-    [SectionId.BASICS]: ViewMode.EDIT,
-    [SectionId.TECH_STACK]: ViewMode.EDIT,
-    [SectionId.REQUIREMENTS]: ViewMode.EDIT,
-    [SectionId.FEATURES]: ViewMode.EDIT,
-    [SectionId.PAGES]: ViewMode.EDIT,
-    [SectionId.DATA_MODEL]: ViewMode.EDIT,
-    [SectionId.API_ENDPOINTS]: ViewMode.EDIT,
-    [SectionId.TEST_CASES]: ViewMode.EDIT,
-    [SectionId.IMPLEMENTATION_PROMPTS]: ViewMode.EDIT,
-  });
-
-  // Function to toggle section expansion
-  const toggleSection = (sectionId: SectionId) => {
-    setExpandedSections((prev) => ({
-      ...prev,
-      [sectionId]: !prev[sectionId],
-    }));
-  };
-
-  // Function to change view mode
-  const changeViewMode = (sectionId: SectionId, viewMode: ViewMode) => {
-    setSectionViewModes((prev) => ({
-      ...prev,
-      [sectionId]: viewMode,
-    }));
-  };
+  // Use our custom hook for section state
+  const {
+    expandedSections,
+    sectionViewModes,
+    toggleSection,
+    changeViewMode,
+  } = useSectionState();
 
   // Use the hooks
   const { data: requirements, isLoading: requirementsLoading } =
@@ -143,8 +71,6 @@ const ProjectDetails = () => {
     useApiEndpoints(id);
 
   const { data: testCases, isLoading: testCasesLoading } = useTestCases(id);
-
-  // const { data: implementationPrompts, isLoading: implementationPromptsLoading } = useImplementationPrompts(id);
 
   // Add implementation prompts state
   const [implementationPrompts, setImplementationPrompts] =
@@ -257,13 +183,11 @@ const ProjectDetails = () => {
     _updatedRequirements: Partial<Requirements>
   ) => {
     // Update is handled by refetching from the backend
-    // We could implement a more sophisticated state management approach if needed
     console.log("Requirements updated:", _updatedRequirements);
   };
 
   const handleFeaturesUpdate = (_updatedFeatures: FeaturesData) => {
     // Update is handled by refetching from the backend
-    // We could implement a more sophisticated state management approach if needed
     console.log("Features updated:", _updatedFeatures);
   };
 
@@ -277,9 +201,9 @@ const ProjectDetails = () => {
     console.log("Data Model updated:", _updatedDataModel);
   };
 
-  const handleApiEndpointsUpdate = (updatedApiEndpoints: Api) => {
+  const handleApiEndpointsUpdate = (_updatedApiEndpoints: Api) => {
     // Update is handled by refetching from the backend
-    console.log("API Endpoints updated:", updatedApiEndpoints);
+    console.log("API Endpoints updated:", _updatedApiEndpoints);
   };
 
   const handleTestCasesUpdate = (_updatedTestCases: TestCasesData) => {
@@ -294,47 +218,6 @@ const ProjectDetails = () => {
     setImplementationPrompts(updatedPrompts as ImplementationPrompts);
     console.log("Implementation Prompts updated:", updatedPrompts);
   };
-
-  // Process arrays from the backend's comma-separated strings
-  const processProjectData = (project: ProjectBase) => {
-    return {
-      ...project,
-      // Convert arrays to comma-separated strings for the form
-      business_goals: project.business_goals || [],
-      target_users: project.target_users || "",
-      domain: project.domain || "",
-    };
-  };
-
-  // Reusable section header component
-  const SectionHeader = ({
-    title,
-    description,
-    sectionId,
-    isExpanded,
-  }: {
-    title: string;
-    description: string;
-    sectionId: SectionId;
-    isExpanded: boolean;
-  }) => (
-    <div
-      className="p-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center cursor-pointer"
-      onClick={() => toggleSection(sectionId)}
-    >
-      <div>
-        <h2 className="text-lg font-medium text-slate-800 dark:text-slate-100">
-          {title}
-        </h2>
-        <p className="text-sm text-slate-500 dark:text-slate-400">
-          {description}
-        </p>
-      </div>
-      <div className="text-slate-400 dark:text-slate-500">
-        {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-      </div>
-    </div>
-  );
 
   return (
     <MainLayout>
@@ -410,613 +293,129 @@ const ProjectDetails = () => {
           </Card>
         ) : project ? (
           <div className="space-y-6">
-            {/* Project Basics */}
-            <Card className="overflow-hidden">
-              <SectionHeader
-                title="Project Details"
-                description="Update the basic information about your project"
-                sectionId={SectionId.BASICS}
-                isExpanded={expandedSections[SectionId.BASICS]}
-              />
-              {expandedSections[SectionId.BASICS] && (
-                <div className="p-6">
-                  <Tabs
-                    value={sectionViewModes[SectionId.BASICS]}
-                    onValueChange={(value) =>
-                      changeViewMode(SectionId.BASICS, value as ViewMode)
-                    }
-                    className="w-full"
-                  >
-                    <TabsList className="mb-4">
-                      <TabsTrigger value={ViewMode.EDIT}>Edit</TabsTrigger>
-                      <TabsTrigger value={ViewMode.PREVIEW}>
-                        Preview
-                      </TabsTrigger>
-                    </TabsList>
+            {/* Project Basics Section */}
+            <ProjectBasicsSection
+              project={project}
+              sectionId={SectionId.BASICS}
+              isExpanded={expandedSections[SectionId.BASICS]}
+              viewMode={sectionViewModes[SectionId.BASICS]}
+              isLoading={loading}
+              onToggle={toggleSection}
+              onViewModeChange={changeViewMode}
+              onSuccess={handleProjectUpdate}
+            />
 
-                    <TabsContent value={ViewMode.EDIT}>
-                      {project && (
-                        <div className="flex justify-end mb-4">
-                          <MarkdownActions
-                            markdown={markdownService.generateProjectBasicsMarkdown(
-                              project
-                            )}
-                            fileName={markdownService.generateFileName(
-                              project.name,
-                              "basics"
-                            )}
-                          />
-                        </div>
-                      )}
-                      <ProjectBasicsForm
-                        initialData={processProjectData(project)}
-                        onSuccess={handleProjectUpdate}
-                      />
-                    </TabsContent>
-
-                    <TabsContent
-                      value={ViewMode.PREVIEW}
-                      className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg"
-                    >
-                      <ProjectBasicsPreview
-                        data={project}
-                        isLoading={loading}
-                      />
-                    </TabsContent>
-                  </Tabs>
-                </div>
-              )}
-            </Card>
+            {/* Tech Stack Section */}
+            <TechStackSection
+              techStack={techStack}
+              projectId={id}
+              projectName={project.name}
+              sectionId={SectionId.TECH_STACK}
+              isExpanded={expandedSections[SectionId.TECH_STACK]}
+              viewMode={sectionViewModes[SectionId.TECH_STACK]}
+              isLoading={techStackLoading}
+              onToggle={toggleSection}
+              onViewModeChange={changeViewMode}
+              onSuccess={handleTechStackUpdate}
+            />
 
             {/* Requirements Section */}
-            <Card className="overflow-hidden">
-              <SectionHeader
-                title="Requirements"
-                description="Define functional and non-functional requirements for your project"
-                sectionId={SectionId.REQUIREMENTS}
-                isExpanded={expandedSections[SectionId.REQUIREMENTS]}
-              />
-              {expandedSections[SectionId.REQUIREMENTS] && (
-                <div className="p-6">
-                  {requirementsLoading ? (
-                    <div className="flex items-center justify-center py-8">
-                      <Loader2 className="h-6 w-6 text-primary-600 animate-spin mr-3" />
-                      <span className="text-slate-600 dark:text-slate-300">
-                        Loading requirements data...
-                      </span>
-                    </div>
-                  ) : (
-                    <Tabs
-                      value={sectionViewModes[SectionId.REQUIREMENTS]}
-                      onValueChange={(value) =>
-                        changeViewMode(
-                          SectionId.REQUIREMENTS,
-                          value as ViewMode
-                        )
-                      }
-                      className="w-full"
-                    >
-                      <TabsList className="mb-4">
-                        <TabsTrigger value={ViewMode.EDIT}>Edit</TabsTrigger>
-                        <TabsTrigger value={ViewMode.PREVIEW}>
-                          Preview
-                        </TabsTrigger>
-                      </TabsList>
-
-                      <TabsContent value={ViewMode.EDIT}>
-                        {requirements && (
-                          <div className="flex justify-end mb-4">
-                            <MarkdownActions
-                              markdown={markdownService.generateRequirementsMarkdown(
-                                requirements
-                              )}
-                              fileName={markdownService.generateFileName(
-                                project.name,
-                                "requirements"
-                              )}
-                            />
-                          </div>
-                        )}
-                        <RequirementsForm
-                          initialData={requirements || undefined}
-                          projectId={id}
-                          onSuccess={handleRequirementsUpdate}
-                        />
-                      </TabsContent>
-
-                      <TabsContent
-                        value={ViewMode.PREVIEW}
-                        className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg"
-                      >
-                        <RequirementsPreview
-                          data={requirements}
-                          projectName={project.name}
-                          isLoading={requirementsLoading}
-                        />
-                      </TabsContent>
-                    </Tabs>
-                  )}
-                </div>
-              )}
-            </Card>
+            <RequirementsSection
+              requirements={requirements}
+              projectId={id}
+              projectName={project.name}
+              sectionId={SectionId.REQUIREMENTS}
+              isExpanded={expandedSections[SectionId.REQUIREMENTS]}
+              viewMode={sectionViewModes[SectionId.REQUIREMENTS]}
+              isLoading={requirementsLoading}
+              onToggle={toggleSection}
+              onViewModeChange={changeViewMode}
+              onSuccess={handleRequirementsUpdate}
+            />
 
             {/* Features Section */}
-            <Card className="overflow-hidden">
-              <SectionHeader
-                title="Features"
-                description="Configure the features and modules for your project"
-                sectionId={SectionId.FEATURES}
-                isExpanded={expandedSections[SectionId.FEATURES]}
-              />
-              {expandedSections[SectionId.FEATURES] && (
-                <div className="p-6">
-                  {featuresLoading ? (
-                    <div className="flex items-center justify-center py-8">
-                      <Loader2 className="h-6 w-6 text-primary-600 animate-spin mr-3" />
-                      <span className="text-slate-600 dark:text-slate-300">
-                        Loading features data...
-                      </span>
-                    </div>
-                  ) : (
-                    <Tabs
-                      value={sectionViewModes[SectionId.FEATURES]}
-                      onValueChange={(value) =>
-                        changeViewMode(SectionId.FEATURES, value as ViewMode)
-                      }
-                      className="w-full"
-                    >
-                      <TabsList className="mb-4">
-                        <TabsTrigger value={ViewMode.EDIT}>Edit</TabsTrigger>
-                        <TabsTrigger value={ViewMode.PREVIEW}>
-                          Preview
-                        </TabsTrigger>
-                      </TabsList>
-
-                      <TabsContent value={ViewMode.EDIT}>
-                        {features && (
-                          <div className="flex justify-end mb-4">
-                            <MarkdownActions
-                              markdown={markdownService.generateFeaturesMarkdown(
-                                features
-                              )}
-                              fileName={markdownService.generateFileName(
-                                project.name,
-                                "features"
-                              )}
-                            />
-                          </div>
-                        )}
-                        <FeaturesForm
-                          initialData={features || undefined}
-                          projectId={id}
-                          onSuccess={handleFeaturesUpdate}
-                        />
-                      </TabsContent>
-
-                      <TabsContent
-                        value={ViewMode.PREVIEW}
-                        className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg"
-                      >
-                        <FeaturesPreview
-                          data={features}
-                          projectName={project.name}
-                          isLoading={featuresLoading}
-                        />
-                      </TabsContent>
-                    </Tabs>
-                  )}
-                </div>
-              )}
-            </Card>
-
-            {/* Tech Stack */}
-            <Card className="overflow-hidden">
-              <SectionHeader
-                title="Technology Stack"
-                description="Configure the technology stack for your project"
-                sectionId={SectionId.TECH_STACK}
-                isExpanded={expandedSections[SectionId.TECH_STACK]}
-              />
-              {expandedSections[SectionId.TECH_STACK] && (
-                <div className="p-6">
-                  {techStackLoading ? (
-                    <div className="flex items-center justify-center py-8">
-                      <Loader2 className="h-6 w-6 text-primary-600 animate-spin mr-3" />
-                      <span className="text-slate-600 dark:text-slate-300">
-                        Loading tech stack data...
-                      </span>
-                    </div>
-                  ) : (
-                    <Tabs
-                      value={sectionViewModes[SectionId.TECH_STACK]}
-                      onValueChange={(value) =>
-                        changeViewMode(SectionId.TECH_STACK, value as ViewMode)
-                      }
-                      className="w-full"
-                    >
-                      <TabsList className="mb-4">
-                        <TabsTrigger value={ViewMode.EDIT}>Edit</TabsTrigger>
-                        <TabsTrigger value={ViewMode.PREVIEW}>
-                          Preview
-                        </TabsTrigger>
-                      </TabsList>
-
-                      <TabsContent value={ViewMode.EDIT}>
-                        {techStack && (
-                          <div className="flex justify-end mb-4">
-                            <MarkdownActions
-                              markdown={markdownService.generateTechStackMarkdown(
-                                techStack
-                              )}
-                              fileName={markdownService.generateFileName(
-                                project.name,
-                                "tech-stack"
-                              )}
-                            />
-                          </div>
-                        )}
-                        <TechStackForm
-                          initialData={techStack || undefined}
-                          projectId={id}
-                          onSuccess={handleTechStackUpdate}
-                        />
-                      </TabsContent>
-
-                      <TabsContent
-                        value={ViewMode.PREVIEW}
-                        className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg"
-                      >
-                        <TechStackPreview
-                          data={techStack}
-                          projectName={project.name}
-                          isLoading={techStackLoading}
-                        />
-                      </TabsContent>
-                    </Tabs>
-                  )}
-                </div>
-              )}
-            </Card>
+            <FeaturesSection
+              features={features}
+              projectId={id}
+              projectName={project.name}
+              sectionId={SectionId.FEATURES}
+              isExpanded={expandedSections[SectionId.FEATURES]}
+              viewMode={sectionViewModes[SectionId.FEATURES]}
+              isLoading={featuresLoading}
+              onToggle={toggleSection}
+              onViewModeChange={changeViewMode}
+              onSuccess={handleFeaturesUpdate}
+            />
 
             {/* Pages Section */}
-            <Card className="overflow-hidden">
-              <SectionHeader
-                title="Pages"
-                description="Configure the pages for your application"
-                sectionId={SectionId.PAGES}
-                isExpanded={expandedSections[SectionId.PAGES]}
-              />
-              {expandedSections[SectionId.PAGES] && (
-                <div className="p-6">
-                  {pagesLoading ? (
-                    <div className="flex items-center justify-center py-8">
-                      <Loader2 className="h-6 w-6 text-primary-600 animate-spin mr-3" />
-                      <span className="text-slate-600 dark:text-slate-300">
-                        Loading pages data...
-                      </span>
-                    </div>
-                  ) : (
-                    <Tabs
-                      value={sectionViewModes[SectionId.PAGES]}
-                      onValueChange={(value) =>
-                        changeViewMode(SectionId.PAGES, value as ViewMode)
-                      }
-                      className="w-full"
-                    >
-                      <TabsList className="mb-4">
-                        <TabsTrigger value={ViewMode.EDIT}>Edit</TabsTrigger>
-                        <TabsTrigger value={ViewMode.PREVIEW}>
-                          Preview
-                        </TabsTrigger>
-                      </TabsList>
-
-                      <TabsContent value={ViewMode.EDIT}>
-                        {pages && (
-                          <div className="flex justify-end mb-4">
-                            <MarkdownActions
-                              markdown={markdownService.generatePagesMarkdown(
-                                pages
-                              )}
-                              fileName={markdownService.generateFileName(
-                                project.name,
-                                "pages"
-                              )}
-                            />
-                          </div>
-                        )}
-                        <PagesForm
-                          initialData={pages || undefined}
-                          projectId={id}
-                          onSuccess={handlePagesUpdate}
-                        />
-                      </TabsContent>
-
-                      <TabsContent
-                        value={ViewMode.PREVIEW}
-                        className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg"
-                      >
-                        <PagesPreview
-                          data={pages}
-                          projectName={project.name}
-                          isLoading={pagesLoading}
-                        />
-                      </TabsContent>
-                    </Tabs>
-                  )}
-                </div>
-              )}
-            </Card>
+            <PagesSection
+              pages={pages}
+              projectId={id}
+              projectName={project.name}
+              sectionId={SectionId.PAGES}
+              isExpanded={expandedSections[SectionId.PAGES]}
+              viewMode={sectionViewModes[SectionId.PAGES]}
+              isLoading={pagesLoading}
+              onToggle={toggleSection}
+              onViewModeChange={changeViewMode}
+              onSuccess={handlePagesUpdate}
+            />
 
             {/* Data Model Section */}
-            <Card className="overflow-hidden">
-              <SectionHeader
-                title="Data Model"
-                description="Configure the database entities and relationships"
-                sectionId={SectionId.DATA_MODEL}
-                isExpanded={expandedSections[SectionId.DATA_MODEL]}
-              />
-              {expandedSections[SectionId.DATA_MODEL] && (
-                <div className="p-6">
-                  {dataModelLoading ? (
-                    <div className="flex items-center justify-center py-8">
-                      <Loader2 className="h-6 w-6 text-primary-600 animate-spin mr-3" />
-                      <span className="text-slate-600 dark:text-slate-300">
-                        Loading data model...
-                      </span>
-                    </div>
-                  ) : (
-                    <Tabs
-                      value={sectionViewModes[SectionId.DATA_MODEL]}
-                      onValueChange={(value) =>
-                        changeViewMode(SectionId.DATA_MODEL, value as ViewMode)
-                      }
-                      className="w-full"
-                    >
-                      <TabsList className="mb-4">
-                        <TabsTrigger value={ViewMode.EDIT}>Edit</TabsTrigger>
-                        <TabsTrigger value={ViewMode.PREVIEW}>
-                          Preview
-                        </TabsTrigger>
-                      </TabsList>
-
-                      <TabsContent value={ViewMode.EDIT}>
-                        {dataModel && (
-                          <div className="flex justify-end mb-4">
-                            <MarkdownActions
-                              markdown={markdownService.generateDataModelMarkdown(
-                                dataModel
-                              )}
-                              fileName={markdownService.generateFileName(
-                                project.name,
-                                "data-model"
-                              )}
-                            />
-                          </div>
-                        )}
-                        <DataModelForm
-                          initialData={dataModel || undefined}
-                          projectId={id}
-                          onSuccess={handleDataModelUpdate}
-                        />
-                      </TabsContent>
-
-                      <TabsContent
-                        value={ViewMode.PREVIEW}
-                        className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg"
-                      >
-                        <DataModelPreview
-                          data={dataModel}
-                          projectName={project.name}
-                          isLoading={dataModelLoading}
-                        />
-                      </TabsContent>
-                    </Tabs>
-                  )}
-                </div>
-              )}
-            </Card>
+            <DataModelSection
+              dataModel={dataModel}
+              projectId={id}
+              projectName={project.name}
+              sectionId={SectionId.DATA_MODEL}
+              isExpanded={expandedSections[SectionId.DATA_MODEL]}
+              viewMode={sectionViewModes[SectionId.DATA_MODEL]}
+              isLoading={dataModelLoading}
+              onToggle={toggleSection}
+              onViewModeChange={changeViewMode}
+              onSuccess={handleDataModelUpdate}
+            />
 
             {/* API Endpoints Section */}
-            <Card className="overflow-hidden">
-              <SectionHeader
-                title="API Endpoints"
-                description="Configure the API endpoints for your application"
-                sectionId={SectionId.API_ENDPOINTS}
-                isExpanded={expandedSections[SectionId.API_ENDPOINTS]}
-              />
-              {expandedSections[SectionId.API_ENDPOINTS] && (
-                <div className="p-6">
-                  {apiEndpointsLoading ? (
-                    <div className="flex items-center justify-center py-8">
-                      <Loader2 className="h-6 w-6 text-primary-600 animate-spin mr-3" />
-                      <span className="text-slate-600 dark:text-slate-300">
-                        Loading API endpoints data...
-                      </span>
-                    </div>
-                  ) : (
-                    <Tabs
-                      value={sectionViewModes[SectionId.API_ENDPOINTS]}
-                      onValueChange={(value) =>
-                        changeViewMode(
-                          SectionId.API_ENDPOINTS,
-                          value as ViewMode
-                        )
-                      }
-                      className="w-full"
-                    >
-                      <TabsList className="mb-4">
-                        <TabsTrigger value={ViewMode.EDIT}>Edit</TabsTrigger>
-                        <TabsTrigger value={ViewMode.PREVIEW}>
-                          Preview
-                        </TabsTrigger>
-                      </TabsList>
-
-                      <TabsContent value={ViewMode.EDIT}>
-                        {apiEndpoints && (
-                          <div className="flex justify-end mb-4">
-                            <MarkdownActions
-                              markdown={markdownService.generateApiEndpointsMarkdown(
-                                apiEndpoints
-                              )}
-                              fileName={markdownService.generateFileName(
-                                project.name,
-                                "api-endpoints"
-                              )}
-                            />
-                          </div>
-                        )}
-                        <ApiEndpointsForm
-                          initialData={apiEndpoints || undefined}
-                          projectId={id}
-                          onSuccess={handleApiEndpointsUpdate}
-                        />
-                      </TabsContent>
-
-                      <TabsContent
-                        value={ViewMode.PREVIEW}
-                        className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg"
-                      >
-                        <ApiEndpointsPreview
-                          data={apiEndpoints}
-                          projectName={project.name}
-                          isLoading={apiEndpointsLoading}
-                        />
-                      </TabsContent>
-                    </Tabs>
-                  )}
-                </div>
-              )}
-            </Card>
+            <ApiEndpointsSection
+              apiEndpoints={apiEndpoints}
+              projectId={id}
+              projectName={project.name}
+              sectionId={SectionId.API_ENDPOINTS}
+              isExpanded={expandedSections[SectionId.API_ENDPOINTS]}
+              viewMode={sectionViewModes[SectionId.API_ENDPOINTS]}
+              isLoading={apiEndpointsLoading}
+              onToggle={toggleSection}
+              onViewModeChange={changeViewMode}
+              onSuccess={handleApiEndpointsUpdate}
+            />
 
             {/* Test Cases Section */}
-            <Card className="overflow-hidden">
-              <SectionHeader
-                title="Test Cases"
-                description="Define Gherkin-style test cases to document expected behavior"
-                sectionId={SectionId.TEST_CASES}
-                isExpanded={expandedSections[SectionId.TEST_CASES]}
-              />
-              {expandedSections[SectionId.TEST_CASES] && (
-                <div className="p-6">
-                  {testCasesLoading ? (
-                    <div className="flex items-center justify-center py-8">
-                      <Loader2 className="h-6 w-6 text-primary-600 animate-spin mr-3" />
-                      <span className="text-slate-600 dark:text-slate-300">
-                        Loading test cases data...
-                      </span>
-                    </div>
-                  ) : (
-                    <Tabs
-                      value={sectionViewModes[SectionId.TEST_CASES]}
-                      onValueChange={(value) =>
-                        changeViewMode(SectionId.TEST_CASES, value as ViewMode)
-                      }
-                      className="w-full"
-                    >
-                      <TabsList className="mb-4">
-                        <TabsTrigger value={ViewMode.EDIT}>Edit</TabsTrigger>
-                        <TabsTrigger value={ViewMode.PREVIEW}>
-                          Preview
-                        </TabsTrigger>
-                      </TabsList>
-
-                      <TabsContent value={ViewMode.EDIT}>
-                        {testCases && (
-                          <div className="flex justify-end mb-4">
-                            <MarkdownActions
-                              markdown={markdownService.generateTestCasesMarkdown(
-                                testCases
-                              )}
-                              fileName={markdownService.generateFileName(
-                                project.name,
-                                "test-cases"
-                              )}
-                            />
-                          </div>
-                        )}
-                        <TestCasesForm
-                          initialData={testCases || undefined}
-                          projectId={id}
-                          onSuccess={handleTestCasesUpdate}
-                        />
-                      </TabsContent>
-
-                      <TabsContent
-                        value={ViewMode.PREVIEW}
-                        className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg"
-                      >
-                        <TestCasesPreview
-                          data={testCases}
-                          projectName={project.name}
-                          isLoading={testCasesLoading}
-                        />
-                      </TabsContent>
-                    </Tabs>
-                  )}
-                </div>
-              )}
-            </Card>
+            <TestCasesSection
+              testCases={testCases}
+              projectId={id}
+              projectName={project.name}
+              sectionId={SectionId.TEST_CASES}
+              isExpanded={expandedSections[SectionId.TEST_CASES]}
+              viewMode={sectionViewModes[SectionId.TEST_CASES]}
+              isLoading={testCasesLoading}
+              onToggle={toggleSection}
+              onViewModeChange={changeViewMode}
+              onSuccess={handleTestCasesUpdate}
+            />
 
             {/* Implementation Prompts Section */}
-            <Card className="overflow-hidden">
-              <SectionHeader
-                title="Implementation Prompts"
-                description="Define prompts for implementing different aspects of your project using AI tools."
-                sectionId={SectionId.IMPLEMENTATION_PROMPTS}
-                isExpanded={expandedSections[SectionId.IMPLEMENTATION_PROMPTS]}
-              />
-
-              {expandedSections[SectionId.IMPLEMENTATION_PROMPTS] && (
-                <div className="p-6">
-                  {implementationPromptsLoading ? (
-                    <div className="flex items-center justify-center py-8">
-                      <Loader2 className="h-6 w-6 text-primary-600 animate-spin mr-3" />
-                      <span className="text-slate-600 dark:text-slate-300">
-                        Loading implementation prompts data...
-                      </span>
-                    </div>
-                  ) : (
-                    <Tabs
-                      value={sectionViewModes[SectionId.IMPLEMENTATION_PROMPTS]}
-                      onValueChange={(value) =>
-                        changeViewMode(
-                          SectionId.IMPLEMENTATION_PROMPTS,
-                          value as ViewMode
-                        )
-                      }
-                      className="w-full"
-                    >
-                      <TabsList className="mb-4">
-                        <TabsTrigger value={ViewMode.EDIT}>Edit</TabsTrigger>
-                        <TabsTrigger value={ViewMode.PREVIEW}>
-                          Preview
-                        </TabsTrigger>
-                      </TabsList>
-
-                      <TabsContent value={ViewMode.EDIT}>
-                        <ImplementationPromptsForm
-                          projectId={id}
-                          initialData={implementationPrompts || undefined}
-                          onSuccess={handleImplementationPromptsUpdate}
-                        />
-                      </TabsContent>
-
-                      <TabsContent
-                        value={ViewMode.PREVIEW}
-                        className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg"
-                      >
-                        <ImplementationPromptsPreview
-                          data={implementationPrompts || undefined}
-                          isLoading={implementationPromptsLoading}
-                        />
-                      </TabsContent>
-                    </Tabs>
-                  )}
-                </div>
-              )}
-            </Card>
-
-            {/* More project sections can be added here later */}
+            <ImplementationPromptsSection
+              implementationPrompts={implementationPrompts}
+              projectId={id}
+              projectName={project.name}
+              sectionId={SectionId.IMPLEMENTATION_PROMPTS}
+              isExpanded={expandedSections[SectionId.IMPLEMENTATION_PROMPTS]}
+              viewMode={sectionViewModes[SectionId.IMPLEMENTATION_PROMPTS]}
+              isLoading={implementationPromptsLoading}
+              onToggle={toggleSection}
+              onViewModeChange={changeViewMode}
+              onSuccess={handleImplementationPromptsUpdate}
+            />
           </div>
         ) : null}
       </div>
