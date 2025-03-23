@@ -63,13 +63,14 @@ export default function PagesForm({
   const [errors, setErrors] = useState<Record<string, string>>({});
   // Add state for error and success messages
   const [error, setError] = useState<string>("");
-  const [success, setSuccess] = useState<string>("");
 
   // Add state for AI enhancement
   const [isEnhancing, setIsEnhancing] = useState<boolean>(false);
   const [isAddingPages, setIsAddingPages] = useState<boolean>(false);
   const [projectDescription, setProjectDescription] = useState<string>("");
-  const [projectFeatures, setProjectFeatures] = useState<{ name: string; description: string; enabled: boolean }[]>([]);
+  const [projectFeatures, setProjectFeatures] = useState<
+    { name: string; description: string; enabled: boolean }[]
+  >([]);
   const [requirements, setRequirements] = useState<string[]>([]);
 
   // Editing state
@@ -153,9 +154,9 @@ export default function PagesForm({
         const featuresData = await featuresService.getFeatures(projectId);
         if (featuresData && featuresData.coreModules) {
           // Make sure each feature has the required 'enabled' property
-          const formattedFeatures = featuresData.coreModules.map(feature => ({
+          const formattedFeatures = featuresData.coreModules.map((feature) => ({
             ...feature,
-            enabled: feature.enabled !== undefined ? feature.enabled : true
+            enabled: feature.enabled !== undefined ? feature.enabled : true,
           }));
           setProjectFeatures(formattedFeatures);
         }
@@ -682,7 +683,6 @@ export default function PagesForm({
 
     // Clear previous messages
     setError("");
-    setSuccess("");
 
     if (!projectId) {
       const errorMessage = "Project must be saved before pages can be saved";
@@ -706,14 +706,11 @@ export default function PagesForm({
       const result = await pagesService.savePages(projectId, data);
 
       if (result) {
-        const successMessage = "Pages saved successfully";
         showToast({
           title: "Success",
-          description: successMessage,
+          description: "Pages saved successfully",
           type: "success",
         });
-        setSuccess(successMessage);
-        setTimeout(() => setSuccess(""), 3000);
 
         if (onSuccess) {
           onSuccess(result);
@@ -971,15 +968,10 @@ export default function PagesForm({
         opacity={0.6}
       />
 
-      {/* Error and Success Messages */}
+      {/* Error Message */}
       {error && (
         <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-md mb-4">
           {error}
-        </div>
-      )}
-      {success && (
-        <div className="bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 p-3 rounded-md mb-4">
-          {success}
         </div>
       )}
 

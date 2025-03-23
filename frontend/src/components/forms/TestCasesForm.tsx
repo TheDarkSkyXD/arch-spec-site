@@ -61,9 +61,7 @@ export default function TestCasesForm({
   );
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  // Add state for form-level error and success messages
   const [error, setError] = useState<string>("");
-  const [success, setSuccess] = useState<string>("");
 
   // State for test case form
   const [isAddingTestCase, setIsAddingTestCase] = useState(false);
@@ -573,7 +571,6 @@ export default function TestCasesForm({
 
     // Clear previous messages
     setError("");
-    setSuccess("");
 
     if (!projectId) {
       const errorMessage =
@@ -596,14 +593,11 @@ export default function TestCasesForm({
       const result = await testCasesService.saveTestCases(projectId, data);
 
       if (result) {
-        const successMessage = "Test cases saved successfully";
         showToast({
           title: "Success",
-          description: successMessage,
+          description: "Test cases saved successfully",
           type: "success",
         });
-        setSuccess(successMessage);
-        setTimeout(() => setSuccess(""), 3000);
 
         if (onSuccess) {
           onSuccess(result);
@@ -673,15 +667,10 @@ export default function TestCasesForm({
         opacity={0.6}
       />
 
-      {/* Error and Success Messages */}
+      {/* Error Message */}
       {error && (
         <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-md mb-4">
           {error}
-        </div>
-      )}
-      {success && (
-        <div className="bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 p-3 rounded-md mb-4">
-          {success}
         </div>
       )}
 

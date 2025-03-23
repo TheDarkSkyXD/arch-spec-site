@@ -67,7 +67,6 @@ export default function DataModelForm({
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
 
   // State for the entity form
   const [isEditingEntity, setIsEditingEntity] = useState(false);
@@ -250,8 +249,11 @@ export default function DataModelForm({
     });
 
     resetEntityForm();
-    setSuccess("Entity added successfully");
-    setTimeout(() => setSuccess(null), 3000);
+    showToast({
+      title: "Success",
+      description: "Entity added successfully",
+      type: "success",
+    });
   };
 
   const handleEditEntity = () => {
@@ -270,8 +272,11 @@ export default function DataModelForm({
     resetEntityForm();
     setEditingEntityIndex(null);
     setIsEditingEntity(false);
-    setSuccess("Entity updated successfully");
-    setTimeout(() => setSuccess(null), 3000);
+    showToast({
+      title: "Success",
+      description: "Entity updated successfully",
+      type: "success",
+    });
   };
 
   const handleStartEditEntity = (index: number) => {
@@ -303,8 +308,11 @@ export default function DataModelForm({
       entities: updatedEntities,
     });
 
-    setSuccess("Entity deleted successfully");
-    setTimeout(() => setSuccess(null), 3000);
+    showToast({
+      title: "Success",
+      description: "Entity deleted successfully",
+      type: "success",
+    });
   };
 
   const resetEntityForm = () => {
@@ -441,8 +449,11 @@ export default function DataModelForm({
     });
 
     resetRelationshipForm();
-    setSuccess("Relationship added successfully");
-    setTimeout(() => setSuccess(null), 3000);
+    showToast({
+      title: "Success",
+      description: "Relationship added successfully",
+      type: "success",
+    });
   };
 
   const handleEditRelationship = () => {
@@ -460,8 +471,11 @@ export default function DataModelForm({
     });
 
     resetRelationshipForm();
-    setSuccess("Relationship updated successfully");
-    setTimeout(() => setSuccess(null), 3000);
+    showToast({
+      title: "Success",
+      description: "Relationship updated successfully",
+      type: "success",
+    });
   };
 
   const handleStartEditRelationship = (index: number) => {
@@ -479,8 +493,11 @@ export default function DataModelForm({
       relationships: updatedRelationships,
     });
 
-    setSuccess("Relationship deleted successfully");
-    setTimeout(() => setSuccess(null), 3000);
+    showToast({
+      title: "Success",
+      description: "Relationship deleted successfully",
+      type: "success",
+    });
   };
 
   const resetRelationshipForm = () => {
@@ -542,7 +559,11 @@ export default function DataModelForm({
       if (enhancedDataModel) {
         // Replace existing data model with enhanced one
         setDataModel(enhancedDataModel);
-        setSuccess("Data model enhanced successfully!");
+        showToast({
+          title: "Success",
+          description: "Data model enhanced successfully!",
+          type: "success",
+        });
       } else {
         setError("No enhanced data model returned");
       }
@@ -621,7 +642,11 @@ export default function DataModelForm({
           ],
         });
 
-        setSuccess(`Added ${newEntities.length} new entities`);
+        showToast({
+          title: "Success",
+          description: `Added ${newEntities.length} new entities`,
+          type: "success",
+        });
       } else {
         setError("No new entities generated");
       }
@@ -651,8 +676,11 @@ export default function DataModelForm({
       );
 
       if (updatedDataModel) {
-        setSuccess("Data model saved successfully");
-        setTimeout(() => setSuccess(null), 3000);
+        showToast({
+          title: "Success",
+          description: "Data model saved successfully",
+          type: "success",
+        });
         if (onSuccess) {
           onSuccess(updatedDataModel);
         }
@@ -694,11 +722,6 @@ export default function DataModelForm({
           {error && (
             <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-md mb-4">
               {error}
-            </div>
-          )}
-          {success && (
-            <div className="bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 p-3 rounded-md mb-4">
-              {success}
             </div>
           )}
 

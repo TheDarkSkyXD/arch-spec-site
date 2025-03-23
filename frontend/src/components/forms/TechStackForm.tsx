@@ -68,7 +68,6 @@ const TechStackForm = ({
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   // Add state for error and success messages
   const [error, setError] = useState<string>("");
-  const [success, setSuccess] = useState<string>("");
   const [justification, setJustification] = useState<string>("");
 
   // Add state for AI enhancement
@@ -508,10 +507,6 @@ const TechStackForm = ({
           type: "success",
         });
 
-        // Set success message
-        setSuccess("Tech stack enhanced successfully.");
-        setTimeout(() => setSuccess(""), 3000);
-
         // Set justification
         setJustification(justification);
       } else {
@@ -573,7 +568,6 @@ const TechStackForm = ({
     setIsSubmitting(true);
     // Clear previous messages
     setError("");
-    setSuccess("");
 
     try {
       const result = await techStackService.saveTechStack(projectId, data);
@@ -584,8 +578,6 @@ const TechStackForm = ({
           description: "Tech stack saved successfully",
           type: "success",
         });
-        setSuccess("Tech stack saved successfully");
-        setTimeout(() => setSuccess(""), 3000);
 
         if (onSuccess) {
           onSuccess(result);
@@ -626,15 +618,10 @@ const TechStackForm = ({
         opacity={0.6}
       />
 
-      {/* Error and Success Messages */}
+      {/* Error Message */}
       {error && (
         <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-md mb-4">
           {error}
-        </div>
-      )}
-      {success && (
-        <div className="bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 p-3 rounded-md whitespace-pre-line mb-4">
-          {success}
         </div>
       )}
 

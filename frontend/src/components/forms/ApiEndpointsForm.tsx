@@ -54,9 +54,7 @@ export default function ApiEndpointsForm({
   const [editingEndpointIndex, setEditingEndpointIndex] = useState<
     number | null
   >(null);
-  // Add state for form-level error and success messages
   const [error, setError] = useState<string>("");
-  const [success, setSuccess] = useState<string>("");
 
   // AI enhancement state
   const [isEnhancing, setIsEnhancing] = useState<boolean>(false);
@@ -481,7 +479,6 @@ export default function ApiEndpointsForm({
 
     // Clear previous messages
     setError("");
-    setSuccess("");
 
     if (!projectId) {
       const errorMessage =
@@ -507,14 +504,11 @@ export default function ApiEndpointsForm({
       );
 
       if (result) {
-        const successMessage = "API endpoints saved successfully";
         showToast({
           title: "Success",
-          description: successMessage,
+          description: "API endpoints saved successfully",
           type: "success",
         });
-        setSuccess(successMessage);
-        setTimeout(() => setSuccess(""), 3000);
 
         if (onSuccess) {
           onSuccess(result);
@@ -584,15 +578,10 @@ export default function ApiEndpointsForm({
         opacity={0.6}
       />
 
-      {/* Error and Success Messages */}
+      {/* Error Message */}
       {error && (
         <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-md mb-4">
           {error}
-        </div>
-      )}
-      {success && (
-        <div className="bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 p-3 rounded-md mb-4">
-          {success}
         </div>
       )}
 
@@ -693,7 +682,9 @@ export default function ApiEndpointsForm({
         {(showNewEndpointForm || editingEndpointIndex !== null) && (
           <Card className="p-4 border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
             <h3 className="text-lg font-medium text-slate-800 dark:text-slate-200 mb-4">
-              {editingEndpointIndex !== null ? "Edit Endpoint" : "Add New Endpoint"}
+              {editingEndpointIndex !== null
+                ? "Edit Endpoint"
+                : "Add New Endpoint"}
             </h3>
 
             <div className="space-y-4">
@@ -881,8 +872,9 @@ export default function ApiEndpointsForm({
         )}
 
         {/* Endpoints List - Only show when not editing or adding new endpoint */}
-        {!showNewEndpointForm && editingEndpointIndex === null && (
-          endpoints.length === 0 ? (
+        {!showNewEndpointForm &&
+          editingEndpointIndex === null &&
+          (endpoints.length === 0 ? (
             <Card className="p-6 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-center">
               <p className="text-slate-600 dark:text-slate-400">
                 No API endpoints defined yet
@@ -1002,8 +994,7 @@ export default function ApiEndpointsForm({
                 </Card>
               ))}
             </div>
-          )
-        )}
+          ))}
       </div>
 
       <div className="mt-6 flex justify-end">

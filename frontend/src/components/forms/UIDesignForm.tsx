@@ -144,7 +144,6 @@ export default function UIDesignForm({
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
-  const [success, setSuccess] = useState<string>("");
   const [copied, setCopied] = useState<boolean>(false);
 
   // Effect to update local state when initial data changes
@@ -406,7 +405,6 @@ export default function UIDesignForm({
 
     // Clear previous messages
     setError("");
-    setSuccess("");
 
     if (!projectId) {
       const errorMessage =
@@ -425,14 +423,11 @@ export default function UIDesignForm({
       const result = await uiDesignService.saveUIDesign(projectId, uiDesign);
 
       if (result) {
-        const successMessage = "UI design saved successfully";
         showToast({
           title: "Success",
-          description: successMessage,
+          description: "UI design saved successfully",
           type: "success",
         });
-        setSuccess(successMessage);
-        setTimeout(() => setSuccess(""), 3000);
 
         if (onSuccess) {
           onSuccess(result);
@@ -562,15 +557,10 @@ export default function UIDesignForm({
 
   return (
     <form id="ui-design-form" onSubmit={handleSubmit} className="space-y-6">
-      {/* Error and Success Messages */}
+      {/* Error Message */}
       {error && (
         <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-md mb-4">
           {error}
-        </div>
-      )}
-      {success && (
-        <div className="bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 p-3 rounded-md mb-4">
-          {success}
         </div>
       )}
 

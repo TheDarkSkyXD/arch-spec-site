@@ -44,14 +44,15 @@ export default function RequirementsForm({
   const [newNonFunctionalReq, setNewNonFunctionalReq] = useState("");
   // Add state for inline editing
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  const [editingType, setEditingType] = useState<"functional" | "non-functional" | null>(null);
+  const [editingType, setEditingType] = useState<
+    "functional" | "non-functional" | null
+  >(null);
   const [editingValue, setEditingValue] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   // Add state for form-level error and success messages
   const [error, setError] = useState<string>("");
-  const [success, setSuccess] = useState<string>("");
   // Add state for AI enhancement
   const [isEnhancing, setIsEnhancing] = useState<boolean>(false);
   const [projectDescription, setProjectDescription] = useState<string>("");
@@ -465,7 +466,6 @@ export default function RequirementsForm({
     setErrors(newErrors);
     // Clear previous form-level messages
     setError("");
-    setSuccess("");
 
     if (Object.keys(newErrors).length === 0) {
       if (!projectId) {
@@ -493,14 +493,11 @@ export default function RequirementsForm({
         );
 
         if (result) {
-          const successMessage = "Requirements saved successfully";
           showToast({
             title: "Success",
-            description: successMessage,
+            description: "Requirements saved successfully",
             type: "success",
           });
-          setSuccess(successMessage);
-          setTimeout(() => setSuccess(""), 3000);
 
           if (onSuccess) {
             onSuccess(result);
@@ -547,7 +544,11 @@ export default function RequirementsForm({
     return "AI enhancement in progress...";
   };
 
-  const handleStartEdit = (index: number, type: "functional" | "non-functional", value: string) => {
+  const handleStartEdit = (
+    index: number,
+    type: "functional" | "non-functional",
+    value: string
+  ) => {
     setEditingIndex(index);
     setEditingType(type);
     setEditingValue(value);
@@ -605,15 +606,10 @@ export default function RequirementsForm({
         opacity={0.6}
       />
 
-      {/* Error and Success Messages */}
+      {/* Error Message */}
       {error && (
         <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-md mb-4">
           {error}
-        </div>
-      )}
-      {success && (
-        <div className="bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 p-3 rounded-md mb-4">
-          {success}
         </div>
       )}
 
@@ -791,7 +787,9 @@ export default function RequirementsForm({
                         type="button"
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleStartEdit(index, "functional", req)}
+                        onClick={() =>
+                          handleStartEdit(index, "functional", req)
+                        }
                         className="text-slate-400 dark:text-slate-500 hover:text-blue-500 dark:hover:text-blue-400"
                       >
                         <Edit className="h-4 w-4" />
