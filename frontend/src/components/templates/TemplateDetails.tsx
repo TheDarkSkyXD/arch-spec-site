@@ -8,6 +8,7 @@ import {
   ApiSection,
   RequirementsSection,
   DataModelSection,
+  UIDesignSection,
 } from "../templateDetails";
 import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 
@@ -25,6 +26,7 @@ const TemplateDetails: React.FC<TemplateDetailsProps> = ({ template }) => {
     dataModel: true,
     pages: true,
     api: true,
+    uiDesign: true,
   });
 
   // Track if all sections are expanded
@@ -46,6 +48,7 @@ const TemplateDetails: React.FC<TemplateDetailsProps> = ({ template }) => {
       dataModel: true,
       pages: true,
       api: true,
+      uiDesign: true,
     });
     setAllExpanded(true);
   };
@@ -59,6 +62,7 @@ const TemplateDetails: React.FC<TemplateDetailsProps> = ({ template }) => {
       dataModel: false,
       pages: false,
       api: false,
+      uiDesign: false,
     });
     setAllExpanded(false);
   };
@@ -132,6 +136,14 @@ const TemplateDetails: React.FC<TemplateDetailsProps> = ({ template }) => {
           features={template.features}
           isOpen={sectionsOpen.features}
           onToggle={() => toggleSection("features")}
+        />
+      )}
+
+      {template.uiDesign && (
+        <UIDesignSection
+          uiDesign={template.uiDesign}
+          isOpen={sectionsOpen.uiDesign}
+          onToggle={() => toggleSection("uiDesign")}
         />
       )}
 
