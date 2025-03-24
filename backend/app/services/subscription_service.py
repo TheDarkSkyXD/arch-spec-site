@@ -21,7 +21,7 @@ class SubscriptionService:
     async def initialize(self):
         """Initialize the database connection"""
         if self.db is None:
-            self.db = await db.get_db()
+            self.db = db.get_db()
             logger.info("Subscription service database connection initialized")
 
     async def get_plans(self) -> List[SubscriptionPlan]:
