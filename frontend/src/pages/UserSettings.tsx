@@ -5,7 +5,6 @@ import { toast } from "react-hot-toast";
 import Button from "../components/ui/Button";
 import Card from "../components/ui/Card";
 import Spinner from "../components/ui/Spinner";
-import Toggle from "../components/ui/Toggle";
 import ProfileLayout from "../layouts/ProfileLayout";
 
 type ColorScheme = "light" | "dark" | "system";
@@ -108,12 +107,12 @@ const UserSettingsPage = () => {
     applyTheme(theme);
   };
 
-  const handleToggleChange = (setting: string, value: boolean) => {
-    setSettings((prev) => ({
-      ...prev,
-      [setting]: value,
-    }));
-  };
+  // const handleToggleChange = (setting: string, value: boolean) => {
+  //   setSettings((prev) => ({
+  //     ...prev,
+  //     [setting]: value,
+  //   }));
+  // };
 
   const handleSaveSettings = async () => {
     setSaving(true);
