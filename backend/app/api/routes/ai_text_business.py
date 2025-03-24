@@ -82,8 +82,13 @@ async def enhance_business_goals(
             use_token_api_for_estimation=True
         )
         
-        # Handle potential credit errors
-        if response.startswith("Insufficient credits"):
+        # Handle potential credit errors - check the response content if it's a dict
+        if isinstance(response, dict) and isinstance(response.get('content'), str) and response['content'].startswith("Insufficient credits"):
+            raise HTTPException(
+                status_code=402,
+                detail=response['content']
+            )
+        elif isinstance(response, str) and response.startswith("Insufficient credits"):
             raise HTTPException(
                 status_code=402,
                 detail=response
@@ -143,9 +148,10 @@ async def enhance_target_users(
     try:
         # Create the logger implementation
         llm_logger = DefaultLLMLogger()
+        usage_tracker = DatabaseUsageTracker(db.get_db())   
         
-        # Initialize the AI client with the logger
-        client = AnthropicClient(llm_logger)
+        # Initialize the AI client with the logger and usage tracker
+        client = AnthropicClient(llm_logger, usage_tracker)
         
         # Create the system message
         if request.target_users and len(request.target_users.strip()) > 0:
@@ -178,7 +184,8 @@ async def enhance_target_users(
                 "additional_user_instruction": request.additional_user_instruction
             },
             response_type=operation_type,
-            check_credits=True
+            check_credits=True,
+            use_token_api_for_estimation=True
         )
         
         # Handle potential credit errors - check the response content if it's a dict
