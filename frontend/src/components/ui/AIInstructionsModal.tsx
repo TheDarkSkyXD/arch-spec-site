@@ -9,6 +9,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "./dialog";
 
 interface AIInstructionsModalProps {
@@ -47,10 +48,13 @@ const AIInstructionsModal: React.FC<AIInstructionsModalProps> = ({
             <Lightbulb className="h-5 w-5 text-yellow-500" />
             {title}
           </DialogTitle>
+          {description && (
+            <DialogDescription>
+              {description}
+            </DialogDescription>
+          )}
         </DialogHeader>
         <div className="py-4">
-          {description && <p className="text-sm mb-4">{description}</p>}
-
           <div className="space-y-2">
             <Label htmlFor="ai-instructions">
               Custom AI Instructions (Optional)
