@@ -181,8 +181,13 @@ async def enhance_target_users(
             check_credits=True
         )
         
-        # Handle potential credit errors
-        if response.startswith("Insufficient credits"):
+        # Handle potential credit errors - check the response content if it's a dict
+        if isinstance(response, dict) and isinstance(response.get('content'), str) and response['content'].startswith("Insufficient credits"):
+            raise HTTPException(
+                status_code=402,
+                detail=response['content']
+            )
+        elif isinstance(response, str) and response.startswith("Insufficient credits"):
             raise HTTPException(
                 status_code=402,
                 detail=response
