@@ -119,6 +119,55 @@ class AnthropicClient():
                     "operation_type": response_type
                 }
             )
+            
+    def count_tokens(
+        self,
+        messages: List[Dict[str, str]],
+        system: Optional[str] = None,
+        model: Optional[str] = None,
+        tools: Optional[List[Dict[str, Any]]] = None
+    ) -> Dict[str, int]:
+        """
+        Count tokens accurately using the Anthropic API's count_tokens endpoint.
+
+        Args:
+            messages: A list of messages in the conversation history.
+            system: Optional system prompt.
+            model: Optional model to use for token counting.
+            tools: Optional list of tools to include in token count.
+
+        Returns:
+            A dictionary containing the token count information.
+        """
+        if not self.client:
+            return {"input_tokens": 0, "error": "Anthropic client not available"}
+
+        try:
+            params: Dict[str, Any] = {
+                "model": model if model else self.model,
+                "messages": messages
+            }
+            
+            if system:
+                params["system"] = system
+                
+            if tools:
+                params["tools"] = tools
+                
+            response = self.client.messages.count_tokens(**params)
+            
+            # Convert to dict if it's a structured object
+            if hasattr(response, 'model_dump'):
+                return response.model_dump()
+            elif hasattr(response, 'dict'):
+                return response.dict()
+            else:
+                # If it's already a dict or we can't convert it
+                return dict(response)
+                
+        except Exception as e:
+            logger.error(f"Error counting tokens: {str(e)}")
+            return {"input_tokens": 0, "error": str(e)}
     
     async def _check_sufficient_credits(
         self,
@@ -126,7 +175,8 @@ class AnthropicClient():
         messages: List[Dict[str, str]],
         system: Optional[str] = None,
         model: Optional[str] = None,
-        has_tools: bool = False
+        tools: Optional[List[Dict[str, Any]]] = None,
+        use_token_api: bool = True
     ) -> Dict[str, Any]:
         """Check if a user has sufficient credits for an operation."""
         if not self.usage_tracker:
@@ -134,34 +184,84 @@ class AnthropicClient():
         
         # Estimate input tokens (approximate calculation)
         estimated_input_tokens = 0
-        for msg in messages:
-            # Roughly 4 characters per token
-            estimated_input_tokens += len(msg.get("content", "")) // 4
+        model_to_use = model if model else self.model
         
-        if system:
-            estimated_input_tokens += len(system) // 4
+        if use_token_api and self.client:
+            # Use the accurate token counting API
+            try:
+                token_count = self.count_tokens(
+                    messages=messages,
+                    system=system,
+                    model=model_to_use,
+                    tools=tools
+                )
+                estimated_input_tokens = token_count.get("input_tokens", 0)
+                
+                logger.info(f"Token count from API: {estimated_input_tokens} for user {user_id}")
+                
+                # If there was an error with token counting, fall back to estimation
+                if estimated_input_tokens == 0 and "error" in token_count:
+                    logger.warning(f"Token count API error: {token_count['error']}. Falling back to estimation.")
+                    use_token_api = False
+            except Exception as e:
+                logger.warning(f"Error using token count API: {str(e)}. Falling back to estimation.")
+                use_token_api = False
         
-        # Tools increase token count
-        if has_tools:
-            # Add a buffer for tool definitions
-            estimated_input_tokens += 500
+        if not use_token_api or estimated_input_tokens == 0:
+            # Fallback to estimation method
+            estimated_input_tokens = 0
+            
+            # Estimate message tokens (approximately 4 chars per token)
+            for msg in messages:
+                content = msg.get("content", "")
+                # Handle content as string or as a list of blocks
+                if isinstance(content, str):
+                    estimated_input_tokens += len(content) // 4
+                elif isinstance(content, list):
+                    # Handle content blocks (text, image, etc.)
+                    for block in content:
+                        if isinstance(block, dict):
+                            block_type = block.get("type", "")
+                            if block_type == "text":
+                                estimated_input_tokens += len(block.get("text", "")) // 4
+                            elif block_type == "image":
+                                # Images typically use more tokens
+                                estimated_input_tokens += 1000  # Rough estimate for image
+            
+            # Add system prompt tokens
+            if system:
+                estimated_input_tokens += len(system) // 4
+            
+            # Add tokens for tools (rough estimate)
+            if tools:
+                tool_json = json.dumps(tools)
+                estimated_input_tokens += len(tool_json) // 4
+                # Add buffer for tool processing
+                estimated_input_tokens += 200  # Additional overhead
+            
+            logger.info(f"Estimated token count: {estimated_input_tokens} for user {user_id}")
         
         # Estimate output tokens (typical response might be 1/4 to 1/2 of input)
-        estimated_output_tokens = min(estimated_input_tokens // 2, self.max_tokens)
+        # For tools, use a smaller ratio since tool outputs are often more concise
+        if tools:
+            estimated_output_tokens = min(estimated_input_tokens // 3, self.max_tokens)
+        else:
+            estimated_output_tokens = min(estimated_input_tokens // 2, self.max_tokens)
         
         # Check if user has sufficient credits
         return await self.usage_tracker.check_credits(
             user_id=user_id,
             estimated_input_tokens=estimated_input_tokens,
             estimated_output_tokens=estimated_output_tokens,
-            model=model if model else self.model
+            model=model_to_use
         )
     
     async def generate_response(self, messages: List[Dict[str, str]], system: Optional[str] = None, 
                           model: Optional[str] = None,
                           log_metadata: Optional[Dict[str, Any]] = None,
                           response_type: Optional[str] = None,
-                          check_credits: bool = True) -> str:
+                          check_credits: bool = True,
+                          use_token_api_for_estimation: bool = True) -> str:
         """Generate a response from Claude given a conversation history.
         
         Args:
@@ -186,7 +286,7 @@ class AnthropicClient():
         
         # Check credits before making the call if requested
         if check_credits and self.usage_tracker and "user_id" in metadata and metadata["user_id"]:
-            credit_check = await self._check_sufficient_credits(metadata["user_id"], messages, system, model_to_use)
+            credit_check = await self._check_sufficient_credits(metadata["user_id"], messages, system, model_to_use, use_token_api=use_token_api_for_estimation)
             logger.info(f"Credit check result: {credit_check}")
             if not credit_check["has_sufficient_credits"]:
                 remaining_credits = credit_check.get("remaining_credits", 0)
@@ -231,7 +331,8 @@ class AnthropicClient():
         model: Optional[str] = None,
         log_metadata: Optional[Dict[str, Any]] = None,
         response_type: str = "stream_response",
-        check_credits: bool = True
+        check_credits: bool = True,
+        use_token_api_for_estimation: bool = True
     ) -> Generator[str, None, None]: # type: ignore
         """Stream a response from Claude given a conversation history.
         
@@ -278,7 +379,7 @@ class AnthropicClient():
         
         # Check credits before making the call if requested
         if check_credits and self.usage_tracker and "user_id" in metadata and metadata["user_id"]:
-            credit_check = await self._check_sufficient_credits(metadata["user_id"], messages, system, model_to_use)
+            credit_check = await self._check_sufficient_credits(metadata["user_id"], messages, system, model_to_use, use_token_api=use_token_api_for_estimation)
             if not credit_check["has_sufficient_credits"]:
                 error_msg = f"Insufficient credits. You have {credit_check['remaining_credits']} credits remaining, but this operation requires approximately {credit_check['estimated_cost']} credits."
                 yield error_msg
@@ -361,7 +462,8 @@ class AnthropicClient():
                               messages: List[Dict[str, str]], model: Optional[str] = None,
                               log_metadata: Optional[Dict[str, Any]] = None,
                               response_type: Optional[str] = "tool_use_response",
-                              check_credits: bool = True) -> Dict[str, Any]:
+                              check_credits: bool = True,
+                              use_token_api_for_estimation: bool = True) -> Dict[str, Any]:
         """Process a response from the Anthropic API that may contain tool use.
         
         This method handles the asynchronous nature of tool use in the Anthropic API.
@@ -389,7 +491,8 @@ class AnthropicClient():
                 messages, 
                 system_prompt, 
                 model_to_use, 
-                has_tools=True
+                tools,
+                use_token_api=use_token_api_for_estimation
             )
             if not credit_check["has_sufficient_credits"]:
                 return {

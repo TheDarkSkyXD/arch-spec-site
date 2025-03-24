@@ -67,7 +67,8 @@ async def enhance_readme(
                 "additional_user_instruction": request.additional_user_instruction
             },
             response_type="enhance_readme",
-            check_credits=True
+            check_credits=True,
+            use_token_api_for_estimation=True
         )
         
         # Handle potential credit errors

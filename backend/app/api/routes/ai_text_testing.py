@@ -138,7 +138,8 @@ async def generate_test_cases(
                 "additional_user_instruction": request.additional_user_instruction
             },
             response_type="generate_test_cases",
-            check_credits=True
+            check_credits=True,
+            use_token_api_for_estimation=True
         )
         
         # Handle potential credit errors

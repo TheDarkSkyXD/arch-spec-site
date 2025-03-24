@@ -78,7 +78,8 @@ async def enhance_business_goals(
                 "additional_user_instruction": request.additional_user_instruction
             },
             response_type=operation_type,
-            check_credits=True
+            check_credits=True,
+            use_token_api_for_estimation=True
         )
         
         # Handle potential credit errors

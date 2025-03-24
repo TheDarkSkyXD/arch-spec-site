@@ -65,7 +65,8 @@ async def enhance_requirements(
                 "additional_user_instruction": request.additional_user_instruction
             },
             response_type="enhance_requirements",
-            check_credits=True
+            check_credits=True,
+            use_token_api_for_estimation=True
         )
         
         # Handle potential credit errors
