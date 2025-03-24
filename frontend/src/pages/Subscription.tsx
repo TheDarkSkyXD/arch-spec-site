@@ -442,6 +442,34 @@ const SubscriptionPage = () => {
         : "bg-white text-primary-600 border border-primary-600 hover:bg-gray-50"
     } py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500`;
 
+    // Define common benefits for the premium plan based on SubscriptionPlan.tsx
+    const commonBenefits = [
+      {
+        title: "Generate project architecture",
+        description: "Create comprehensive project structure",
+      },
+      {
+        title: "AI-powered enhancements",
+        description: "Generate descriptions, features, and requirements with AI",
+      },
+      {
+        title: "Advanced tech stack recommendations",
+        description: "Get customized technology recommendations",
+      },
+      {
+        title: "300 AI credits per month",
+        description: "Credits reset on your billing renewal date each month",
+      },
+      {
+        title: "Priority support",
+        description: "Get faster responses to your questions",
+      },
+      {
+        title: "Unlimited projects",
+        description: "Create as many projects as you need",
+      },
+    ];
+
     return (
       <div key={plan.id} className={cardClassName}>
         <div className="p-6 flex-grow">
@@ -463,8 +491,36 @@ const SubscriptionPage = () => {
             </p>
           )}
           <ul className="mt-6 space-y-4">
-            {plan.features.map((feature, index) => (
+            {/* Plan features/benefits */}
+            {commonBenefits.map((benefit, index) => (
               <li key={index} className="flex items-start">
+                <div className="flex-shrink-0">
+                  <svg
+                    className="h-5 w-5 text-green-500"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+                <div className="ml-3 text-sm">
+                  <p className="font-medium text-gray-700 dark:text-gray-300">
+                    {benefit.title}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                    {benefit.description}
+                  </p>
+                </div>
+              </li>
+            ))}
+            {/* Original plan features */}
+            {plan.features.map((feature, index) => (
+              <li key={`feature-${index}`} className="flex items-start">
                 <div className="flex-shrink-0">
                   <svg
                     className="h-5 w-5 text-green-500"
@@ -517,8 +573,10 @@ const SubscriptionPage = () => {
     }
 
     return (
-      <div className="mt-12 grid gap-8 lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1">
-        {plans.map(renderPlanCard)}
+      <div className="mt-12 max-w-3xl mx-auto">
+        <div className="grid grid-cols-1 gap-8">
+          {plans.map(renderPlanCard)}
+        </div>
       </div>
     );
   };
