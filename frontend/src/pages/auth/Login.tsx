@@ -225,7 +225,7 @@ const Login = () => {
             </div>
           </form>
 
-          <div className="mt-6">
+          {/* <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-slate-300" />
@@ -289,7 +289,7 @@ const Login = () => {
                 </svg>
               </button>
             </div>
-          </div>
+          </div> */}
 
           {/* Development buttons removed */}
         </div>
