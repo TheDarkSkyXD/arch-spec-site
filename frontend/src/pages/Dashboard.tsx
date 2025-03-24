@@ -53,7 +53,7 @@ const Dashboard = () => {
             <div className="flex flex-col sm:flex-row gap-3">
               <Button
                 onClick={() => navigate("/new-project")}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 whitespace-nowrap"
               >
                 <PlusCircle size={18} />
                 <span>New Project</span>
@@ -61,7 +61,7 @@ const Dashboard = () => {
               <Button
                 onClick={() => navigate("/templates")}
                 variant="outline"
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 whitespace-nowrap"
               >
                 <Package size={18} />
                 <span>Browse Templates</span>
@@ -306,7 +306,8 @@ const Dashboard = () => {
                 {projects.slice(0, 3).map((project) => (
                   <Card
                     key={project.id}
-                    className="overflow-hidden hover:shadow-md transition-shadow duration-200 p-4"
+                    className="overflow-hidden hover:shadow-md transition-shadow duration-200 p-4 cursor-pointer"
+                    onClick={() => navigate(`/projects/${project.id}`)}
                   >
                     <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-1">
                       {project.name}
@@ -317,7 +318,9 @@ const Dashboard = () => {
                     <div className="flex justify-between items-center text-xs text-slate-500 dark:text-slate-400 pt-3 border-t border-slate-100 dark:border-slate-800">
                       <span>
                         Updated{" "}
-                        {project.updated_at ? new Date(project.updated_at).toLocaleDateString() : 'N/A'}
+                        {project.updated_at
+                          ? new Date(project.updated_at).toLocaleDateString()
+                          : "N/A"}
                       </span>
                       <Button
                         onClick={() => navigate(`/projects/${project.id}`)}

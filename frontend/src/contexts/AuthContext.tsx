@@ -57,7 +57,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   // Load user profile from backend
   const loadUserProfile = async (user: User) => {
     try {
-      const profile = await userApi.getCurrentUser();
+      const profile = await userApi.getCurrentUserProfile();
       return { ...user, profile };
     } catch (error) {
       console.error("Error loading user profile:", error);

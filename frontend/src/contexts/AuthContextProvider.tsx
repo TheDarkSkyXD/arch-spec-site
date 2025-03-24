@@ -29,7 +29,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   // Load user profile from backend
   const loadUserProfile = async (user: User) => {
     try {
-      const profile = await userApi.getCurrentUser();
+      const profile = await userApi.getCurrentUserProfile();
       return { ...user, profile };
     } catch (error) {
       logMessage(
@@ -97,7 +97,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
       // Load user profile immediately after sign in
       try {
-        const profile = await userApi.getCurrentUser();
+        const profile = await userApi.getCurrentUserProfile();
         setCurrentUser({ ...user, profile });
       } catch (error) {
         logMessage(
@@ -132,7 +132,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
       // Load user profile immediately after sign in
       try {
-        const profile = await userApi.getCurrentUser();
+        const profile = await userApi.getCurrentUserProfile();
         setCurrentUser({ ...user, profile });
       } catch (error) {
         logMessage(
@@ -167,7 +167,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
       // Load user profile immediately after sign up
       try {
-        const profile = await userApi.getCurrentUser();
+        const profile = await userApi.getCurrentUserProfile();
         setCurrentUser({ ...user, profile });
       } catch (error) {
         logMessage(

@@ -8,6 +8,7 @@ import {
   Tag,
   RefreshCw,
   Lock,
+  Edit,
 } from "lucide-react";
 import { requirementsService } from "../../services/requirementsService";
 import { projectsService } from "../../services/projectsService";
@@ -18,7 +19,9 @@ import { Requirements } from "../../types/templates";
 import Button from "../ui/Button";
 import Input from "../ui/Input";
 import Card from "../ui/Card";
-import { PremiumFeatureBadge } from "../ui/index";
+import { PremiumFeatureBadge, ProcessingOverlay } from "../ui/index";
+import AIInstructionsModal from "../ui/AIInstructionsModal";
+import { useUserProfile } from "../../hooks/useUserProfile";
 
 interface RequirementsFormProps {
   initialData?: Partial<Requirements>;
@@ -33,6 +36,7 @@ export default function RequirementsForm({
 }: RequirementsFormProps) {
   const { showToast } = useToast();
   const { hasAIFeatures } = useSubscription();
+  const { aiCreditsRemaining } = useUserProfile();
   const [functionalReqs, setFunctionalReqs] = useState<string[]>(
     initialData?.functional || []
   );
@@ -41,12 +45,17 @@ export default function RequirementsForm({
   );
   const [newFunctionalReq, setNewFunctionalReq] = useState("");
   const [newNonFunctionalReq, setNewNonFunctionalReq] = useState("");
+  // Add state for inline editing
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [editingType, setEditingType] = useState<
+    "functional" | "non-functional" | null
+  >(null);
+  const [editingValue, setEditingValue] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   // Add state for form-level error and success messages
   const [error, setError] = useState<string>("");
-  const [success, setSuccess] = useState<string>("");
   // Add state for AI enhancement
   const [isEnhancing, setIsEnhancing] = useState<boolean>(false);
   const [projectDescription, setProjectDescription] = useState<string>("");
@@ -56,6 +65,10 @@ export default function RequirementsForm({
   // Add a new state for the second button loading state
   const [isAddingRequirements, setIsAddingRequirements] =
     useState<boolean>(false);
+
+  // Add state for AI instructions modals
+  const [isEnhanceModalOpen, setIsEnhanceModalOpen] = useState<boolean>(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
 
   // Effect to update local state when initial data changes
   useEffect(() => {
@@ -89,7 +102,7 @@ export default function RequirementsForm({
     fetchRequirements();
   }, [projectId, initialData]);
 
-  // New function to fetch project description and business goals for AI enhancement
+  // New function to fetch project info for AI enhancement
   const fetchProjectInfo = async () => {
     if (!projectId) return;
 
@@ -180,14 +193,24 @@ export default function RequirementsForm({
     return req;
   };
 
-  // Enhanced function to enhance requirements using AI with subscription check
-  const enhanceRequirements = async () => {
+  // Function to open the enhance requirements modal
+  const openEnhanceModal = () => {
     if (!projectId) {
       showToast({
         title: "Error",
         description:
           "Project must be saved before requirements can be enhanced",
         type: "error",
+      });
+      return;
+    }
+
+    // Check if user has remaining AI credits
+    if (aiCreditsRemaining <= 0) {
+      showToast({
+        title: "Insufficient AI Credits",
+        description: "You've used all your AI credits for this billing period",
+        type: "warning",
       });
       return;
     }
@@ -225,12 +248,66 @@ export default function RequirementsForm({
       return;
     }
 
+    setIsEnhanceModalOpen(true);
+  };
+
+  // Function to open the add requirements modal
+  const openAddModal = () => {
+    if (!projectId) {
+      showToast({
+        title: "Error",
+        description:
+          "Project must be saved before requirements can be enhanced",
+        type: "error",
+      });
+      return;
+    }
+
+    // Check if user has remaining AI credits
+    if (aiCreditsRemaining <= 0) {
+      showToast({
+        title: "Insufficient AI Credits",
+        description: "You've used all your AI credits for this billing period",
+        type: "warning",
+      });
+      return;
+    }
+
+    // Check if user has access to AI features
+    if (!hasAIFeatures) {
+      showToast({
+        title: "Premium Feature",
+        description:
+          "AI-generated requirements are only available on Premium and Open Source plans. Please upgrade to use this feature.",
+        type: "warning",
+      });
+      return;
+    }
+
+    if (!projectDescription) {
+      showToast({
+        title: "Warning",
+        description:
+          "Project description is missing. Requirements may not be properly enhanced.",
+        type: "warning",
+      });
+    }
+
+    setIsAddModalOpen(true);
+  };
+
+  // Enhanced function to enhance requirements using AI with subscription check
+  const enhanceRequirements = async (additionalInstructions?: string) => {
+    // Combine functional and non-functional requirements
+    const allRequirements = [...functionalReqs, ...nonFunctionalReqs];
+
     setIsEnhancing(true);
     try {
       const enhancedRequirements = await aiService.enhanceRequirements(
         projectDescription,
         businessGoals,
-        allRequirements
+        allRequirements,
+        additionalInstructions
       );
 
       if (enhancedRequirements && enhancedRequirements.length > 0) {
@@ -309,37 +386,7 @@ export default function RequirementsForm({
   };
 
   // Enhanced function to add AI-generated requirements with subscription check
-  const addAIRequirements = async () => {
-    if (!projectId) {
-      showToast({
-        title: "Error",
-        description:
-          "Project must be saved before requirements can be enhanced",
-        type: "error",
-      });
-      return;
-    }
-
-    // Check if user has access to AI features
-    if (!hasAIFeatures) {
-      showToast({
-        title: "Premium Feature",
-        description:
-          "AI-generated requirements are only available on Premium and Open Source plans. Please upgrade to use this feature.",
-        type: "warning",
-      });
-      return;
-    }
-
-    if (!projectDescription) {
-      showToast({
-        title: "Warning",
-        description:
-          "Project description is missing. Requirements may not be properly enhanced.",
-        type: "warning",
-      });
-    }
-
+  const addAIRequirements = async (additionalInstructions?: string) => {
     // Combine functional and non-functional requirements to provide context to the AI
     const allRequirements = [...functionalReqs, ...nonFunctionalReqs];
 
@@ -348,7 +395,8 @@ export default function RequirementsForm({
       const enhancedRequirements = await aiService.enhanceRequirements(
         projectDescription,
         businessGoals,
-        allRequirements
+        allRequirements,
+        additionalInstructions
       );
 
       if (enhancedRequirements && enhancedRequirements.length > 0) {
@@ -460,7 +508,6 @@ export default function RequirementsForm({
     setErrors(newErrors);
     // Clear previous form-level messages
     setError("");
-    setSuccess("");
 
     if (Object.keys(newErrors).length === 0) {
       if (!projectId) {
@@ -488,14 +535,11 @@ export default function RequirementsForm({
         );
 
         if (result) {
-          const successMessage = "Requirements saved successfully";
           showToast({
             title: "Success",
-            description: successMessage,
+            description: "Requirements saved successfully",
             type: "success",
           });
-          setSuccess(successMessage);
-          setTimeout(() => setSuccess(""), 3000);
 
           if (onSuccess) {
             onSuccess(result);
@@ -526,6 +570,60 @@ export default function RequirementsForm({
     }
   };
 
+  // Helper function to check if any AI operation is in progress
+  const isAnyEnhancementInProgress = () => {
+    return isEnhancing || isAddingRequirements;
+  };
+
+  // Helper to get the appropriate message for the overlay
+  const getEnhancementMessage = () => {
+    if (isEnhancing) {
+      return "AI is enhancing your requirements. Please wait...";
+    }
+    if (isAddingRequirements) {
+      return "AI is generating new requirements for your project. Please wait...";
+    }
+    return "AI enhancement in progress...";
+  };
+
+  const handleStartEdit = (
+    index: number,
+    type: "functional" | "non-functional",
+    value: string
+  ) => {
+    setEditingIndex(index);
+    setEditingType(type);
+    setEditingValue(value);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingIndex(null);
+    setEditingType(null);
+    setEditingValue("");
+  };
+
+  const handleSaveEdit = () => {
+    if (!editingValue.trim() || editingIndex === null || !editingType) return;
+
+    if (editingType === "functional") {
+      const newReqs = [...functionalReqs];
+      newReqs[editingIndex] = editingValue.trim();
+      setFunctionalReqs(newReqs);
+    } else {
+      const newReqs = [...nonFunctionalReqs];
+      newReqs[editingIndex] = editingValue.trim();
+      setNonFunctionalReqs(newReqs);
+    }
+
+    showToast({
+      title: "Success",
+      description: "Requirement updated successfully",
+      type: "success",
+    });
+
+    handleCancelEdit();
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -538,16 +636,41 @@ export default function RequirementsForm({
   }
 
   return (
-    <form id="requirements-form" onSubmit={handleSubmit} className="space-y-8">
-      {/* Error and Success Messages */}
+    <form
+      id="requirements-form"
+      onSubmit={handleSubmit}
+      className="space-y-8 relative"
+    >
+      {/* Processing Overlay */}
+      <ProcessingOverlay
+        isVisible={isAnyEnhancementInProgress()}
+        message={getEnhancementMessage()}
+        opacity={0.6}
+      />
+
+      {/* AI Instructions Modals */}
+      <AIInstructionsModal
+        isOpen={isEnhanceModalOpen}
+        onClose={() => setIsEnhanceModalOpen(false)}
+        onConfirm={(instructions) => enhanceRequirements(instructions)}
+        title="Enhance All Requirements"
+        description="The AI will replace your current requirements with enhanced versions that are more specific, measurable, and comprehensive."
+        confirmText="Replace Requirements"
+      />
+
+      <AIInstructionsModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onConfirm={(instructions) => addAIRequirements(instructions)}
+        title="Generate Additional Requirements"
+        description="The AI will generate new requirements to complement your existing ones based on your project description and goals."
+        confirmText="Add Requirements"
+      />
+
+      {/* Error Message */}
       {error && (
         <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-md mb-4">
           {error}
-        </div>
-      )}
-      {success && (
-        <div className="bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 p-3 rounded-md mb-4">
-          {success}
         </div>
       )}
 
@@ -584,7 +707,7 @@ export default function RequirementsForm({
           {!hasAIFeatures && <PremiumFeatureBadge />}
           <Button
             type="button"
-            onClick={addAIRequirements}
+            onClick={openAddModal}
             disabled={
               isAddingRequirements ||
               isEnhancing ||
@@ -594,7 +717,7 @@ export default function RequirementsForm({
             variant={hasAIFeatures ? "outline" : "ghost"}
             className={`flex items-center gap-2 relative ${
               !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            } ${isAddingRequirements ? "relative z-[60]" : ""}`}
             title={
               hasAIFeatures
                 ? "Generate new requirements to complement existing ones"
@@ -619,17 +742,18 @@ export default function RequirementsForm({
           </Button>
           <Button
             type="button"
-            onClick={enhanceRequirements}
+            onClick={openEnhanceModal}
             disabled={
               isEnhancing ||
               isAddingRequirements ||
               !projectId ||
-              !hasAIFeatures
+              !hasAIFeatures ||
+              (functionalReqs.length === 0 && nonFunctionalReqs.length === 0)
             }
             variant={hasAIFeatures ? "outline" : "ghost"}
             className={`flex items-center gap-2 relative ${
               !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            } ${isEnhancing ? "relative z-[60]" : ""}`}
             title={
               hasAIFeatures
                 ? "Replace all requirements with enhanced versions"
@@ -685,18 +809,65 @@ export default function RequirementsForm({
                 key={index}
                 className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
               >
-                <p className="dark:text-slate-300">
-                  {stripCategoryPrefix(req)}
-                </p>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => removeFunctionalRequirement(index)}
-                  className="text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400"
-                >
-                  <Trash2 size={18} />
-                </Button>
+                {editingIndex === index && editingType === "functional" ? (
+                  <div className="flex gap-2 w-full">
+                    <Input
+                      type="text"
+                      value={editingValue}
+                      onChange={(e) => setEditingValue(e.target.value)}
+                      className="flex-1"
+                      autoFocus
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handleSaveEdit();
+                        if (e.key === "Escape") handleCancelEdit();
+                      }}
+                    />
+                    <Button
+                      type="button"
+                      onClick={handleSaveEdit}
+                      variant="default"
+                      size="sm"
+                    >
+                      Save
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={handleCancelEdit}
+                      variant="outline"
+                      size="sm"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <p className="dark:text-slate-300">
+                      {stripCategoryPrefix(req)}
+                    </p>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() =>
+                          handleStartEdit(index, "functional", req)
+                        }
+                        className="text-slate-400 dark:text-slate-500 hover:text-blue-500 dark:hover:text-blue-400"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeFunctionalRequirement(index)}
+                        className="text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </>
+                )}
               </Card>
             )
           )}
@@ -746,18 +917,65 @@ export default function RequirementsForm({
                 key={index}
                 className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
               >
-                <p className="dark:text-slate-300">
-                  {stripCategoryPrefix(req)}
-                </p>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => removeNonFunctionalRequirement(index)}
-                  className="text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400"
-                >
-                  <Trash2 size={18} />
-                </Button>
+                {editingIndex === index && editingType === "non-functional" ? (
+                  <div className="flex gap-2 w-full">
+                    <Input
+                      type="text"
+                      value={editingValue}
+                      onChange={(e) => setEditingValue(e.target.value)}
+                      className="flex-1"
+                      autoFocus
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handleSaveEdit();
+                        if (e.key === "Escape") handleCancelEdit();
+                      }}
+                    />
+                    <Button
+                      type="button"
+                      onClick={handleSaveEdit}
+                      variant="default"
+                      size="sm"
+                    >
+                      Save
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={handleCancelEdit}
+                      variant="outline"
+                      size="sm"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <p className="dark:text-slate-300">
+                      {stripCategoryPrefix(req)}
+                    </p>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() =>
+                          handleStartEdit(index, "non-functional", req)
+                        }
+                        className="text-slate-400 dark:text-slate-500 hover:text-blue-500 dark:hover:text-blue-400"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeNonFunctionalRequirement(index)}
+                        className="text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </>
+                )}
               </Card>
             )
           )}

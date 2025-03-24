@@ -16,7 +16,9 @@ from app.schemas.ai_text import (
 from app.services.ai_service import AnthropicClient, INTELLIGENT_MODEL
 from app.core.firebase_auth import get_current_user
 from app.api.routes.ai_text_utils import extract_data_from_response
-from app.utils.llm_logging import log_llm_response
+from app.utils.llm_logging import DefaultLLMLogger
+from app.db.base import db
+from app.services.db_usage_tracker import DatabaseUsageTracker
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/ai-text", tags=["AI Text"])
@@ -34,8 +36,12 @@ async def enhance_features(
     It uses Anthropic's tool use feature to ensure a structured response.
     """
     try:
-        # Initialize the AI client
-        client = AnthropicClient()
+        # Create the service objects
+        llm_logger = DefaultLLMLogger()
+        usage_tracker = DatabaseUsageTracker(db.get_db())
+        
+        # Initialize the AI client with the logger and usage tracker
+        client = AnthropicClient(llm_logger, usage_tracker)
         
         # Create the system message
         system_message = (
@@ -52,31 +58,43 @@ async def enhance_features(
         if request.user_features and len(request.user_features) > 0:
             formatted_features = json.dumps(request.user_features, indent=2)
         
-        user_prompt = get_features_user_prompt(request.project_description, formatted_goals, formatted_requirements, formatted_features)
+        user_prompt = get_features_user_prompt(
+            request.project_description, 
+            formatted_goals, 
+            formatted_requirements, 
+            formatted_features,
+            request.additional_user_instruction
+        )
         
         # Generate the tool use response
         messages = [{"role": "user", "content": user_prompt}]
         tools = [print_features_input_schema()]
-        response = client.get_tool_use_response(system_message, tools, messages, model=INTELLIGENT_MODEL)
-        
-        # Log the LLM response
-        log_llm_response(
-            project_id=request.project_id if hasattr(request, "project_id") else "unknown",
-            response_type="enhance_features",
-            response=json.dumps(response),  # Convert response object to string for logging
-            parsed_data=response,  # Store the structured response directly
-            metadata={
-                "user_id": current_user.get("uid") if current_user else None,
-                "model": INTELLIGENT_MODEL,
-                "system_message": system_message,
-                "user_message": user_prompt,
-                "tools": tools,
+        response = await client.get_tool_use_response(system_message, tools, messages, model=INTELLIGENT_MODEL,
+            log_metadata={
+                "user_id": current_user.get("firebase_uid") if current_user else None,
+                "project_id": request.project_id if hasattr(request, "project_id") else "unknown",
                 "project_description": request.project_description,
                 "business_goals": request.business_goals,
                 "requirements": request.requirements,
-                "user_features": request.user_features
-            }
+                "user_features": request.user_features,
+                "additional_user_instruction": request.additional_user_instruction
+            },
+            response_type="enhance_features",
+            check_credits=True,
+            use_token_api_for_estimation=True
         )
+        
+        # Handle potential credit errors - check the response content if it's a dict
+        if isinstance(response, dict) and isinstance(response.get('content'), str) and response['content'].startswith("Insufficient credits"):
+            raise HTTPException(
+                status_code=402,
+                detail=response['content']
+            )
+        elif isinstance(response, str) and response.startswith("Insufficient credits"):
+            raise HTTPException(
+                status_code=402,
+                detail=response
+            )
         
         if "error" in response:
             logger.error(f"Error in AI tool use: {response['error']}")

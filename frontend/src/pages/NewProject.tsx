@@ -6,15 +6,43 @@ import FeaturesForm from "../components/forms/FeaturesForm";
 import PagesForm from "../components/forms/PagesForm";
 import ApiEndpointsForm from "../components/forms/ApiEndpointsForm";
 import DataModelForm from "../components/forms/DataModelForm";
+import TestCasesForm from "../components/forms/TestCasesForm";
+import ImplementationPromptsForm from "../components/forms/ImplementationPromptsForm";
+import UIDesignForm from "../components/forms/UIDesignForm";
 import TemplateSelectionStep from "../components/project/TemplateSelectionStep";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, ChevronDown, ChevronUp } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useProjectTemplateSection } from "../hooks/useProjectTemplateSection";
+import { useSubscription } from "../contexts/SubscriptionContext";
+import { userApi } from "../api/userApi";
+import { useToast } from "../contexts/ToastContext";
+
+// Import services for saving template data
+import { requirementsService } from "../services/requirementsService";
+import { techStackService } from "../services/techStackService";
+import { featuresService } from "../services/featuresService";
+import { pagesService } from "../services/pagesService";
+import { dataModelService } from "../services/dataModelService";
+import { apiEndpointsService } from "../services/apiEndpointsService";
+import { testCasesService } from "../services/testCasesService";
+import { uiDesignService } from "../services/uiDesignService";
+import { implementationPromptsService } from "../services/implementationPromptsService";
 
 // Import shadcn UI components
 import Button from "../components/ui/Button";
 import Card from "../components/ui/Card";
+
+// Import template types
+import { 
+  FrameworkBackend, 
+  BaaSBackend, 
+  ServerlessBackend, 
+  SQLDatabase
+} from "../types/templates";
+
+// Import tech stack form data type
+import { TechStackFormData } from "../components/forms/tech-stack/techStackSchema";
 
 // Define section IDs for consistency
 enum SectionId {
@@ -26,11 +54,17 @@ enum SectionId {
   PAGES = "pages",
   DATA_MODEL = "dataModel",
   API_ENDPOINTS = "apiEndpoints",
+  TEST_CASES = "testCases",
+  IMPLEMENTATION_PROMPTS = "implementationPrompts",
+  UI_DESIGN = "uiDesign",
 }
 
 const NewProject = () => {
   const navigate = useNavigate();
   const [projectId, setProjectId] = useState<string | undefined>(undefined);
+  const { refreshSubscriptionData } = useSubscription();
+  const { showToast } = useToast();
+  const [isSavingTemplateData, setIsSavingTemplateData] = useState(false);
 
   // State to track expanded sections
   const [expandedSections, setExpandedSections] = useState<
@@ -44,6 +78,9 @@ const NewProject = () => {
     [SectionId.PAGES]: false,
     [SectionId.DATA_MODEL]: false,
     [SectionId.API_ENDPOINTS]: false,
+    [SectionId.TEST_CASES]: false,
+    [SectionId.IMPLEMENTATION_PROMPTS]: false,
+    [SectionId.UI_DESIGN]: false,
   });
 
   // Function to toggle section expansion
@@ -61,6 +98,175 @@ const NewProject = () => {
     handleTemplateSelect,
     handleBlankProjectSelect,
   } = useProjectTemplateSection();
+
+  // Load subscription data when component mounts
+  useEffect(() => {
+    const loadUserProfile = async () => {
+      await userApi.getCurrentUserProfile();
+      refreshSubscriptionData();
+    };
+    loadUserProfile();
+  }, [refreshSubscriptionData]);
+
+  // Function to save all template data to a project
+  const saveAllTemplateData = async (projectId: string) => {
+    if (!selectedTemplate || !projectId) return;
+    
+    try {
+      setIsSavingTemplateData(true);
+      
+      // Create an array of promises to save all specs in parallel
+      const savePromises = [];
+      
+      // Save requirements if they exist in template
+      if (selectedTemplate.requirements) {
+        savePromises.push(
+          requirementsService.saveRequirements(projectId, {
+            functional: selectedTemplate.requirements.functional || [],
+            non_functional: selectedTemplate.requirements.non_functional || []
+          })
+        );
+      }
+      
+      // Save tech stack if it exists in template
+      if (selectedTemplate.techStack) {
+        // Create a tech stack object with proper type definition
+        const convertedTechStack: TechStackFormData = {
+          frontend: selectedTemplate.techStack.frontend?.framework || '',
+          frontend_language: selectedTemplate.techStack.frontend?.language || '',
+          backend_type: selectedTemplate.techStack.backend?.type || '',
+          ui_library: selectedTemplate.techStack.frontend?.uiLibrary,
+          state_management: selectedTemplate.techStack.frontend?.stateManagement,
+        };
+        
+        // Add backend properties conditionally based on type
+        if (selectedTemplate.techStack.backend?.type === "framework") {
+          // Only framework type has framework and language
+          const frameworkBackend = selectedTemplate.techStack.backend as FrameworkBackend;
+          convertedTechStack.backend_framework = frameworkBackend.framework;
+          convertedTechStack.backend_language = frameworkBackend.language;
+        } else if (selectedTemplate.techStack.backend?.type === "baas" || 
+                   selectedTemplate.techStack.backend?.type === "serverless") {
+          // BaaS and Serverless have service
+          const backendWithService = selectedTemplate.techStack.backend as BaaSBackend | ServerlessBackend;
+          convertedTechStack.backend_service = backendWithService.service;
+          
+          // Only Serverless has language
+          if (selectedTemplate.techStack.backend?.type === "serverless") {
+            const serverlessBackend = selectedTemplate.techStack.backend as ServerlessBackend;
+            convertedTechStack.backend_language = serverlessBackend.language;
+          }
+        }
+        
+        // Database properties - only SQL database has ORM
+        if (selectedTemplate.techStack.database) {
+          convertedTechStack.database_type = selectedTemplate.techStack.database.type;
+          convertedTechStack.database_system = selectedTemplate.techStack.database.system;
+          
+          if (selectedTemplate.techStack.database.type === "sql") {
+            const sqlDatabase = selectedTemplate.techStack.database as SQLDatabase;
+            convertedTechStack.database_orm = sqlDatabase.orm || undefined;
+          }
+        }
+        
+        // Add the rest of the properties
+        if (selectedTemplate.techStack.authentication) {
+          convertedTechStack.auth_provider = selectedTemplate.techStack.authentication.provider;
+        }
+        
+        if (selectedTemplate.techStack.hosting) {
+          convertedTechStack.hosting_frontend = selectedTemplate.techStack.hosting.frontend;
+          convertedTechStack.hosting_backend = selectedTemplate.techStack.hosting.backend;
+          convertedTechStack.hosting_database = selectedTemplate.techStack.hosting.database;
+        }
+        
+        if (selectedTemplate.techStack.storage) {
+          convertedTechStack.storage_type = selectedTemplate.techStack.storage.type;
+          convertedTechStack.storage_service = selectedTemplate.techStack.storage.service;
+        }
+        
+        if (selectedTemplate.techStack.deployment) {
+          convertedTechStack.deployment_ci_cd = selectedTemplate.techStack.deployment.ci_cd || undefined;
+          convertedTechStack.deployment_containerization = selectedTemplate.techStack.deployment.containerization || undefined;
+        }
+        
+        savePromises.push(techStackService.saveTechStack(projectId, convertedTechStack));
+      }
+      
+      // Save features if they exist in template
+      if (selectedTemplate.features) {
+        savePromises.push(featuresService.saveFeatures(projectId, selectedTemplate.features));
+      }
+      
+      // Save pages if they exist in template
+      if (selectedTemplate.pages) {
+        savePromises.push(pagesService.savePages(projectId, selectedTemplate.pages));
+      }
+      
+      // Save data model if it exists in template
+      if (selectedTemplate.dataModel) {
+        savePromises.push(dataModelService.saveDataModel(projectId, selectedTemplate.dataModel));
+      }
+      
+      // Save API endpoints if they exist in template
+      if (selectedTemplate.api) {
+        savePromises.push(apiEndpointsService.saveApiEndpoints(projectId, selectedTemplate.api));
+      }
+      
+      // Save UI design if it exists in template
+      if (selectedTemplate.uiDesign) {
+        savePromises.push(uiDesignService.saveUIDesign(projectId, selectedTemplate.uiDesign));
+      }
+      
+      // Save test cases if they exist in template
+      if (selectedTemplate.testing && selectedTemplate.testing.e2e?.scenarios) {
+        // Convert the string array to the proper GherkinTestCase format
+        const formattedTestCases = (selectedTemplate.testing.e2e.scenarios || []).map(scenario => ({
+          feature: "Generated Feature",
+          title: scenario,
+          description: '',
+          given: [`Given ${scenario}`],
+          when: ['When the feature is used'],
+          then: ['Then the expected outcome is achieved'],
+          scenarios: []
+        }));
+        
+        savePromises.push(testCasesService.saveTestCases(projectId, {
+          testCases: formattedTestCases
+        }));
+      }
+      
+      // Save implementation prompts if needed
+      savePromises.push(implementationPromptsService.saveImplementationPrompts(projectId, {
+        data: {}
+      }));
+      
+      // Execute all save operations in parallel
+      await Promise.all(savePromises);
+      
+      showToast({
+        title: "Success",
+        description: "All template data saved to the project",
+        type: "success"
+      });
+      
+      console.log("All template data saved to project successfully");
+    } catch (error) {
+      console.error("Error saving template data to project:", error);
+      showToast({
+        title: "Warning",
+        description: "Some template data could not be saved to the project",
+        type: "warning"
+      });
+    } finally {
+      setIsSavingTemplateData(false);
+    }
+  };
+
+  useEffect(() => {
+    console.log("Is saving template data:", isSavingTemplateData);
+  }, [isSavingTemplateData]);
+
   useEffect(() => {
     console.log("Selected Template:", selectedTemplate);
   }, [selectedTemplate]);
@@ -166,34 +372,20 @@ const NewProject = () => {
               <div className="p-6">
                 <ProjectBasicsForm
                   onSuccess={(newProjectId) => {
+                    // Check if this is an initial project creation
+                    const isNewProject = projectId === undefined;
+                    
                     // Store the project ID in state
                     setProjectId(newProjectId);
                     console.log(
                       "Project created/updated successfully with ID:",
                       newProjectId
                     );
-                  }}
-                />
-              </div>
-            )}
-          </Card>
-
-          {/* Tech Stack (Optional) */}
-          <Card className="overflow-hidden">
-            <SectionHeader
-              title="Tech Stack"
-              description="Define your project's technology stack"
-              sectionId={SectionId.TECH_STACK}
-              isExpanded={expandedSections[SectionId.TECH_STACK]}
-              disabled={!projectId}
-            />
-            {expandedSections[SectionId.TECH_STACK] && (
-              <div className="p-6">
-                <TechStackForm
-                  initialData={selectedTemplate?.techStack}
-                  projectId={projectId}
-                  onSuccess={() => {
-                    console.log("Tech stack updated");
+                    
+                    // Only save template data on initial project creation
+                    if (isNewProject && selectedTemplate) {
+                      saveAllTemplateData(newProjectId);
+                    }
                   }}
                 />
               </div>
@@ -247,6 +439,50 @@ const NewProject = () => {
                   projectId={projectId}
                   onSuccess={(updatedFeatures) => {
                     console.log("Features updated:", updatedFeatures);
+                  }}
+                />
+              </div>
+            )}
+          </Card>
+
+          {/* UI Design (Optional) */}
+          <Card className="overflow-hidden">
+            <SectionHeader
+              title="UI Design"
+              description="Define your project's visual design system"
+              sectionId={SectionId.UI_DESIGN}
+              isExpanded={expandedSections[SectionId.UI_DESIGN]}
+              disabled={!projectId}
+            />
+            {expandedSections[SectionId.UI_DESIGN] && (
+              <div className="p-6">
+                <UIDesignForm
+                  initialData={selectedTemplate?.uiDesign}
+                  projectId={projectId}
+                  onSuccess={(updatedUIDesign) => {
+                    console.log("UI Design updated:", updatedUIDesign);
+                  }}
+                />
+              </div>
+            )}
+          </Card>
+
+          {/* Tech Stack (Optional) */}
+          <Card className="overflow-hidden">
+            <SectionHeader
+              title="Tech Stack"
+              description="Define your project's technology stack"
+              sectionId={SectionId.TECH_STACK}
+              isExpanded={expandedSections[SectionId.TECH_STACK]}
+              disabled={!projectId}
+            />
+            {expandedSections[SectionId.TECH_STACK] && (
+              <div className="p-6">
+                <TechStackForm
+                  initialData={selectedTemplate?.techStack}
+                  projectId={projectId}
+                  onSuccess={() => {
+                    console.log("Tech stack updated");
                   }}
                 />
               </div>
@@ -328,6 +564,57 @@ const NewProject = () => {
                   projectId={projectId}
                   onSuccess={(updatedApiEndpoints) => {
                     console.log("API Endpoints updated:", updatedApiEndpoints);
+                  }}
+                />
+              </div>
+            )}
+          </Card>
+
+          {/* Test Cases (Optional) */}
+          <Card className="overflow-hidden">
+            <SectionHeader
+              title="Test Cases"
+              description="Define Gherkin-style test cases to document expected behavior"
+              sectionId={SectionId.TEST_CASES}
+              isExpanded={expandedSections[SectionId.TEST_CASES]}
+              disabled={!projectId}
+            />
+            {expandedSections[SectionId.TEST_CASES] && (
+              <div className="p-6">
+                <TestCasesForm
+                  initialData={{
+                    testCases: [],
+                  }}
+                  projectId={projectId}
+                  onSuccess={(updatedTestCases) => {
+                    console.log("Test Cases updated:", updatedTestCases);
+                  }}
+                />
+              </div>
+            )}
+          </Card>
+
+          {/* Implementation Prompts (Optional) */}
+          <Card className="overflow-hidden">
+            <SectionHeader
+              title="Implementation Prompts"
+              description="Define prompts for implementing different aspects of your project"
+              sectionId={SectionId.IMPLEMENTATION_PROMPTS}
+              isExpanded={expandedSections[SectionId.IMPLEMENTATION_PROMPTS]}
+              disabled={!projectId}
+            />
+            {expandedSections[SectionId.IMPLEMENTATION_PROMPTS] && (
+              <div className="p-6">
+                <ImplementationPromptsForm
+                  initialData={{
+                    data: {},
+                  }}
+                  projectId={projectId}
+                  onSuccess={(updatedImplementationPrompts) => {
+                    console.log(
+                      "Implementation Prompts updated:",
+                      updatedImplementationPrompts
+                    );
                   }}
                 />
               </div>

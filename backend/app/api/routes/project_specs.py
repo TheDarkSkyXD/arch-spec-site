@@ -8,6 +8,8 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 from typing import Dict, Any, Type
 import logging
 
+from ...schemas.templates import UIDesign
+
 from ...db.base import db
 from ...schemas.project_specs import (
     TimelineSpec,
@@ -21,6 +23,7 @@ from ...schemas.project_specs import (
     TechStackSpec,
     FeaturesSpec,
     PagesSpec,
+    UIDesignSpec,
     DataModelSpec,
     ApiSpec,
     TestingSpec,
@@ -31,6 +34,7 @@ from ...schemas.project_specs import (
     TechStackSpecUpdate,
     FeaturesSpecUpdate,
     PagesSpecUpdate,
+    UIDesignSpecUpdate,
     DataModelSpecUpdate,
     ApiSpecUpdate,
     TestingSpecUpdate,
@@ -43,7 +47,7 @@ from ...schemas.project_specs import (
 )
 from ...services.project_specs_service import ProjectSpecsService
 from ...schemas.shared_schemas import (
-    ProjectTechStack, Features
+    Features
 )
 from ...core.firebase_auth import get_current_user
 
@@ -348,7 +352,10 @@ def add_spec_routes(
         
         spec = await get_method(project_id, database)
         if spec is None:
-            # Return an empty spec structure instead of 404
+            # For UI design specs, return a default spec
+            if spec_class.__name__ == "UIDesignSpec":
+                spec = spec_class(project_id=project_id, data=UIDesign())
+            # For other specs, return an empty structure
             spec = spec_class(project_id=project_id, data={})
         
         return spec
@@ -379,6 +386,13 @@ add_spec_routes(
     ProjectSpecsService.get_pages_spec,
     ProjectSpecsService.create_or_update_pages_spec,
     "pages"
+)
+
+add_spec_routes(
+    "ui_design", "ui-design", UIDesignSpec, UIDesignSpecUpdate,
+    ProjectSpecsService.get_ui_design_spec,
+    ProjectSpecsService.create_or_update_ui_design_spec,
+    "UI design"
 )
 
 add_spec_routes(

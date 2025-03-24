@@ -63,6 +63,7 @@ def prepare_implementation_prompt(
     integration_points: str = "",
     testing_requirements: str = "",
     deployment_requirements: str = "",
+    additional_user_instruction: str = "",
 ) -> Optional[str]:
     """
     Prepare the implementation prompt for a specific category by filling in the template.
@@ -87,6 +88,7 @@ def prepare_implementation_prompt(
         integration_points: Integration points
         testing_requirements: Testing requirements
         deployment_requirements: Deployment requirements
+        additional_user_instruction: Optional custom instructions from the user
         
     Returns:
         The prepared implementation prompt, or None if the template couldn't be loaded
@@ -123,5 +125,10 @@ def prepare_implementation_prompt(
         placeholder = f"{{{var_name}}}"
         if placeholder in prompt:
             prompt = prompt.replace(placeholder, var_value)
+    
+    # Add the additional user instruction if provided
+    if additional_user_instruction:
+        prompt += f"\n\nAdditional instructions from user:\n{additional_user_instruction}\n\n"
+        prompt += "Note: While considering these additional instructions, still follow the core implementation requirements outlined above. Do not deviate from the primary objective of the implementation."
     
     return prompt 

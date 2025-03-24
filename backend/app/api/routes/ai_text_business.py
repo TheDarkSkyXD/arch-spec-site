@@ -15,7 +15,9 @@ from app.schemas.ai_text import (
 )
 from app.services.ai_service import FAST_MODEL, AnthropicClient
 from app.core.firebase_auth import get_current_user
-from app.utils.llm_logging import log_llm_response
+from app.utils.llm_logging import DefaultLLMLogger
+from app.services.db_usage_tracker import DatabaseUsageTracker
+from app.db.base import db
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/ai-text", tags=["AI Text"])
@@ -33,15 +35,19 @@ async def enhance_business_goals(
     provided, the system will generate appropriate goals based on the project description.
     """
     try:
-        # Initialize the AI client
-        client = AnthropicClient()
+        # Create the service objects
+        llm_logger = DefaultLLMLogger()
+        usage_tracker = DatabaseUsageTracker(db.get_db())
+        
+        # Initialize the AI client with the logger and usage tracker
+        client = AnthropicClient(llm_logger, usage_tracker)
         
         # Create the system message, adjusting based on whether goals were provided
         if request.user_goals and len(request.user_goals) > 0:
-            system_message = business_goals_system_prompt_enhance()
+            system_message = business_goals_system_prompt_enhance(request.additional_user_instruction)
             operation_type = "enhance_business_goals"
         else:
-            system_message = business_goals_system_prompt_create()
+            system_message = business_goals_system_prompt_create(request.additional_user_instruction)
             operation_type = "create_business_goals"
         
         # Create the user message, adjusting based on whether goals were provided
@@ -60,24 +66,28 @@ async def enhance_business_goals(
         
         # Generate the response
         messages = [{"role": "user", "content": user_message}]
-        response = client.generate_response(messages, system_message, FAST_MODEL)
-        
-        # Log the LLM response
-        log_llm_response(
-            project_id=request.project_id if hasattr(request, "project_id") else "unknown",
-            response_type=operation_type,
-            response=response,
-            parsed_data={"enhanced_goals": [line.strip()[1:].strip() for line in response.split("\n") 
-                                          if line.strip().startswith("-") or line.strip().startswith("•")]},
-            metadata={
-                "user_id": current_user.get("uid") if current_user else None,
-                "model": FAST_MODEL,
-                "system_message": system_message,
-                "user_message": user_message,
+        response = await client.generate_response(
+            messages, 
+            system_message, 
+            FAST_MODEL,
+            log_metadata={
+                "user_id": current_user.get("firebase_uid") if current_user else None,
+                "project_id": request.project_id if hasattr(request, "project_id") else "unknown",
                 "project_description": request.project_description,
-                "original_goals": request.user_goals if hasattr(request, "user_goals") else None
-            }
+                "original_goals": request.user_goals if hasattr(request, "user_goals") else None,
+                "additional_user_instruction": request.additional_user_instruction
+            },
+            response_type=operation_type,
+            check_credits=True,
+            use_token_api_for_estimation=True
         )
+        
+        # Handle potential credit errors
+        if response.startswith("Insufficient credits"):
+            raise HTTPException(
+                status_code=402,
+                detail=response
+            )
         
         # Parse the bulleted list response into an array of goals
         enhanced_goals = []
@@ -131,15 +141,18 @@ async def enhance_target_users(
     description is empty, it will generate one based on the project description.
     """
     try:
-        # Initialize the AI client
-        client = AnthropicClient()
+        # Create the logger implementation
+        llm_logger = DefaultLLMLogger()
+        
+        # Initialize the AI client with the logger
+        client = AnthropicClient(llm_logger)
         
         # Create the system message
         if request.target_users and len(request.target_users.strip()) > 0:
-            system_message = target_users_system_prompt_enhance()
+            system_message = target_users_system_prompt_enhance(request.additional_user_instruction)
             operation_type = "enhance_target_users"
         else:
-            system_message = target_users_system_prompt_create()
+            system_message = target_users_system_prompt_create(request.additional_user_instruction)
             operation_type = "create_target_users"
         
         # Create the user message
@@ -153,23 +166,32 @@ async def enhance_target_users(
         
         # Generate the response
         messages = [{"role": "user", "content": user_message}]
-        response = client.generate_response(messages, system_message, FAST_MODEL)
-        
-        # Log the LLM response
-        log_llm_response(
-            project_id=request.project_id if hasattr(request, "project_id") else "unknown",
-            response_type=operation_type,
-            response=response,
-            parsed_data={"enhanced_target_users": response.strip()},
-            metadata={
-                "user_id": current_user.get("uid") if current_user else None,
-                "model": FAST_MODEL,
-                "system_message": system_message,
-                "user_message": user_message,
+        response = await client.generate_response(
+            messages, 
+            system_message, 
+            FAST_MODEL,
+            log_metadata={
+                "user_id": current_user.get("firebase_uid") if current_user else None,
+                "project_id": request.project_id if hasattr(request, "project_id") else "unknown",
                 "project_description": request.project_description,
-                "original_target_users": request.target_users if hasattr(request, "target_users") else None
-            }
+                "original_target_users": request.target_users if hasattr(request, "target_users") else None,
+                "additional_user_instruction": request.additional_user_instruction
+            },
+            response_type=operation_type,
+            check_credits=True
         )
+        
+        # Handle potential credit errors - check the response content if it's a dict
+        if isinstance(response, dict) and isinstance(response.get('content'), str) and response['content'].startswith("Insufficient credits"):
+            raise HTTPException(
+                status_code=402,
+                detail=response['content']
+            )
+        elif isinstance(response, str) and response.startswith("Insufficient credits"):
+            raise HTTPException(
+                status_code=402,
+                detail=response
+            )
         
         # Return the enhanced target users description
         return TargetUsersEnhanceResponse(enhanced_target_users=response.strip())

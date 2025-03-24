@@ -1,16 +1,30 @@
-def get_test_cases_user_prompt(formatted_requirements, formatted_features, formatted_test_cases=None):
+def get_test_cases_user_prompt(formatted_requirements, formatted_features, formatted_test_cases=None, additional_user_instruction=None):
     """
     Generate a prompt for creating test cases in Gherkin format
     """
+    # Start with project information
     existing_test_cases = ""
     if formatted_test_cases:
-        existing_test_cases = f"Original test cases (if any): {formatted_test_cases}\n\n"
+        existing_test_cases = f"Original test cases (if any): {formatted_test_cases}\n"
 
-    return (
+    base_prompt = (
         f"Requirements:\n{formatted_requirements}\n\n"
         f"Features:\n{formatted_features}\n\n"
         f"{existing_test_cases}"
-        "Your task:\n"
+    )
+    
+    # Add additional user instruction if provided, with guardrails
+    if additional_user_instruction:
+        base_prompt += (
+            f"\nAdditional instructions from user:\n{additional_user_instruction}\n\n"
+            "Note: While considering these additional instructions, you must still follow the core task "
+            "of creating test cases in Gherkin format as described below. Do not deviate from the primary task format or objective. "
+            "You must use the print_test_cases function as directed in the main task."
+        )
+    
+    # Add the main task instructions after any user-provided instructions
+    base_prompt += (
+        "\nYour task:\n"
         "1. Create comprehensive test cases using Gherkin format (Feature, Scenario, Given, When, Then)\n"
         "2. Each test case should include:\n"
         "   * Feature name\n"
@@ -27,4 +41,6 @@ def get_test_cases_user_prompt(formatted_requirements, formatted_features, forma
         "   * Organizing them into logical features\n"
         "6. If generating from scratch, create test cases that comprehensively verify requirements\n\n"
         "Once you've analyzed the requirements and features, use the print_test_cases function to output the organized test cases."
-    ) 
+    )
+    
+    return base_prompt 

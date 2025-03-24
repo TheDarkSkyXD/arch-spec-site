@@ -25,6 +25,7 @@ import Button from "../ui/Button";
 import Card from "../ui/Card";
 // Import Lucide icons for AI enhancement buttons
 import { Loader2, Sparkles, Lock } from "lucide-react";
+import AIInstructionsModal from "../ui/AIInstructionsModal";
 
 // Import schema
 import {
@@ -46,7 +47,8 @@ import { useToast } from "../../contexts/ToastContext";
 import { projectsService } from "../../services/projectsService";
 import { requirementsService } from "../../services/requirementsService";
 import { useSubscription } from "../../contexts/SubscriptionContext";
-import { PremiumFeatureBadge } from "../ui/index";
+import { PremiumFeatureBadge, ProcessingOverlay } from "../ui/index";
+import { useUserProfile } from "../../hooks/useUserProfile";
 
 interface TechStackFormProps {
   initialData?: ProjectTechStack;
@@ -61,6 +63,7 @@ const TechStackForm = ({
 }: TechStackFormProps) => {
   const { showToast } = useToast();
   const { hasAIFeatures } = useSubscription();
+  const { aiCreditsRemaining } = useUserProfile();
   // State for options
   const [techStackOptions, setTechStackOptions] =
     useState<TechStackData | null>(null);
@@ -68,13 +71,15 @@ const TechStackForm = ({
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   // Add state for error and success messages
   const [error, setError] = useState<string>("");
-  const [success, setSuccess] = useState<string>("");
   const [justification, setJustification] = useState<string>("");
 
   // Add state for AI enhancement
   const [isEnhancing, setIsEnhancing] = useState<boolean>(false);
   const [projectDescription, setProjectDescription] = useState<string>("");
   const [projectRequirements, setProjectRequirements] = useState<string[]>([]);
+
+  // Add state for AI instructions modal
+  const [isAIModalOpen, setIsAIModalOpen] = useState<boolean>(false);
 
   const defaultValues: TechStackFormData = {
     frontend: "",
@@ -339,13 +344,23 @@ const TechStackForm = ({
     }
   };
 
-  // New function to enhance tech stack using AI (replace existing settings)
-  const enhanceTechStack = async () => {
+  // Function to open the AI modal
+  const openAIModal = () => {
     if (!projectId) {
       showToast({
         title: "Error",
         description: "Project must be saved before tech stack can be enhanced",
         type: "error",
+      });
+      return;
+    }
+
+    // Check if user has remaining AI credits
+    if (aiCreditsRemaining <= 0) {
+      showToast({
+        title: "Insufficient AI Credits",
+        description: "You've used all your AI credits for this billing period",
+        type: "warning",
       });
       return;
     }
@@ -379,6 +394,11 @@ const TechStackForm = ({
       });
     }
 
+    setIsAIModalOpen(true);
+  };
+
+  // New function to enhance tech stack using AI (replace existing settings)
+  const enhanceTechStack = async (additionalInstructions?: string) => {
     setIsEnhancing(true);
     setJustification("");
     try {
@@ -391,7 +411,8 @@ const TechStackForm = ({
       const techStackRecommendations = await aiService.enhanceTechStack(
         projectDescription,
         projectRequirements,
-        formValues
+        formValues,
+        additionalInstructions
       );
 
       if (techStackRecommendations) {
@@ -508,10 +529,6 @@ const TechStackForm = ({
           type: "success",
         });
 
-        // Set success message
-        setSuccess("Tech stack enhanced successfully.");
-        setTimeout(() => setSuccess(""), 3000);
-
         // Set justification
         setJustification(justification);
       } else {
@@ -540,6 +557,19 @@ const TechStackForm = ({
     }
   }, [projectId]);
 
+  // Helper function to check if any AI operation is in progress
+  const isAnyEnhancementInProgress = () => {
+    return isEnhancing;
+  };
+
+  // Helper to get the appropriate message for the overlay
+  const getEnhancementMessage = () => {
+    if (isEnhancing) {
+      return "AI is analyzing your project requirements and recommending the optimal tech stack. Please wait...";
+    }
+    return "AI enhancement in progress...";
+  };
+
   if (isLoading || !techStackOptions) {
     return <Card className="p-4">Loading tech stack options...</Card>;
   }
@@ -560,7 +590,6 @@ const TechStackForm = ({
     setIsSubmitting(true);
     // Clear previous messages
     setError("");
-    setSuccess("");
 
     try {
       const result = await techStackService.saveTechStack(projectId, data);
@@ -571,8 +600,6 @@ const TechStackForm = ({
           description: "Tech stack saved successfully",
           type: "success",
         });
-        setSuccess("Tech stack saved successfully");
-        setTimeout(() => setSuccess(""), 3000);
 
         if (onSuccess) {
           onSuccess(result);
@@ -604,17 +631,29 @@ const TechStackForm = ({
     <form
       id="tech-stack-form"
       onSubmit={handleSubmit(onSubmit)}
-      className="space-y-8"
+      className="space-y-8 relative"
     >
-      {/* Error and Success Messages */}
+      {/* Processing Overlay */}
+      <ProcessingOverlay
+        isVisible={isAnyEnhancementInProgress()}
+        message={getEnhancementMessage()}
+        opacity={0.6}
+      />
+
+      {/* AI Instructions Modal */}
+      <AIInstructionsModal
+        isOpen={isAIModalOpen}
+        onClose={() => setIsAIModalOpen(false)}
+        onConfirm={(instructions) => enhanceTechStack(instructions)}
+        title="AI Tech Stack Recommendations"
+        description="The AI will analyze your project description and requirements to recommend the optimal technology stack. You can provide additional context or constraints below."
+        confirmText="Generate Recommendations"
+      />
+
+      {/* Error Message */}
       {error && (
         <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-md mb-4">
           {error}
-        </div>
-      )}
-      {success && (
-        <div className="bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 p-3 rounded-md whitespace-pre-line mb-4">
-          {success}
         </div>
       )}
 
@@ -629,12 +668,12 @@ const TechStackForm = ({
         {!hasAIFeatures && <PremiumFeatureBadge />}
         <Button
           type="button"
-          onClick={enhanceTechStack}
+          onClick={openAIModal}
           disabled={isEnhancing || !projectId || !hasAIFeatures}
           variant={hasAIFeatures ? "outline" : "ghost"}
           className={`flex items-center gap-2 relative ${
             !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
-          }`}
+          } ${isEnhancing ? "relative z-[60]" : ""}`}
           title={
             hasAIFeatures
               ? "Replace tech stack with AI-generated recommendations"

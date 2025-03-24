@@ -1,0 +1,561 @@
+{
+  "id": "react_supabase_web_app",
+  "template": {
+    "name": "React Web App with Supabase",
+    "version": "1.0.0",
+    "description": "A web application template using React for frontend and Supabase for authentication and database",
+    "businessGoals": [],
+    "targetUsers": "",
+    "domain": "",
+    "techStack": {
+      "frontend": {
+        "framework": "React",
+        "language": "TypeScript",
+        "stateManagement": "Context API",
+        "uiLibrary": "Tailwind CSS",
+        "formHandling": "React Hook Form",
+        "routing": "React Router"
+      },
+      "backend": {
+        "type": "baas",
+        "service": "Supabase",
+        "functions": "Edge Functions",
+        "realtime": "Supabase Realtime"
+      },
+      "database": {
+        "type": "sql",
+        "system": "PostgreSQL",
+        "hosting": "Supabase"
+      },
+      "authentication": {
+        "provider": "Supabase Auth",
+        "methods": ["Email/Password", "Google", "GitHub"]
+      },
+      "hosting": {
+        "frontend": "Vercel",
+        "backend": "Supabase",
+        "database": "Supabase"
+      },
+      "storage": {
+        "type": "objectStorage",
+        "service": "Supabase Storage"
+      },
+      "deployment": {
+        "ci_cd": "GitHub Actions"
+      }
+    },
+    "requirements": {
+      "functional": [
+        "User Authentication System: Implement comprehensive authentication flows including registration, login, password reset, and social logins (Google, GitHub) through Supabase Auth. The system should maintain session state and handle token refresh automatically.",
+        "Role-Based Access Control: Provide differentiated access levels for regular users and administrators. Admin users should have access to user management functionalities and system settings, while regular users should only access their own data and profile.",
+        "Data Management Operations: Support complete CRUD operations for application items, with appropriate validation, error handling, and real-time updates. Items should be user-scoped to ensure data privacy.",
+        "User Profile Management: Allow users to view and update their profile information, including personal details, preferences, and account settings. Profile changes should be persisted to the database immediately.",
+        "Admin Dashboard & Analytics: Provide administrators with a dashboard showing key metrics, user statistics, and system health indicators. Include user management tools with the ability to view, edit, and manage user accounts."
+      ],
+      "non_functional": [
+        "Security: Implement proper authentication mechanisms, data encryption, protection against common web vulnerabilities (XSS, CSRF, SQL injection), and secure API access. Follow security best practices for handling user data and credentials.",
+        "Performance: Ensure application responsiveness with page load times under 2 seconds, efficient database queries, and optimized frontend rendering. Implement caching strategies for frequently accessed data.",
+        "Usability & Accessibility: Create a responsive interface that works across desktop and mobile devices. Follow WCAG 2.1 AA standards for accessibility, ensuring the application is usable by people with various disabilities.",
+        "Scalability: Design the application to handle increasing user loads without performance degradation. Implement database indexing strategies and optimize query patterns for large datasets.",
+        "Maintainability: Structure code with clear organization, consistent naming conventions, and comprehensive documentation. Implement testing at unit, integration, and E2E levels to ensure code quality and facilitate future changes."
+      ]
+    },
+    "features": {
+      "coreModules": [
+        {
+          "name": "Authentication",
+          "description": "User registration, login, password reset, profile management",
+          "enabled": true
+        },
+        {
+          "name": "User Management",
+          "description": "User roles, permissions, and account administration",
+          "enabled": true
+        },
+        {
+          "name": "Data Management",
+          "description": "CRUD operations for application data",
+          "enabled": true
+        },
+        {
+          "name": "Notifications",
+          "description": "In-app notifications and email alerts",
+          "enabled": false,
+          "optional": true
+        },
+        {
+          "name": "Reports & Analytics",
+          "description": "Data visualization and reporting capabilities",
+          "enabled": false,
+          "optional": true
+        },
+        {
+          "name": "Payment Processing",
+          "description": "Integration with payment gateways",
+          "enabled": false,
+          "optional": true,
+          "providers": ["Stripe", "PayPal"]
+        }
+      ]
+    },
+    "uiDesign": {
+      "colors": {
+        "primary": "#3b82f6",
+        "secondary": "#6366f1",
+        "accent": "#f59e0b",
+        "background": "#ffffff",
+        "textPrimary": "#1f2937",
+        "textSecondary": "#6b7280",
+        "success": "#10b981",
+        "warning": "#f59e0b",
+        "error": "#ef4444",
+        "info": "#3b82f6",
+        "surface": "#f9fafb",
+        "border": "#e5e7eb"
+      },
+      "typography": {
+        "fontFamily": "Inter, sans-serif",
+        "headingFont": "Inter, sans-serif",
+        "fontSize": "16px",
+        "lineHeight": 1.5,
+        "fontWeight": 400,
+        "headingSizes": {
+          "h1": "2.25rem",
+          "h2": "1.875rem",
+          "h3": "1.5rem",
+          "h4": "1.25rem",
+          "h5": "1.125rem",
+          "h6": "1rem"
+        }
+      },
+      "spacing": {
+        "unit": "4px",
+        "scale": [
+          0, 1, 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24, 32, 40, 48, 64, 80, 96
+        ]
+      },
+      "borderRadius": {
+        "small": "2px",
+        "medium": "4px",
+        "large": "8px",
+        "xl": "12px",
+        "pill": "9999px"
+      },
+      "shadows": {
+        "small": "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+        "medium": "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+        "large": "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+        "xl": "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
+      },
+      "layout": {
+        "containerWidth": "1280px",
+        "responsive": true,
+        "sidebarWidth": "240px",
+        "topbarHeight": "64px",
+        "gridColumns": 12,
+        "gutterWidth": "16px"
+      },
+      "components": {
+        "buttonStyle": "rounded",
+        "inputStyle": "outline",
+        "cardStyle": "shadow",
+        "tableStyle": "bordered",
+        "navStyle": "underline"
+      },
+      "darkMode": {
+        "enabled": true,
+        "colors": {
+          "background": "#111827",
+          "textPrimary": "#f9fafb",
+          "textSecondary": "#9ca3af",
+          "surface": "#1f2937",
+          "border": "#374151"
+        }
+      },
+      "animations": {
+        "transitionDuration": "150ms",
+        "transitionTiming": "ease",
+        "hoverScale": 1.05,
+        "enableAnimations": true
+      }
+    },
+    "pages": {
+      "public": [
+        {
+          "name": "Landing",
+          "path": "/",
+          "components": ["Hero", "Features", "Pricing", "Footer"],
+          "enabled": true
+        },
+        {
+          "name": "Login",
+          "path": "/login",
+          "components": ["LoginForm", "SocialLogin"],
+          "enabled": true
+        },
+        {
+          "name": "Register",
+          "path": "/register",
+          "components": ["RegistrationForm", "SocialLogin"],
+          "enabled": true
+        },
+        {
+          "name": "ForgotPassword",
+          "path": "/forgot-password",
+          "components": ["PasswordResetForm"],
+          "enabled": true
+        }
+      ],
+      "authenticated": [
+        {
+          "name": "Dashboard",
+          "path": "/dashboard",
+          "components": ["Summary", "RecentActivity", "QuickActions"],
+          "enabled": true
+        },
+        {
+          "name": "Profile",
+          "path": "/profile",
+          "components": ["UserInfo", "ProfileForm", "SecuritySettings"],
+          "enabled": true
+        },
+        {
+          "name": "Settings",
+          "path": "/settings",
+          "components": ["AppSettings", "Preferences", "Notifications"],
+          "enabled": true
+        }
+      ],
+      "admin": [
+        {
+          "name": "AdminDashboard",
+          "path": "/admin",
+          "components": ["Stats", "UserManagement", "ContentManagement"],
+          "enabled": true
+        },
+        {
+          "name": "UserManagement",
+          "path": "/admin/users",
+          "components": ["UserTable", "UserDetails", "UserEdit"],
+          "enabled": true
+        },
+        {
+          "name": "SystemSettings",
+          "path": "/admin/settings",
+          "components": ["GlobalSettings", "SecurityControls"],
+          "enabled": true
+        }
+      ]
+    },
+    "dataModel": {
+      "entities": [
+        {
+          "name": "User",
+          "description": "Application user information",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid",
+              "primaryKey": true,
+              "generated": true
+            },
+            {
+              "name": "email",
+              "type": "string",
+              "unique": true,
+              "required": true
+            },
+            {
+              "name": "full_name",
+              "type": "string"
+            },
+            {
+              "name": "avatar_url",
+              "type": "string"
+            },
+            {
+              "name": "role",
+              "type": "string",
+              "enum": ["user", "admin"],
+              "default": "user"
+            },
+            {
+              "name": "created_at",
+              "type": "timestamp",
+              "default": "now()"
+            },
+            {
+              "name": "updated_at",
+              "type": "timestamp",
+              "default": "now()"
+            }
+          ]
+        },
+        {
+          "name": "Profile",
+          "description": "Extended user profile information",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid",
+              "primaryKey": true,
+              "generated": true
+            },
+            {
+              "name": "user_id",
+              "type": "uuid",
+              "foreignKey": {
+                "table": "User",
+                "field": "id",
+                "onDelete": "CASCADE"
+              }
+            },
+            {
+              "name": "bio",
+              "type": "text"
+            },
+            {
+              "name": "preferences",
+              "type": "jsonb"
+            },
+            {
+              "name": "created_at",
+              "type": "timestamp",
+              "default": "now()"
+            },
+            {
+              "name": "updated_at",
+              "type": "timestamp",
+              "default": "now()"
+            }
+          ]
+        },
+        {
+          "name": "Item",
+          "description": "Generic data item (customize based on app needs)",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid",
+              "primaryKey": true,
+              "generated": true
+            },
+            {
+              "name": "user_id",
+              "type": "uuid",
+              "foreignKey": {
+                "table": "User",
+                "field": "id",
+                "onDelete": "CASCADE"
+              }
+            },
+            {
+              "name": "title",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "description",
+              "type": "text"
+            },
+            {
+              "name": "amount",
+              "type": "decimal",
+              "default": 0
+            },
+            {
+              "name": "date",
+              "type": "date",
+              "default": "now()"
+            },
+            {
+              "name": "category",
+              "type": "string"
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "enum": ["active", "archived", "deleted"],
+              "default": "active"
+            },
+            {
+              "name": "metadata",
+              "type": "jsonb"
+            },
+            {
+              "name": "created_at",
+              "type": "timestamp",
+              "default": "now()"
+            },
+            {
+              "name": "updated_at",
+              "type": "timestamp",
+              "default": "now()"
+            }
+          ]
+        }
+      ],
+      "relationships": [
+        {
+          "type": "oneToOne",
+          "from_entity": "User",
+          "to_entity": "Profile",
+          "field": "user_id"
+        },
+        {
+          "type": "oneToMany",
+          "from_entity": "User",
+          "to_entity": "Item",
+          "field": "user_id"
+        }
+      ]
+    },
+    "api": {
+      "endpoints": [
+        {
+          "path": "/api/auth",
+          "description": "Authentication endpoints (handled by Supabase)",
+          "methods": ["POST", "GET"],
+          "auth": false
+        },
+        {
+          "path": "/api/users",
+          "description": "User management",
+          "methods": ["GET", "POST", "PUT", "DELETE"],
+          "auth": true,
+          "roles": ["admin"]
+        },
+        {
+          "path": "/api/users/me",
+          "description": "Current user profile",
+          "methods": ["GET", "PUT"],
+          "auth": true
+        },
+        {
+          "path": "/api/items",
+          "description": "Item management",
+          "methods": ["GET", "POST", "PUT", "DELETE"],
+          "auth": true
+        }
+      ]
+    },
+    "testing": {
+      "unit": {
+        "framework": "Jest",
+        "coverage": 80,
+        "directories": ["components", "hooks", "utils"]
+      },
+      "integration": {
+        "framework": "React Testing Library",
+        "coverage": 70,
+        "focus": ["Form submissions", "Authentication flows", "Data fetching"]
+      },
+      "e2e": {
+        "framework": "Cypress",
+        "coverage": 50,
+        "scenarios": [
+          "User registration",
+          "Login and logout",
+          "Basic CRUD operations",
+          "Admin workflows"
+        ]
+      }
+    },
+    "projectStructure": {
+      "frontend": {
+        "directories": [
+          "src/components",
+          "src/hooks",
+          "src/context",
+          "src/pages",
+          "src/utils",
+          "src/api",
+          "src/styles",
+          "src/types",
+          "src/tests"
+        ],
+        "files": [
+          "src/App.tsx",
+          "src/index.tsx",
+          "src/routes.tsx",
+          "src/supabaseClient.ts",
+          "src/types/index.d.ts"
+        ]
+      }
+    },
+    "deployment": {
+      "environments": [
+        {
+          "name": "Development",
+          "url": "${PROJECT_NAME}-dev.vercel.app",
+          "variables": [
+            {
+              "name": "REACT_APP_SUPABASE_URL",
+              "value": "https://your-project.supabase.co",
+              "secret": true
+            },
+            {
+              "name": "REACT_APP_SUPABASE_ANON_KEY",
+              "value": "",
+              "secret": true
+            }
+          ]
+        },
+        {
+          "name": "Production",
+          "url": "${PROJECT_NAME}.vercel.app",
+          "variables": [
+            {
+              "name": "REACT_APP_SUPABASE_URL",
+              "value": "https://your-project.supabase.co",
+              "secret": true
+            },
+            {
+              "name": "REACT_APP_SUPABASE_ANON_KEY",
+              "value": "",
+              "secret": true
+            }
+          ]
+        }
+      ],
+      "cicd": {
+        "provider": "GitHub Actions",
+        "steps": [
+          "Install dependencies",
+          "Run tests",
+          "Build application",
+          "Deploy to environment"
+        ]
+      }
+    },
+    "documentation": {
+      "sections": [
+        "Overview",
+        "Architecture",
+        "Data Model",
+        "API Reference",
+        "UI Components",
+        "Authentication",
+        "Deployment",
+        "Testing"
+      ],
+      "diagrams": [
+        {
+          "name": "Architecture Diagram",
+          "type": "mermaid",
+          "template": "flowchart TD\n  User[User] --> Frontend[React Frontend]\n  Frontend --> Supabase[Supabase]\n  Supabase --> Auth[Authentication]\n  Supabase --> DB[PostgreSQL Database]\n  Frontend --> API[API Layer]\n  API --> DB"
+        },
+        {
+          "name": "Entity Relationship",
+          "type": "mermaid",
+          "template": "erDiagram\n  USER ||--o{ ITEM : creates\n  USER ||--|| PROFILE : has"
+        },
+        {
+          "name": "Authentication Flow",
+          "type": "mermaid",
+          "template": "sequenceDiagram\n  participant User\n  participant Frontend\n  participant SupabaseAuth\n  participant Database\n  User->>Frontend: Login with credentials\n  Frontend->>SupabaseAuth: Authenticate\n  SupabaseAuth-->>Frontend: Return JWT\n  Frontend->>Database: Access with JWT\n  Database-->>Frontend: Return data"
+        }
+      ]
+    }
+  }
+}

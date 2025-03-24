@@ -180,6 +180,13 @@ const Navigation = () => {
                   Your Profile
                 </Link>
                 <Link
+                  to="/subscription-plan"
+                  className="block px-4 py-2 text-base font-medium text-slate-500 hover:text-slate-800 hover:bg-slate-100 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-700"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Subscription
+                </Link>
+                <Link
                   to="/user-settings"
                   className="block px-4 py-2 text-base font-medium text-slate-500 hover:text-slate-800 hover:bg-slate-100 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-700"
                   onClick={() => setMobileMenuOpen(false)}

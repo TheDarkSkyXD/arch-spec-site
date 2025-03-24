@@ -8,6 +8,8 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 from pydantic import BaseModel
 from datetime import timezone
 
+from ..schemas.templates import UIDesign
+
 from ..schemas.project_specs import (
     ProjectSpec,
     TimelineSpec,
@@ -39,7 +41,9 @@ from ..schemas.project_specs import (
     DeploymentSpecUpdate,
     DocumentationSpecUpdate,
     ImplementationPromptsSpec,
-    ImplementationPromptsSpecUpdate
+    ImplementationPromptsSpecUpdate,
+    UIDesignSpec,
+    UIDesignSpecUpdate
 )
 from ..schemas.shared_schemas import (
     BudgetItem, ProjectTechStack, Features, Pages, DataModel, Api, 
@@ -494,6 +498,28 @@ class ProjectSpecsService:
     ) -> PagesSpec:
         return await ProjectSpecsService._generic_spec_handler(
             project_id, "pages", data, user_id, database, PagesSpec, PagesSpecUpdate
+        )
+        
+    # UI Design spec
+    @staticmethod
+    async def get_ui_design_spec(
+        project_id: str, database: AsyncIOMotorDatabase
+    ) -> Optional[UIDesignSpec]:
+        """Get the UI design spec for a project."""
+        spec_doc = await database.ui_design_specs.find_one({"project_id": project_id})
+        if spec_doc:
+            return UIDesignSpec(**spec_doc)
+        return None
+    
+    @staticmethod
+    async def create_or_update_ui_design_spec(
+        project_id: str, 
+        data: Union[UIDesign, UIDesignSpecUpdate], 
+        user_id: Optional[str],
+        database: AsyncIOMotorDatabase
+    ) -> UIDesignSpec:
+        return await ProjectSpecsService._generic_spec_handler(
+            project_id, "ui_design", data, user_id, database, UIDesignSpec, UIDesignSpecUpdate
         )
         
     # Data model spec

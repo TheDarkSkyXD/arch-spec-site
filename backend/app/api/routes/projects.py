@@ -206,6 +206,7 @@ async def delete_project(
         "metadata_specs",
         "tech_stack_specs",
         "features_specs",
+        "ui_design_specs",
         "pages_specs",
         "data_model_specs",
         "api_specs",
@@ -214,6 +215,7 @@ async def delete_project(
         "project_structure_specs",
         "deployment_specs",
         "documentation_specs"
+        "implementation_prompts_specs",
     ]
     
     # Delete all specs associated with the project

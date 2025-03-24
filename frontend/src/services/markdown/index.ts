@@ -7,6 +7,7 @@ import { generateDataModelMarkdown } from "./dataModel";
 import { generateApiEndpointsMarkdown } from "./apiEndpoints";
 import { generateTestCasesMarkdown } from "./testCases";
 import { generateImplementationPromptsMarkdown } from "./implementationPrompts";
+import { generateUIDesignMarkdown } from "./uiDesign";
 import { formatObject, generateFileName } from "./utils";
 import { generateMarkdownZip } from "./markdownZip";
 // import { sanitizeFileName } from "./utils";
@@ -29,6 +30,7 @@ export const markdownService = {
   generateFileName,
   generateMarkdownZip,
   generateImplementationPromptsMarkdown,
+  generateUIDesignMarkdown,
   // downloadImplementationPromptsMarkdown: (
   //   projectName: string,
   //   implementationPrompts: ImplementationPrompts
@@ -54,4 +56,5 @@ export {
   generateTestCasesMarkdown,
   generateFileName,
   generateImplementationPromptsMarkdown,
+  generateUIDesignMarkdown,
 };

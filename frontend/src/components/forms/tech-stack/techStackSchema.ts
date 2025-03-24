@@ -31,6 +31,7 @@ export const techStackSchema = z
     // Hosting fields
     hosting_frontend: z.string().optional(),
     hosting_backend: z.string().optional(),
+    hosting_database: z.string().optional(),
 
     // Storage fields
     storage_type: z.string().optional(),

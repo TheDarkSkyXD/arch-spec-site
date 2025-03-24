@@ -1,5 +1,6 @@
+import { useState } from "react";
 import TemplateSelector from "../templates/TemplateSelector";
-import TemplateDetails from "../templates/TemplateDetails";
+import TemplateDetailsModal from "../modals/TemplateDetailsModal";
 import { ProjectTemplate } from "../../types/templates";
 
 interface TemplateSelectionStepProps {
@@ -17,6 +18,8 @@ const TemplateSelectionStep = ({
   loading = false,
   error = null,
 }: TemplateSelectionStepProps) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   // Show loading state when fetching template
   if (loading) {
     return (
@@ -70,12 +73,47 @@ const TemplateSelectionStep = ({
         </div>
       </div>
 
-      <TemplateSelector onTemplateSelect={onTemplateSelect} />
+      <TemplateSelector
+        onTemplateSelect={onTemplateSelect}
+        selectedTemplateId={selectedTemplate?.id}
+        initialSelectedTemplate={selectedTemplate}
+      />
 
       {selectedTemplate && (
-        <div className="mt-8 border-t border-slate-200 dark:border-slate-700 pt-6">
-          <TemplateDetails template={selectedTemplate} />
+        <div className="mt-8 border-t border-slate-200 dark:border-slate-700 pt-6 flex justify-center">
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="px-4 py-2 bg-primary-100 dark:bg-primary-900/30 hover:bg-primary-200 dark:hover:bg-primary-900/50 text-primary-600 dark:text-primary-400 rounded-lg flex items-center gap-2 transition-colors"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+            Preview Template Details
+          </button>
         </div>
+      )}
+
+      {selectedTemplate && (
+        <TemplateDetailsModal
+          template={selectedTemplate}
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onUseTemplate={() => {
+            setIsModalOpen(false);
+            // The template is already selected, so no need to call onTemplateSelect again
+          }}
+        />
       )}
     </div>
   );

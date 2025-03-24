@@ -16,16 +16,50 @@ See /app/seed/README.md for more detailed documentation.
 """
 import logging
 import datetime
+import json
+import os
+import glob
 from typing import Dict, List, Optional
-
-from ..seed.template_data.sample_templates import PROJECT_TEMPLATES
+from pathlib import Path
+from bson import ObjectId
 
 logger = logging.getLogger(__name__)
+
+# Path to templates directory
+TEMPLATES_DIR = os.path.join(os.path.dirname(__file__), "template_data", "templates")
+
+def load_templates_from_files() -> List[Dict]:
+    """
+    Load all templates from JSON files in the templates directory.
+    
+    Returns:
+        List of project templates
+    """
+    templates = []
+    
+    # Get all JSON files in the templates directory
+    template_files = glob.glob(os.path.join(TEMPLATES_DIR, "*.json"))
+    
+    for file_path in template_files:
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                template = json.load(f)
+                
+                # Generate a unique ID if "auto_generate" is specified
+                if template.get("id") == "auto_generate":
+                    template["id"] = str(ObjectId())
+                
+                templates.append(template)
+                logger.info(f"Loaded template: {template.get('template', {}).get('name', 'Unknown')} from {Path(file_path).name}")
+        except Exception as e:
+            logger.error(f"Error loading template from {file_path}: {str(e)}")
+    
+    return templates
 
 async def seed_templates(db, clean_all: bool = False):
     """
     Seed project templates into the database.
-    If templates already exist, check if they need to be updated.
+    If templates already exist, check if there are new templates to add.
     
     Args:
         db: Database instance
@@ -45,16 +79,37 @@ async def seed_templates(db, clean_all: bool = False):
             logger.info(f"Deleted {delete_result.deleted_count} template documents")
             count = 0  # Reset count to 0 to force insertion of new records
         
+        # Load templates from JSON files
+        loaded_templates = load_templates_from_files()
+        
         if count == 0:
             # No templates exist, insert all
             logger.info("Seeding project templates...")
             
             # Insert templates
-            result = await templates_collection.insert_many(PROJECT_TEMPLATES)
+            result = await templates_collection.insert_many(loaded_templates)
             logger.info(f"Inserted {len(result.inserted_ids)} project templates")
         else:
-            # Templates already exist, skip seeding
-            logger.info(f"Template collection already has {count} documents. Skipping seeding...")
+            # Templates exist, check for new ones to add
+            logger.info(f"Template collection already has {count} documents. Checking for new templates...")
+            
+            # Get existing templates from the database
+            existing_templates = await templates_collection.find().to_list(length=None)
+            existing_template_names = {template.get('template', {}).get('name') for template in existing_templates}
+            
+            # Find new templates to insert
+            new_templates = []
+            for template in loaded_templates:
+                template_name = template.get('template', {}).get('name')
+                if template_name and template_name not in existing_template_names:
+                    new_templates.append(template)
+            
+            if new_templates:
+                logger.info(f"Found {len(new_templates)} new templates to insert")
+                result = await templates_collection.insert_many(new_templates)
+                logger.info(f"Inserted {len(result.inserted_ids)} new project templates")
+            else:
+                logger.info("No new templates to insert")
             
         # Get all templates from the database
         templates = await get_templates_from_db(db)
@@ -72,7 +127,7 @@ def get_templates() -> List[Dict]:
     Returns:
         List of project templates
     """
-    return PROJECT_TEMPLATES
+    return load_templates_from_files()
 
 def get_template_by_id(template_id: str) -> Dict:
     """
@@ -84,7 +139,7 @@ def get_template_by_id(template_id: str) -> Dict:
     Returns:
         Project template or None if not found
     """
-    for template in PROJECT_TEMPLATES:
+    for template in load_templates_from_files():
         if template["id"] == template_id:
             return template
     return None

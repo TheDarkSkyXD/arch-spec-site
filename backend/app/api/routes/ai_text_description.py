@@ -12,7 +12,9 @@ from app.schemas.ai_text import (
 )
 from app.services.ai_service import FAST_MODEL, AnthropicClient
 from app.core.firebase_auth import get_current_user
-from app.utils.llm_logging import log_llm_response
+from app.utils.llm_logging import DefaultLLMLogger
+from app.db.base import db
+from app.services.db_usage_tracker import DatabaseUsageTracker
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/ai-text", tags=["AI Text"])
@@ -30,33 +32,47 @@ async def enhance_project_description(
     technical precision.
     """
     try:
-        # Initialize the AI client
-        client = AnthropicClient()
+        # Create the service objects
+        llm_logger = DefaultLLMLogger() 
+        usage_tracker = DatabaseUsageTracker(db.get_db())
+        
+        # Initialize the AI client with the logger and usage tracker
+        client = AnthropicClient(llm_logger, usage_tracker)
         
         # Create the system message and user message
-        system_prompt = project_description_system_prompt()
+        system_prompt = project_description_system_prompt(request.additional_user_instruction)
         
         # Create the user message with the project description
         user_message = f"Original description: {request.user_description}"
         
         # Generate the response
         messages = [{"role": "user", "content": user_message}]
-        response = client.generate_response(messages, system_prompt, FAST_MODEL)
-        
-        # Log the LLM response
-        log_llm_response(
-            project_id=request.project_id if hasattr(request, "project_id") else "unknown",
+        response = await client.generate_response(
+            messages,
+            system_prompt,
+            FAST_MODEL,
+            log_metadata={
+                "user_id": current_user.get("firebase_uid") if current_user else None,
+                "project_id": request.project_id if hasattr(request, "project_id") else "unknown",
+                "original_description": request.user_description,
+                "additional_user_instruction": request.additional_user_instruction
+            },
             response_type="enhance_description",
-            response=response,
-            parsed_data={"enhanced_description": response},
-            metadata={
-                "user_id": current_user.get("uid") if current_user else None,
-                "model": FAST_MODEL,
-                "system_message": system_prompt,
-                "user_message": user_message,
-                "original_description": request.user_description
-            }
+            check_credits=True,
+            use_token_api_for_estimation=True
         )
+        
+        # Handle potential credit errors - check the response content if it's a dict
+        if isinstance(response, dict) and isinstance(response.get('content'), str) and response['content'].startswith("Insufficient credits"):
+            raise HTTPException(
+                status_code=402,
+                detail=response['content']
+            )
+        elif isinstance(response, str) and response.startswith("Insufficient credits"):
+            raise HTTPException(
+                status_code=402,
+                detail=response
+            )
         
         # Return the enhanced description
         return DescriptionEnhanceResponse(enhanced_description=response)

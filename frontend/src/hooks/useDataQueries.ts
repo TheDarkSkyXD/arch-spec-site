@@ -10,6 +10,8 @@ import { Requirements, Pages, DataModel } from "../types/templates";
 import { apiEndpointsService } from "../services/apiEndpointsService";
 import { Api } from "../types/templates";
 import { dataModelService } from "../services/dataModelService";
+import { uiDesignService } from "../services/uiDesignService";
+import { UIDesign } from "../types/templates";
 
 // Query keys for different types of data
 export const QUERY_KEYS = {
@@ -84,14 +86,16 @@ export function useRefreshTemplates() {
   };
 }
 
-// Requirements hook
-export const useRequirements = (projectId?: string) => {
-  const [isLoading, setIsLoading] = useState(true);
+/**
+ * Hook to fetch requirements data for a project
+ */
+export function useRequirements(projectId?: string) {
+  const [data, setData] = useState<Requirements | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
-  const [data, setData] = useState<Partial<Requirements> | null>(null);
 
   useEffect(() => {
-    const fetchRequirements = async () => {
+    const fetchData = async () => {
       if (!projectId) {
         setIsLoading(false);
         return;
@@ -104,31 +108,31 @@ export const useRequirements = (projectId?: string) => {
         const requirements = await requirementsService.getRequirements(
           projectId
         );
-        setData(requirements);
+        setData(requirements as Requirements);
       } catch (err) {
         console.error("Error fetching requirements:", err);
-        setError(
-          err instanceof Error ? err : new Error("Failed to fetch requirements")
-        );
+        setError(err instanceof Error ? err : new Error(String(err)));
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchRequirements();
+    fetchData();
   }, [projectId]);
 
   return { data, isLoading, error };
-};
+}
 
-// Features hook
-export const useFeatures = (projectId?: string) => {
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+/**
+ * Hook to fetch features data for a project
+ */
+export function useFeatures(projectId?: string) {
   const [data, setData] = useState<FeaturesData | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    const fetchFeatures = async () => {
+    const fetchData = async () => {
       if (!projectId) {
         setIsLoading(false);
         return;
@@ -142,28 +146,28 @@ export const useFeatures = (projectId?: string) => {
         setData(features);
       } catch (err) {
         console.error("Error fetching features:", err);
-        setError(
-          err instanceof Error ? err : new Error("Failed to fetch features")
-        );
+        setError(err instanceof Error ? err : new Error(String(err)));
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchFeatures();
+    fetchData();
   }, [projectId]);
 
   return { data, isLoading, error };
-};
+}
 
-// Pages hook
-export const usePages = (projectId?: string) => {
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+/**
+ * Hook to fetch pages data for a project
+ */
+export function usePages(projectId?: string) {
   const [data, setData] = useState<Pages | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    const fetchPages = async () => {
+    const fetchData = async () => {
       if (!projectId) {
         setIsLoading(false);
         return;
@@ -177,28 +181,63 @@ export const usePages = (projectId?: string) => {
         setData(pages);
       } catch (err) {
         console.error("Error fetching pages:", err);
-        setError(
-          err instanceof Error ? err : new Error("Failed to fetch pages")
-        );
+        setError(err instanceof Error ? err : new Error(String(err)));
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchPages();
+    fetchData();
   }, [projectId]);
 
   return { data, isLoading, error };
-};
+}
 
-// API Endpoints hook
-export const useApiEndpoints = (projectId?: string) => {
-  const [isLoading, setIsLoading] = useState(true);
+/**
+ * Hook to fetch data model for a project
+ */
+export function useDataModel(projectId?: string) {
+  const [data, setData] = useState<DataModel | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
-  const [data, setData] = useState<Api | null>(null);
 
   useEffect(() => {
-    const fetchApiEndpoints = async () => {
+    const fetchData = async () => {
+      if (!projectId) {
+        setIsLoading(false);
+        return;
+      }
+
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const dataModel = await dataModelService.getDataModel(projectId);
+        setData(dataModel);
+      } catch (err) {
+        console.error("Error fetching data model:", err);
+        setError(err instanceof Error ? err : new Error(String(err)));
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [projectId]);
+
+  return { data, isLoading, error };
+}
+
+/**
+ * Hook to fetch API endpoints for a project
+ */
+export function useApiEndpoints(projectId?: string) {
+  const [data, setData] = useState<Api | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
       if (!projectId) {
         setIsLoading(false);
         return;
@@ -214,65 +253,28 @@ export const useApiEndpoints = (projectId?: string) => {
         setData(apiEndpoints);
       } catch (err) {
         console.error("Error fetching API endpoints:", err);
-        setError(
-          err instanceof Error
-            ? err
-            : new Error("Failed to fetch API endpoints")
-        );
+        setError(err instanceof Error ? err : new Error(String(err)));
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchApiEndpoints();
+    fetchData();
   }, [projectId]);
 
   return { data, isLoading, error };
-};
+}
 
-// Data Model hook
-export const useDataModel = (projectId?: string) => {
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-  const [data, setData] = useState<Partial<DataModel> | null>(null);
-
-  useEffect(() => {
-    const fetchDataModel = async () => {
-      if (!projectId) {
-        setIsLoading(false);
-        return;
-      }
-
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const dataModel = await dataModelService.getDataModel(projectId);
-        setData(dataModel);
-      } catch (err) {
-        console.error("Error fetching data model:", err);
-        setError(
-          err instanceof Error ? err : new Error("Failed to fetch data model")
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchDataModel();
-  }, [projectId]);
-
-  return { data, isLoading, error };
-};
-
-// Test Cases hook
-export const useTestCases = (projectId?: string) => {
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+/**
+ * Hook to fetch test cases for a project
+ */
+export function useTestCases(projectId?: string) {
   const [data, setData] = useState<TestCasesData | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    const fetchTestCases = async () => {
+    const fetchData = async () => {
       if (!projectId) {
         setIsLoading(false);
         return;
@@ -286,16 +288,49 @@ export const useTestCases = (projectId?: string) => {
         setData(testCases);
       } catch (err) {
         console.error("Error fetching test cases:", err);
-        setError(
-          err instanceof Error ? err : new Error("Failed to fetch test cases")
-        );
+        setError(err instanceof Error ? err : new Error(String(err)));
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchTestCases();
+    fetchData();
   }, [projectId]);
 
   return { data, isLoading, error };
-};
+}
+
+/**
+ * Hook to fetch UI Design data for a project
+ */
+export function useUIDesign(projectId?: string) {
+  const [data, setData] = useState<UIDesign | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!projectId) {
+        setIsLoading(false);
+        return;
+      }
+
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const uiDesign = await uiDesignService.getUIDesign(projectId);
+        setData(uiDesign);
+      } catch (err) {
+        console.error("Error fetching UI design:", err);
+        setError(err instanceof Error ? err : new Error(String(err)));
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [projectId]);
+
+  return { data, isLoading, error };
+}

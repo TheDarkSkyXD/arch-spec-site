@@ -7,6 +7,7 @@ import {
   DataModel,
   Api,
   ImplementationPrompts,
+  UIDesign,
 } from "../../types/templates";
 import { FeaturesData } from "../featuresService";
 import { TestCasesData } from "../testCasesService";
@@ -19,6 +20,7 @@ import { generateProjectBasicsMarkdown } from "./projectBasics";
 import { generateRequirementsMarkdown } from "./requirements";
 import { generateTechStackMarkdown } from "./techStack";
 import { generateTestCasesMarkdown } from "./testCases";
+import { generateUIDesignMarkdown } from "./uiDesign";
 import { generateFileName } from "./utils";
 import { generateImplementationPromptsMarkdown } from "./implementationPrompts";
 
@@ -34,6 +36,7 @@ import { generateImplementationPromptsMarkdown } from "./implementationPrompts";
  * @param apiEndpoints The API endpoints
  * @param testCases The test cases
  * @param implementationPrompts The implementation prompts
+ * @param uiDesign The UI design data
  * @returns Promise that resolves to a Blob containing the zip file
  */
 export async function generateMarkdownZip(
@@ -45,7 +48,8 @@ export async function generateMarkdownZip(
   dataModel: Partial<DataModel> | null,
   apiEndpoints: Api | null,
   testCases: TestCasesData | null,
-  implementationPrompts: ImplementationPrompts | null
+  implementationPrompts: ImplementationPrompts | null,
+  uiDesign: UIDesign | null
 ): Promise<Blob> {
   const zip = new JSZip();
 
@@ -96,6 +100,12 @@ export async function generateMarkdownZip(
     zip.file(generateFileName(project.name, "test-cases"), testCasesMarkdown);
   }
 
+  // UI Design markdown
+  if (uiDesign) {
+    const uiDesignMarkdown = generateUIDesignMarkdown(uiDesign);
+    zip.file(generateFileName(project.name, "ui-design"), uiDesignMarkdown);
+  }
+
   // Implementation Prompts markdown
   if (implementationPrompts) {
     const implementationPromptsMarkdown = generateImplementationPromptsMarkdown(
@@ -140,7 +150,8 @@ export async function generateMarkdownZip(
         `- Pages\n` +
         `- Data Model\n` +
         `- API Endpoints\n` +
-        `- Test Cases\n\n` +
+        `- Test Cases\n` +
+        `- UI Design\n\n` +
         `Generated on: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`;
     }
   } catch (error) {
@@ -158,7 +169,8 @@ export async function generateMarkdownZip(
       `- Pages\n` +
       `- Data Model\n` +
       `- API Endpoints\n` +
-      `- Test Cases\n\n` +
+      `- Test Cases\n` +
+      `- UI Design\n\n` +
       `Generated on: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`;
   }
 

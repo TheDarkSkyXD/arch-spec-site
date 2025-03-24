@@ -5,7 +5,6 @@ import { toast } from "react-hot-toast";
 import Button from "../components/ui/Button";
 import Card from "../components/ui/Card";
 import Spinner from "../components/ui/Spinner";
-import Toggle from "../components/ui/Toggle";
 import ProfileLayout from "../layouts/ProfileLayout";
 
 type ColorScheme = "light" | "dark" | "system";
@@ -42,7 +41,7 @@ const UserSettingsPage = () => {
 
       try {
         // Try to load settings from API directly
-        const profile = await userApi.getCurrentUser();
+        const profile = await userApi.getCurrentUserProfile();
 
         // Merge default settings with user settings from profile
         const userSettings = profile.settings as Record<string, unknown>;
@@ -52,7 +51,9 @@ const UserSettingsPage = () => {
         });
 
         // Apply theme setting to the document
-        applyTheme((userSettings?.theme as ColorScheme) || defaultSettings.theme);
+        applyTheme(
+          (userSettings?.theme as ColorScheme) || defaultSettings.theme
+        );
       } catch (error) {
         console.error("Error loading settings:", error);
         setError("Failed to load settings. Using default settings.");
@@ -66,7 +67,8 @@ const UserSettingsPage = () => {
 
           // Apply theme setting to the document
           applyTheme(
-            (currentUser.profile.settings?.theme as ColorScheme) || defaultSettings.theme
+            (currentUser.profile.settings?.theme as ColorScheme) ||
+              defaultSettings.theme
           );
         }
       } finally {
@@ -105,12 +107,12 @@ const UserSettingsPage = () => {
     applyTheme(theme);
   };
 
-  const handleToggleChange = (setting: string, value: boolean) => {
-    setSettings((prev) => ({
-      ...prev,
-      [setting]: value,
-    }));
-  };
+  // const handleToggleChange = (setting: string, value: boolean) => {
+  //   setSettings((prev) => ({
+  //     ...prev,
+  //     [setting]: value,
+  //   }));
+  // };
 
   const handleSaveSettings = async () => {
     setSaving(true);
@@ -191,7 +193,7 @@ const UserSettingsPage = () => {
         </Card>
 
         {/* Notification Settings */}
-        <Card>
+        {/* <Card>
           <h2 className="text-xl font-semibold mb-4">Notifications</h2>
 
           <div className="space-y-4">
@@ -221,7 +223,7 @@ const UserSettingsPage = () => {
               />
             </div>
           </div>
-        </Card>
+        </Card> */}
 
         {/* Save Button */}
         <div className="flex justify-end">

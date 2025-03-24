@@ -11,6 +11,7 @@ import {
   DataModel,
   Api,
   ImplementationPrompts,
+  UIDesign,
 } from "../../types/templates";
 import { FeaturesData } from "../../services/featuresService";
 import { TestCasesData } from "../../services/testCasesService";
@@ -25,6 +26,7 @@ interface DownloadAllMarkdownProps {
   apiEndpoints: Api | null;
   testCases?: TestCasesData | null;
   implementationPrompts?: ImplementationPrompts | null;
+  uiDesign?: UIDesign | null;
   className?: string;
   variant?: "default" | "outline" | "ghost" | "link";
   size?: "default" | "sm" | "lg";
@@ -40,6 +42,7 @@ const DownloadAllMarkdown = ({
   apiEndpoints,
   testCases = null,
   implementationPrompts = null,
+  uiDesign = null,
   className = "",
   variant = "default",
   size = "default",
@@ -61,6 +64,7 @@ const DownloadAllMarkdown = ({
         apiEndpoints,
         testCases,
         implementationPrompts,
+        uiDesign,
       });
 
       const zipBlob = await generateMarkdownZip(
@@ -72,7 +76,8 @@ const DownloadAllMarkdown = ({
         dataModel,
         apiEndpoints,
         testCases,
-        implementationPrompts
+        implementationPrompts,
+        uiDesign
       );
 
       console.log(

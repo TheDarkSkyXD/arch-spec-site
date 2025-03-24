@@ -15,6 +15,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { useSubscription } from "../../contexts/SubscriptionContext";
+import { useUserProfile } from "../../hooks/useUserProfile";
 
 // Import shadcn UI components
 import { Label } from "../ui/label";
@@ -23,6 +24,8 @@ import Button from "../ui/Button";
 import Input from "../ui/Input";
 import Card from "../ui/Card";
 import PremiumFeatureBadge from "../ui/PremiumFeatureBadge";
+import { ProcessingOverlay } from "../ui/index";
+import AIInstructionsModal from "../ui/AIInstructionsModal";
 
 const projectBasicsSchema = z.object({
   name: z.string().min(3, "Project name must be at least 3 characters"),
@@ -39,6 +42,9 @@ interface ProjectBasicsFormProps {
   onSuccess?: (projectId: string) => void;
 }
 
+// Define the type for active modal
+type ActiveModal = "description" | "businessGoals" | "targetUsers" | null;
+
 const ProjectBasicsForm = ({
   initialData,
   onSuccess,
@@ -48,21 +54,47 @@ const ProjectBasicsForm = ({
   const [isEnhancingGoals, setIsEnhancingGoals] = useState(false);
   const [isEnhancingTargetUsers, setIsEnhancingTargetUsers] = useState(false);
   const { showToast } = useToast();
-  const { hasAIFeatures } = useSubscription();
+  const { aiCreditsRemaining } = useUserProfile();
+  const { hasAIFeatures, isLoading: isSubscriptionLoading } = useSubscription();
+
+  // Add local loading state with forced delay
+  const [localLoading, setLocalLoading] = useState(true);
+
   // Track the project ID internally for subsequent updates
   const [projectId, setProjectId] = useState<string | undefined>(
     initialData?.id
   );
   // Add state for error and success messages
   const [error, setError] = useState<string>("");
-  const [success, setSuccess] = useState<string>("");
   // State for business goals
   const [businessGoals, setBusinessGoals] = useState<string[]>(
     initialData?.business_goals || []
   );
   const [newBusinessGoal, setNewBusinessGoal] = useState<string>("");
 
+  // State for AI instructions modal
+  const [activeModal, setActiveModal] = useState<ActiveModal>(null);
+
   const isEditMode = Boolean(projectId);
+
+  // Force a minimum loading time to prevent flickering
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLocalLoading(false);
+    }, 1000); // Force a 1-second minimum loading time
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Reset local loading if subscription loading state changes
+  useEffect(() => {
+    if (isSubscriptionLoading) {
+      setLocalLoading(true);
+    }
+  }, [isSubscriptionLoading]);
+
+  // Composite loading state - true if either local or subscription is loading
+  const isLoading = localLoading || isSubscriptionLoading;
 
   const {
     register,
@@ -121,11 +153,13 @@ const ProjectBasicsForm = ({
     setBusinessGoals(businessGoals.filter((_, i) => i !== index));
   };
 
-  const enhanceDescription = async () => {
-    if (!currentDescription || currentDescription.length < 5) {
+  // Function to open AI instructions modal
+  const openAIInstructionsModal = (modal: ActiveModal) => {
+    // Check if user has remaining AI credits
+    if (aiCreditsRemaining <= 0) {
       showToast({
-        title: "Description too short",
-        description: "Please provide a longer description to enhance",
+        title: "Insufficient AI Credits",
+        description: "You've used all your AI credits for this billing period",
         type: "warning",
       });
       return;
@@ -141,10 +175,30 @@ const ProjectBasicsForm = ({
       return;
     }
 
+    setActiveModal(modal);
+  };
+
+  // Function to close the modal
+  const closeAIInstructionsModal = () => {
+    setActiveModal(null);
+  };
+
+  // Enhanced functions with AI instructions
+  const enhanceDescription = async (additionalInstructions?: string) => {
+    if (!currentDescription || currentDescription.length < 5) {
+      showToast({
+        title: "Description too short",
+        description: "Please provide a longer description to enhance",
+        type: "warning",
+      });
+      return;
+    }
+
     setIsEnhancing(true);
     try {
       const enhancedDescription = await aiService.enhanceDescription(
-        currentDescription
+        currentDescription,
+        additionalInstructions
       );
 
       if (enhancedDescription) {
@@ -173,7 +227,7 @@ const ProjectBasicsForm = ({
     }
   };
 
-  const enhanceBusinessGoals = async () => {
+  const enhanceBusinessGoals = async (additionalInstructions?: string) => {
     // Only need a valid description to generate/enhance goals
     if (!currentDescription || currentDescription.length < 5) {
       showToast({
@@ -188,7 +242,8 @@ const ProjectBasicsForm = ({
     try {
       const enhancedGoals = await aiService.enhanceBusinessGoals(
         currentDescription,
-        businessGoals
+        businessGoals,
+        additionalInstructions
       );
 
       if (enhancedGoals && enhancedGoals.length > 0) {
@@ -224,7 +279,7 @@ const ProjectBasicsForm = ({
     }
   };
 
-  const enhanceTargetUsers = async () => {
+  const enhanceTargetUsers = async (additionalInstructions?: string) => {
     // Need a valid description to generate/enhance target users
     if (!currentDescription || currentDescription.length < 5) {
       showToast({
@@ -239,7 +294,8 @@ const ProjectBasicsForm = ({
     try {
       const enhancedTargetUsers = await aiService.enhanceTargetUsers(
         currentDescription,
-        currentTargetUsers || ""
+        currentTargetUsers || "",
+        additionalInstructions
       );
 
       if (enhancedTargetUsers) {
@@ -279,7 +335,6 @@ const ProjectBasicsForm = ({
     setIsSubmitting(true);
     // Clear previous messages
     setError("");
-    setSuccess("");
 
     // Update business_goals in form data before submission
     data.business_goals = businessGoals;
@@ -309,9 +364,6 @@ const ProjectBasicsForm = ({
           description: successMessage,
           type: "success",
         });
-
-        setSuccess(successMessage);
-        setTimeout(() => setSuccess(""), 3000);
 
         if (onSuccess) {
           onSuccess(project.id);
@@ -349,21 +401,90 @@ const ProjectBasicsForm = ({
     }
   };
 
+  // Helper function to check if any AI enhancement is in progress
+  const isAnyEnhancementInProgress = () => {
+    return isEnhancing || isEnhancingGoals || isEnhancingTargetUsers;
+  };
+
+  // Helper to get the appropriate message based on which enhancement is in progress
+  const getEnhancementMessage = () => {
+    if (isEnhancing) {
+      return "AI is enhancing your project description. Please wait...";
+    }
+    if (isEnhancingGoals) {
+      return businessGoals.length > 0
+        ? "AI is improving your business goals. Please wait..."
+        : "AI is generating business goals based on your description. Please wait...";
+    }
+    if (isEnhancingTargetUsers) {
+      return currentTargetUsers
+        ? "AI is enhancing your target users description. Please wait..."
+        : "AI is generating target users based on your description. Please wait...";
+    }
+    return "AI enhancement in progress...";
+  };
+
   return (
     <form
       id="project-basics-form"
       onSubmit={handleSubmit(onSubmit)}
-      className="space-y-6"
+      className="space-y-6 relative"
     >
-      {/* Error and Success Messages */}
+      {/* Processing Overlay */}
+      <ProcessingOverlay
+        isVisible={isAnyEnhancementInProgress()}
+        message={getEnhancementMessage()}
+        opacity={0.6}
+      />
+
+      {/* AI Instructions Modal */}
+      <AIInstructionsModal
+        isOpen={activeModal === "description"}
+        onClose={closeAIInstructionsModal}
+        onConfirm={(instructions) => enhanceDescription(instructions)}
+        title="Enhance Project Description"
+        description="The AI will improve your project description with better clarity, grammar, and technical precision."
+        confirmText="Enhance Description"
+      />
+
+      <AIInstructionsModal
+        isOpen={activeModal === "businessGoals"}
+        onClose={closeAIInstructionsModal}
+        onConfirm={(instructions) => enhanceBusinessGoals(instructions)}
+        title={
+          businessGoals.length > 0
+            ? "Enhance Business Goals"
+            : "Generate Business Goals"
+        }
+        description={
+          businessGoals.length > 0
+            ? "The AI will improve your existing business goals to be more specific, measurable, and actionable."
+            : "The AI will generate relevant business goals based on your project description."
+        }
+        confirmText={
+          businessGoals.length > 0 ? "Enhance Goals" : "Generate Goals"
+        }
+      />
+
+      <AIInstructionsModal
+        isOpen={activeModal === "targetUsers"}
+        onClose={closeAIInstructionsModal}
+        onConfirm={(instructions) => enhanceTargetUsers(instructions)}
+        title={
+          currentTargetUsers ? "Enhance Target Users" : "Generate Target Users"
+        }
+        description={
+          currentTargetUsers
+            ? "The AI will improve your target users description with more detail and precision."
+            : "The AI will generate a relevant target users description based on your project."
+        }
+        confirmText={currentTargetUsers ? "Enhance Users" : "Generate Users"}
+      />
+
+      {/* Error Message */}
       {error && (
         <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-md mb-4">
           {error}
-        </div>
-      )}
-      {success && (
-        <div className="bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 p-3 rounded-md mb-4">
-          {success}
         </div>
       )}
 
@@ -382,37 +503,39 @@ const ProjectBasicsForm = ({
         <div className="flex justify-between items-center mb-1">
           <Label htmlFor="description">Description</Label>
 
-          <div className="flex justify-end items-center gap-3 mb-1">
-            {!hasAIFeatures && <PremiumFeatureBadge />}
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={enhanceDescription}
-              disabled={isEnhancing || !currentDescription || !hasAIFeatures}
-              className={`flex items-center gap-1 text-xs ${
-                !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
-              }`}
-              title={
-                hasAIFeatures
-                  ? "Enhance description with AI"
-                  : "Upgrade to Premium to use AI-powered features"
-              }
-            >
-              {isEnhancing ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-1" />
-              ) : (
-                <>
-                  {hasAIFeatures ? (
-                    <Sparkles size={14} className="mr-1" />
-                  ) : (
-                    <Lock size={14} className="mr-1" />
-                  )}
-                </>
-              )}
-              {isEnhancing ? "Enhancing..." : "Enhance Description"}
-            </Button>
-          </div>
+          {!isLoading && (
+            <div className="flex justify-end items-center gap-3 mb-1">
+              {!hasAIFeatures && <PremiumFeatureBadge />}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => openAIInstructionsModal("description")}
+                disabled={isEnhancing || !currentDescription || !hasAIFeatures}
+                className={`flex items-center gap-1 text-xs ${
+                  !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
+                } ${isEnhancing ? "relative z-[60]" : ""}`}
+                title={
+                  hasAIFeatures
+                    ? "Enhance description with AI"
+                    : "Upgrade to Premium to use AI-powered features"
+                }
+              >
+                {isEnhancing ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                ) : (
+                  <>
+                    {hasAIFeatures ? (
+                      <Sparkles size={14} className="mr-1" />
+                    ) : (
+                      <Lock size={14} className="mr-1" />
+                    )}
+                  </>
+                )}
+                {isEnhancing ? "Enhancing..." : "Enhance Description"}
+              </Button>
+            </div>
+          )}
         </div>
         <div className="relative">
           <Textarea
@@ -434,41 +557,43 @@ const ProjectBasicsForm = ({
         <div className="flex justify-between items-center">
           <Label htmlFor="business_goals">Business Goals</Label>
 
-          <div className="flex justify-end items-center gap-3">
-            {!hasAIFeatures && <PremiumFeatureBadge />}
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={enhanceBusinessGoals}
-              disabled={
-                isEnhancingGoals || !currentDescription || !hasAIFeatures
-              }
-              className={`text-xs flex items-center gap-1 ${
-                !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
-              }`}
-              title={
-                hasAIFeatures
-                  ? businessGoals.length > 0
-                    ? "Enhance business goals with AI"
-                    : "Generate business goals with AI"
-                  : "Upgrade to Premium to use AI-powered features"
-              }
-            >
-              {isEnhancingGoals ? (
-                <Loader2 size={14} className="animate-spin mr-1" />
-              ) : (
-                <>
-                  {hasAIFeatures ? (
-                    <Wand2 size={14} className="mr-1" />
-                  ) : (
-                    <Lock size={14} className="mr-1" />
-                  )}
-                </>
-              )}
-              {businessGoals.length > 0 ? "Enhance Goals" : "Generate Goals"}
-            </Button>
-          </div>
+          {!isLoading && (
+            <div className="flex justify-end items-center gap-3">
+              {!hasAIFeatures && <PremiumFeatureBadge />}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => openAIInstructionsModal("businessGoals")}
+                disabled={
+                  isEnhancingGoals || !currentDescription || !hasAIFeatures
+                }
+                className={`text-xs flex items-center gap-1 ${
+                  !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
+                } ${isEnhancingGoals ? "relative z-[60]" : ""}`}
+                title={
+                  hasAIFeatures
+                    ? businessGoals.length > 0
+                      ? "Enhance business goals with AI"
+                      : "Generate business goals with AI"
+                    : "Upgrade to Premium to use AI-powered features"
+                }
+              >
+                {isEnhancingGoals ? (
+                  <Loader2 size={14} className="animate-spin mr-1" />
+                ) : (
+                  <>
+                    {hasAIFeatures ? (
+                      <Wand2 size={14} className="mr-1" />
+                    ) : (
+                      <Lock size={14} className="mr-1" />
+                    )}
+                  </>
+                )}
+                {businessGoals.length > 0 ? "Enhance Goals" : "Generate Goals"}
+              </Button>
+            </div>
+          )}
         </div>
 
         {isEnhancingGoals && (
@@ -532,41 +657,45 @@ const ProjectBasicsForm = ({
         <div className="flex justify-between items-center mb-1">
           <Label htmlFor="target_users">Target Users</Label>
 
-          <div className="flex justify-end items-center gap-3 mb-1">
-            {!hasAIFeatures && <PremiumFeatureBadge />}
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={enhanceTargetUsers}
-              disabled={
-                isEnhancingTargetUsers || !currentDescription || !hasAIFeatures
-              }
-              className={`text-xs flex items-center gap-1 ${
-                !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
-              }`}
-              title={
-                hasAIFeatures
-                  ? currentTargetUsers
-                    ? "Enhance target users with AI"
-                    : "Generate target users with AI"
-                  : "Upgrade to Premium to use AI-powered features"
-              }
-            >
-              {isEnhancingTargetUsers ? (
-                <Loader2 size={14} className="animate-spin mr-1" />
-              ) : (
-                <>
-                  {hasAIFeatures ? (
-                    <Users size={14} className="mr-1" />
-                  ) : (
-                    <Lock size={14} className="mr-1" />
-                  )}
-                </>
-              )}
-              {currentTargetUsers ? "Enhance Users" : "Generate Users"}
-            </Button>
-          </div>
+          {!isLoading && (
+            <div className="flex justify-end items-center gap-3 mb-1">
+              {!hasAIFeatures && <PremiumFeatureBadge />}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => openAIInstructionsModal("targetUsers")}
+                disabled={
+                  isEnhancingTargetUsers ||
+                  !currentDescription ||
+                  !hasAIFeatures
+                }
+                className={`text-xs flex items-center gap-1 ${
+                  !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
+                } ${isEnhancingTargetUsers ? "relative z-[60]" : ""}`}
+                title={
+                  hasAIFeatures
+                    ? currentTargetUsers
+                      ? "Enhance target users with AI"
+                      : "Generate target users with AI"
+                    : "Upgrade to Premium to use AI-powered features"
+                }
+              >
+                {isEnhancingTargetUsers ? (
+                  <Loader2 size={14} className="animate-spin mr-1" />
+                ) : (
+                  <>
+                    {hasAIFeatures ? (
+                      <Users size={14} className="mr-1" />
+                    ) : (
+                      <Lock size={14} className="mr-1" />
+                    )}
+                  </>
+                )}
+                {currentTargetUsers ? "Enhance Users" : "Generate Users"}
+              </Button>
+            </div>
+          )}
         </div>
 
         {isEnhancingTargetUsers && (

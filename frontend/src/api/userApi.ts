@@ -65,6 +65,7 @@ export interface UserProfile {
   subscription_id: string | null;
   ai_credits: number;
   ai_credits_used: number;
+  ai_credits_remaining: number;
   _id: string;
   firebase_uid: string;
   email: string;
@@ -90,7 +91,7 @@ export interface UserUpdateData {
 // User API functions
 export const userApi = {
   // Get current user profile
-  getCurrentUser: async (): Promise<UserProfile> => {
+  getCurrentUserProfile: async (): Promise<UserProfile> => {
     try {
       const response = await apiClient.get("/api/users/me");
       return response.data;

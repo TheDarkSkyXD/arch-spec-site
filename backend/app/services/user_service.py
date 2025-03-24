@@ -1,10 +1,13 @@
 from datetime import datetime, UTC
-from typing import Dict, List, Any, Optional, Union
+import logging
+from typing import Dict, Any, Optional, Union
 from bson import ObjectId
 
 from ..db.base import db
-from ..schemas.user import UserInDB, UserUpdate, UserCreate
+from ..schemas.user import UserUpdate
 
+# Set up logger at module level
+logger = logging.getLogger(__name__)
 
 class UserService:
     """Service for user-related operations."""
@@ -21,6 +24,8 @@ class UserService:
         # Convert _id from ObjectId to string
         if '_id' in user and isinstance(user['_id'], ObjectId):
             user['_id'] = str(user['_id'])
+        
+        user['ai_credits_remaining'] = user.get('ai_credits', 0) - user.get('ai_credits_used', 0)
             
         return user
     

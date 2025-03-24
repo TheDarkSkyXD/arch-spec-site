@@ -24,10 +24,11 @@ import {
 } from "../../constants/implementationPrompts";
 import Button from "../ui/Button";
 import Card from "../ui/Card";
-import { PremiumFeatureBadge } from "../ui/index";
+import { PremiumFeatureBadge, ProcessingOverlay } from "../ui/index";
 import { Textarea } from "../ui/textarea";
 import { Select } from "../ui/select";
-
+import AIInstructionsModal from "../ui/AIInstructionsModal";
+import { useUserProfile } from "../../hooks/useUserProfile";
 interface ImplementationPromptsFormProps {
   initialData?: Partial<ImplementationPrompts>;
   projectId?: string;
@@ -41,6 +42,7 @@ export default function ImplementationPromptsForm({
 }: ImplementationPromptsFormProps) {
   const { showToast } = useToast();
   const { hasAIFeatures } = useSubscription();
+  const { aiCreditsRemaining } = useUserProfile();
   const [promptsData, setPromptsData] = useState<
     Record<string, ImplementationPrompt[]>
   >(initialData?.data || {});
@@ -56,7 +58,6 @@ export default function ImplementationPromptsForm({
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
-  const [success, setSuccess] = useState<string>("");
   const [copiedPromptId, setCopiedPromptId] = useState<string | null>(null);
   const [generatingCategories, setGeneratingCategories] = useState<
     Record<string, boolean>
@@ -64,6 +65,10 @@ export default function ImplementationPromptsForm({
   const [loadingSampleCategories, setLoadingSampleCategories] = useState<
     Record<string, boolean>
   >({});
+  const [generatingCategory, setGeneratingCategory] = useState<string | null>(
+    null
+  );
+  const [isAIModalOpen, setIsAIModalOpen] = useState<boolean>(false);
 
   // Effect to update local state when initial data changes
   useEffect(() => {
@@ -112,6 +117,11 @@ export default function ImplementationPromptsForm({
       setPromptsData(initializedData);
     }
   }, [promptsData]);
+
+  // Helper function to check if any AI generation is in progress
+  const isAnyGenerationInProgress = () => {
+    return Object.values(generatingCategories).some(Boolean);
+  };
 
   // Add a helper function to find the next available prompt type for a category
   const getNextAvailablePromptType = (category: string) => {
@@ -382,7 +392,17 @@ export default function ImplementationPromptsForm({
     }
   };
 
-  const generatePromptsForCategory = async (category: string) => {
+  const openAIModal = (category: string) => {
+    // Check if user has remaining AI credits
+    if (aiCreditsRemaining <= 0) {
+      showToast({
+        title: "Insufficient AI Credits",
+        description: "You've used all your AI credits for this billing period",
+        type: "warning",
+      });
+      return;
+    }
+
     if (!projectId) {
       const errorMessage =
         "Project must be saved before prompts can be generated";
@@ -406,6 +426,14 @@ export default function ImplementationPromptsForm({
       return;
     }
 
+    setGeneratingCategory(category);
+    setIsAIModalOpen(true);
+  };
+
+  const generatePromptsForCategory = async (
+    category: string,
+    additionalInstructions?: string
+  ) => {
     // Set loading state for this category
     setGeneratingCategories((prev) => ({ ...prev, [category]: true }));
 
@@ -413,8 +441,9 @@ export default function ImplementationPromptsForm({
       // Call the API to generate prompts for this category
       const generatedPrompts =
         await implementationPromptsService.generateImplementationPrompts(
-          projectId,
-          category
+          projectId!,
+          category,
+          additionalInstructions
         );
 
       if (generatedPrompts && generatedPrompts.length > 0) {
@@ -476,12 +505,19 @@ export default function ImplementationPromptsForm({
     }
   };
 
+  const handleAIModalConfirm = (instructions: string) => {
+    if (generatingCategory) {
+      generatePromptsForCategory(generatingCategory, instructions);
+    }
+    setIsAIModalOpen(false);
+    setGeneratingCategory(null);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Clear previous error/success messages
     setError("");
-    setSuccess("");
 
     if (!projectId) {
       const errorMessage = "Project must be saved before prompts can be saved";
@@ -507,14 +543,11 @@ export default function ImplementationPromptsForm({
         );
 
       if (result) {
-        const successMessage = "Implementation prompts saved successfully";
         showToast({
           title: "Success",
-          description: successMessage,
+          description: "Implementation prompts saved successfully",
           type: "success",
         });
-        setSuccess(successMessage);
-        setTimeout(() => setSuccess(""), 3000);
 
         if (onSuccess) {
           onSuccess(result);
@@ -578,17 +611,38 @@ export default function ImplementationPromptsForm({
     <form
       id="implementation-prompts-form"
       onSubmit={handleSubmit}
-      className="space-y-8"
+      className="space-y-8 relative"
     >
-      {/* Error and Success Messages */}
+      {/* Processing Overlay */}
+      <ProcessingOverlay
+        isVisible={isAnyGenerationInProgress()}
+        message="AI prompt generation in progress. Please wait while we create high-quality prompts for you..."
+        opacity={0.6}
+      />
+
+      {/* AI Instructions Modal */}
+      <AIInstructionsModal
+        isOpen={isAIModalOpen}
+        onClose={() => {
+          setIsAIModalOpen(false);
+          setGeneratingCategory(null);
+        }}
+        onConfirm={handleAIModalConfirm}
+        title={`Generate ${
+          generatingCategory ? CATEGORY_LABELS[generatingCategory] : ""
+        } Prompts`}
+        description={`The AI will generate implementation prompts for ${
+          generatingCategory
+            ? CATEGORY_LABELS[generatingCategory]
+            : "this category"
+        } based on your project requirements and specifications.`}
+        confirmText="Generate Prompts"
+      />
+
+      {/* Error Message */}
       {error && (
         <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-md mb-4">
           {error}
-        </div>
-      )}
-      {success && (
-        <div className="bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 p-3 rounded-md mb-4">
-          {success}
         </div>
       )}
 
@@ -613,6 +667,7 @@ export default function ImplementationPromptsForm({
           variant="outline"
           className="flex items-center gap-2 relative"
           title="Download all prompts as a markdown file"
+          disabled={isAnyGenerationInProgress()}
         >
           <FileDown className="h-4 w-4" />
           <span>Download All</span>
@@ -635,6 +690,7 @@ export default function ImplementationPromptsForm({
               className={
                 errors[category] ? "border-red-500 dark:border-red-700" : ""
               }
+              disabled={isAnyGenerationInProgress()}
             >
               {CATEGORY_LABELS[category]}
               {promptsData[category] && promptsData[category].length > 0 && (
@@ -667,7 +723,10 @@ export default function ImplementationPromptsForm({
             <Button
               type="button"
               onClick={() => loadSamplePromptsForCategory(currentCategory)}
-              disabled={loadingSampleCategories[currentCategory]}
+              disabled={
+                loadingSampleCategories[currentCategory] ||
+                isAnyGenerationInProgress()
+              }
               variant="outline"
               className="flex items-center gap-2"
               title={`Load sample prompts for ${CATEGORY_LABELS[currentCategory]}`}
@@ -704,7 +763,7 @@ export default function ImplementationPromptsForm({
             {hasAIFeatures && (
               <Button
                 type="button"
-                onClick={() => generatePromptsForCategory(currentCategory)}
+                onClick={() => openAIModal(currentCategory)}
                 disabled={generatingCategories[currentCategory] || !projectId}
                 variant="outline"
                 className="flex items-center gap-2"
@@ -746,6 +805,7 @@ export default function ImplementationPromptsForm({
                     }
                     className="text-slate-500 hover:text-primary-500"
                     title="Copy prompt to clipboard"
+                    disabled={isAnyGenerationInProgress()}
                   >
                     {copiedPromptId === prompt.id ? (
                       <Check size={16} className="text-green-500" />
@@ -764,6 +824,7 @@ export default function ImplementationPromptsForm({
                         }
                         className="text-slate-500 hover:text-blue-500"
                         title="Edit prompt"
+                        disabled={isAnyGenerationInProgress()}
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -786,6 +847,7 @@ export default function ImplementationPromptsForm({
                         onClick={() => removePrompt(currentCategory, prompt.id)}
                         className="text-slate-500 hover:text-red-500"
                         title="Delete prompt"
+                        disabled={isAnyGenerationInProgress()}
                       >
                         <Trash2 size={16} />
                       </Button>
@@ -808,6 +870,7 @@ export default function ImplementationPromptsForm({
                       variant="outline"
                       size="sm"
                       onClick={cancelEditingPrompt}
+                      disabled={isAnyGenerationInProgress()}
                     >
                       Cancel
                     </Button>
@@ -818,7 +881,9 @@ export default function ImplementationPromptsForm({
                       onClick={() =>
                         saveEditedPrompt(currentCategory, prompt.id)
                       }
-                      disabled={!editPromptContent.trim()}
+                      disabled={
+                        !editPromptContent.trim() || isAnyGenerationInProgress()
+                      }
                     >
                       Save
                     </Button>
@@ -887,10 +952,16 @@ export default function ImplementationPromptsForm({
             <Button
               type="button"
               onClick={addPrompt}
-              disabled={!newPromptContent.trim()}
-              variant={!newPromptContent.trim() ? "outline" : "default"}
+              disabled={!newPromptContent.trim() || isAnyGenerationInProgress()}
+              variant={
+                !newPromptContent.trim() || isAnyGenerationInProgress()
+                  ? "outline"
+                  : "default"
+              }
               className={`flex gap-2 ${
-                !newPromptContent.trim() ? "cursor-not-allowed" : ""
+                !newPromptContent.trim() || isAnyGenerationInProgress()
+                  ? "cursor-not-allowed"
+                  : ""
               }`}
             >
               <PlusCircle size={18} />
@@ -903,10 +974,14 @@ export default function ImplementationPromptsForm({
       <div className="mt-6 flex justify-end">
         <Button
           type="submit"
-          disabled={isSubmitting || !projectId}
-          variant={!projectId || isSubmitting ? "outline" : "default"}
+          disabled={isSubmitting || !projectId || isAnyGenerationInProgress()}
+          variant={
+            !projectId || isSubmitting || isAnyGenerationInProgress()
+              ? "outline"
+              : "default"
+          }
           className={
-            !projectId || isSubmitting
+            !projectId || isSubmitting || isAnyGenerationInProgress()
               ? "bg-gray-400 text-white hover:bg-gray-400"
               : ""
           }

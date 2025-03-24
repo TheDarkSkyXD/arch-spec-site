@@ -34,7 +34,7 @@ const SubscriptionPlan = () => {
 
       try {
         // Attempt to reload the profile from API
-        const profile = await userApi.getCurrentUser();
+        const profile = await userApi.getCurrentUserProfile();
 
         // Update subscription data with fresh profile data
         setSubscriptionData({
@@ -151,32 +151,93 @@ const SubscriptionPlan = () => {
                     AI Credits
                   </div>
                   <div className="flex items-center">
-                    <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+                    <div
+                      className="relative w-full bg-gray-200 rounded-full h-3 dark:bg-gray-700 overflow-hidden"
+                      role="progressbar"
+                      aria-valuemin={0}
+                      aria-valuemax={subscriptionData.ai_credits}
+                      aria-valuenow={Math.max(
+                        0,
+                        subscriptionData.ai_credits -
+                          subscriptionData.ai_credits_used
+                      )}
+                      title={`${Math.max(
+                        0,
+                        subscriptionData.ai_credits -
+                          subscriptionData.ai_credits_used
+                      )} credits remaining`}
+                    >
+                      {/* Progress bar background shading */}
+                      <div className="absolute inset-0 w-full h-full opacity-20 bg-gradient-to-r from-blue-300 via-blue-400 to-blue-600"></div>
+
+                      {/* Active progress bar */}
                       <div
-                        className="bg-blue-600 h-2.5 rounded-full"
+                        className="h-full rounded-full transition-all duration-500 ease-out bg-gradient-to-r from-blue-400 to-blue-600 relative"
                         style={{
                           width: `${
                             subscriptionData.ai_credits > 0
-                              ? (
-                                  100 *
-                                  (subscriptionData.ai_credits_used /
-                                    (subscriptionData.ai_credits_used +
-                                      subscriptionData.ai_credits))
+                              ? Math.max(
+                                  0,
+                                  Math.min(
+                                    100,
+                                    100 *
+                                      (1 -
+                                        subscriptionData.ai_credits_used /
+                                          subscriptionData.ai_credits)
+                                  )
                                 ).toFixed(0)
                               : 0
                           }%`,
                         }}
-                      ></div>
+                      >
+                        {/* Pulse effect for low credits */}
+                        {subscriptionData.ai_credits > 0 &&
+                          (subscriptionData.ai_credits -
+                            subscriptionData.ai_credits_used) /
+                            subscriptionData.ai_credits <
+                            0.2 &&
+                          subscriptionData.ai_credits -
+                            subscriptionData.ai_credits_used >
+                            0 && (
+                            <div className="absolute inset-0 bg-red-500 animate-pulse opacity-30 rounded-full"></div>
+                          )}
+                      </div>
                     </div>
-                    <div className="text-sm text-gray-500 ml-3">
+                    <div className="text-sm text-gray-500 ml-3 min-w-[85px] whitespace-nowrap">
                       <span className="font-bold text-blue-600">
-                        {subscriptionData.ai_credits}
+                        {Math.max(
+                          0,
+                          subscriptionData.ai_credits -
+                            subscriptionData.ai_credits_used
+                        )}
                       </span>{" "}
-                      available
+                      remaining
                     </div>
                   </div>
-                  <div className="mt-1 text-xs text-gray-500">
-                    {subscriptionData.ai_credits_used} credits used
+                  <div className="mt-1 text-xs text-gray-500 flex justify-between">
+                    <span>{subscriptionData.ai_credits_used} credits used</span>
+                    <span>{subscriptionData.ai_credits} total</span>
+                  </div>
+
+                  <div className="mt-3 p-3 bg-blue-50 rounded-md text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-200">
+                    <h3 className="font-medium mb-1 flex items-center">
+                      <Info size={14} className="mr-1" />
+                      About AI Credits
+                    </h3>
+                    <p className="text-xs mb-2">
+                      AI credits are used when you generate or enhance content
+                      with AI features.
+                    </p>
+                    {subscriptionData.plan === "premium" && (
+                      <p className="text-xs mt-2">
+                        Credits reset on your billing renewal date each month.
+                      </p>
+                    )}
+                    {subscriptionData.plan === "free" && (
+                      <p className="text-xs mt-2">
+                        Upgrade to Premium for monthly credit allowance.
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -213,15 +274,6 @@ const SubscriptionPlan = () => {
                           You have access to all premium features including
                           AI-powered tools and unlimited projects.
                         </p>
-                        <div className="mt-3 flex space-x-3">
-                          <Button
-                            href="/subscription"
-                            size="sm"
-                            variant="outline"
-                          >
-                            Manage Subscription
-                          </Button>
-                        </div>
                       </div>
                     </div>
                   )}

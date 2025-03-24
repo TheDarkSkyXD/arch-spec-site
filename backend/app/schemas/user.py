@@ -53,7 +53,8 @@ class UserInDB(UserBase):
     subscription_id: Optional[str] = Field(None, description="ID of the user's subscription if applicable")
     ai_credits: int = Field(default=0, description="Available AI enhancement credits")
     ai_credits_used: int = Field(default=0, description="AI enhancement credits used so far")
-    
+    ai_credits_remaining: int = Field(default=0, description="AI enhancement credits remaining")
+
     model_config = ConfigDict(
         populate_by_name=True,
         json_encoders={ObjectId: str},
@@ -72,7 +73,8 @@ class UserInDB(UserBase):
                 "plan": "free",
                 "subscription_id": None,
                 "ai_credits": 0,
-                "ai_credits_used": 0
+                "ai_credits_used": 0,
+                "ai_credits_remaining": 0
             }
         }
     )
@@ -92,7 +94,7 @@ class UserResponse(BaseModel):
     subscription_id: Optional[str] = None
     ai_credits: int = Field(default=0)
     ai_credits_used: int = Field(default=0)
-    
+    ai_credits_remaining: int = Field(default=0)
     model_config = ConfigDict(
         populate_by_name=True,
         json_encoders={ObjectId: str}

@@ -104,7 +104,7 @@ class LemonSqueezyService:
                                 has_free_trial=variant_attrs.get("has_free_trial", False),
                                 trial_days=variant_attrs.get("trial_interval_count", 0),
                                 plan_type="premium",
-                                ai_credits=500
+                                ai_credits=300
                             )
                             plans.append(plan)
                             logger.debug(f"Added subscription plan: {plan.name} - ${plan.price/100} {plan.interval}")

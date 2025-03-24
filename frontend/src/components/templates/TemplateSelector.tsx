@@ -117,16 +117,18 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
 interface TemplateSelectorProps {
   onTemplateSelect: (template: ProjectTemplate | null) => void;
   selectedTemplateId?: string;
+  initialSelectedTemplate?: ProjectTemplate | null;
 }
 
 const TemplateSelector: React.FC<TemplateSelectorProps> = ({
   onTemplateSelect,
   selectedTemplateId,
+  initialSelectedTemplate = null,
 }) => {
   const { data: templates = [], isLoading, error: queryError } = useTemplates();
 
   const [selectedTemplate, setSelectedTemplate] =
-    useState<ProjectTemplate | null>(null);
+    useState<ProjectTemplate | null>(initialSelectedTemplate);
   const [error, setError] = useState<string | null>(null);
 
   // Set error message if query fails
@@ -136,6 +138,13 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
       setError("Failed to load templates. Please try again later.");
     }
   }, [queryError]);
+
+  // Initialize with the passed in template if available
+  useEffect(() => {
+    if (initialSelectedTemplate) {
+      setSelectedTemplate(initialSelectedTemplate);
+    }
+  }, [initialSelectedTemplate]);
 
   // Set selected template when templates are loaded or selectedTemplateId changes
   useEffect(() => {

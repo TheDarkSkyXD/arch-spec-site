@@ -1,0 +1,582 @@
+{
+  "id": "sveltekit_prisma",
+  "template": {
+    "name": "SvelteKit Web App with Prisma",
+    "version": "1.0.0",
+    "description": "A simple web application template using SvelteKit with server-side rendering and Prisma for database access",
+    "businessGoals": [],
+    "targetUsers": "",
+    "domain": "",
+    "techStack": {
+      "frontend": {
+        "framework": "SvelteKit",
+        "language": "TypeScript",
+        "stateManagement": "Svelte Store",
+        "uiLibrary": "Tailwind CSS",
+        "formHandling": "Svelte Forms",
+        "routing": "SvelteKit Routing"
+      },
+      "backend": {
+        "type": "framework",
+        "framework": "SvelteKit",
+        "language": "TypeScript",
+        "functions": "Edge Functions",
+        "serverless": "Vercel Functions"
+      },
+      "database": {
+        "type": "sql",
+        "system": "PostgreSQL",
+        "orm": "Prisma",
+        "hosting": "Managed Instance"
+      },
+      "authentication": {
+        "provider": "OAuth2",
+        "methods": ["Email/Password", "Google", "GitHub"]
+      },
+      "hosting": {
+        "frontend": "Vercel",
+        "backend": "Vercel",
+        "database": "Self-hosted"
+      },
+      "storage": {
+        "type": "objectStorage",
+        "service": "AWS S3"
+      },
+      "deployment": {
+        "ci_cd": "GitHub Actions"
+      }
+    },
+    "requirements": {
+      "functional": [
+        "User Authentication System: Implement comprehensive authentication flows including registration, login, password reset, and social logins using Auth.js with SvelteKit. Secure session management and proper handling of protected routes.",
+        "Server-Side Rendering: Utilize SvelteKit's SSR capabilities for improved SEO, faster initial page loads, and better performance on low-powered devices.",
+        "Data Management Operations: Create complete CRUD operations for application items with proper validation and error handling using Prisma ORM for database interactions.",
+        "User Profile Management: Allow users to manage their profile information with the ability to update personal details and preferences.",
+        "Progressive Web App Features: Implement offline capabilities, caching strategies, and installable app features using SvelteKit service workers."
+      ],
+      "non_functional": [
+        "Performance: Optimize for Core Web Vitals with fast initial loads (<2s FCP), minimal layout shifts, and quick time-to-interactive. Leverage SvelteKit's code splitting and SSR capabilities.",
+        "Accessibility: Ensure WCAG 2.1 AA compliance with proper semantic HTML, keyboard navigation support, screen reader compatibility, and appropriate color contrast ratios.",
+        "Security: Implement proper CSRF protection, content security policies, secure authentication flows, and input validation to protect against common vulnerabilities.",
+        "Maintainability: Structure code with a clear organization following SvelteKit conventions. Include comprehensive documentation and type definitions.",
+        "Responsive Design: Create a fluid interface that works seamlessly across mobile, tablet, and desktop devices with appropriate breakpoints and flexible layouts."
+      ]
+    },
+    "features": {
+      "coreModules": [
+        {
+          "name": "Authentication",
+          "description": "User registration, login, password reset",
+          "enabled": true
+        },
+        {
+          "name": "User Management",
+          "description": "User roles and profile management",
+          "enabled": true
+        },
+        {
+          "name": "Data Management",
+          "description": "CRUD operations for application data",
+          "enabled": true
+        },
+        {
+          "name": "Offline Support",
+          "description": "Service worker and caching for offline use",
+          "enabled": true
+        },
+        {
+          "name": "Notifications",
+          "description": "In-app notifications and browser alerts",
+          "enabled": false,
+          "optional": true
+        },
+        {
+          "name": "File Upload",
+          "description": "Manage user-generated content and files",
+          "enabled": false,
+          "optional": true
+        }
+      ]
+    },
+    "uiDesign": {
+      "colors": {
+        "primary": "#3b82f6",
+        "secondary": "#6366f1",
+        "accent": "#f59e0b",
+        "background": "#ffffff",
+        "textPrimary": "#1f2937",
+        "textSecondary": "#6b7280",
+        "success": "#10b981",
+        "warning": "#f59e0b",
+        "error": "#ef4444",
+        "info": "#3b82f6",
+        "surface": "#f9fafb",
+        "border": "#e5e7eb"
+      },
+      "typography": {
+        "fontFamily": "Inter, sans-serif",
+        "headingFont": "Inter, sans-serif",
+        "fontSize": "16px",
+        "lineHeight": 1.5,
+        "fontWeight": 400,
+        "headingSizes": {
+          "h1": "2.25rem",
+          "h2": "1.875rem",
+          "h3": "1.5rem",
+          "h4": "1.25rem",
+          "h5": "1.125rem",
+          "h6": "1rem"
+        }
+      },
+      "spacing": {
+        "unit": "4px",
+        "scale": [
+          0, 1, 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24, 32, 40, 48, 64, 80, 96
+        ]
+      },
+      "borderRadius": {
+        "small": "2px",
+        "medium": "4px",
+        "large": "8px",
+        "xl": "12px",
+        "pill": "9999px"
+      },
+      "shadows": {
+        "small": "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+        "medium": "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+        "large": "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+        "xl": "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
+      },
+      "layout": {
+        "containerWidth": "1280px",
+        "responsive": true,
+        "sidebarWidth": "240px",
+        "topbarHeight": "64px",
+        "gridColumns": 12,
+        "gutterWidth": "16px"
+      },
+      "components": {
+        "buttonStyle": "rounded",
+        "inputStyle": "outline",
+        "cardStyle": "shadow",
+        "tableStyle": "bordered",
+        "navStyle": "underline"
+      },
+      "darkMode": {
+        "enabled": true,
+        "colors": {
+          "background": "#111827",
+          "textPrimary": "#f9fafb",
+          "textSecondary": "#9ca3af",
+          "surface": "#1f2937",
+          "border": "#374151"
+        }
+      },
+      "animations": {
+        "transitionDuration": "150ms",
+        "transitionTiming": "ease",
+        "hoverScale": 1.05,
+        "enableAnimations": true
+      }
+    },
+    "pages": {
+      "public": [
+        {
+          "name": "Home",
+          "path": "/",
+          "components": ["Hero", "Features", "CallToAction", "Footer"],
+          "enabled": true
+        },
+        {
+          "name": "Login",
+          "path": "/auth/login",
+          "components": ["LoginForm", "SocialLogin"],
+          "enabled": true
+        },
+        {
+          "name": "Register",
+          "path": "/auth/register",
+          "components": ["RegistrationForm", "SocialLogin"],
+          "enabled": true
+        },
+        {
+          "name": "ResetPassword",
+          "path": "/auth/reset-password",
+          "components": ["PasswordResetForm"],
+          "enabled": true
+        }
+      ],
+      "authenticated": [
+        {
+          "name": "Dashboard",
+          "path": "/dashboard",
+          "components": ["Summary", "RecentItems", "QuickActions"],
+          "enabled": true
+        },
+        {
+          "name": "Profile",
+          "path": "/profile",
+          "components": ["UserInfo", "ProfileForm", "AccountSettings"],
+          "enabled": true
+        },
+        {
+          "name": "Items",
+          "path": "/items",
+          "components": ["ItemsList", "ItemFilters", "ItemCreate"],
+          "enabled": true
+        },
+        {
+          "name": "ItemDetail",
+          "path": "/items/[id]",
+          "components": ["ItemView", "ItemEdit", "ItemActions"],
+          "enabled": true
+        }
+      ],
+      "admin": [
+        {
+          "name": "AdminDashboard",
+          "path": "/admin",
+          "components": ["Stats", "UserManagement", "SystemStatus"],
+          "enabled": true
+        },
+        {
+          "name": "UserManagement",
+          "path": "/admin/users",
+          "components": ["UserTable", "UserDetails", "UserEdit"],
+          "enabled": true
+        }
+      ]
+    },
+    "dataModel": {
+      "entities": [
+        {
+          "name": "User",
+          "description": "Application user information",
+          "fields": [
+            {
+              "name": "id",
+              "type": "string",
+              "primaryKey": true,
+              "generated": true
+            },
+            {
+              "name": "email",
+              "type": "string",
+              "unique": true,
+              "required": true
+            },
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "image",
+              "type": "string"
+            },
+            {
+              "name": "role",
+              "type": "enum",
+              "enum": ["USER", "ADMIN"],
+              "default": "USER"
+            },
+            {
+              "name": "createdAt",
+              "type": "dateTime",
+              "default": "now()"
+            },
+            {
+              "name": "updatedAt",
+              "type": "dateTime",
+              "default": "now()"
+            }
+          ]
+        },
+        {
+          "name": "Profile",
+          "description": "Extended user profile information",
+          "fields": [
+            {
+              "name": "id",
+              "type": "string",
+              "primaryKey": true,
+              "generated": true
+            },
+            {
+              "name": "userId",
+              "type": "string",
+              "required": true,
+              "unique": true,
+              "foreignKey": {
+                "table": "User",
+                "field": "id",
+                "onDelete": "CASCADE"
+              }
+            },
+            {
+              "name": "bio",
+              "type": "string"
+            },
+            {
+              "name": "preferences",
+              "type": "json"
+            },
+            {
+              "name": "createdAt",
+              "type": "dateTime",
+              "default": "now()"
+            },
+            {
+              "name": "updatedAt",
+              "type": "dateTime",
+              "default": "now()"
+            }
+          ]
+        },
+        {
+          "name": "Item",
+          "description": "Generic data item for the application",
+          "fields": [
+            {
+              "name": "id",
+              "type": "string",
+              "primaryKey": true,
+              "generated": true
+            },
+            {
+              "name": "title",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "description",
+              "type": "string"
+            },
+            {
+              "name": "content",
+              "type": "string"
+            },
+            {
+              "name": "published",
+              "type": "boolean",
+              "default": false
+            },
+            {
+              "name": "authorId",
+              "type": "string",
+              "required": true,
+              "foreignKey": {
+                "table": "User",
+                "field": "id",
+                "onDelete": "CASCADE"
+              }
+            },
+            {
+              "name": "createdAt",
+              "type": "dateTime",
+              "default": "now()"
+            },
+            {
+              "name": "updatedAt",
+              "type": "dateTime",
+              "default": "now()"
+            }
+          ]
+        }
+      ],
+      "relationships": [
+        {
+          "type": "oneToOne",
+          "from_entity": "User",
+          "to_entity": "Profile",
+          "field": "userId"
+        },
+        {
+          "type": "oneToMany",
+          "from_entity": "User",
+          "to_entity": "Item",
+          "field": "authorId"
+        }
+      ]
+    },
+    "api": {
+      "endpoints": [
+        {
+          "path": "/api/auth/*",
+          "description": "Authentication endpoints (handled by Auth.js)",
+          "methods": ["GET", "POST"],
+          "auth": false
+        },
+        {
+          "path": "/api/users",
+          "description": "User management",
+          "methods": ["GET", "POST", "PUT", "DELETE"],
+          "auth": true,
+          "roles": ["ADMIN"]
+        },
+        {
+          "path": "/api/users/me",
+          "description": "Current user profile",
+          "methods": ["GET", "PUT"],
+          "auth": true
+        },
+        {
+          "path": "/api/items",
+          "description": "Item management",
+          "methods": ["GET", "POST", "PUT", "DELETE"],
+          "auth": true
+        },
+        {
+          "path": "/api/items/[id]",
+          "description": "Single item operations",
+          "methods": ["GET", "PUT", "DELETE"],
+          "auth": true
+        }
+      ]
+    },
+    "testing": {
+      "unit": {
+        "framework": "Vitest",
+        "coverage": 80,
+        "directories": ["lib", "utils", "stores"]
+      },
+      "integration": {
+        "framework": "Playwright",
+        "coverage": 70,
+        "focus": [
+          "Form submissions",
+          "Authentication flows",
+          "API interactions"
+        ]
+      },
+      "e2e": {
+        "framework": "Playwright",
+        "coverage": 50,
+        "scenarios": [
+          "User registration",
+          "Login and logout",
+          "Item CRUD operations",
+          "Admin workflows"
+        ]
+      }
+    },
+    "projectStructure": {
+      "frontend": {
+        "directories": [
+          "src/routes",
+          "src/lib/components",
+          "src/lib/server",
+          "src/lib/utils",
+          "src/lib/stores",
+          "src/lib/types",
+          "src/lib/assets",
+          "static",
+          "prisma",
+          "tests"
+        ],
+        "files": [
+          "src/app.html",
+          "src/hooks.server.ts",
+          "src/app.d.ts",
+          "prisma/schema.prisma",
+          "svelte.config.js",
+          "tailwind.config.js",
+          "vite.config.ts"
+        ]
+      }
+    },
+    "deployment": {
+      "environments": [
+        {
+          "name": "Development",
+          "url": "${PROJECT_NAME}-dev.vercel.app",
+          "variables": [
+            {
+              "name": "DATABASE_URL",
+              "value": "",
+              "secret": true
+            },
+            {
+              "name": "AUTH_SECRET",
+              "value": "",
+              "secret": true
+            },
+            {
+              "name": "GITHUB_ID",
+              "value": "",
+              "secret": true
+            },
+            {
+              "name": "GITHUB_SECRET",
+              "value": "",
+              "secret": true
+            }
+          ]
+        },
+        {
+          "name": "Production",
+          "url": "${PROJECT_NAME}.vercel.app",
+          "variables": [
+            {
+              "name": "DATABASE_URL",
+              "value": "",
+              "secret": true
+            },
+            {
+              "name": "AUTH_SECRET",
+              "value": "",
+              "secret": true
+            },
+            {
+              "name": "GITHUB_ID",
+              "value": "",
+              "secret": true
+            },
+            {
+              "name": "GITHUB_SECRET",
+              "value": "",
+              "secret": true
+            }
+          ]
+        }
+      ],
+      "cicd": {
+        "provider": "GitHub Actions",
+        "steps": [
+          "Install dependencies",
+          "Run tests",
+          "Build application",
+          "Deploy to environment"
+        ]
+      }
+    },
+    "documentation": {
+      "sections": [
+        "Overview",
+        "Architecture",
+        "Data Model",
+        "API Reference",
+        "Component Library",
+        "Authentication",
+        "Deployment",
+        "Testing"
+      ],
+      "diagrams": [
+        {
+          "name": "Architecture Diagram",
+          "type": "mermaid",
+          "template": "flowchart TD\n  User[User] --> SvelteKit[SvelteKit App]\n  SvelteKit --> ServerRoutes[Server Routes]\n  SvelteKit --> ClientRoutes[Client Routes]\n  ServerRoutes --> Prisma[Prisma ORM]\n  Prisma --> Database[PostgreSQL Database]\n  ServerRoutes --> AuthJS[Auth.js]\n  ClientRoutes --> Stores[Svelte Stores]"
+        },
+        {
+          "name": "Entity Relationship",
+          "type": "mermaid",
+          "template": "erDiagram\n  USER ||--o{ ITEM : creates\n  USER ||--|| PROFILE : has"
+        },
+        {
+          "name": "Authentication Flow",
+          "type": "mermaid",
+          "template": "sequenceDiagram\n  participant User\n  participant SvelteKit\n  participant AuthJS\n  participant Database\n  User->>SvelteKit: Login with credentials\n  SvelteKit->>AuthJS: Authenticate\n  AuthJS->>Database: Verify credentials\n  Database-->>AuthJS: User data\n  AuthJS-->>SvelteKit: Create session\n  SvelteKit-->>User: Redirect to dashboard"
+        }
+      ]
+    }
+  }
+}

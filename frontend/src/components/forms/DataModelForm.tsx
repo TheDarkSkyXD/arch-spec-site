@@ -45,7 +45,9 @@ import {
   EntityField,
 } from "../../types/templates";
 import { Textarea } from "../ui/textarea";
-import { PremiumFeatureBadge } from "../ui/index";
+import { PremiumFeatureBadge, ProcessingOverlay } from "../ui/index";
+import AIInstructionsModal from "../ui/AIInstructionsModal";
+import { useUserProfile } from "../../hooks/useUserProfile";
 
 interface DataModelFormProps {
   initialData?: Partial<DataModel>;
@@ -59,6 +61,7 @@ export default function DataModelForm({
   onSuccess,
 }: DataModelFormProps) {
   const { hasAIFeatures } = useSubscription();
+  const { aiCreditsRemaining } = useUserProfile();
   const { showToast } = useToast();
   const [dataModel, setDataModel] = useState<DataModel>({
     entities: [],
@@ -67,7 +70,6 @@ export default function DataModelForm({
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
 
   // State for the entity form
   const [isEditingEntity, setIsEditingEntity] = useState(false);
@@ -136,6 +138,10 @@ export default function DataModelForm({
   const [businessGoals, setBusinessGoals] = useState<string[]>([]);
   const [requirements, setRequirements] = useState<string[]>([]);
   const [projectFeatures, setProjectFeatures] = useState<FeatureModule[]>([]);
+
+  // Add state for AI instructions modals
+  const [isEnhanceModalOpen, setIsEnhanceModalOpen] = useState<boolean>(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
 
   const fetchDataModel = useCallback(async () => {
     if (!projectId) return;
@@ -250,8 +256,11 @@ export default function DataModelForm({
     });
 
     resetEntityForm();
-    setSuccess("Entity added successfully");
-    setTimeout(() => setSuccess(null), 3000);
+    showToast({
+      title: "Success",
+      description: "Entity added successfully",
+      type: "success",
+    });
   };
 
   const handleEditEntity = () => {
@@ -270,8 +279,11 @@ export default function DataModelForm({
     resetEntityForm();
     setEditingEntityIndex(null);
     setIsEditingEntity(false);
-    setSuccess("Entity updated successfully");
-    setTimeout(() => setSuccess(null), 3000);
+    showToast({
+      title: "Success",
+      description: "Entity updated successfully",
+      type: "success",
+    });
   };
 
   const handleStartEditEntity = (index: number) => {
@@ -303,8 +315,11 @@ export default function DataModelForm({
       entities: updatedEntities,
     });
 
-    setSuccess("Entity deleted successfully");
-    setTimeout(() => setSuccess(null), 3000);
+    showToast({
+      title: "Success",
+      description: "Entity deleted successfully",
+      type: "success",
+    });
   };
 
   const resetEntityForm = () => {
@@ -441,8 +456,11 @@ export default function DataModelForm({
     });
 
     resetRelationshipForm();
-    setSuccess("Relationship added successfully");
-    setTimeout(() => setSuccess(null), 3000);
+    showToast({
+      title: "Success",
+      description: "Relationship added successfully",
+      type: "success",
+    });
   };
 
   const handleEditRelationship = () => {
@@ -460,8 +478,11 @@ export default function DataModelForm({
     });
 
     resetRelationshipForm();
-    setSuccess("Relationship updated successfully");
-    setTimeout(() => setSuccess(null), 3000);
+    showToast({
+      title: "Success",
+      description: "Relationship updated successfully",
+      type: "success",
+    });
   };
 
   const handleStartEditRelationship = (index: number) => {
@@ -479,8 +500,11 @@ export default function DataModelForm({
       relationships: updatedRelationships,
     });
 
-    setSuccess("Relationship deleted successfully");
-    setTimeout(() => setSuccess(null), 3000);
+    showToast({
+      title: "Success",
+      description: "Relationship deleted successfully",
+      type: "success",
+    });
   };
 
   const resetRelationshipForm = () => {
@@ -495,9 +519,19 @@ export default function DataModelForm({
     setError(null);
   };
 
-  // New function to enhance the data model using AI (replace existing model)
-  const enhanceDataModel = async () => {
-    // Return early if the user doesn't have access to AI features
+  // Function to open the enhance data model modal
+  const openEnhanceModal = () => {
+    // Check if user has remaining AI credits
+    if (aiCreditsRemaining <= 0) {
+      showToast({
+        title: "Insufficient AI Credits",
+        description: "You've used all your AI credits for this billing period",
+        type: "warning",
+      });
+      return;
+    }
+
+    // Check if user has access to AI features
     if (!hasAIFeatures) {
       showToast({
         title: "Premium Feature",
@@ -526,37 +560,22 @@ export default function DataModelForm({
       return;
     }
 
-    setIsEnhancing(true);
-    setError(null);
-
-    try {
-      console.log("Enhancing data model with AI...");
-      const enhancedDataModel = await aiService.enhanceDataModel(
-        projectDescription,
-        businessGoals,
-        projectFeatures,
-        requirements,
-        dataModel.entities.length > 0 ? dataModel : undefined
-      );
-
-      if (enhancedDataModel) {
-        // Replace existing data model with enhanced one
-        setDataModel(enhancedDataModel);
-        setSuccess("Data model enhanced successfully!");
-      } else {
-        setError("No enhanced data model returned");
-      }
-    } catch (error) {
-      console.error("Error enhancing data model:", error);
-      setError("Failed to enhance data model");
-    } finally {
-      setIsEnhancing(false);
-    }
+    setIsEnhanceModalOpen(true);
   };
 
-  // New function to add AI-generated entities without replacing existing ones
-  const addAIEntities = async () => {
-    // Return early if the user doesn't have access to AI features
+  // Function to open the add entities modal
+  const openAddModal = () => {
+    // Check if user has remaining AI credits
+    if (aiCreditsRemaining <= 0) {
+      showToast({
+        title: "Insufficient AI Credits",
+        description: "You've used all your AI credits for this billing period",
+        type: "warning",
+      });
+      return;
+    }
+
+    // Check if user has access to AI features
     if (!hasAIFeatures) {
       showToast({
         title: "Premium Feature",
@@ -578,6 +597,46 @@ export default function DataModelForm({
       return;
     }
 
+    setIsAddModalOpen(true);
+  };
+
+  // Modified function to enhance the data model using AI (replace existing model)
+  const enhanceDataModel = async (additionalInstructions?: string) => {
+    setIsEnhancing(true);
+    setError(null);
+
+    try {
+      console.log("Enhancing data model with AI...");
+      const enhancedDataModel = await aiService.enhanceDataModel(
+        projectDescription,
+        businessGoals,
+        projectFeatures,
+        requirements,
+        dataModel.entities.length > 0 ? dataModel : undefined,
+        additionalInstructions
+      );
+
+      if (enhancedDataModel) {
+        // Replace existing data model with enhanced one
+        setDataModel(enhancedDataModel);
+        showToast({
+          title: "Success",
+          description: "Data model enhanced successfully!",
+          type: "success",
+        });
+      } else {
+        setError("No enhanced data model returned");
+      }
+    } catch (error) {
+      console.error("Error enhancing data model:", error);
+      setError("Failed to enhance data model");
+    } finally {
+      setIsEnhancing(false);
+    }
+  };
+
+  // Modified function to add AI-generated entities without replacing existing ones
+  const addAIEntities = async (additionalInstructions?: string) => {
     setIsAddingEntities(true);
     setError(null);
 
@@ -590,7 +649,8 @@ export default function DataModelForm({
         businessGoals,
         projectFeatures,
         requirements,
-        dataModel
+        dataModel,
+        additionalInstructions
       );
 
       if (enhancedDataModel && enhancedDataModel.entities.length > 0) {
@@ -621,7 +681,11 @@ export default function DataModelForm({
           ],
         });
 
-        setSuccess(`Added ${newEntities.length} new entities`);
+        showToast({
+          title: "Success",
+          description: `Added ${newEntities.length} new entities`,
+          type: "success",
+        });
       } else {
         setError("No new entities generated");
       }
@@ -651,8 +715,11 @@ export default function DataModelForm({
       );
 
       if (updatedDataModel) {
-        setSuccess("Data model saved successfully");
-        setTimeout(() => setSuccess(null), 3000);
+        showToast({
+          title: "Success",
+          description: "Data model saved successfully",
+          type: "success",
+        });
         if (onSuccess) {
           onSuccess(updatedDataModel);
         }
@@ -665,6 +732,22 @@ export default function DataModelForm({
     } finally {
       setSaving(false);
     }
+  };
+
+  // Helper function to check if any AI operation is in progress
+  const isAnyEnhancementInProgress = () => {
+    return isEnhancing || isAddingEntities;
+  };
+
+  // Helper to get the appropriate message for the overlay
+  const getEnhancementMessage = () => {
+    if (isEnhancing) {
+      return "AI is analyzing your project to create an optimal data model. Please wait...";
+    }
+    if (isAddingEntities) {
+      return "AI is generating additional entities based on your project requirements. Please wait...";
+    }
+    return "AI enhancement in progress...";
   };
 
   return (
@@ -680,20 +763,41 @@ export default function DataModelForm({
               {error}
             </div>
           )}
-          {success && (
-            <div className="bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 p-3 rounded-md mb-4">
-              {success}
-            </div>
-          )}
 
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} className="relative">
+            {/* Processing Overlay */}
+            <ProcessingOverlay
+              isVisible={isAnyEnhancementInProgress()}
+              message={getEnhancementMessage()}
+              opacity={0.6}
+            />
+
+            {/* AI Instructions Modals */}
+            <AIInstructionsModal
+              isOpen={isEnhanceModalOpen}
+              onClose={() => setIsEnhanceModalOpen(false)}
+              onConfirm={(instructions) => enhanceDataModel(instructions)}
+              title="Enhance Data Model"
+              description="The AI will replace your current data model with an optimized structure based on your project requirements and features."
+              confirmText="Replace Data Model"
+            />
+
+            <AIInstructionsModal
+              isOpen={isAddModalOpen}
+              onClose={() => setIsAddModalOpen(false)}
+              onConfirm={(instructions) => addAIEntities(instructions)}
+              title="Generate Additional Entities"
+              description="The AI will generate new entities to complement your existing ones based on your project requirements and features."
+              confirmText="Add Entities"
+            />
+
             <div className="grid grid-cols-1 gap-6">
               {/* AI Enhancement Buttons */}
               <div className="flex justify-end items-center gap-3 mb-4">
                 {!hasAIFeatures && <PremiumFeatureBadge />}
                 <Button
                   type="button"
-                  onClick={addAIEntities}
+                  onClick={openAddModal}
                   disabled={
                     isAddingEntities ||
                     isEnhancing ||
@@ -703,7 +807,7 @@ export default function DataModelForm({
                   variant={hasAIFeatures ? "outline" : "ghost"}
                   className={`flex items-center gap-2 relative ${
                     !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
+                  } ${isAddingEntities ? "relative z-[60]" : ""}`}
                   title={
                     hasAIFeatures
                       ? "Generate new entities to complement existing ones"
@@ -728,17 +832,18 @@ export default function DataModelForm({
                 </Button>
                 <Button
                   type="button"
-                  onClick={enhanceDataModel}
+                  onClick={openEnhanceModal}
                   disabled={
                     isEnhancing ||
                     isAddingEntities ||
                     !projectId ||
-                    !hasAIFeatures
+                    !hasAIFeatures ||
+                    dataModel.entities.length === 0
                   }
                   variant={hasAIFeatures ? "outline" : "ghost"}
                   className={`flex items-center gap-2 relative ${
                     !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
+                  } ${isEnhancing ? "relative z-[60]" : ""}`}
                   title={
                     hasAIFeatures
                       ? "Replace entire data model with AI-generated one"

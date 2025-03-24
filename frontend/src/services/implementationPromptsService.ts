@@ -24,6 +24,7 @@ interface GenerateImplementationPromptRequest {
   category: string;
   project_id: string;
   prompt_type?: ImplementationPromptType;
+  additional_user_instruction?: string;
 }
 
 // Interface for AI prompt generation response
@@ -147,12 +148,14 @@ export const implementationPromptsService = {
    *
    * @param projectId - Project ID
    * @param category - Category to generate prompts for
+   * @param additionalInstructions - Optional custom instructions for the AI
    * @param promptType - Optional specific prompt type to generate
    * @returns Promise containing the generated implementation prompts
    */
   async generateImplementationPrompts(
     projectId: string,
     category: string,
+    additionalInstructions?: string,
     promptType?: ImplementationPromptType
   ): Promise<ImplementationPrompt[] | null> {
     try {
@@ -160,6 +163,7 @@ export const implementationPromptsService = {
         category,
         project_id: projectId,
         prompt_type: promptType,
+        additional_user_instruction: additionalInstructions,
       };
 
       const response =

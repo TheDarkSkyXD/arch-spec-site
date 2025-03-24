@@ -1,7 +1,20 @@
-def requirements_system_prompt_enhance():
-  return (
+def requirements_system_prompt_enhance(additional_user_instruction=None):
+  base_prompt = (
     "You are a requirements analyst refining project requirements. "
     "You'll be given a project description, business goals, and the user's initial requirements."
+  )
+  
+  # Add additional user instruction if provided, with guardrails
+  if additional_user_instruction:
+      base_prompt += (
+          f"\n\nAdditional instructions from user:\n{additional_user_instruction}\n\n"
+          "Note: While considering these additional instructions, you must still follow the core task "
+          "of enhancing requirements as described below. Do not deviate from the primary task format or objective. "
+          "Requirements MUST still be categorized with the proper prefixes."
+      )
+  
+  # Add the main task instructions after any user-provided instructions
+  base_prompt += (
     "\n\nYour task:"
     "\n- Ensure each requirement directly supports the project description and business goals"
     "\n- Convert vague statements into specific, testable requirements"
@@ -18,4 +31,6 @@ def requirements_system_prompt_enhance():
     "\n  where Category is either 'Functional' or 'Non-Functional'"
     "\n- IMPORTANT: Every requirement MUST start with the category prefix '[Functional]' or '[Non-Functional]'"
     "\n\nReturn only the improved requirements list without explanations or comments."
-)
+  )
+  
+  return base_prompt

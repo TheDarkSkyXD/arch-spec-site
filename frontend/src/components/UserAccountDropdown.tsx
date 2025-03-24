@@ -1,6 +1,6 @@
-import { useState, useRef, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts';
+import { useState, useRef, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts";
 
 const UserAccountDropdown = () => {
   const { currentUser, signOut } = useAuth();
@@ -11,23 +11,26 @@ const UserAccountDropdown = () => {
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
   const handleSignOut = async () => {
     try {
       await signOut();
-      navigate('/login');
+      navigate("/login");
     } catch (error) {
-      console.error('Error signing out:', error);
+      console.error("Error signing out:", error);
     }
   };
 
@@ -45,11 +48,11 @@ const UserAccountDropdown = () => {
           {currentUser.photoURL ? (
             <img
               src={currentUser.photoURL}
-              alt={currentUser.displayName || 'User'}
+              alt={currentUser.displayName || "User"}
               className="w-full h-full object-cover"
               onError={(e) => {
                 // Replace with initials on error
-                (e.target as HTMLImageElement).style.display = 'none';
+                (e.target as HTMLImageElement).style.display = "none";
               }}
             />
           ) : (
@@ -58,15 +61,19 @@ const UserAccountDropdown = () => {
                 ? currentUser.displayName.charAt(0).toUpperCase()
                 : currentUser.email
                 ? currentUser.email.charAt(0).toUpperCase()
-                : 'U'}
+                : "U"}
             </span>
           )}
         </div>
         <span className="text-sm font-medium hidden md:block">
-          {currentUser.displayName || currentUser.email?.split('@')[0] || 'User'}
+          {currentUser.displayName ||
+            currentUser.email?.split("@")[0] ||
+            "User"}
         </span>
         <svg
-          className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          className={`w-4 h-4 transition-transform ${
+            isOpen ? "rotate-180" : ""
+          }`}
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 20 20"
           fill="currentColor"
@@ -82,8 +89,12 @@ const UserAccountDropdown = () => {
       {isOpen && (
         <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
           <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-700">
-            <p className="text-sm font-medium">{currentUser.displayName || 'User'}</p>
-            <p className="text-xs text-gray-500 truncate">{currentUser.email}</p>
+            <p className="text-sm font-medium">
+              {currentUser.displayName || "User"}
+            </p>
+            <p className="text-xs text-gray-500 truncate">
+              {currentUser.email}
+            </p>
           </div>
 
           <Link
@@ -92,6 +103,14 @@ const UserAccountDropdown = () => {
             onClick={() => setIsOpen(false)}
           >
             Profile
+          </Link>
+
+          <Link
+            to="/subscription-plan"
+            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
+            onClick={() => setIsOpen(false)}
+          >
+            Subscription
           </Link>
 
           <Link

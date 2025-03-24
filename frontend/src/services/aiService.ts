@@ -3,10 +3,15 @@
  */
 import apiClient from "../api/apiClient";
 import { FeatureModule } from "./featuresService";
-import { DataModel } from "../types/templates";
+import { DataModel, UIDesign } from "../types/templates";
 import { GherkinTestCase } from "./testCasesService";
 
-interface EnhanceDescriptionRequest {
+interface BaseRequest {
+  project_description: string;
+  additional_user_instruction?: string;
+}
+
+interface EnhanceDescriptionRequest extends BaseRequest {
   user_description: string;
 }
 
@@ -14,8 +19,7 @@ interface EnhanceDescriptionResponse {
   enhanced_description: string;
 }
 
-interface EnhanceBusinessGoalsRequest {
-  project_description: string;
+interface EnhanceBusinessGoalsRequest extends BaseRequest {
   user_goals: string[];
 }
 
@@ -23,8 +27,7 @@ interface EnhanceBusinessGoalsResponse {
   enhanced_goals: string[];
 }
 
-interface EnhanceTargetUsersRequest {
-  project_description: string;
+interface EnhanceTargetUsersRequest extends BaseRequest {
   target_users: string;
 }
 
@@ -32,8 +35,7 @@ interface EnhanceTargetUsersResponse {
   enhanced_target_users: string;
 }
 
-interface EnhanceRequirementsRequest {
-  project_description: string;
+interface EnhanceRequirementsRequest extends BaseRequest {
   business_goals: string[];
   user_requirements: string[];
 }
@@ -47,8 +49,7 @@ interface FeaturesData {
   optionalModules?: FeatureModule[];
 }
 
-interface EnhanceFeaturesRequest {
-  project_description: string;
+interface EnhanceFeaturesRequest extends BaseRequest {
   business_goals: string[];
   requirements: string[];
   user_features?: FeatureModule[];
@@ -71,8 +72,7 @@ export interface PagesData {
   admin: PageComponent[];
 }
 
-interface EnhancePagesRequest {
-  project_description: string;
+interface EnhancePagesRequest extends BaseRequest {
   features: FeatureModule[];
   requirements: string[];
   existing_pages?: PagesData;
@@ -82,8 +82,7 @@ interface EnhancePagesResponse {
   data: PagesData;
 }
 
-interface EnhanceDataModelRequest {
-  project_description: string;
+interface EnhanceDataModelRequest extends BaseRequest {
   business_goals: string[];
   features: FeatureModule[];
   requirements: string[];
@@ -107,8 +106,7 @@ export interface ApiData {
   endpoints: ApiEndpoint[];
 }
 
-interface EnhanceApiEndpointsRequest {
-  project_description: string;
+interface EnhanceApiEndpointsRequest extends BaseRequest {
   features: FeatureModule[];
   data_models: Record<string, unknown>;
   requirements: string[];
@@ -119,8 +117,7 @@ interface EnhanceApiEndpointsResponse {
   data: ApiData;
 }
 
-interface EnhanceTechStackRequest {
-  project_description: string;
+interface EnhanceTechStackRequest extends BaseRequest {
   project_requirements: string[];
   user_preferences: Record<string, unknown>;
 }
@@ -176,8 +173,7 @@ interface TestCasesData {
   testCases: GherkinTestCase[];
 }
 
-interface TestCasesEnhanceRequest {
-  project_description: string;
+interface TestCasesEnhanceRequest extends BaseRequest {
   requirements: string[];
   features: FeatureModule[];
   existing_test_cases?: GherkinTestCase[];
@@ -188,9 +184,8 @@ interface TestCasesEnhanceResponse {
 }
 
 // Add new interfaces for README enhancement
-interface EnhanceReadmeRequest {
+interface EnhanceReadmeRequest extends BaseRequest {
   project_name: string;
-  project_description: string;
   business_goals: string[];
   requirements: {
     functional: string[];
@@ -207,18 +202,35 @@ interface EnhanceReadmeResponse {
   enhanced_readme: string;
 }
 
+interface EnhanceUIDesignRequest extends BaseRequest {
+  features: FeatureModule[];
+  requirements: string[];
+  existing_ui_design?: UIDesign;
+}
+
+interface EnhanceUIDesignResponse {
+  data: UIDesign;
+}
+
 class AIService {
   /**
    * Enhance a project description using AI.
    *
    * @param description The original project description
+   * @param additionalInstructions Optional custom instructions for the AI
    * @returns The enhanced description or null if an error occurred
    */
-  async enhanceDescription(description: string): Promise<string | null> {
+  async enhanceDescription(
+    description: string,
+    additionalInstructions?: string
+  ): Promise<string | null> {
     try {
       const response = await apiClient.post<EnhanceDescriptionResponse>(
         "/api/ai-text/enhance-description",
-        { user_description: description } as EnhanceDescriptionRequest
+        {
+          user_description: description,
+          additional_user_instruction: additionalInstructions,
+        } as EnhanceDescriptionRequest
       );
 
       return response.data.enhanced_description;
@@ -233,11 +245,13 @@ class AIService {
    *
    * @param projectDescription The project description
    * @param businessGoals The original business goals
+   * @param additionalInstructions Optional custom instructions for the AI
    * @returns The enhanced business goals or null if an error occurred
    */
   async enhanceBusinessGoals(
     projectDescription: string,
-    businessGoals: string[]
+    businessGoals: string[],
+    additionalInstructions?: string
   ): Promise<string[] | null> {
     try {
       const response = await apiClient.post<EnhanceBusinessGoalsResponse>(
@@ -245,6 +259,7 @@ class AIService {
         {
           project_description: projectDescription,
           user_goals: businessGoals,
+          additional_user_instruction: additionalInstructions,
         } as EnhanceBusinessGoalsRequest
       );
 
@@ -260,11 +275,13 @@ class AIService {
    *
    * @param projectDescription The project description
    * @param targetUsers The original target users description
+   * @param additionalInstructions Optional custom instructions for the AI
    * @returns The enhanced target users description or null if an error occurred
    */
   async enhanceTargetUsers(
     projectDescription: string,
-    targetUsers: string
+    targetUsers: string,
+    additionalInstructions?: string
   ): Promise<string | null> {
     try {
       const response = await apiClient.post<EnhanceTargetUsersResponse>(
@@ -272,6 +289,7 @@ class AIService {
         {
           project_description: projectDescription,
           target_users: targetUsers,
+          additional_user_instruction: additionalInstructions,
         } as EnhanceTargetUsersRequest
       );
 
@@ -288,12 +306,14 @@ class AIService {
    * @param projectDescription The project description
    * @param businessGoals The business goals
    * @param requirements The original requirements
+   * @param additionalInstructions Optional custom instructions for the AI
    * @returns The enhanced requirements or null if an error occurred
    */
   async enhanceRequirements(
     projectDescription: string,
     businessGoals: string[],
-    requirements: string[]
+    requirements: string[],
+    additionalInstructions?: string
   ): Promise<string[] | null> {
     try {
       const response = await apiClient.post<EnhanceRequirementsResponse>(
@@ -302,6 +322,7 @@ class AIService {
           project_description: projectDescription,
           business_goals: businessGoals,
           user_requirements: requirements,
+          additional_user_instruction: additionalInstructions,
         } as EnhanceRequirementsRequest
       );
 
@@ -319,13 +340,15 @@ class AIService {
    * @param businessGoals The business goals
    * @param requirements The project requirements
    * @param userFeatures The original features (optional)
+   * @param additionalInstructions Optional custom instructions for the AI
    * @returns The enhanced features data or null if an error occurred
    */
   async enhanceFeatures(
     projectDescription: string,
     businessGoals: string[],
     requirements: string[],
-    userFeatures?: FeatureModule[]
+    userFeatures?: FeatureModule[],
+    additionalInstructions?: string
   ): Promise<FeaturesData | null> {
     try {
       const response = await apiClient.post<EnhanceFeaturesResponse>(
@@ -335,6 +358,7 @@ class AIService {
           business_goals: businessGoals,
           requirements: requirements,
           user_features: userFeatures,
+          additional_user_instruction: additionalInstructions,
         } as EnhanceFeaturesRequest
       );
 
@@ -353,6 +377,7 @@ class AIService {
    * @param dataModels The data models
    * @param requirements The project requirements
    * @param existingEndpoints The original endpoints (optional)
+   * @param additionalInstructions Optional custom instructions for the AI
    * @returns The enhanced API endpoints or null if an error occurred
    */
   async enhanceApiEndpoints(
@@ -360,7 +385,8 @@ class AIService {
     features: FeatureModule[],
     dataModels: Record<string, unknown>,
     requirements: string[],
-    existingEndpoints?: ApiData
+    existingEndpoints?: ApiData,
+    additionalInstructions?: string
   ): Promise<ApiData | null> {
     try {
       const response = await apiClient.post<EnhanceApiEndpointsResponse>(
@@ -371,6 +397,7 @@ class AIService {
           data_models: dataModels,
           requirements: requirements,
           existing_endpoints: existingEndpoints,
+          additional_user_instruction: additionalInstructions,
         } as EnhanceApiEndpointsRequest
       );
 
@@ -388,13 +415,15 @@ class AIService {
    * @param features The project features
    * @param requirements The project requirements
    * @param existingPages The original pages (optional)
+   * @param additionalInstructions Optional custom instructions for the AI
    * @returns The enhanced pages data or null if an error occurred
    */
   async enhancePages(
     projectDescription: string,
     features: FeatureModule[],
     requirements: string[],
-    existingPages?: PagesData
+    existingPages?: PagesData,
+    additionalInstructions?: string
   ): Promise<PagesData | null> {
     try {
       const response = await apiClient.post<EnhancePagesResponse>(
@@ -404,6 +433,7 @@ class AIService {
           features: features,
           requirements: requirements,
           existing_pages: existingPages,
+          additional_user_instruction: additionalInstructions,
         } as EnhancePagesRequest
       );
 
@@ -422,6 +452,7 @@ class AIService {
    * @param features The project features
    * @param requirements The project requirements
    * @param existingDataModel The original data model (optional)
+   * @param additionalInstructions Optional custom instructions for the AI
    * @returns The enhanced data model or null if an error occurred
    */
   async enhanceDataModel(
@@ -429,7 +460,8 @@ class AIService {
     businessGoals: string[],
     features: FeatureModule[],
     requirements: string[],
-    existingDataModel?: Partial<DataModel>
+    existingDataModel?: Partial<DataModel>,
+    additionalInstructions?: string
   ): Promise<DataModel | null> {
     try {
       const response = await apiClient.post<EnhanceDataModelResponse>(
@@ -440,6 +472,7 @@ class AIService {
           features: features,
           requirements: requirements,
           existing_data_model: existingDataModel,
+          additional_user_instruction: additionalInstructions,
         } as EnhanceDataModelRequest
       );
 
@@ -456,12 +489,14 @@ class AIService {
    * @param projectDescription The project description
    * @param projectRequirements The project requirements
    * @param userPreferences The user's existing tech preferences (optional)
+   * @param additionalInstructions Optional custom instructions for the AI
    * @returns The enhanced tech stack recommendations or null if an error occurred
    */
   async enhanceTechStack(
     projectDescription: string,
     projectRequirements: string[],
-    userPreferences?: Record<string, unknown>
+    userPreferences?: Record<string, unknown>,
+    additionalInstructions?: string
   ): Promise<TechStackRecommendation | null> {
     try {
       const response = await apiClient.post<EnhanceTechStackResponse>(
@@ -470,6 +505,7 @@ class AIService {
           project_description: projectDescription,
           project_requirements: projectRequirements,
           user_preferences: userPreferences || {},
+          additional_user_instruction: additionalInstructions,
         } as EnhanceTechStackRequest
       );
 
@@ -480,10 +516,20 @@ class AIService {
     }
   }
 
+  /**
+   * Generate test cases using AI.
+   *
+   * @param projectDescription The project description
+   * @param requirements The project requirements
+   * @param features The project features
+   * @param additionalInstructions Optional custom instructions for the AI
+   * @returns The generated test cases data or null if an error occurred
+   */
   async generateTestCases(
     projectDescription: string,
     requirements: string[],
-    features: FeatureModule[]
+    features: FeatureModule[],
+    additionalInstructions?: string
   ): Promise<TestCasesData | null> {
     try {
       const response = await apiClient.post<TestCasesEnhanceResponse>(
@@ -492,6 +538,7 @@ class AIService {
           project_description: projectDescription,
           requirements,
           features,
+          additional_user_instruction: additionalInstructions,
         } as TestCasesEnhanceRequest
       );
 
@@ -507,11 +554,22 @@ class AIService {
     }
   }
 
+  /**
+   * Enhance existing test cases using AI.
+   *
+   * @param projectDescription The project description
+   * @param existingTestCases Existing test cases to enhance
+   * @param requirements The project requirements
+   * @param features The project features
+   * @param additionalInstructions Optional custom instructions for the AI
+   * @returns The enhanced test cases data or null if an error occurred
+   */
   async enhanceTestCases(
     projectDescription: string,
     existingTestCases: GherkinTestCase[],
     requirements: string[],
-    features: FeatureModule[]
+    features: FeatureModule[],
+    additionalInstructions?: string
   ): Promise<TestCasesData | null> {
     try {
       const response = await apiClient.post<TestCasesEnhanceResponse>(
@@ -521,6 +579,7 @@ class AIService {
           existing_test_cases: existingTestCases,
           requirements,
           features,
+          additional_user_instruction: additionalInstructions,
         } as TestCasesEnhanceRequest
       );
 
@@ -545,6 +604,7 @@ class AIService {
    * @param requirements The project requirements
    * @param features The project features
    * @param techStack The technology stack
+   * @param additionalInstructions Optional custom instructions for the AI
    * @returns The enhanced README content or null if an error occurred
    */
   async enhanceReadme(
@@ -559,7 +619,8 @@ class AIService {
       coreModules: FeatureModule[];
       optionalModules?: FeatureModule[];
     },
-    techStack: Record<string, unknown>
+    techStack: Record<string, unknown>,
+    additionalInstructions?: string
   ): Promise<string | null> {
     try {
       const response = await apiClient.post<EnhanceReadmeResponse>(
@@ -571,12 +632,49 @@ class AIService {
           requirements: requirements,
           features: features,
           tech_stack: techStack,
+          additional_user_instruction: additionalInstructions,
         } as EnhanceReadmeRequest
       );
 
       return response.data.enhanced_readme;
     } catch (error) {
       console.error("Error enhancing README:", error);
+      return null;
+    }
+  }
+
+  /**
+   * Enhance UI design using AI.
+   *
+   * @param projectDescription The project description
+   * @param features The project features
+   * @param requirements The project requirements
+   * @param existingUIDesign The original UI design (optional)
+   * @param additionalInstructions Optional custom instructions for the AI
+   * @returns The enhanced UI design or null if an error occurred
+   */
+  async enhanceUIDesign(
+    projectDescription: string,
+    features: FeatureModule[],
+    requirements: string[],
+    existingUIDesign?: UIDesign,
+    additionalInstructions?: string
+  ): Promise<UIDesign | null> {
+    try {
+      const response = await apiClient.post<EnhanceUIDesignResponse>(
+        "/api/ai-text/enhance-ui-design",
+        {
+          project_description: projectDescription,
+          features: features,
+          requirements: requirements,
+          existing_ui_design: existingUIDesign,
+          additional_user_instruction: additionalInstructions,
+        } as EnhanceUIDesignRequest
+      );
+
+      return response.data.data;
+    } catch (error) {
+      console.error("Error enhancing UI design:", error);
       return null;
     }
   }

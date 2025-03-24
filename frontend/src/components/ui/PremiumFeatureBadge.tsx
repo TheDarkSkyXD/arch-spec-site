@@ -43,5 +43,4 @@ const PremiumFeatureBadge: React.FC<PremiumFeatureBadgeProps> = ({
     </div>
   );
 };
-
 export default PremiumFeatureBadge;
