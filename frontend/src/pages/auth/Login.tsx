@@ -9,7 +9,7 @@ import SuccessMessage from "../../components/ui/SuccessMessage";
 const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { signIn, signInWithGoogle, currentUser } = useAuth();
+  const { signIn, currentUser } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

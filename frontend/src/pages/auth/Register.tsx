@@ -14,7 +14,7 @@ import { useAuth } from "../../contexts/AuthContextDefinition";
 
 const Register = () => {
   const navigate = useNavigate();
-  const { signUp, signInWithGoogle, currentUser } = useAuth();
+  const { signUp, currentUser } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
