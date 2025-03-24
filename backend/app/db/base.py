@@ -12,6 +12,10 @@ class Database:
     
     def __init__(self):
         """Initialize the database connection."""
+        self.client = None
+    
+    async def connect_to_mongodb(self):
+        """Connect to MongoDB and verify connection."""
         try:
             # Initialize the Motor client
             logger.info(f"Initializing MongoDB client with URI: {settings.mongo.uri}")
@@ -19,27 +23,20 @@ class Database:
                 settings.mongo.uri,
                 serverSelectionTimeoutMS=5000
             )
-            logger.info("MongoDB client initialized")
-        except Exception as e:
-            logger.error(f"Failed to initialize MongoDB client: {str(e)}")
-            self.client = None
-    
-    async def connect_to_mongodb(self):
-        """Verify MongoDB connection."""
-        if not self.client:
-            logger.error("MongoDB client not initialized")
-            return
             
-        try:
-            # Simply log that we're connected - no need to check in dev environment
-            logger.info("MongoDB connection setup completed")
+            # Verify connection by getting server info
+            await self.client.admin.command('ping')
+            logger.info("MongoDB connection established and verified")
         except Exception as e:
             logger.error(f"MongoDB connection error: {str(e)}")
+            self.client = None
+            raise
     
     async def close_mongodb_connection(self):
         """Close MongoDB connection."""
         if self.client:
             self.client.close()
+            self.client = None
             logger.info("Closed MongoDB connection")
     
     def get_db(self):

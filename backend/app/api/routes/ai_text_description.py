@@ -13,6 +13,8 @@ from app.schemas.ai_text import (
 from app.services.ai_service import FAST_MODEL, AnthropicClient
 from app.core.firebase_auth import get_current_user
 from app.utils.llm_logging import DefaultLLMLogger
+from app.db.base import db
+from app.services.db_usage_tracker import DatabaseUsageTracker
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/ai-text", tags=["AI Text"])
@@ -30,11 +32,12 @@ async def enhance_project_description(
     technical precision.
     """
     try:
-        # Create the logger implementation
-        llm_logger = DefaultLLMLogger()
+        # Create the service objects
+        llm_logger = DefaultLLMLogger() 
+        usage_tracker = DatabaseUsageTracker(db.get_db())
         
-        # Initialize the AI client with the logger
-        client = AnthropicClient(llm_logger)
+        # Initialize the AI client with the logger and usage tracker
+        client = AnthropicClient(llm_logger, usage_tracker)
         
         # Create the system message and user message
         system_prompt = project_description_system_prompt(request.additional_user_instruction)
@@ -44,15 +47,26 @@ async def enhance_project_description(
         
         # Generate the response
         messages = [{"role": "user", "content": user_message}]
-        response = client.generate_response(messages, system_prompt, FAST_MODEL,
+        response = await client.generate_response(
+            messages,
+            system_prompt,
+            FAST_MODEL,
             log_metadata={
-                "user_id": current_user.get("uid") if current_user else None,
+                "user_id": current_user.get("firebase_uid") if current_user else None,
                 "project_id": request.project_id if hasattr(request, "project_id") else "unknown",
                 "original_description": request.user_description,
                 "additional_user_instruction": request.additional_user_instruction
             },
-            response_type="enhance_description"
+            response_type="enhance_description",
+            check_credits=True
         )
+        
+        # Handle potential credit errors
+        if response.startswith("Insufficient credits"):
+            raise HTTPException(
+                status_code=402,
+                detail=response
+            )
         
         # Return the enhanced description
         return DescriptionEnhanceResponse(enhanced_description=response)

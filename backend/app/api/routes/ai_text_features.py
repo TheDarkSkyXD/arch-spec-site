@@ -17,6 +17,8 @@ from app.services.ai_service import AnthropicClient, INTELLIGENT_MODEL
 from app.core.firebase_auth import get_current_user
 from app.api.routes.ai_text_utils import extract_data_from_response
 from app.utils.llm_logging import DefaultLLMLogger
+from app.db.base import db
+from app.services.db_usage_tracker import DatabaseUsageTracker
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/ai-text", tags=["AI Text"])
@@ -34,11 +36,12 @@ async def enhance_features(
     It uses Anthropic's tool use feature to ensure a structured response.
     """
     try:
-        # Create the logger implementation
+        # Create the service objects
         llm_logger = DefaultLLMLogger()
+        usage_tracker = DatabaseUsageTracker(db.get_db())
         
-        # Initialize the AI client with the logger
-        client = AnthropicClient(llm_logger)
+        # Initialize the AI client with the logger and usage tracker
+        client = AnthropicClient(llm_logger, usage_tracker)
         
         # Create the system message
         system_message = (
@@ -66,9 +69,9 @@ async def enhance_features(
         # Generate the tool use response
         messages = [{"role": "user", "content": user_prompt}]
         tools = [print_features_input_schema()]
-        response = client.get_tool_use_response(system_message, tools, messages, model=INTELLIGENT_MODEL,
+        response = await client.get_tool_use_response(system_message, tools, messages, model=INTELLIGENT_MODEL,
             log_metadata={
-                "user_id": current_user.get("uid") if current_user else None,
+                "user_id": current_user.get("firebase_uid") if current_user else None,
                 "project_id": request.project_id if hasattr(request, "project_id") else "unknown",
                 "project_description": request.project_description,
                 "business_goals": request.business_goals,
@@ -76,8 +79,16 @@ async def enhance_features(
                 "user_features": request.user_features,
                 "additional_user_instruction": request.additional_user_instruction
             },
-            response_type="enhance_features"
+            response_type="enhance_features",
+            check_credits=True
         )
+        
+        # Handle potential credit errors
+        if response.startswith("Insufficient credits"):
+            raise HTTPException(
+                status_code=402,
+                detail=response
+            )
         
         if "error" in response:
             logger.error(f"Error in AI tool use: {response['error']}")

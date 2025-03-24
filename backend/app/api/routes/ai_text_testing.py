@@ -17,6 +17,8 @@ from app.services.ai_service import AnthropicClient, INTELLIGENT_MODEL
 from app.core.firebase_auth import get_current_user
 from app.api.routes.ai_text_utils import extract_data_from_response
 from app.utils.llm_logging import DefaultLLMLogger
+from app.db.base import db
+from app.services.db_usage_tracker import DatabaseUsageTracker
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/ai-text", tags=["AI Text"])
@@ -30,11 +32,12 @@ async def enhance_test_cases(
     Enhance or generate test cases in Gherkin format.
     """
     try:
-        # Create the logger implementation
+        # Create the service objects
         llm_logger = DefaultLLMLogger()
+        usage_tracker = DatabaseUsageTracker(db.get_db())
         
-        # Initialize the AI client with the logger
-        client = AnthropicClient(llm_logger)
+        # Initialize the AI client with the logger and usage tracker
+        client = AnthropicClient(llm_logger, usage_tracker)
         
         # Create system message
         system_message = "You are an expert QA engineer specializing in writing Gherkin test cases for software applications."
@@ -61,18 +64,25 @@ async def enhance_test_cases(
         # Generate the tool use response
         messages = [{"role": "user", "content": user_prompt}]
         tools = [print_test_cases_input_schema()]
-        response = client.get_tool_use_response(system_message, tools, messages, model=INTELLIGENT_MODEL,
+        response = await client.get_tool_use_response(system_message, tools, messages, model=INTELLIGENT_MODEL,
             log_metadata={
-                "user_id": current_user.get("uid") if current_user else None,
+                "user_id": current_user.get("firebase_uid") if current_user else None,
                 "project_id": request.project_id if hasattr(request, "project_id") else "unknown",
                 "requirements": request.requirements,
                 "features": request.features,
                 "existing_test_cases": request.existing_test_cases,
                 "additional_user_instruction": request.additional_user_instruction
             },
-            response_type="enhance_test_cases"
+            response_type="enhance_test_cases",
+            check_credits=True
         )
         
+        # Handle potential credit errors
+        if response.startswith("Insufficient credits"):
+            raise HTTPException(
+                status_code=402,
+                detail=response
+            )
         # Extract the response data
         test_cases_data = extract_data_from_response(response, TestCasesData, logger)
         
@@ -92,7 +102,12 @@ async def generate_test_cases(
     This is a dedicated endpoint for creating test cases from scratch.
     """
     try:
-        client = AnthropicClient()
+        # Create the service objects
+        llm_logger = DefaultLLMLogger()
+        usage_tracker = DatabaseUsageTracker(db.get_db())
+        
+        # Initialize the AI client with the logger and usage tracker
+        client = AnthropicClient(llm_logger, usage_tracker)
         
         # Create system message
         system_message = "You are an expert QA engineer specializing in writing comprehensive Gherkin test cases for software applications. Focus on creating test cases that cover all functional requirements and important edge cases."
@@ -114,25 +129,24 @@ async def generate_test_cases(
         # Generate the tool use response
         messages = [{"role": "user", "content": user_prompt}]
         tools = [print_test_cases_input_schema()]
-        response = client.get_tool_use_response(system_message, tools, messages, model=INTELLIGENT_MODEL)
-        
-        # Log the LLM response
-        log_llm_response(
-            project_id=request.project_id if hasattr(request, "project_id") else "unknown",
-            response_type="generate_test_cases",
-            response=json.dumps(response),  # Convert response object to string for logging
-            parsed_data=response,  # Store the structured response directly
-            metadata={
-                "user_id": current_user.get("uid") if current_user else None,
-                "model": INTELLIGENT_MODEL,
-                "system_message": system_message,
-                "user_message": user_prompt,
-                "tools": tools,
+        response = await client.get_tool_use_response(system_message, tools, messages, model=INTELLIGENT_MODEL,
+            log_metadata={
+                "user_id": current_user.get("firebase_uid") if current_user else None,
+                "project_id": request.project_id if hasattr(request, "project_id") else "unknown",
                 "requirements": request.requirements,
                 "features": request.features,
                 "additional_user_instruction": request.additional_user_instruction
-            }
+            },
+            response_type="generate_test_cases",
+            check_credits=True
         )
+        
+        # Handle potential credit errors
+        if response.startswith("Insufficient credits"):
+            raise HTTPException(
+                status_code=402,
+                detail=response
+            )
         
         # Extract the response data
         test_cases_data = extract_data_from_response(response, TestCasesData, logger)
