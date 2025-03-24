@@ -67,10 +67,10 @@ class DatabaseUsageTracker(UsageTracker):
             # Insert usage record
             self.db.llm_usage.insert_one(usage_record)
             
-            # Update user's credit usage
+            # Increment user's credit usage by 1
             self.db.users.update_one(
                 {"firebase_uid": user_id},
-                {"$inc": {"ai_credits_used": total_cost}}
+                {"$inc": {"ai_credits_used": 1}}
             )
             
             # Update aggregated usage stats

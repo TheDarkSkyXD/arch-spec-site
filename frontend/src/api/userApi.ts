@@ -65,6 +65,7 @@ export interface UserProfile {
   subscription_id: string | null;
   ai_credits: number;
   ai_credits_used: number;
+  ai_credits_remaining: number;
   _id: string;
   firebase_uid: string;
   email: string;

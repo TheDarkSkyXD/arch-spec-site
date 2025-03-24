@@ -290,8 +290,7 @@ class AnthropicClient():
             logger.info(f"Credit check result: {credit_check}")
             if not credit_check["has_sufficient_credits"]:
                 remaining_credits = credit_check.get("remaining_credits", 0)
-                estimated_cost = credit_check.get("estimated_cost", 0)
-                error_msg = f"Insufficient credits. You have {remaining_credits} credits remaining, but this operation requires approximately {estimated_cost} credits."
+                error_msg = f"Insufficient credits. You have {remaining_credits} credits remaining."
                 return error_msg
             
         try:
@@ -381,7 +380,7 @@ class AnthropicClient():
         if check_credits and self.usage_tracker and "user_id" in metadata and metadata["user_id"]:
             credit_check = await self._check_sufficient_credits(metadata["user_id"], messages, system, model_to_use, use_token_api=use_token_api_for_estimation)
             if not credit_check["has_sufficient_credits"]:
-                error_msg = f"Insufficient credits. You have {credit_check['remaining_credits']} credits remaining, but this operation requires approximately {credit_check['estimated_cost']} credits."
+                error_msg = f"Insufficient credits. You have {credit_check['remaining_credits']} credits remaining."
                 yield error_msg
                 return
             
@@ -496,7 +495,7 @@ class AnthropicClient():
             )
             if not credit_check["has_sufficient_credits"]:
                 return {
-                    "error": f"Insufficient credits. You have {credit_check['remaining_credits']} credits remaining, but this operation requires approximately {credit_check['estimated_cost']} credits."
+                    "error": f"Insufficient credits. You have {credit_check['remaining_credits']} credits remaining."
                 }
         
         try:
