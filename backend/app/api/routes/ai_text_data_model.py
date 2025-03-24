@@ -16,7 +16,7 @@ from app.schemas.ai_text import (
 from app.services.ai_service import AnthropicClient, INTELLIGENT_MODEL
 from app.core.firebase_auth import get_current_user
 from app.api.routes.ai_text_utils import extract_data_from_response
-from app.utils.llm_logging import log_llm_response
+from app.utils.llm_logging import DefaultLLMLogger
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/ai-text", tags=["AI Text"])
@@ -34,8 +34,11 @@ async def enhance_data_model(
     It uses Anthropic's tool use feature to ensure a structured response.
     """
     try:
-        # Initialize the AI client
-        client = AnthropicClient()
+        # Create the logger implementation
+        llm_logger = DefaultLLMLogger()
+        
+        # Initialize the AI client with the logger
+        client = AnthropicClient(llm_logger)
         
         # Create the system message
         system_message = (
@@ -67,27 +70,18 @@ async def enhance_data_model(
         # Generate the tool use response
         messages = [{"role": "user", "content": user_prompt}]
         tools = [print_data_model_input_schema()]
-        response = client.get_tool_use_response(system_message, tools, messages, model=INTELLIGENT_MODEL)
-        
-        # Log the LLM response
-        log_llm_response(
-            project_id=request.project_id if hasattr(request, "project_id") else "unknown",
-            response_type="enhance_data_model",
-            response=json.dumps(response),  # Convert response object to string for logging
-            parsed_data=response,  # Store the structured response directly
-            metadata={
+        response = client.get_tool_use_response(system_message, tools, messages, model=INTELLIGENT_MODEL,
+            log_metadata={
+                "project_id": request.project_id if hasattr(request, "project_id") else "unknown",
                 "user_id": current_user.get("uid") if current_user else None,
-                "model": INTELLIGENT_MODEL,
-                "system_message": system_message,
-                "user_message": user_prompt,
-                "tools": tools,
                 "project_description": request.project_description,
                 "business_goals": request.business_goals,
                 "features": request.features,
                 "requirements": request.requirements,
                 "existing_data_model": request.existing_data_model,
                 "additional_user_instruction": request.additional_user_instruction
-            }
+            },
+            response_type="enhance_data_model"
         )
         
         if "error" in response:

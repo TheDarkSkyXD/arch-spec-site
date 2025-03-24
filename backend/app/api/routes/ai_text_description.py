@@ -12,7 +12,7 @@ from app.schemas.ai_text import (
 )
 from app.services.ai_service import FAST_MODEL, AnthropicClient
 from app.core.firebase_auth import get_current_user
-from app.utils.llm_logging import log_llm_response
+from app.utils.llm_logging import DefaultLLMLogger
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/ai-text", tags=["AI Text"])
@@ -30,8 +30,11 @@ async def enhance_project_description(
     technical precision.
     """
     try:
-        # Initialize the AI client
-        client = AnthropicClient()
+        # Create the logger implementation
+        llm_logger = DefaultLLMLogger()
+        
+        # Initialize the AI client with the logger
+        client = AnthropicClient(llm_logger)
         
         # Create the system message and user message
         system_prompt = project_description_system_prompt(request.additional_user_instruction)
@@ -41,22 +44,14 @@ async def enhance_project_description(
         
         # Generate the response
         messages = [{"role": "user", "content": user_message}]
-        response = client.generate_response(messages, system_prompt, FAST_MODEL)
-        
-        # Log the LLM response
-        log_llm_response(
-            project_id=request.project_id if hasattr(request, "project_id") else "unknown",
-            response_type="enhance_description",
-            response=response,
-            parsed_data={"enhanced_description": response},
-            metadata={
+        response = client.generate_response(messages, system_prompt, FAST_MODEL,
+            log_metadata={
                 "user_id": current_user.get("uid") if current_user else None,
-                "model": FAST_MODEL,
-                "system_message": system_prompt,
-                "user_message": user_message,
+                "project_id": request.project_id if hasattr(request, "project_id") else "unknown",
                 "original_description": request.user_description,
                 "additional_user_instruction": request.additional_user_instruction
-            }
+            },
+            response_type="enhance_description"
         )
         
         # Return the enhanced description

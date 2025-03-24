@@ -18,8 +18,8 @@ from app.services.ai_service import FAST_MODEL, AnthropicClient
 from app.services.project_specs_service import ProjectSpecsService
 from app.core.firebase_auth import get_current_user
 from app.db.base import db
-from app.utils.llm_logging import log_llm_response, CustomEncoder
-from app.core.config import settings
+from app.utils.llm_logging import DefaultLLMLogger
+from app.utils.llm_logging import CustomEncoder
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/ai-text", tags=["AI Text"])
@@ -89,8 +89,11 @@ async def generate_implementation_prompt(
     It uses AI to generate prompts based on the project specifications.
     """
     try:
-        # Initialize the AI client
-        client = AnthropicClient()
+        # Create the logger implementation
+        llm_logger = DefaultLLMLogger()
+        
+        # Initialize the AI client with the logger
+        client = AnthropicClient(llm_logger)
         
         # Get the database
         database = db.get_db()
@@ -199,25 +202,12 @@ async def generate_implementation_prompt(
         response = client.generate_response(
             messages=messages,
             system=system_message,
-            model=FAST_MODEL
-        )
-        
-        # Parse the response to extract the different prompt types
-        parsed_prompts = extract_prompts_from_response(response)
-        
-        # Log the response for future retrieval using the centralized utility
-        log_llm_response(
-            project_id=request.project_id,
-            response_type="implementation_prompt",
-            response=response,
-            parsed_data=parsed_prompts,
-            category=request.category,
-            metadata={
+            model=FAST_MODEL,
+            log_metadata={
                 "user_id": current_user.get("uid") if current_user else None,
-                "model": FAST_MODEL,
-                "system_message": system_message,
-                "user_message": meta_prompt,
+                "project_id": request.project_id if hasattr(request, "project_id") else "unknown",
                 "project_description": project_description,
+                "category": request.category,
                 "tech_stack": tech_stack,
                 "data_models": data_models,
                 "api_endpoints": api_endpoints,
@@ -225,8 +215,12 @@ async def generate_implementation_prompt(
                 "security_requirements": security_requirements,
                 "architecture_spec": architecture_spec,
                 "additional_user_instruction": request.additional_user_instruction
-            }
+            },
+            response_type="generate_implementation_prompt"
         )
+        
+        # Parse the response to extract the different prompt types
+        parsed_prompts = extract_prompts_from_response(response)
         
         # Convert the parsed prompts to the expected response format
         generated_prompts = []

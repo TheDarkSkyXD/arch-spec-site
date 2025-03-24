@@ -16,7 +16,7 @@ from app.schemas.ai_text import (
 from app.services.ai_service import AnthropicClient, INTELLIGENT_MODEL
 from app.core.firebase_auth import get_current_user
 from app.api.routes.ai_text_utils import extract_data_from_response
-from app.utils.llm_logging import log_llm_response
+from app.utils.llm_logging import DefaultLLMLogger
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/ai-text", tags=["AI Text"])
@@ -30,7 +30,11 @@ async def enhance_test_cases(
     Enhance or generate test cases in Gherkin format.
     """
     try:
-        client = AnthropicClient()
+        # Create the logger implementation
+        llm_logger = DefaultLLMLogger()
+        
+        # Initialize the AI client with the logger
+        client = AnthropicClient(llm_logger)
         
         # Create system message
         system_message = "You are an expert QA engineer specializing in writing Gherkin test cases for software applications."
@@ -57,25 +61,16 @@ async def enhance_test_cases(
         # Generate the tool use response
         messages = [{"role": "user", "content": user_prompt}]
         tools = [print_test_cases_input_schema()]
-        response = client.get_tool_use_response(system_message, tools, messages, model=INTELLIGENT_MODEL)
-        
-        # Log the LLM response
-        log_llm_response(
-            project_id=request.project_id if hasattr(request, "project_id") else "unknown",
-            response_type="enhance_test_cases",
-            response=json.dumps(response),  # Convert response object to string for logging
-            parsed_data=response,  # Store the structured response directly
-            metadata={
+        response = client.get_tool_use_response(system_message, tools, messages, model=INTELLIGENT_MODEL,
+            log_metadata={
                 "user_id": current_user.get("uid") if current_user else None,
-                "model": INTELLIGENT_MODEL,
-                "system_message": system_message,
-                "user_message": user_prompt,
-                "tools": tools,
+                "project_id": request.project_id if hasattr(request, "project_id") else "unknown",
                 "requirements": request.requirements,
                 "features": request.features,
                 "existing_test_cases": request.existing_test_cases,
                 "additional_user_instruction": request.additional_user_instruction
-            }
+            },
+            response_type="enhance_test_cases"
         )
         
         # Extract the response data

@@ -12,7 +12,7 @@ from app.schemas.ai_text import (
 )
 from app.services.ai_service import FAST_MODEL, AnthropicClient
 from app.core.firebase_auth import get_current_user
-from app.utils.llm_logging import log_llm_response
+from app.utils.llm_logging import DefaultLLMLogger
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/ai-text", tags=["AI Text"])
@@ -29,8 +29,11 @@ async def enhance_readme(
     requirements, features, and tech stack, and generates a comprehensive README markdown file.
     """
     try:
-        # Initialize the AI client
-        client = AnthropicClient()
+        # Create the logger implementation
+        llm_logger = DefaultLLMLogger()
+        
+        # Initialize the AI client with the logger
+        client = AnthropicClient(llm_logger)
         
         # Create the system message
         system_message = readme_system_prompt(request.additional_user_instruction)
@@ -48,19 +51,10 @@ async def enhance_readme(
         
         # Generate the response
         messages = [{"role": "user", "content": user_message}]
-        response = client.generate_response(messages, system_message, FAST_MODEL)
-        
-        # Log the LLM response
-        log_llm_response(
-            project_id=request.project_id if hasattr(request, "project_id") else "unknown",
-            response_type="generate_readme",
-            response=response,
-            parsed_data={"enhanced_readme": response.strip()},
-            metadata={
+        response = client.generate_response(messages, system_message, FAST_MODEL,
+            log_metadata={
                 "user_id": current_user.get("uid") if current_user else None,
-                "model": FAST_MODEL,
-                "system_message": system_message,
-                "user_message": user_message,
+                "project_id": request.project_id if hasattr(request, "project_id") else "unknown",
                 "project_name": request.project_name,
                 "project_description": request.project_description,
                 "business_goals": request.business_goals,
@@ -68,7 +62,8 @@ async def enhance_readme(
                 "features": request.features,
                 "tech_stack": request.tech_stack,
                 "additional_user_instruction": request.additional_user_instruction
-            }
+            },
+            response_type="enhance_readme"
         )
         
         # Return the enhanced README

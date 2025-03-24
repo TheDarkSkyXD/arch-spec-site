@@ -11,6 +11,8 @@ from typing import List, Dict, Any, Optional, Generator
 from anthropic import Anthropic
 from anthropic.types import ContentBlockDeltaEvent
 
+from ..utils.llm_logging import LLMLogger
+
 from ..core.config import settings
 
 # Set up logger at module level
@@ -44,8 +46,9 @@ class AnthropicClient():
         temperature: The temperature to use for generating responses.
     """
     
-    def __init__(self) -> None:
-        """Initialize the Anthropic client."""
+    def __init__(self, llm_logger: Optional[LLMLogger] = None) -> None:
+        """Initialize the Anthropic client with an optional logger."""
+        self.llm_logger = llm_logger
         try:
             self.client = Anthropic(api_key=settings.anthropic.api_key)
             self.model = settings.anthropic.model
@@ -61,7 +64,11 @@ class AnthropicClient():
             self.max_tokens = settings.anthropic.max_tokens
             self.temperature = settings.anthropic.temperature
     
-    def generate_response(self, messages: List[Dict[str, str]], system: Optional[str] = None, model: Optional[str] = None) -> str:
+    def generate_response(self, messages: List[Dict[str, str]], system: Optional[str] = None, 
+                          model: Optional[str] = None,
+                          log_metadata: Optional[Dict[str, Any]] = None,
+                          response_type: Optional[str] = None,
+                          ) -> str:
         """Generate a response from Claude given a conversation history.
         
         Args:
@@ -92,14 +99,36 @@ class AnthropicClient():
                 params["system"] = system
                 
             response = self.client.messages.create(**params)
-            # Explicitly check if content exists and has text property
+            result = ""
+            # Extract text from response
             if response.content and len(response.content) > 0 and hasattr(response.content[0], 'text'):
-                return str(response.content[0].text)
-            return ""
+                result = str(response.content[0].text)
+
+            # Log the response if a logger is provided
+            self._log_response(
+                response=response,
+                response_type=response_type,
+                metadata=self._prepare_log_metadata(messages, system, model, log_metadata)
+            )
+
+            return result
         except Exception as e:
+            # Log the error
+            self._log_error(
+                error=e,
+                response_type=response_type,
+                metadata=self._prepare_log_metadata(messages, system, model, log_metadata)
+            )
             raise Exception(f"Error calling Anthropic API: {str(e)}")
     
-    def stream_response(self, messages: List[Dict[str, str]], system: Optional[str] = None, model: Optional[str] = None) -> Generator[str, None, None]:
+    def stream_response(
+        self, 
+        messages: List[Dict[str, str]], 
+        system: Optional[str] = None, 
+        model: Optional[str] = None,
+        log_metadata: Optional[Dict[str, Any]] = None,
+        response_type: str = "stream_response"
+    ) -> Generator[str, None, None]:
         """Stream a response from Claude given a conversation history.
         
         Args:
@@ -108,12 +137,32 @@ class AnthropicClient():
                 and 'content' (the text of the message).
             system: Optional system prompt to provide context to Claude.
             model: Optional model to use for generating responses.
+            log_metadata: Optional metadata to include in the logs.
+            response_type: The type of response for logging purposes.
             
         Yields:
             Chunks of the generated response from Claude.
         
         Raises:
             Exception: If there is an error streaming from the Anthropic API.
+            
+        Sample Usage:
+        ```python
+        # Stream a response
+        for chunk in client.stream_response(
+            messages,
+            system_message,
+            FAST_MODEL,
+            log_metadata={
+                "project_id": request.project_id,
+                "user_id": current_user.get("uid"),
+                # Other relevant metadata
+            },
+            response_type="streamed_explanation"
+        ):
+            # Process each chunk (e.g., send to frontend)
+            yield chunk
+        ```
         """
         if not self.client:
             yield "Error: Anthropic client not available"
@@ -130,15 +179,81 @@ class AnthropicClient():
             
             if system:
                 params["system"] = system
-                
+            
+            # Collect the full response for logging
+            full_response = ""
+            response_obj = None
+            
             with self.client.messages.stream(**params) as stream:
+                # Get the response object to extract metadata later
+                response_obj = stream.response
+                
                 for chunk in stream:
                     if isinstance(chunk, ContentBlockDeltaEvent) and chunk.delta.text:
-                        yield chunk.delta.text
+                        chunk_text = chunk.delta.text
+                        full_response += chunk_text
+                        yield chunk_text
+            
+            # Log the complete response after streaming is done
+            if self.llm_logger and response_obj:
+                metadata = self._prepare_log_metadata(messages, system, model, log_metadata)
+                
+                # Add usage information if available
+                if hasattr(response_obj, 'usage'):
+                    metadata["usage"] = response_obj.usage
+                    
+                # Log the complete response
+                self.llm_logger.log_response(
+                    response_type=response_type,
+                    raw_response=full_response,
+                    project_id=metadata.get("project_id", "unknown"),
+                    metadata=metadata
+                )
+                
         except Exception as e:
+            # Log the error
+            if self.llm_logger:
+                metadata = self._prepare_log_metadata(messages, system, model, log_metadata)
+                self._log_error(e, f"{response_type}_error", metadata)
+                
             raise Exception(f"Error streaming from Anthropic API: {str(e)}")
+        
+    def _extract_tool_use_or_json(self, response) -> Dict[str, Any]:
+        """Helper to extract tool use from a response or fall back to JSON in text."""
+        # Iterate through content blocks to find tool use
+        for content_block in response.content:
+            if content_block.type == "tool_use":
+                # Convert the input to a dictionary to ensure correct return type
+                if hasattr(content_block, 'input') and content_block.input is not None:
+                    # Convert to dict if it's not already a dict
+                    if isinstance(content_block.input, dict):
+                        return dict(content_block.input)
+                    else:
+                        # If it's not a dict, create a dict with the input
+                        return {"result": str(content_block.input)}
+        
+        # If we don't have tool use content, try to extract JSON from text response
+        text_content = None
+        for content_block in response.content:
+            if content_block.type == "text":
+                text_content = content_block.text
+                break
+                
+        if text_content:
+            # Find JSON object in the response
+            start_idx = text_content.find('{')
+            end_idx = text_content.rfind('}') + 1
+            if start_idx >= 0 and end_idx > start_idx:
+                json_str = text_content[start_idx:end_idx]
+                result: Dict[str, Any] = json.loads(json_str)
+                return result
+                
+        return {"error": "Could not parse JSON from response"}
     
-    def get_tool_use_response(self, system_prompt: str, tools: List[Dict[str, Any]], messages: List[Dict[str, str]], model: Optional[str] = None) -> Dict[str, Any]:
+    def get_tool_use_response(self, system_prompt: str, tools: List[Dict[str, Any]], 
+                              messages: List[Dict[str, str]], model: Optional[str] = None,
+                              log_metadata: Optional[Dict[str, Any]] = None,
+                              response_type: Optional[str] = "tool_use_response") -> Dict[str, Any]:
         """Process a response from the Anthropic API that may contain tool use.
         
         This method handles the asynchronous nature of tool use in the Anthropic API.
@@ -172,41 +287,26 @@ class AnthropicClient():
             else:
                 logger.info(f"Params: {params}")
                 response = self.client.messages.create(**params)
+                
+            # Extract tool use or process text content
+            result = self._extract_tool_use_or_json(response)
             
-            logger.info(f"Response: {response.model_dump_json()}")
-
-            # Iterate through content blocks to find tool use
-            for content_block in response.content:
-                if content_block.type == "tool_use":
-                    # Convert the input to a dictionary to ensure correct return type
-                    if hasattr(content_block, 'input') and content_block.input is not None:
-                        # Convert to dict if it's not already a dict
-                        if isinstance(content_block.input, dict):
-                            return dict(content_block.input)
-                        else:
-                            # If it's not a dict, create a dict with the input
-                            return {"result": str(content_block.input)}
+            # Log the response
+            self._log_response(
+                response=response,
+                response_type=response_type,
+                metadata=self._prepare_tool_log_metadata(messages, system_prompt, tools, model, log_metadata)
+            )
             
-            # If we don't have tool use content, try to extract JSON from text response
-            # Find the first text block
-            text_content = None
-            for content_block in response.content:
-                if content_block.type == "text":
-                    text_content = content_block.text
-                    break
-                    
-            if text_content:
-                # Find JSON object in the response
-                start_idx = text_content.find('{')
-                end_idx = text_content.rfind('}') + 1
-                if start_idx >= 0 and end_idx > start_idx:
-                    json_str = text_content[start_idx:end_idx]
-                    result: Dict[str, Any] = json.loads(json_str)
-                    return result
-                    
-            return {"error": "Could not parse JSON from response"}
+            return result
                 
         except Exception as e:
+            # Log the error
+            self._log_error(
+                error=e,
+                response_type=response_type,
+                metadata=self._prepare_tool_log_metadata(messages, system_prompt, tools, model, log_metadata)
+            )
             return {"error": f"Error parsing JSON: {str(e)}"}
     
     async def process_specification(self, spec_data: Dict[str, Any]) -> Dict[str, Any]:
@@ -326,3 +426,83 @@ class AnthropicClient():
         except Exception as e:
             print(f"Error parsing AI content: {str(e)}")
             return original_spec 
+        
+    def _prepare_log_metadata(
+        self, 
+        messages: List[Dict[str, str]], 
+        system: Optional[str], 
+        model: Optional[str],
+        user_metadata: Optional[Dict[str, Any]]
+    ) -> Dict[str, Any]:
+        """Prepare metadata for logging."""
+        metadata = user_metadata or {}
+        metadata.update({
+            "model": model if model else self.model,
+            "system_message": system,
+            "user_message": messages[-1]["content"] if messages and messages[-1]["role"] == "user" else None,
+        })
+        return metadata
+    
+    def _prepare_tool_log_metadata(
+        self, 
+        messages: List[Dict[str, str]], 
+        system_prompt: str, 
+        tools: List[Dict[str, Any]], 
+        model: Optional[str],
+        user_metadata: Optional[Dict[str, Any]]
+    ) -> Dict[str, Any]:
+        """Prepare metadata for tool use logging."""
+        metadata = user_metadata or {}
+        metadata.update({
+            "model": model if model else self.model,
+            "system_message": system_prompt,
+            "user_message": messages[-1]["content"] if messages and messages[-1]["role"] == "user" else None,
+            "tools": tools,
+        })
+        return metadata
+    
+    def _log_response(
+        self, 
+        response: Any, 
+        response_type: str, 
+        metadata: Dict[str, Any]
+    ) -> None:
+        """Log a successful response if a logger is provided."""
+        if not self.llm_logger:
+            return
+            
+        # Extract usage info from response
+        if hasattr(response, 'usage'):
+            metadata["usage"] = response.usage
+        
+        # Get the response as a string for logging
+        response_str = response.model_dump_json() if hasattr(response, 'model_dump_json') else str(response)
+        
+        # Log the response
+        self.llm_logger.log_response(
+            response_type=response_type,
+            raw_response=response_str,
+            project_id=metadata.get("project_id", "unknown"),
+            metadata=metadata
+        )
+    
+    def _log_error(
+        self, 
+        error: Exception, 
+        response_type: str, 
+        metadata: Dict[str, Any]
+    ) -> None:
+        """Log an error if a logger is provided."""
+        if not self.llm_logger:
+            return
+            
+        # Add error information to metadata
+        metadata["error"] = str(error)
+        
+        # Log the error
+        self.llm_logger.log_response(
+            response_type=f"{response_type}_error",
+            raw_response=f"Error: {str(error)}",
+            project_id=metadata.get("project_id", "unknown"),
+            metadata=metadata
+        )
