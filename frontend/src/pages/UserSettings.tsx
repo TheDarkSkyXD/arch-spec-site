@@ -52,7 +52,9 @@ const UserSettingsPage = () => {
         });
 
         // Apply theme setting to the document
-        applyTheme((userSettings?.theme as ColorScheme) || defaultSettings.theme);
+        applyTheme(
+          (userSettings?.theme as ColorScheme) || defaultSettings.theme
+        );
       } catch (error) {
         console.error("Error loading settings:", error);
         setError("Failed to load settings. Using default settings.");
@@ -66,7 +68,8 @@ const UserSettingsPage = () => {
 
           // Apply theme setting to the document
           applyTheme(
-            (currentUser.profile.settings?.theme as ColorScheme) || defaultSettings.theme
+            (currentUser.profile.settings?.theme as ColorScheme) ||
+              defaultSettings.theme
           );
         }
       } finally {
@@ -191,7 +194,7 @@ const UserSettingsPage = () => {
         </Card>
 
         {/* Notification Settings */}
-        <Card>
+        {/* <Card>
           <h2 className="text-xl font-semibold mb-4">Notifications</h2>
 
           <div className="space-y-4">
@@ -221,7 +224,7 @@ const UserSettingsPage = () => {
               />
             </div>
           </div>
-        </Card>
+        </Card> */}
 
         {/* Save Button */}
         <div className="flex justify-end">

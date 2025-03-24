@@ -15,7 +15,7 @@ const ProfileLayout = ({ children, title }: ProfileLayoutProps) => {
 
   const navItems = [
     { name: "Profile", path: "/profile" },
-    { name: "Plan", path: "/subscription-plan" },
+    { name: "Subscription", path: "/subscription-plan" },
     { name: "Settings", path: "/user-settings" },
     { name: "Security", path: "/security-settings" },
   ];
