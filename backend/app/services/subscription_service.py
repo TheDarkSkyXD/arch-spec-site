@@ -98,14 +98,6 @@ class SubscriptionService:
                         customer_id="5351054"  # Customer ID from logs
                     )
             
-            # TODO: In a full implementation, you would check your database first for a 
-            # subscription ID associated with this user's email
-            # subscription_id = await db.get_latest_subscription_id_for_email(email)
-            # if subscription_id:
-            #     subscription = await lemonsqueezy_service.get_subscription_by_id(subscription_id)
-            #     if subscription and subscription.status in ['active', 'on_trial']:
-            #         return subscription
-            
             # Get customer
             customer = await lemonsqueezy_service.get_customer_by_email(email)
             
@@ -135,8 +127,6 @@ class SubscriptionService:
             
             if active_subscription:
                 logger.info(f"Found active subscription: {active_subscription.id} with status {active_subscription.status}")
-                # TODO: In a full implementation, you would store this in your database:
-                # await db.store_subscription_for_email(email, active_subscription.id, active_subscription.status)
             else:
                 logger.warning(f"No active subscription found for customer ID: {customer.id}")
             
