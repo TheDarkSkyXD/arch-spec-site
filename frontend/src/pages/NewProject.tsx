@@ -102,7 +102,7 @@ const NewProject = () => {
   // Load subscription data when component mounts
   useEffect(() => {
     const loadUserProfile = async () => {
-      await userApi.getCurrentUser();
+      await userApi.getCurrentUserProfile();
       refreshSubscriptionData();
     };
     loadUserProfile();

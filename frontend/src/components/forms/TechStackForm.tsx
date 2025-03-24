@@ -48,6 +48,7 @@ import { projectsService } from "../../services/projectsService";
 import { requirementsService } from "../../services/requirementsService";
 import { useSubscription } from "../../contexts/SubscriptionContext";
 import { PremiumFeatureBadge, ProcessingOverlay } from "../ui/index";
+import { useUserProfile } from "../../hooks/useUserProfile";
 
 interface TechStackFormProps {
   initialData?: ProjectTechStack;
@@ -62,6 +63,7 @@ const TechStackForm = ({
 }: TechStackFormProps) => {
   const { showToast } = useToast();
   const { hasAIFeatures } = useSubscription();
+  const { aiCreditsRemaining } = useUserProfile();
   // State for options
   const [techStackOptions, setTechStackOptions] =
     useState<TechStackData | null>(null);
@@ -349,6 +351,16 @@ const TechStackForm = ({
         title: "Error",
         description: "Project must be saved before tech stack can be enhanced",
         type: "error",
+      });
+      return;
+    }
+
+    // Check if user has remaining AI credits
+    if (aiCreditsRemaining <= 0) {
+      showToast({
+        title: "Insufficient AI Credits",
+        description: "You've used all your AI credits for this billing period",
+        type: "warning",
       });
       return;
     }

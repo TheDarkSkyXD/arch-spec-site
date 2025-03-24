@@ -21,6 +21,7 @@ import Input from "../ui/Input";
 import Card from "../ui/Card";
 import { PremiumFeatureBadge, ProcessingOverlay } from "../ui/index";
 import AIInstructionsModal from "../ui/AIInstructionsModal";
+import { useUserProfile } from "../../hooks/useUserProfile";
 
 interface RequirementsFormProps {
   initialData?: Partial<Requirements>;
@@ -35,6 +36,7 @@ export default function RequirementsForm({
 }: RequirementsFormProps) {
   const { showToast } = useToast();
   const { hasAIFeatures } = useSubscription();
+  const { aiCreditsRemaining } = useUserProfile();
   const [functionalReqs, setFunctionalReqs] = useState<string[]>(
     initialData?.functional || []
   );
@@ -203,6 +205,16 @@ export default function RequirementsForm({
       return;
     }
 
+    // Check if user has remaining AI credits
+    if (aiCreditsRemaining <= 0) {
+      showToast({
+        title: "Insufficient AI Credits",
+        description: "You've used all your AI credits for this billing period",
+        type: "warning",
+      });
+      return;
+    }
+
     // Check if user has access to AI features
     if (!hasAIFeatures) {
       showToast({
@@ -247,6 +259,16 @@ export default function RequirementsForm({
         description:
           "Project must be saved before requirements can be enhanced",
         type: "error",
+      });
+      return;
+    }
+
+    // Check if user has remaining AI credits
+    if (aiCreditsRemaining <= 0) {
+      showToast({
+        title: "Insufficient AI Credits",
+        description: "You've used all your AI credits for this billing period",
+        type: "warning",
       });
       return;
     }
@@ -725,7 +747,8 @@ export default function RequirementsForm({
               isEnhancing ||
               isAddingRequirements ||
               !projectId ||
-              !hasAIFeatures
+              !hasAIFeatures ||
+              (functionalReqs.length === 0 && nonFunctionalReqs.length === 0)
             }
             variant={hasAIFeatures ? "outline" : "ghost"}
             className={`flex items-center gap-2 relative ${

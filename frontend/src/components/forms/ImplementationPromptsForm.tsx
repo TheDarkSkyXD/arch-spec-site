@@ -28,7 +28,7 @@ import { PremiumFeatureBadge, ProcessingOverlay } from "../ui/index";
 import { Textarea } from "../ui/textarea";
 import { Select } from "../ui/select";
 import AIInstructionsModal from "../ui/AIInstructionsModal";
-
+import { useUserProfile } from "../../hooks/useUserProfile";
 interface ImplementationPromptsFormProps {
   initialData?: Partial<ImplementationPrompts>;
   projectId?: string;
@@ -42,6 +42,7 @@ export default function ImplementationPromptsForm({
 }: ImplementationPromptsFormProps) {
   const { showToast } = useToast();
   const { hasAIFeatures } = useSubscription();
+  const { aiCreditsRemaining } = useUserProfile();
   const [promptsData, setPromptsData] = useState<
     Record<string, ImplementationPrompt[]>
   >(initialData?.data || {});
@@ -392,6 +393,16 @@ export default function ImplementationPromptsForm({
   };
 
   const openAIModal = (category: string) => {
+    // Check if user has remaining AI credits
+    if (aiCreditsRemaining <= 0) {
+      showToast({
+        title: "Insufficient AI Credits",
+        description: "You've used all your AI credits for this billing period",
+        type: "warning",
+      });
+      return;
+    }
+
     if (!projectId) {
       const errorMessage =
         "Project must be saved before prompts can be generated";

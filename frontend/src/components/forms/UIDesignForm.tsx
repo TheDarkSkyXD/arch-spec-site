@@ -20,7 +20,7 @@ import { projectsService } from "../../services/projectsService";
 import { featuresService } from "../../services/featuresService";
 import { PremiumFeatureBadge, ProcessingOverlay } from "../ui/index";
 import AIInstructionsModal from "../ui/AIInstructionsModal";
-
+import { useUserProfile } from "../../hooks/useUserProfile";
 // Import shadcn UI components
 import Button from "../ui/Button";
 import Input from "../ui/Input";
@@ -154,6 +154,7 @@ export default function UIDesignForm({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const [copied, setCopied] = useState<boolean>(false);
+  const { aiCreditsRemaining } = useUserProfile();
 
   // Add state for AI enhancement
   const [isEnhancing, setIsEnhancing] = useState<boolean>(false);
@@ -237,7 +238,17 @@ export default function UIDesignForm({
 
   // Function to open the AI design enhancement modal
   const openAIModal = () => {
-    // Return early if the user doesn't have access to AI features
+    // Check if user has remaining AI credits
+    if (aiCreditsRemaining <= 0) {
+      showToast({
+        title: "Insufficient AI Credits",
+        description: "You've used all your AI credits for this billing period",
+        type: "warning",
+      });
+      return;
+    }
+
+    // Check if user has access to AI features
     if (!hasAIFeatures) {
       showToast({
         title: "Premium Feature",

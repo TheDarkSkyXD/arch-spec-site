@@ -22,7 +22,7 @@ import { requirementsService } from "../../services/requirementsService";
 import { FeatureModule, featuresService } from "../../services/featuresService";
 import { useSubscription } from "../../contexts/SubscriptionContext";
 import AIInstructionsModal from "../ui/AIInstructionsModal";
-
+import { useUserProfile } from "../../hooks/useUserProfile";
 // Import shadcn UI components
 import Button from "../ui/Button";
 import Input from "../ui/Input";
@@ -57,6 +57,7 @@ export default function TestCasesForm({
 }: TestCasesFormProps) {
   const { showToast } = useToast();
   const { hasAIFeatures } = useSubscription();
+  const { aiCreditsRemaining } = useUserProfile();
   const [testCases, setTestCases] = useState<GherkinTestCase[]>(
     initialData?.testCases || []
   );
@@ -438,6 +439,16 @@ export default function TestCasesForm({
 
   // Function to open the generate test cases modal
   const openGenerateModal = () => {
+    // Check if user has remaining AI credits
+    if (aiCreditsRemaining <= 0) {
+      showToast({
+        title: "Insufficient AI Credits",
+        description: "You've used all your AI credits for this billing period",
+        type: "warning",
+      });
+      return;
+    }
+
     if (!projectId) {
       showToast({
         title: "Error",
@@ -471,6 +482,16 @@ export default function TestCasesForm({
 
   // Function to open the enhance test cases modal
   const openEnhanceModal = () => {
+    // Check if user has remaining AI credits
+    if (aiCreditsRemaining <= 0) {
+      showToast({
+        title: "Insufficient AI Credits",
+        description: "You've used all your AI credits for this billing period",
+        type: "warning",
+      });
+      return;
+    }
+
     if (!projectId) {
       showToast({
         title: "Error",

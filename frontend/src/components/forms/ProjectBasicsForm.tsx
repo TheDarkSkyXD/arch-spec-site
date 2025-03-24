@@ -15,6 +15,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { useSubscription } from "../../contexts/SubscriptionContext";
+import { useUserProfile } from "../../hooks/useUserProfile";
 
 // Import shadcn UI components
 import { Label } from "../ui/label";
@@ -53,6 +54,7 @@ const ProjectBasicsForm = ({
   const [isEnhancingGoals, setIsEnhancingGoals] = useState(false);
   const [isEnhancingTargetUsers, setIsEnhancingTargetUsers] = useState(false);
   const { showToast } = useToast();
+  const { aiCreditsRemaining } = useUserProfile();
   const { hasAIFeatures, isLoading: isSubscriptionLoading } = useSubscription();
 
   // Add local loading state with forced delay
@@ -153,6 +155,16 @@ const ProjectBasicsForm = ({
 
   // Function to open AI instructions modal
   const openAIInstructionsModal = (modal: ActiveModal) => {
+    // Check if user has remaining AI credits
+    if (aiCreditsRemaining <= 0) {
+      showToast({
+        title: "Insufficient AI Credits",
+        description: "You've used all your AI credits for this billing period",
+        type: "warning",
+      });
+      return;
+    }
+
     // Check if user has access to AI features
     if (!hasAIFeatures) {
       showToast({

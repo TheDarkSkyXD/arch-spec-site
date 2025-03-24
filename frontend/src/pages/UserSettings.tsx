@@ -42,7 +42,7 @@ const UserSettingsPage = () => {
 
       try {
         // Try to load settings from API directly
-        const profile = await userApi.getCurrentUser();
+        const profile = await userApi.getCurrentUserProfile();
 
         // Merge default settings with user settings from profile
         const userSettings = profile.settings as Record<string, unknown>;

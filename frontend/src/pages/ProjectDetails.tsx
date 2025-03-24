@@ -63,16 +63,11 @@ const ProjectDetails = () => {
   // Use the hooks
   const { data: requirements, isLoading: requirementsLoading } =
     useRequirements(id);
-
   const { data: features, isLoading: featuresLoading } = useFeatures(id);
-
   const { data: pages, isLoading: pagesLoading } = usePages(id);
-
   const { data: dataModel, isLoading: dataModelLoading } = useDataModel(id);
-
   const { data: apiEndpoints, isLoading: apiEndpointsLoading } =
     useApiEndpoints(id);
-
   const { data: testCases, isLoading: testCasesLoading } = useTestCases(id);
 
   // Add UI Design hook
@@ -86,7 +81,7 @@ const ProjectDetails = () => {
 
   useEffect(() => {
     const loadUserProfile = async () => {
-      await userApi.getCurrentUser();
+      await userApi.getCurrentUserProfile();
       refreshSubscriptionData();
     };
     loadUserProfile();

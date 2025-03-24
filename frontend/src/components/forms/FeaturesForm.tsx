@@ -34,7 +34,7 @@ import { Checkbox } from "../ui/checkbox";
 import { Select } from "../ui/select";
 import Card from "../ui/Card";
 import { Label } from "../ui/label";
-
+import { useUserProfile } from "../../hooks/useUserProfile";
 interface FeaturesFormProps {
   initialData?: FeaturesData;
   projectId?: string;
@@ -48,6 +48,7 @@ export default function FeaturesForm({
 }: FeaturesFormProps) {
   const { showToast } = useToast();
   const { hasAIFeatures } = useSubscription();
+  const { aiCreditsRemaining } = useUserProfile();
   const [coreModules, setCoreModules] = useState<FeatureModule[]>(
     initialData?.coreModules || []
   );
@@ -335,6 +336,16 @@ export default function FeaturesForm({
 
   // Function to open the enhance features modal
   const openEnhanceModal = () => {
+    // Check if user has remaining AI credits
+    if (aiCreditsRemaining <= 0) {
+      showToast({
+        title: "Insufficient AI Credits",
+        description: "You've used all your AI credits for this billing period",
+        type: "warning",
+      });
+      return;
+    }
+
     if (!hasAIFeatures) {
       showToast({
         title: "Premium Feature",
@@ -376,6 +387,16 @@ export default function FeaturesForm({
 
   // Function to open the add features modal
   const openAddModal = () => {
+    // Check if user has remaining AI credits
+    if (aiCreditsRemaining <= 0) {
+      showToast({
+        title: "Insufficient AI Credits",
+        description: "You've used all your AI credits for this billing period",
+        type: "warning",
+      });
+      return;
+    }
+
     if (!hasAIFeatures) {
       showToast({
         title: "Premium Feature",
@@ -692,7 +713,11 @@ export default function FeaturesForm({
               type="button"
               onClick={openEnhanceModal}
               disabled={
-                isEnhancing || isAddingFeatures || !projectId || !hasAIFeatures
+                isEnhancing ||
+                isAddingFeatures ||
+                !projectId ||
+                !hasAIFeatures ||
+                coreModules.length === 0
               }
               variant={hasAIFeatures ? "outline" : "ghost"}
               className={`flex items-center gap-2 relative ${

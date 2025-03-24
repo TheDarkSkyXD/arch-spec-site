@@ -27,7 +27,7 @@ const Profile = () => {
 
       try {
         // Attempt to reload the profile from API
-        const profile = await userApi.getCurrentUser();
+        const profile = await userApi.getCurrentUserProfile();
 
         // Update form data with fresh profile data
         setFormData({

@@ -47,6 +47,7 @@ import {
 import { Textarea } from "../ui/textarea";
 import { PremiumFeatureBadge, ProcessingOverlay } from "../ui/index";
 import AIInstructionsModal from "../ui/AIInstructionsModal";
+import { useUserProfile } from "../../hooks/useUserProfile";
 
 interface DataModelFormProps {
   initialData?: Partial<DataModel>;
@@ -60,6 +61,7 @@ export default function DataModelForm({
   onSuccess,
 }: DataModelFormProps) {
   const { hasAIFeatures } = useSubscription();
+  const { aiCreditsRemaining } = useUserProfile();
   const { showToast } = useToast();
   const [dataModel, setDataModel] = useState<DataModel>({
     entities: [],
@@ -519,7 +521,17 @@ export default function DataModelForm({
 
   // Function to open the enhance data model modal
   const openEnhanceModal = () => {
-    // Return early if the user doesn't have access to AI features
+    // Check if user has remaining AI credits
+    if (aiCreditsRemaining <= 0) {
+      showToast({
+        title: "Insufficient AI Credits",
+        description: "You've used all your AI credits for this billing period",
+        type: "warning",
+      });
+      return;
+    }
+
+    // Check if user has access to AI features
     if (!hasAIFeatures) {
       showToast({
         title: "Premium Feature",
@@ -553,7 +565,17 @@ export default function DataModelForm({
 
   // Function to open the add entities modal
   const openAddModal = () => {
-    // Return early if the user doesn't have access to AI features
+    // Check if user has remaining AI credits
+    if (aiCreditsRemaining <= 0) {
+      showToast({
+        title: "Insufficient AI Credits",
+        description: "You've used all your AI credits for this billing period",
+        type: "warning",
+      });
+      return;
+    }
+
+    // Check if user has access to AI features
     if (!hasAIFeatures) {
       showToast({
         title: "Premium Feature",
@@ -815,7 +837,8 @@ export default function DataModelForm({
                     isEnhancing ||
                     isAddingEntities ||
                     !projectId ||
-                    !hasAIFeatures
+                    !hasAIFeatures ||
+                    dataModel.entities.length === 0
                   }
                   variant={hasAIFeatures ? "outline" : "ghost"}
                   className={`flex items-center gap-2 relative ${

@@ -24,7 +24,7 @@ import { aiService } from "../../services/aiService";
 import { PageComponent } from "../../services/aiService";
 import { useSubscription } from "../../contexts/SubscriptionContext";
 import AIInstructionsModal from "../ui/AIInstructionsModal";
-
+import { useUserProfile } from "../../hooks/useUserProfile";
 // Import shadcn UI components
 import Button from "../ui/Button";
 import Input from "../ui/Input";
@@ -45,6 +45,7 @@ export default function PagesForm({
 }: PagesFormProps) {
   const { showToast } = useToast();
   const { hasAIFeatures } = useSubscription();
+  const { aiCreditsRemaining } = useUserProfile();
   const [publicPages, setPublicPages] = useState<PageComponent[]>(
     initialData?.public || []
   );
@@ -193,7 +194,17 @@ export default function PagesForm({
 
   // Function to open the enhance pages modal
   const openEnhanceModal = () => {
-    // Return early if the user doesn't have access to AI features
+    // Check if user has remaining AI credits
+    if (aiCreditsRemaining <= 0) {
+      showToast({
+        title: "Insufficient AI Credits",
+        description: "You've used all your AI credits for this billing period",
+        type: "warning",
+      });
+      return;
+    }
+
+    // Check if user has access to AI features
     if (!hasAIFeatures) {
       showToast({
         title: "Premium Feature",
@@ -235,7 +246,17 @@ export default function PagesForm({
 
   // Function to open the add pages modal
   const openAddModal = () => {
-    // Return early if the user doesn't have access to AI features
+    // Check if user has remaining AI credits
+    if (aiCreditsRemaining <= 0) {
+      showToast({
+        title: "Insufficient AI Credits",
+        description: "You've used all your AI credits for this billing period",
+        type: "warning",
+      });
+      return;
+    }
+
+    // Check if user has access to AI features
     if (!hasAIFeatures) {
       showToast({
         title: "Premium Feature",
@@ -1061,7 +1082,13 @@ export default function PagesForm({
             type="button"
             onClick={openEnhanceModal}
             disabled={
-              isEnhancing || isAddingPages || !projectId || !hasAIFeatures
+              isEnhancing ||
+              isAddingPages ||
+              !projectId ||
+              !hasAIFeatures ||
+              (publicPages.length === 0 &&
+                authenticatedPages.length === 0 &&
+                adminPages.length === 0)
             }
             variant={hasAIFeatures ? "outline" : "ghost"}
             className={`flex items-center gap-2 relative ${

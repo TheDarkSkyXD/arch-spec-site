@@ -137,7 +137,7 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
 
   // Function to refresh subscription data
   const refreshSubscriptionData = async (): Promise<void> => {
-    const user = await userApi.getCurrentUser();
+    const user = await userApi.getCurrentUserProfile();
     if (user) {
       setHasAIFeatures(user.plan === "premium" || user.plan === "open_source");
       setHasPremiumTemplates(user.plan === "premium");

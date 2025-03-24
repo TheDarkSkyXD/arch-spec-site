@@ -23,6 +23,7 @@ import { dataModelService } from "../../services/dataModelService";
 import { requirementsService } from "../../services/requirementsService";
 import { useSubscription } from "../../contexts/SubscriptionContext";
 import AIInstructionsModal from "../ui/AIInstructionsModal";
+import { useUserProfile } from "../../hooks/useUserProfile";
 
 // Import shadcn UI components
 import Button from "../ui/Button";
@@ -46,6 +47,7 @@ export default function ApiEndpointsForm({
 }: ApiEndpointsFormProps) {
   const { showToast } = useToast();
   const { hasAIFeatures } = useSubscription();
+  const { aiCreditsRemaining } = useUserProfile();
   const [endpoints, setEndpoints] = useState<ApiEndpoint[]>(
     initialData?.endpoints || []
   );
@@ -83,6 +85,16 @@ export default function ApiEndpointsForm({
 
   // Function to open enhance endpoints modal
   const openEnhanceModal = () => {
+    // Check if user has remaining AI credits
+    if (aiCreditsRemaining <= 0) {
+      showToast({
+        title: "Insufficient AI Credits",
+        description: "You've used all your AI credits for this billing period",
+        type: "warning",
+      });
+      return;
+    }
+
     if (!projectId) {
       showToast({
         title: "Error",
@@ -125,6 +137,16 @@ export default function ApiEndpointsForm({
 
   // Function to open add endpoints modal
   const openAddModal = () => {
+    // Check if user has remaining AI credits
+    if (aiCreditsRemaining <= 0) {
+      showToast({
+        title: "Insufficient AI Credits",
+        description: "You've used all your AI credits for this billing period",
+        type: "warning",
+      });
+      return;
+    }
+
     if (!projectId) {
       showToast({
         title: "Error",
@@ -671,7 +693,11 @@ export default function ApiEndpointsForm({
             type="button"
             onClick={openEnhanceModal}
             disabled={
-              isEnhancing || isAddingEndpoints || !projectId || !hasAIFeatures
+              isEnhancing ||
+              isAddingEndpoints ||
+              !projectId ||
+              !hasAIFeatures ||
+              endpoints.length === 0
             }
             variant={hasAIFeatures ? "outline" : "ghost"}
             className={`flex items-center gap-2 relative ${

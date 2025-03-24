@@ -133,7 +133,7 @@ const SubscriptionPage = () => {
               console.log(
                 "Updating user profile with subscription information"
               );
-              const userProfile = await userApi.getCurrentUser();
+              const userProfile = await userApi.getCurrentUserProfile();
 
               // Only update if subscription ID doesn't match or plan is not premium
               if (
