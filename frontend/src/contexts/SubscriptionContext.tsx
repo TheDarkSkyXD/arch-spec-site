@@ -5,7 +5,7 @@ import React, {
   useEffect,
   ReactNode,
 } from "react";
-import { useAuth } from "./AuthContext";
+import { useAuth } from "./index";
 import { subscriptionService } from "../services/subscriptionService";
 import { userApi } from "../api/userApi";
 
