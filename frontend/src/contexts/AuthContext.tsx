@@ -25,6 +25,7 @@ interface AuthContextType {
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
+  signInWithGitHub: () => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   sendPasswordResetEmail: (email: string) => Promise<void>;
@@ -36,6 +37,7 @@ export const AuthContext = createContext<AuthContextType>({
   loading: true,
   signIn: async () => {},
   signInWithGoogle: async () => {},
+  signInWithGitHub: async () => {},
   signUp: async () => {},
   signOut: async () => {},
   sendPasswordResetEmail: async () => {},
@@ -114,6 +116,21 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
+  // Sign in with GitHub
+  const signInWithGitHub = async () => {
+    setLoading(true);
+
+    try {
+      // Sign in with GitHub via Firebase
+      await authService.signInWithGitHub();
+
+      // Auth state listener will handle setting the user
+    } catch (error) {
+      setLoading(false);
+      throw error;
+    }
+  };
+
   // Sign up with email and password
   const signUp = async (email: string, password: string) => {
     setLoading(true);
@@ -155,6 +172,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     loading,
     signIn,
     signInWithGoogle,
+    signInWithGitHub,
     signUp,
     signOut,
     sendPasswordResetEmail,

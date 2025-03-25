@@ -7,6 +7,7 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   sendPasswordResetEmail,
+  GithubAuthProvider,
 } from "firebase/auth";
 import { auth } from "../firebase/config";
 import { getAuthErrorMessage } from "../utils/authErrorHandler";
@@ -76,6 +77,20 @@ export const signUpWithEmail = async (
 export const signInWithGoogle = async (): Promise<User> => {
   try {
     const provider = new GoogleAuthProvider();
+    const userCredential = await signInWithPopup(auth, provider);
+    return await mapFirebaseUser(userCredential.user);
+  } catch (error) {
+    // Use the error handler utility to get a user-friendly message
+    // Remove console.error to prevent leaking implementation details
+    const errorMessage = getAuthErrorMessage(error);
+    throw new Error(errorMessage);
+  }
+};
+
+// Sign in with GitHub
+export const signInWithGitHub = async (): Promise<User> => {
+  try {
+    const provider = new GithubAuthProvider();
     const userCredential = await signInWithPopup(auth, provider);
     return await mapFirebaseUser(userCredential.user);
   } catch (error) {
