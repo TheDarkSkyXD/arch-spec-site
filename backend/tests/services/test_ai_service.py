@@ -3,7 +3,7 @@
 import pytest
 from unittest.mock import patch, MagicMock
 
-from app.services.ai_service import AnthropicClient, SetEncoder
+from app.services.ai_service import AIService, SetEncoder
 from anthropic import Anthropic
 
 
@@ -23,8 +23,8 @@ def test_set_encoder():
 
 @patch("anthropic.Anthropic")
 def test_anthropic_client_init(mock_anthropic):
-    """Test initializing the AnthropicClient."""
-    client = AnthropicClient()
+    """Test initializing the AIService."""
+    client = AIService()
     
     # Check that client is initialized with the correct attributes
     # Instead of checking equality with the mock, check that it's an instance of Anthropic
@@ -36,7 +36,7 @@ def test_anthropic_client_init(mock_anthropic):
 
 
 @pytest.mark.asyncio
-@patch.object(AnthropicClient, "generate_response")
+@patch.object(AIService, "generate_response")
 async def test_process_specification(mock_generate_response):
     """Test processing a specification."""
     # Setup mock
@@ -74,7 +74,7 @@ async def test_process_specification(mock_generate_response):
     """
     
     # Create client and test
-    client = AnthropicClient()
+    client = AIService()
     
     # Create test specification
     spec = {
@@ -108,7 +108,7 @@ async def test_process_specification(mock_generate_response):
 
 def test_generate_prompt():
     """Test generating a prompt."""
-    client = AnthropicClient()
+    client = AIService()
     
     # Create test specification
     spec = {
@@ -152,7 +152,7 @@ def test_get_tool_use_response_with_tool_use(mock_anthropic):
     mock_client.messages.create.return_value = mock_response
     
     # Create client and test parameters
-    client = AnthropicClient()
+    client = AIService()
     # Replace the real client with our mock
     client.client = mock_client
     
@@ -193,7 +193,7 @@ def test_get_tool_use_response_fallback_to_json(mock_anthropic):
     mock_client.messages.create.return_value = mock_response
     
     # Create client and test parameters
-    client = AnthropicClient()
+    client = AIService()
     # Replace the real client with our mock
     client.client = mock_client
     
@@ -217,7 +217,7 @@ def test_get_tool_use_response_error_handling(mock_anthropic):
     mock_client.messages.create.side_effect = Exception("Test error")
     
     # Create client and test parameters
-    client = AnthropicClient()
+    client = AIService()
     # Replace the real client with our mock
     client.client = mock_client
     
