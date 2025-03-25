@@ -59,20 +59,30 @@ export async function generateMarkdownZip(
 ): Promise<Blob> {
   const zip = new JSZip();
 
-  // Add each markdown file to the zip
+  // Create a specs folder for all specification documents
+  const specsFolder = zip.folder("specs");
+
+  if (!specsFolder) {
+    throw new Error("Failed to create specs folder in zip file");
+  }
+
+  // Add each markdown file to the specs folder
   if (project) {
     const basicsMarkdown = generateProjectBasicsMarkdown(project);
-    zip.file(generateFileName(project.name, "basics"), basicsMarkdown);
+    specsFolder.file(generateFileName(project.name, "basics"), basicsMarkdown);
   }
 
   if (techStack) {
     const techStackMarkdown = generateTechStackMarkdown(techStack);
-    zip.file(generateFileName(project.name, "tech-stack"), techStackMarkdown);
+    specsFolder.file(
+      generateFileName(project.name, "tech-stack"),
+      techStackMarkdown
+    );
   }
 
   if (requirements) {
     const requirementsMarkdown = generateRequirementsMarkdown(requirements);
-    zip.file(
+    specsFolder.file(
       generateFileName(project.name, "requirements"),
       requirementsMarkdown
     );
@@ -80,22 +90,28 @@ export async function generateMarkdownZip(
 
   if (features) {
     const featuresMarkdown = generateFeaturesMarkdown(features);
-    zip.file(generateFileName(project.name, "features"), featuresMarkdown);
+    specsFolder.file(
+      generateFileName(project.name, "features"),
+      featuresMarkdown
+    );
   }
 
   if (pages) {
     const pagesMarkdown = generatePagesMarkdown(pages);
-    zip.file(generateFileName(project.name, "pages"), pagesMarkdown);
+    specsFolder.file(generateFileName(project.name, "pages"), pagesMarkdown);
   }
 
   if (dataModel) {
     const dataModelMarkdown = generateDataModelMarkdown(dataModel);
-    zip.file(generateFileName(project.name, "data-model"), dataModelMarkdown);
+    specsFolder.file(
+      generateFileName(project.name, "data-model"),
+      dataModelMarkdown
+    );
   }
 
   if (apiEndpoints) {
     const apiEndpointsMarkdown = generateApiEndpointsMarkdown(apiEndpoints);
-    zip.file(
+    specsFolder.file(
       generateFileName(project.name, "api-endpoints"),
       apiEndpointsMarkdown
     );
@@ -103,13 +119,19 @@ export async function generateMarkdownZip(
 
   if (testCases) {
     const testCasesMarkdown = generateTestCasesMarkdown(testCases);
-    zip.file(generateFileName(project.name, "test-cases"), testCasesMarkdown);
+    specsFolder.file(
+      generateFileName(project.name, "test-cases"),
+      testCasesMarkdown
+    );
   }
 
   // UI Design markdown
   if (uiDesign) {
     const uiDesignMarkdown = generateUIDesignMarkdown(uiDesign);
-    zip.file(generateFileName(project.name, "ui-design"), uiDesignMarkdown);
+    specsFolder.file(
+      generateFileName(project.name, "ui-design"),
+      uiDesignMarkdown
+    );
   }
 
   // Implementation Prompts markdown
@@ -117,7 +139,10 @@ export async function generateMarkdownZip(
     const implementationPromptsMarkdown = generateImplementationPromptsMarkdown(
       implementationPrompts
     );
-    zip.file("implementation-prompts.md", implementationPromptsMarkdown);
+    specsFolder.file(
+      "implementation-prompts.md",
+      implementationPromptsMarkdown
+    );
   }
 
   // Initialize readme variable
@@ -130,11 +155,18 @@ export async function generateMarkdownZip(
     `- Tech Stack\n` +
     `- Requirements\n` +
     `- Features\n` +
+    `- UI Design\n\n` +
     `- Pages\n` +
     `- Data Model\n` +
     `- API Endpoints\n` +
     `- Test Cases\n` +
-    `- UI Design\n\n` +
+    `- Implementation Prompts\n\n` +
+    `## How to Use\n\n` +
+    `This zip file contains all the markdown files for the ${project.name} project specification.\n\n` +
+    `Once unzipped, open the folder using VS Code or a similar IDE to start working on the project.\n\n` +
+    `Use the prompts in the \`implementation-prompts.md\` file to guide the AI in implementing the project.\n\n` +
+    `Add relevant spec files as part of the prompt context when asking the AI to implement the project.\n\n` +
+    `All specification files are located in the \`specs/\` folder.\n\n` +
     `Generated on: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`;
 
   try {

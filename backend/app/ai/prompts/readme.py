@@ -29,6 +29,14 @@ The README should include:
 6. Summary of the technology stack
 7. Information about the specification documents available
 8. Any other relevant details that would help someone understand the project
+9. Add a How to Use section to explain how to use the specifications to implement the project. 
+For example, 
+    ## How to Use
+    The zip file contains all the markdown files for the project specification.
+    Once unzipped, open the folder using Cursor IDE, Windsurf, VS Code or any other IDE with AI assistance to start working on the project.
+    Use the prompts in the \`implementation-prompts.md\` file to guide the AI in implementing the project.
+    Add relevant spec files as part of the prompt context when asking the AI to implement the project.
+    All specification files are located in the \`specs/\` folder.
 
 Format the README in proper Markdown with appropriate headers, lists, and emphasis.
 Make the README professional, informative, and visually well-organized.

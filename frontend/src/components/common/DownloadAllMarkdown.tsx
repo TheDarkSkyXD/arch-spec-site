@@ -132,7 +132,7 @@ const DownloadAllMarkdown = ({
       const sanitizedName = project.name
         .toLowerCase()
         .replace(/[^a-z0-9]/g, "-");
-      a.download = `${sanitizedName}-specification.zip`;
+      a.download = `${sanitizedName}.zip`;
 
       document.body.appendChild(a);
       a.click();
@@ -143,7 +143,7 @@ const DownloadAllMarkdown = ({
 
       showToast({
         title: "Downloaded!",
-        description: `Project specification downloaded as ${sanitizedName}-specification.zip`,
+        description: `Project specification downloaded as ${sanitizedName}.zip`,
         type: "success",
       });
     } catch (err) {
