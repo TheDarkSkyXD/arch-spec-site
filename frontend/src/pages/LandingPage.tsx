@@ -204,6 +204,7 @@ const LandingPage = () => {
                     <li>✅ Free manual data entry for all spec sections</li>
                     <li>✅ One template available (more coming soon)</li>
                     <li>✅ LemonSqueezy payment integration</li>
+                    <li>✅ AI credit-based plan</li>
                   </ul>
                 </div>
               </div>
@@ -231,7 +232,6 @@ const LandingPage = () => {
                     In Development
                   </h3>
                   <ul className="mt-2 text-base text-slate-500 dark:text-slate-300 space-y-2">
-                    <li>⏳ AI credit-based plans</li>
                     <li>⏳ Optimized AI calls (batching)</li>
                     <li>⏳ Intelligent knowledge graphs for gaps detection</li>
                     <li>⏳ Implementation sequence generator</li>
@@ -536,11 +536,10 @@ const LandingPage = () => {
                   <span className="text-5xl font-extrabold tracking-tight">
                     Basic
                   </span>
-                  <span className="ml-1 text-xl font-semibold">+ AI costs</span>
+                  <span className="ml-1 text-xl font-semibold">+ AI credits</span>
                 </p>
                 <p className="mt-6 text-slate-500 dark:text-slate-300">
-                  Use our hosted version at archspec.dev with no setup. AI
-                  features require payment to cover API costs.
+                  Use our hosted version at archspec.dev with no setup. Subscribe to use our AI-powered features.
                 </p>
 
                 <ul className="mt-6 space-y-4">

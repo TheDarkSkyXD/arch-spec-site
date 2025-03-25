@@ -82,6 +82,8 @@ function Stop-DevProcess {
 # Stop backend and frontend servers
 Stop-DevProcess -ProcessName "python" -ProcessPattern "uvicorn*app.main:app" -FriendlyName "Backend server"
 Stop-DevProcess -ProcessName "node" -ProcessPattern "vite" -FriendlyName "Frontend server"
+# Stop ngrok for Lemonsqueezy webhook
+Stop-DevProcess -ProcessName "ngrok" -ProcessPattern "ngrok http --url=camel-square-airedale.ngrok-free.app" -FriendlyName "ngrok webhook tunnel"
 
 # Stop MongoDB container
 Write-ColorOutput "📦 Stopping MongoDB container..." "Yellow"
@@ -90,4 +92,4 @@ docker compose down
 Pop-Location
 Write-ColorOutput "  ✅ MongoDB container stopped" "Green"
 
-Write-ColorOutput "✨ Development environment shutdown complete!" "Green" 
+Write-ColorOutput "✨ Development environment shutdown complete!" "Green"

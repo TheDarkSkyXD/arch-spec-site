@@ -64,6 +64,9 @@ stop_process "python" "uvicorn.*app.main:app" "Backend server"
 # Stop the frontend server (vite)
 stop_process "node" "vite" "Frontend server"
 
+# Stop ngrok for LemonSqueezy webhook
+stop_process "ngrok" "ngrok http --url=camel-square-airedale.ngrok-free.app" "ngrok webhook tunnel"
+
 # Stop MongoDB container
 print_message "$YELLOW" "📦 Stopping MongoDB container..."
 cd "$BACKEND_DIR"
@@ -71,4 +74,4 @@ docker compose down
 cd "$ROOT_DIR"
 print_message "$GREEN" "  ✅ MongoDB container stopped"
 
-print_message "$GREEN" "✨ Development environment shutdown complete!" 
+print_message "$GREEN" "✨ Development environment shutdown complete!"
