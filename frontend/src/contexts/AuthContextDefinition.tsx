@@ -1,5 +1,5 @@
 import { createContext, useContext } from "react";
-import { AuthContextType } from './AuthTypes';
+import { AuthContextType } from "./AuthTypes";
 
 // Create the context with default values
 export const AuthContext = createContext<AuthContextType>({
@@ -7,6 +7,7 @@ export const AuthContext = createContext<AuthContextType>({
   loading: true,
   signIn: async () => {},
   signInWithGoogle: async () => {},
+  signInWithGitHub: async () => {},
   signUp: async () => {},
   signOut: async () => {},
   sendPasswordResetEmail: async () => {},

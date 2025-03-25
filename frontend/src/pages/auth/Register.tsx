@@ -14,7 +14,7 @@ import { useAuth } from "../../contexts/AuthContextDefinition";
 
 const Register = () => {
   const navigate = useNavigate();
-  const { signUp, currentUser } = useAuth();
+  const { signUp, signInWithGoogle, signInWithGitHub, currentUser } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -349,7 +349,7 @@ const Register = () => {
             </div>
           </form>
 
-          {/* <div className="mt-6">
+          <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-slate-300 dark:border-slate-600" />
@@ -393,9 +393,19 @@ const Register = () => {
 
               <button
                 type="button"
-                onClick={() => {
-                  // GitHub sign-in is not implemented yet
-                  alert("GitHub sign-up is not implemented yet");
+                onClick={async () => {
+                  try {
+                    setLoading(true);
+                    setError(null);
+                    await signInWithGitHub();
+                    // GitHub sign-in automatically creates an account if it doesn't exist
+                    navigate("/", { replace: true });
+                  } catch (err) {
+                    console.error("GitHub sign-up error:", err);
+                    setError("Failed to sign up with GitHub");
+                  } finally {
+                    setLoading(false);
+                  }
                 }}
                 disabled={loading}
                 className="w-full inline-flex justify-center py-2 px-4 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm bg-white dark:bg-slate-700 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 dark:focus:ring-offset-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -414,7 +424,7 @@ const Register = () => {
                 </svg>
               </button>
             </div>
-          </div> */}
+          </div>
         </div>
       </div>
     </AuthLayout>

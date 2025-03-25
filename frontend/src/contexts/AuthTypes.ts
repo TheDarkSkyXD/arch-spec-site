@@ -1,4 +1,4 @@
-import { UserProfile } from '../api/userApi';
+import { UserProfile } from "../api/userApi";
 
 // Define the User type
 export interface User {
@@ -16,6 +16,7 @@ export interface AuthContextType {
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
+  signInWithGitHub: () => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   sendPasswordResetEmail: (email: string) => Promise<void>;

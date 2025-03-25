@@ -156,6 +156,41 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
+  // Sign in with GitHub
+  const signInWithGitHub = async () => {
+    if (loading && !initializing) return; // Prevent multiple concurrent sign-in attempts
+    setLoading(true);
+
+    try {
+      // Sign in with GitHub via Firebase
+      const user = await authService.signInWithGitHub();
+
+      // Load user profile immediately after sign in
+      try {
+        const profile = await userApi.getCurrentUserProfile();
+        setCurrentUser({ ...user, profile });
+      } catch (error) {
+        logMessage(
+          `Error loading profile after GitHub sign-in: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`,
+          true
+        );
+        setCurrentUser(user); // Set basic user info even if profile load fails
+      }
+    } catch (error) {
+      logMessage(
+        `GitHub sign in error: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`,
+        true
+      );
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Sign up with email and password
   const signUp = async (email: string, password: string) => {
     if (loading && !initializing) return; // Prevent multiple concurrent sign-up attempts
@@ -223,6 +258,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     loading: loading || initializing,
     signIn,
     signInWithGoogle,
+    signInWithGitHub,
     signUp,
     signOut,
     sendPasswordResetEmail,

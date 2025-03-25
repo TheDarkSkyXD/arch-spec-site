@@ -9,7 +9,7 @@ import SuccessMessage from "../../components/ui/SuccessMessage";
 const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { signIn, currentUser } = useAuth();
+  const { signIn, signInWithGoogle, signInWithGitHub, currentUser } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -225,7 +225,7 @@ const Login = () => {
             </div>
           </form>
 
-          {/* <div className="mt-6">
+          <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-slate-300" />
@@ -268,9 +268,18 @@ const Login = () => {
 
               <button
                 type="button"
-                onClick={() => {
-                  // GitHub sign-in is not implemented yet
-                  alert("GitHub sign-in is not implemented yet");
+                onClick={async () => {
+                  try {
+                    setLoading(true);
+                    setError(null);
+                    await signInWithGitHub();
+                    navigate(from, { replace: true });
+                  } catch (err) {
+                    console.error("GitHub sign-in error:", err);
+                    setError("Failed to sign in with GitHub");
+                  } finally {
+                    setLoading(false);
+                  }
                 }}
                 disabled={loading}
                 className="w-full inline-flex justify-center py-2 px-4 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm bg-white dark:bg-slate-700 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 dark:focus:ring-offset-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -289,7 +298,7 @@ const Login = () => {
                 </svg>
               </button>
             </div>
-          </div> */}
+          </div>
 
           {/* Development buttons removed */}
         </div>
