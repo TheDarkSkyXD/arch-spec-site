@@ -10,7 +10,7 @@ from app.schemas.ai_text import (
     DescriptionEnhanceRequest, 
     DescriptionEnhanceResponse,
 )
-from app.services.ai_service import FAST_MODEL, AnthropicClient
+from app.services.ai_service import INTELLIGENT_MODEL, AnthropicClient
 from app.core.firebase_auth import get_current_user
 from app.utils.llm_logging import DefaultLLMLogger
 from app.db.base import db
@@ -50,7 +50,7 @@ async def enhance_project_description(
         response = await client.generate_response(
             messages,
             system_prompt,
-            FAST_MODEL,
+            INTELLIGENT_MODEL,
             log_metadata={
                 "user_id": current_user.get("firebase_uid") if current_user else None,
                 "project_id": request.project_id if hasattr(request, "project_id") else "unknown",

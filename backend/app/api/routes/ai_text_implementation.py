@@ -5,7 +5,7 @@ import logging
 import json
 import re
 from fastapi import APIRouter, HTTPException, Depends
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any
 
 from app.ai.prompts.implementation_prompts import prepare_implementation_prompt
 from app.schemas.ai_text import (
@@ -14,7 +14,7 @@ from app.schemas.ai_text import (
     ImplementationPromptsGenerateResponse,
 )
 from app.schemas.shared_schemas import ImplementationPromptType
-from app.services.ai_service import FAST_MODEL, AnthropicClient
+from app.services.ai_service import INTELLIGENT_MODEL, AnthropicClient
 from app.services.project_specs_service import ProjectSpecsService
 from app.core.firebase_auth import get_current_user
 from app.db.base import db
@@ -103,77 +103,60 @@ async def generate_implementation_prompt(
             raise HTTPException(status_code=500, detail="Database connection not available")
             
         # Get project specifications
+        project = await database.projects.find_one({"id": request.project_id})
         tech_stack_spec = await ProjectSpecsService.get_tech_stack_spec(request.project_id, database)
+        requirements_spec = await ProjectSpecsService.get_requirements_spec(request.project_id, database)
+        features_spec = await ProjectSpecsService.get_features_spec(request.project_id, database)
+        ui_design_spec = await ProjectSpecsService.get_ui_design_spec(request.project_id, database)
+        pages_spec = await ProjectSpecsService.get_pages_spec(request.project_id, database)
         data_model_spec = await ProjectSpecsService.get_data_model_spec(request.project_id, database)
         api_spec = await ProjectSpecsService.get_api_spec(request.project_id, database)
-        features_spec = await ProjectSpecsService.get_features_spec(request.project_id, database)
-        requirements_spec = await ProjectSpecsService.get_requirements_spec(request.project_id, database)
-        project = await database.projects.find_one({"id": request.project_id})
+        test_cases_spec = await ProjectSpecsService.get_test_cases_spec(request.project_id, database)
         
         # Extract relevant data from project specs
         project_description = project.get("description", "") if project else ""
         
         # Convert complex objects to serializable format
         serializable_tech_stack = convert_to_serializable(tech_stack_spec.data) if tech_stack_spec and tech_stack_spec.data else {}
+        serializable_features = convert_to_serializable(features_spec.data) if features_spec and features_spec.data else {}
+        serializable_ui_design = convert_to_serializable(ui_design_spec.data) if ui_design_spec and ui_design_spec.data else {}
+        serializable_pages = convert_to_serializable(pages_spec.data) if pages_spec and pages_spec.data else {}
         serializable_data_models = convert_to_serializable(data_model_spec.data) if data_model_spec and data_model_spec.data else {}
         serializable_api = convert_to_serializable(api_spec.data) if api_spec and api_spec.data else {}
-        serializable_features = convert_to_serializable(features_spec.data) if features_spec and features_spec.data else {}
+        serializable_test_cases = convert_to_serializable(test_cases_spec.data) if test_cases_spec and test_cases_spec.data else {}
         
         # Now serialize to JSON
         tech_stack = json.dumps(serializable_tech_stack, cls=CustomEncoder) if serializable_tech_stack else ""
+        features = json.dumps(serializable_features, cls=CustomEncoder) if serializable_features else ""
+        ui_design = json.dumps(serializable_ui_design, cls=CustomEncoder) if serializable_ui_design else ""
+        pages = json.dumps(serializable_pages, cls=CustomEncoder) if serializable_pages else ""
         data_models = json.dumps(serializable_data_models, cls=CustomEncoder) if serializable_data_models else ""
         api_endpoints = json.dumps(serializable_api, cls=CustomEncoder) if serializable_api else ""
-        features = json.dumps(serializable_features, cls=CustomEncoder) if serializable_features else ""
+        test_cases = json.dumps(serializable_test_cases, cls=CustomEncoder) if serializable_test_cases else ""
+
+        # Extract functional requirements from requirements spec
+        fr_spec = ""
+        if requirements_spec and requirements_spec.functional:
+            fr_spec = "\n".join(requirements_spec.functional)
         
         # Extract non-functional requirements from requirements spec
         nfr_spec = ""
         if requirements_spec and requirements_spec.non_functional:
             nfr_spec = "\n".join(requirements_spec.non_functional)
         
-        # Extract security requirements (a subset of non-functional requirements)
-        security_requirements = ""
-        if requirements_spec and requirements_spec.non_functional:
-            security_reqs = [req for req in requirements_spec.non_functional if "security" in req.lower() or "auth" in req.lower()]
-            security_requirements = "\n".join(security_reqs)
-        
-        # Extract architecture-specific information
-        architecture_spec = ""
-        architecture_backend = ""
-        architecture_frontend = ""
-        architecture_data_layer = ""
-        
-        # Attempt to identify database technology from tech stack
-        database_tech = ""
-        if tech_stack_spec and tech_stack_spec.data:
-            db_techs = []
-            try:
-                for category, techs in serializable_tech_stack.items():
-                    if category.lower() in ["database", "data", "persistence", "storage"]:
-                        if isinstance(techs, list):
-                            db_techs.extend(techs)
-                        else:
-                            db_techs.append(str(techs))
-                database_tech = ", ".join(db_techs)
-            except Exception as e:
-                logger.warning(f"Error extracting database tech: {str(e)}")
-                # Continue anyway, this is not critical
-        
         # Prepare the implementation prompt
         meta_prompt = prepare_implementation_prompt(
             category=request.category,
             project_description=project_description,
-            architecture_spec=architecture_spec,
             tech_stack=tech_stack,
             data_models=data_models,
             api_endpoints=api_endpoints,
             features=features,
-            security_requirements=security_requirements,
-            architecture_backend=architecture_backend,
-            architecture_frontend=architecture_frontend,
-            architecture_data_layer=architecture_data_layer,
+            ui_design=ui_design,
+            pages=pages,
+            test_cases=test_cases,
+            fr_spec=fr_spec,
             nfr_spec=nfr_spec,
-            nfr_data_related=nfr_spec,  # Use same NFRs for data-related
-            database_tech=database_tech,
             additional_user_instruction=request.additional_user_instruction,
         )
         
@@ -204,7 +187,7 @@ async def generate_implementation_prompt(
         response = await client.generate_response(
             messages=messages,
             system=system_message,
-            model=FAST_MODEL,
+            model=INTELLIGENT_MODEL,
             log_metadata={
                 "user_id": current_user.get("firebase_uid") if current_user else None,
                 "project_id": request.project_id if hasattr(request, "project_id") else "unknown",
@@ -214,8 +197,11 @@ async def generate_implementation_prompt(
                 "data_models": data_models,
                 "api_endpoints": api_endpoints,
                 "features": features,
-                "security_requirements": security_requirements,
-                "architecture_spec": architecture_spec,
+                "ui_design": ui_design,
+                "pages": pages,
+                "test_cases": test_cases,
+                "functional_requirements": fr_spec,
+                "non_functional_requirements": nfr_spec,
                 "additional_user_instruction": request.additional_user_instruction
             },
             response_type="generate_implementation_prompt",

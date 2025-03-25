@@ -11,7 +11,6 @@ import {
   Sparkles,
   RefreshCw,
   Lock,
-  Tag,
 } from "lucide-react";
 import {
   FeatureModule,
@@ -85,7 +84,6 @@ export default function FeaturesForm({
   const [projectDescription, setProjectDescription] = useState<string>("");
   const [businessGoals, setBusinessGoals] = useState<string[]>([]);
   const [requirements, setRequirements] = useState<string[]>([]);
-  const [stripPrefixes, setStripPrefixes] = useState(true);
 
   // Add state for AI instructions modals
   const [isEnhanceModalOpen, setIsEnhanceModalOpen] = useState<boolean>(false);
@@ -657,24 +655,7 @@ export default function FeaturesForm({
         </div>
 
         {/* AI Enhancement Buttons */}
-        <div className="flex justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              onClick={() => setStripPrefixes(!stripPrefixes)}
-              variant="ghost"
-              size="sm"
-              className="flex items-center gap-1 text-xs"
-              title={
-                stripPrefixes
-                  ? "Show category prefixes"
-                  : "Hide category prefixes"
-              }
-            >
-              <Tag className="h-3 w-3" />
-              {stripPrefixes ? "Show prefixes" : "Hide prefixes"}
-            </Button>
-          </div>
+        <div className="flex justify-end mb-4">
           <div className="flex justify-end items-center gap-3 mb-4">
             {!hasAIFeatures && <PremiumFeatureBadge />}
             <Button
@@ -686,7 +667,7 @@ export default function FeaturesForm({
               variant={hasAIFeatures ? "outline" : "ghost"}
               className={`flex items-center gap-2 relative ${
                 !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
-              } ${isAddingFeatures ? "relative z-[60]" : ""}`}
+              }`}
               title={
                 hasAIFeatures
                   ? "Generate new features to complement existing ones"
@@ -722,7 +703,7 @@ export default function FeaturesForm({
               variant={hasAIFeatures ? "outline" : "ghost"}
               className={`flex items-center gap-2 relative ${
                 !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
-              } ${isEnhancing ? "relative z-[60]" : ""}`}
+              }`}
               title={
                 hasAIFeatures
                   ? "Replace all features with enhanced versions"

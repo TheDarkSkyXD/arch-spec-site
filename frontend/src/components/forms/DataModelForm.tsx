@@ -807,7 +807,7 @@ export default function DataModelForm({
                   variant={hasAIFeatures ? "outline" : "ghost"}
                   className={`flex items-center gap-2 relative ${
                     !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
-                  } ${isAddingEntities ? "relative z-[60]" : ""}`}
+                  }`}
                   title={
                     hasAIFeatures
                       ? "Generate new entities to complement existing ones"
@@ -843,7 +843,7 @@ export default function DataModelForm({
                   variant={hasAIFeatures ? "outline" : "ghost"}
                   className={`flex items-center gap-2 relative ${
                     !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
-                  } ${isEnhancing ? "relative z-[60]" : ""}`}
+                  }`}
                   title={
                     hasAIFeatures
                       ? "Replace entire data model with AI-generated one"

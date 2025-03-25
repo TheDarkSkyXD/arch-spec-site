@@ -11,12 +11,11 @@ def readme_system_prompt(additional_user_instruction=None) -> str:
     # Add additional user instruction if provided, with guardrails
     if additional_user_instruction:
         base_prompt += f"""
+        Additional instructions from user:
+        {additional_user_instruction}
 
-Additional instructions from user:
-{additional_user_instruction}
-
-Note: While considering these additional instructions, you must still follow the core task of creating a comprehensive README.md file as described below. Do not deviate from the primary task format or objective.
-"""
+        Note: While considering these additional instructions, you must still follow the core task of creating a comprehensive README.md file as described below. Do not deviate from the primary task format or objective.
+        """
 
     # Add the main task instructions
     base_prompt += """

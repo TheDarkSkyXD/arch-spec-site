@@ -5,7 +5,6 @@ import {
   AlertCircle,
   Loader2,
   Sparkles,
-  Tag,
   RefreshCw,
   Lock,
   Edit,
@@ -60,8 +59,6 @@ export default function RequirementsForm({
   const [isEnhancing, setIsEnhancing] = useState<boolean>(false);
   const [projectDescription, setProjectDescription] = useState<string>("");
   const [businessGoals, setBusinessGoals] = useState<string[]>([]);
-  // Add state for stripping prefixes
-  const [stripPrefixes, setStripPrefixes] = useState<boolean>(true);
   // Add a new state for the second button loading state
   const [isAddingRequirements, setIsAddingRequirements] =
     useState<boolean>(false);
@@ -178,19 +175,6 @@ export default function RequirementsForm({
     }
 
     setNonFunctionalReqs(newReqs);
-  };
-
-  // Function to strip category prefixes
-  const stripCategoryPrefix = (req: string): string => {
-    if (
-      stripPrefixes &&
-      (req.toLowerCase().startsWith("[functional]") ||
-        req.toLowerCase().startsWith("[non-functional]") ||
-        req.toLowerCase().startsWith("[nonfunctional]"))
-    ) {
-      return req.substring(req.indexOf("]") + 1).trim();
-    }
-    return req;
   };
 
   // Function to open the enhance requirements modal
@@ -685,25 +669,8 @@ export default function RequirementsForm({
       </div>
 
       {/* AI Enhancement Buttons */}
-      <div className="flex justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <Button
-            type="button"
-            onClick={() => setStripPrefixes(!stripPrefixes)}
-            variant="ghost"
-            size="sm"
-            className="flex items-center gap-1 text-xs"
-            title={
-              stripPrefixes
-                ? "Show category prefixes"
-                : "Hide category prefixes"
-            }
-          >
-            <Tag className="h-3 w-3" />
-            {stripPrefixes ? "Show prefixes" : "Hide prefixes"}
-          </Button>
-        </div>
-        <div className="flex justify-end items-center gap-3 mb-4">
+      <div className="flex justify-end mb-4">
+        <div className="flex items-center gap-3">
           {!hasAIFeatures && <PremiumFeatureBadge />}
           <Button
             type="button"
@@ -717,7 +684,7 @@ export default function RequirementsForm({
             variant={hasAIFeatures ? "outline" : "ghost"}
             className={`flex items-center gap-2 relative ${
               !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
-            } ${isAddingRequirements ? "relative z-[60]" : ""}`}
+            }`}
             title={
               hasAIFeatures
                 ? "Generate new requirements to complement existing ones"
@@ -753,7 +720,7 @@ export default function RequirementsForm({
             variant={hasAIFeatures ? "outline" : "ghost"}
             className={`flex items-center gap-2 relative ${
               !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
-            } ${isEnhancing ? "relative z-[60]" : ""}`}
+            }`}
             title={
               hasAIFeatures
                 ? "Replace all requirements with enhanced versions"
@@ -841,9 +808,7 @@ export default function RequirementsForm({
                   </div>
                 ) : (
                   <>
-                    <p className="dark:text-slate-300">
-                      {stripCategoryPrefix(req)}
-                    </p>
+                    <p className="dark:text-slate-300">{req}</p>
                     <div className="flex gap-2">
                       <Button
                         type="button"
@@ -949,9 +914,7 @@ export default function RequirementsForm({
                   </div>
                 ) : (
                   <>
-                    <p className="dark:text-slate-300">
-                      {stripCategoryPrefix(req)}
-                    </p>
+                    <p className="dark:text-slate-300">{req}</p>
                     <div className="flex gap-2">
                       <Button
                         type="button"

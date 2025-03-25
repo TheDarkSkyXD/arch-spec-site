@@ -37,6 +37,9 @@ import { generateImplementationPromptsMarkdown } from "./implementationPrompts";
  * @param testCases The test cases
  * @param implementationPrompts The implementation prompts
  * @param uiDesign The UI design data
+ * @param useAIReadme Flag to use AI for README generation
+ * @param aiRules Flag to use AI for rules generation
+ * @param additionalInstructions Additional instructions for the README and AI rules (optional)
  * @returns Promise that resolves to a Blob containing the zip file
  */
 export async function generateMarkdownZip(
@@ -49,7 +52,10 @@ export async function generateMarkdownZip(
   apiEndpoints: Api | null,
   testCases: TestCasesData | null,
   implementationPrompts: ImplementationPrompts | null,
-  uiDesign: UIDesign | null
+  uiDesign: UIDesign | null,
+  useAIReadme: boolean,
+  useAIRules: boolean,
+  additionalInstructions?: string
 ): Promise<Blob> {
   const zip = new JSZip();
 
@@ -115,66 +121,143 @@ export async function generateMarkdownZip(
   }
 
   // Initialize readme variable
-  let readme: string;
+  let enhancedReadme: string | null = null;
+  let readme =
+    `# ${project.name} Project Specification\n\n` +
+    `This archive contains markdown files for all sections of the ${project.name} project specification.\n\n` +
+    `## Contents\n\n` +
+    `- Project Basics\n` +
+    `- Tech Stack\n` +
+    `- Requirements\n` +
+    `- Features\n` +
+    `- Pages\n` +
+    `- Data Model\n` +
+    `- API Endpoints\n` +
+    `- Test Cases\n` +
+    `- UI Design\n\n` +
+    `Generated on: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`;
 
   try {
-    // Attempt to generate an AI-enhanced README
-    const enhancedReadme = await aiService.enhanceReadme(
-      project.name,
-      project.description,
-      project.business_goals || [],
-      {
-        functional: requirements?.functional || [],
-        non_functional: requirements?.non_functional || [],
-      },
-      {
-        coreModules: features?.coreModules || [],
-        optionalModules: features?.optionalModules || [],
-      },
-      techStack ? { ...techStack } : {}
-    );
-
-    // Use the AI-enhanced README if available
-    if (enhancedReadme) {
-      readme = enhancedReadme;
-    } else {
-      // Fallback to basic README if AI enhancement fails
-      readme =
-        `# ${project.name} Project Specification\n\n` +
-        `This archive contains markdown files for all sections of the ${project.name} project specification.\n\n` +
-        `## Contents\n\n` +
-        `- Project Basics\n` +
-        `- Tech Stack\n` +
-        `- Requirements\n` +
-        `- Features\n` +
-        `- Pages\n` +
-        `- Data Model\n` +
-        `- API Endpoints\n` +
-        `- Test Cases\n` +
-        `- UI Design\n\n` +
-        `Generated on: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`;
+    if (useAIReadme) {
+      // Attempt to generate an AI-enhanced README
+      enhancedReadme = await aiService.enhanceReadme(
+        project.name,
+        project.description,
+        project.business_goals || [],
+        {
+          functional: requirements?.functional || [],
+          non_functional: requirements?.non_functional || [],
+        },
+        {
+          coreModules: features?.coreModules || [],
+          optionalModules: features?.optionalModules || [],
+        },
+        techStack ? { ...techStack } : {},
+        additionalInstructions
+      );
+      // Use the AI-enhanced README if available
+      if (enhancedReadme) {
+        readme = enhancedReadme;
+      }
     }
   } catch (error) {
     console.error("Error generating AI README:", error);
-
-    // Fallback to basic README if any error occurs
-    readme =
-      `# ${project.name} Project Specification\n\n` +
-      `This archive contains markdown files for all sections of the ${project.name} project specification.\n\n` +
-      `## Contents\n\n` +
-      `- Project Basics\n` +
-      `- Tech Stack\n` +
-      `- Requirements\n` +
-      `- Features\n` +
-      `- Pages\n` +
-      `- Data Model\n` +
-      `- API Endpoints\n` +
-      `- Test Cases\n` +
-      `- UI Design\n\n` +
-      `Generated on: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`;
   }
 
   zip.file("README.md", readme);
+
+  let aiRules = `
+# Project Rules for ${project.name}
+
+## Project Context
+
+**Project Description:**
+${project.description}
+
+**Business Goals:**
+${project.business_goals?.join("\n")}
+
+**Requirements Overview:**
+- Functional Requirements: 
+  ${requirements?.functional?.map((req) => req).join("\n - ")}
+- Non-Functional Requirements: 
+  ${requirements?.non_functional?.map((req) => req).join("\n - ")}
+
+**Features:**
+- Core: 
+  ${features?.coreModules?.map((module) => module.name).join("\n - ")}
+- Optional: 
+  ${features?.optionalModules?.map((module) => module.name).join("\n - ")}
+
+**Tech Stack:**
+- Frontend: ${techStack?.frontend.framework} / ${techStack?.frontend.language}
+- Backend: ${techStack?.backend.type}
+- Database: ${techStack?.database.type} / ${techStack?.database.system}
+
+## AI Assistant Persona
+
+When working on this project, the AI assistant should:
+
+- Act as a knowledgeable developer familiar with the technology stack
+- Prioritize solutions that align with the project's business goals
+- Consider both functional and non-functional requirements
+- Focus on delivering the core features first
+- Follow established patterns in the existing codebase
+- Provide clear explanations for implementation decisions
+
+## Coding Standards
+
+### General Guidelines
+- Write clean, maintainable code
+- Follow consistent naming conventions
+- Include appropriate error handling
+- Add comments for complex logic
+- Write unit tests for new functionality
+
+### Technology-Specific Standards
+- **${techStack?.frontend.framework}**: Follow component-based architecture
+- **${techStack?.backend.type}**: Implement proper separation of concerns
+- **${
+    techStack?.database.system
+  }**: Use parameterized queries to prevent injection
+
+---
+
+*Note: These rules provide general guidance for AI assistance with this project. Refer to the detailed specification documents for comprehensive implementation details.*`;
+
+  if (useAIRules) {
+    // Initialize ai rules variable
+    let enhancedAIRules: string | null = null;
+
+    try {
+      // Attempt to generate ai rules
+      enhancedAIRules = await aiService.createAIRules(
+        project.name,
+        project.description,
+        project.business_goals || [],
+        {
+          functional: requirements?.functional || [],
+          non_functional: requirements?.non_functional || [],
+        },
+        {
+          coreModules: features?.coreModules || [],
+          optionalModules: features?.optionalModules || [],
+        },
+        techStack ? { ...techStack } : {},
+        additionalInstructions
+      );
+
+      if (enhancedAIRules) {
+        aiRules = enhancedAIRules;
+      }
+    } catch (error) {
+      console.error("Error generating AI Rules:", error);
+    }
+  }
+
+  zip.file(".cursorrules", aiRules);
+  zip.file(".windsurfrules", aiRules);
+  zip.file("CLAUDE.md", aiRules);
 
   // Generate the zip file
   return await zip.generateAsync({ type: "blob" });

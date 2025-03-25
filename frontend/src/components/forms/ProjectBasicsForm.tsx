@@ -514,7 +514,7 @@ const ProjectBasicsForm = ({
                 disabled={isEnhancing || !currentDescription || !hasAIFeatures}
                 className={`flex items-center gap-1 text-xs ${
                   !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
-                } ${isEnhancing ? "relative z-[60]" : ""}`}
+                }`}
                 title={
                   hasAIFeatures
                     ? "Enhance description with AI"
@@ -570,7 +570,7 @@ const ProjectBasicsForm = ({
                 }
                 className={`text-xs flex items-center gap-1 ${
                   !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
-                } ${isEnhancingGoals ? "relative z-[60]" : ""}`}
+                }`}
                 title={
                   hasAIFeatures
                     ? businessGoals.length > 0
@@ -672,7 +672,7 @@ const ProjectBasicsForm = ({
                 }
                 className={`text-xs flex items-center gap-1 ${
                   !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
-                } ${isEnhancingTargetUsers ? "relative z-[60]" : ""}`}
+                }`}
                 title={
                   hasAIFeatures
                     ? currentTargetUsers

@@ -757,7 +757,7 @@ export default function TestCasesForm({
             variant={hasAIFeatures ? "outline" : "ghost"}
             className={`flex items-center gap-2 relative ${
               !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
-            } ${isGeneratingTestCases ? "relative z-[60]" : ""}`}
+            }`}
             title={
               hasAIFeatures
                 ? "Generate new test cases based on requirements and features"
@@ -793,7 +793,7 @@ export default function TestCasesForm({
             variant={hasAIFeatures ? "outline" : "ghost"}
             className={`flex items-center gap-2 relative ${
               !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
-            } ${isEnhancing ? "relative z-[60]" : ""}`}
+            }`}
             title={
               hasAIFeatures
                 ? "Enhance existing test cases with AI"
@@ -1124,90 +1124,95 @@ export default function TestCasesForm({
             </p>
           </Card>
         ) : (
-          <div className="space-y-4">
-            {testCases.map((testCase, index) => (
-              <Card key={index} className="p-4 bg-white dark:bg-slate-800">
-                <div className="flex justify-between items-start mb-2">
-                  <div>
-                    <h3 className="font-medium text-slate-800 dark:text-slate-100">
-                      {testCase.feature}: {testCase.title}
-                    </h3>
-                    {testCase.description && (
-                      <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-                        {testCase.description}
-                      </p>
-                    )}
-                    {testCase.tags && testCase.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {testCase.tags.map((tag, tagIndex) => (
-                          <Badge key={tagIndex} variant="outline">
-                            @{tag}
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
+          !isAddingTestCase &&
+          !isEditingTestCase && (
+            <div className="space-y-4">
+              {testCases.map((testCase, index) => (
+                <Card key={index} className="p-4 bg-white dark:bg-slate-800">
+                  <div className="flex justify-between items-start mb-2">
+                    <div>
+                      <h3 className="font-medium text-slate-800 dark:text-slate-100">
+                        {testCase.feature}: {testCase.title}
+                      </h3>
+                      {testCase.description && (
+                        <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+                          {testCase.description}
+                        </p>
+                      )}
+                      {testCase.tags && testCase.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {testCase.tags.map((tag, tagIndex) => (
+                            <Badge key={tagIndex} variant="outline">
+                              @{tag}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex space-x-2">
+                      <button
+                        type="button"
+                        onClick={() => handleStartEditTestCase(index)}
+                        className="p-1 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                        title="Edit test case"
+                      >
+                        <Edit size={18} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteTestCase(index)}
+                        className="p-1 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                        title="Delete test case"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex space-x-2">
-                    <button
-                      type="button"
-                      onClick={() => handleStartEditTestCase(index)}
-                      className="p-1 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
-                      title="Edit test case"
-                    >
-                      <Edit size={18} />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteTestCase(index)}
-                      className="p-1 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
-                      title="Delete test case"
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  </div>
-                </div>
 
-                {/* Collapsible scenarios section */}
-                <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700">
-                  <Tabs defaultValue="scenario0">
-                    <TabsList className="mb-2">
-                      {testCase.scenarios.map((_scenario, scenarioIndex) => (
-                        <TabsTrigger
+                  {/* Collapsible scenarios section */}
+                  <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700">
+                    <Tabs defaultValue="scenario0">
+                      <TabsList className="mb-2">
+                        {testCase.scenarios.map((_scenario, scenarioIndex) => (
+                          <TabsTrigger
+                            key={scenarioIndex}
+                            value={`scenario${scenarioIndex}`}
+                          >
+                            Scenario {scenarioIndex + 1}
+                          </TabsTrigger>
+                        ))}
+                      </TabsList>
+                      {testCase.scenarios.map((scenario, scenarioIndex) => (
+                        <TabsContent
                           key={scenarioIndex}
                           value={`scenario${scenarioIndex}`}
                         >
-                          Scenario {scenarioIndex + 1}
-                        </TabsTrigger>
+                          <div className="bg-slate-50 dark:bg-slate-700/30 p-3 rounded">
+                            <h4 className="font-medium mb-2">
+                              {scenario.name}
+                            </h4>
+                            <ul className="space-y-1">
+                              {scenario.steps.map((step, stepIndex) => (
+                                <li
+                                  key={stepIndex}
+                                  className="text-sm text-slate-600 dark:text-slate-300"
+                                >
+                                  <span className="font-medium capitalize">
+                                    {step.type}
+                                  </span>{" "}
+                                  {step.text}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </TabsContent>
                       ))}
-                    </TabsList>
-                    {testCase.scenarios.map((scenario, scenarioIndex) => (
-                      <TabsContent
-                        key={scenarioIndex}
-                        value={`scenario${scenarioIndex}`}
-                      >
-                        <div className="bg-slate-50 dark:bg-slate-700/30 p-3 rounded">
-                          <h4 className="font-medium mb-2">{scenario.name}</h4>
-                          <ul className="space-y-1">
-                            {scenario.steps.map((step, stepIndex) => (
-                              <li
-                                key={stepIndex}
-                                className="text-sm text-slate-600 dark:text-slate-300"
-                              >
-                                <span className="font-medium capitalize">
-                                  {step.type}
-                                </span>{" "}
-                                {step.text}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      </TabsContent>
-                    ))}
-                  </Tabs>
-                </div>
-              </Card>
-            ))}
-          </div>
+                    </Tabs>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )
         )}
       </div>
 

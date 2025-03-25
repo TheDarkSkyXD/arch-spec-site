@@ -72,7 +72,7 @@ async def enhance_api_endpoints(
         # Generate the tool use response
         messages = [{"role": "user", "content": user_prompt}]
         tools = [print_api_endpoints_input_schema()]
-        response = client.get_tool_use_response(
+        response = await client.get_tool_use_response(
             system_message, 
             tools, 
             messages, 

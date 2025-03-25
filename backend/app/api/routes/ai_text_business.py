@@ -13,7 +13,7 @@ from app.schemas.ai_text import (
     TargetUsersEnhanceRequest,
     TargetUsersEnhanceResponse,
 )
-from app.services.ai_service import FAST_MODEL, AnthropicClient
+from app.services.ai_service import INTELLIGENT_MODEL, AnthropicClient
 from app.core.firebase_auth import get_current_user
 from app.utils.llm_logging import DefaultLLMLogger
 from app.services.db_usage_tracker import DatabaseUsageTracker
@@ -69,7 +69,7 @@ async def enhance_business_goals(
         response = await client.generate_response(
             messages, 
             system_message, 
-            FAST_MODEL,
+            INTELLIGENT_MODEL,
             log_metadata={
                 "user_id": current_user.get("firebase_uid") if current_user else None,
                 "project_id": request.project_id if hasattr(request, "project_id") else "unknown",
@@ -175,7 +175,7 @@ async def enhance_target_users(
         response = await client.generate_response(
             messages, 
             system_message, 
-            FAST_MODEL,
+            INTELLIGENT_MODEL,
             log_metadata={
                 "user_id": current_user.get("firebase_uid") if current_user else None,
                 "project_id": request.project_id if hasattr(request, "project_id") else "unknown",

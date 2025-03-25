@@ -46,23 +46,15 @@ def get_implementation_prompt_template(category: str) -> Optional[str]:
 def prepare_implementation_prompt(
     category: str,
     project_description: str = "",
-    architecture_spec: str = "",
     tech_stack: str = "",
     data_models: str = "",
     api_endpoints: str = "",
     features: str = "",
-    security_requirements: str = "",
-    architecture_backend: str = "",
-    architecture_frontend: str = "",
-    architecture_data_layer: str = "",
+    pages: str = "",
+    ui_design: str = "",
+    test_cases: str = "",
+    fr_spec: str = "",
     nfr_spec: str = "",
-    nfr_data_related: str = "",
-    database_tech: str = "",
-    component_specs: str = "",
-    ui_components: str = "",
-    integration_points: str = "",
-    testing_requirements: str = "",
-    deployment_requirements: str = "",
     additional_user_instruction: str = "",
 ) -> Optional[str]:
     """
@@ -71,23 +63,15 @@ def prepare_implementation_prompt(
     Args:
         category: The category to prepare the prompt for
         project_description: Project description
-        architecture_spec: Architecture specification
         tech_stack: Technology stack
         data_models: Data models specification
         api_endpoints: API endpoints specification
         features: Features specification
-        security_requirements: Security requirements
-        architecture_backend: Backend architecture specification
-        architecture_frontend: Frontend architecture specification
-        architecture_data_layer: Data layer architecture specification
+        pages: Pages specification
+        ui_design: UI design specification
+        test_cases: Test cases specification
+        fr_spec: Functional requirements specification
         nfr_spec: Non-functional requirements specification
-        nfr_data_related: Data-related non-functional requirements
-        database_tech: Database technology
-        component_specs: Component specifications
-        ui_components: UI component specifications
-        integration_points: Integration points
-        testing_requirements: Testing requirements
-        deployment_requirements: Deployment requirements
         additional_user_instruction: Optional custom instructions from the user
         
     Returns:
@@ -100,23 +84,16 @@ def prepare_implementation_prompt(
     # Create a dict of variables to replace in the template
     variables = {
         "project_description": project_description,
-        "architecture_spec": architecture_spec,
         "tech_stack": tech_stack,
         "data_models": data_models,
         "api_endpoints": api_endpoints,
         "features": features,
-        "security_requirements": security_requirements,
-        "architecture_backend": architecture_backend,
-        "architecture_frontend": architecture_frontend,
-        "architecture_data_layer": architecture_data_layer,
+        "pages": pages,
+        "ui_design": ui_design,
+        "test_cases": test_cases,
+        "fr_spec": fr_spec,
         "nfr_spec": nfr_spec,
-        "nfr_data_related": nfr_data_related,
-        "database_tech": database_tech,
-        "component_specs": component_specs,
-        "ui_components": ui_components,
-        "integration_points": integration_points,
-        "testing_requirements": testing_requirements,
-        "deployment_requirements": deployment_requirements,
+        "additional_user_instruction": additional_user_instruction,
     }
     
     # Replace variables in the template

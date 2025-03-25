@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Download, Loader2 } from "lucide-react";
+import { Download, Loader2, Wand2, Lock } from "lucide-react";
 import Button from "../ui/Button";
 import { useToast } from "../../contexts/ToastContext";
 import { generateMarkdownZip } from "../../services/markdown/markdownZip";
@@ -15,6 +15,9 @@ import {
 } from "../../types/templates";
 import { FeaturesData } from "../../services/featuresService";
 import { TestCasesData } from "../../services/testCasesService";
+import { useSubscription } from "../../contexts/SubscriptionContext";
+import { useUserProfile } from "../../hooks/useUserProfile";
+import AIInstructionsModal from "../ui/AIInstructionsModal";
 
 interface DownloadAllMarkdownProps {
   project: ProjectBase;
@@ -49,8 +52,37 @@ const DownloadAllMarkdown = ({
 }: DownloadAllMarkdownProps) => {
   const [isDownloading, setIsDownloading] = useState(false);
   const { showToast } = useToast();
+  const { hasAIFeatures } = useSubscription();
+  const { aiCreditsRemaining } = useUserProfile();
 
-  const handleDownload = async () => {
+  // State for AI modal
+  const [isAIModalOpen, setIsAIModalOpen] = useState(false);
+  const [generateAIReadme, setGenerateAIReadme] = useState(true);
+  const [generateAIRules, setGenerateAIRules] = useState(true);
+
+  const handleDownloadClick = () => {
+    // Check if user has AI features before showing modal
+    if (hasAIFeatures && aiCreditsRemaining > 0) {
+      setIsAIModalOpen(true);
+    } else {
+      // Just proceed with regular download if user doesn't have AI features
+      handleDownload();
+    }
+  };
+
+  const handleModalConfirm = async (additionalInstructions?: string) => {
+    await handleDownload(
+      additionalInstructions,
+      generateAIReadme,
+      generateAIRules
+    );
+  };
+
+  const handleDownload = async (
+    additionalInstructions?: string,
+    useAIReadme = false,
+    useAIRules = false
+  ) => {
     setIsDownloading(true);
 
     try {
@@ -65,6 +97,9 @@ const DownloadAllMarkdown = ({
         testCases,
         implementationPrompts,
         uiDesign,
+        useAIReadme,
+        useAIRules,
+        additionalInstructions,
       });
 
       const zipBlob = await generateMarkdownZip(
@@ -77,7 +112,10 @@ const DownloadAllMarkdown = ({
         apiEndpoints,
         testCases,
         implementationPrompts,
-        uiDesign
+        uiDesign,
+        useAIReadme,
+        useAIRules,
+        additionalInstructions
       );
 
       console.log(
@@ -122,20 +160,77 @@ const DownloadAllMarkdown = ({
   };
 
   return (
-    <Button
-      onClick={handleDownload}
-      variant={variant}
-      size={size}
-      className={`flex items-center gap-1 ${className}`}
-      disabled={isDownloading}
-    >
-      {isDownloading ? (
-        <Loader2 size={16} className="animate-spin" />
-      ) : (
-        <Download size={16} />
-      )}
-      <span>{isDownloading ? "Downloading..." : "Download All"}</span>
-    </Button>
+    <>
+      <AIInstructionsModal
+        isOpen={isAIModalOpen}
+        onClose={() => setIsAIModalOpen(false)}
+        onConfirm={handleModalConfirm}
+        title="AI-Enhanced Documentation Options"
+        description="Choose which AI-enhanced documentation to include in your download. This will use AI credits."
+        confirmText="Download with AI Enhancements"
+        defaultInstructions=""
+        additionalOptions={
+          <div className="space-y-4 mb-4">
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="generate-readme"
+                checked={generateAIReadme}
+                onChange={(e) => setGenerateAIReadme(e.target.checked)}
+                className="rounded"
+              />
+              <label htmlFor="generate-readme" className="text-sm">
+                Generate AI-enhanced README.md
+              </label>
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="generate-ai-rules"
+                checked={generateAIRules}
+                onChange={(e) => setGenerateAIRules(e.target.checked)}
+                className="rounded"
+              />
+              <label htmlFor="generate-ai-rules" className="text-sm">
+                Generate AI assistant rules files (.cursorrules, .windsurfrules,
+                and CLAUDE.md)
+              </label>
+            </div>
+            <div className="text-xs text-slate-500 mt-2">
+              Note: Each option will consume AI credits when enabled
+            </div>
+          </div>
+        }
+      />
+
+      <Button
+        onClick={handleDownloadClick}
+        variant={variant}
+        size={size}
+        className={`flex items-center gap-1 ${className}`}
+        disabled={isDownloading}
+      >
+        {isDownloading ? (
+          <Loader2 size={16} className="animate-spin" />
+        ) : hasAIFeatures && aiCreditsRemaining > 0 ? (
+          <Wand2 size={16} />
+        ) : (
+          <Download size={16} />
+        )}
+        <span>
+          {isDownloading
+            ? "Preparing download..."
+            : hasAIFeatures && aiCreditsRemaining > 0
+            ? "Download with AI"
+            : "Download All"}
+        </span>
+        {!hasAIFeatures && (
+          <span className="ml-1">
+            <Lock size={12} />
+          </span>
+        )}
+      </Button>
+    </>
   );
 };
 
