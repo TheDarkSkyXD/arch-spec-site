@@ -248,11 +248,12 @@ const ProjectDetails = () => {
                 techStack={techStack}
                 requirements={requirements as Requirements | null}
                 features={features || null}
+                uiDesign={uiDesign || null}
                 pages={pages || null}
                 dataModel={dataModel || null}
                 apiEndpoints={apiEndpoints || null}
                 testCases={testCases || null}
-                uiDesign={uiDesign || null}
+                implementationPrompts={implementationPrompts || null}
               />
             </div>
           )}

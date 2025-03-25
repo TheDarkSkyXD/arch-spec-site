@@ -166,13 +166,72 @@ export async function generateMarkdownZip(
 
   zip.file("README.md", readme);
 
+  let aiRules = `
+# Project Rules for ${project.name}
+
+## Project Context
+
+**Project Description:**
+${project.description}
+
+**Business Goals:**
+${project.business_goals?.join("\n")}
+
+**Requirements Overview:**
+- Functional Requirements: 
+  ${requirements?.functional?.map((req) => req).join("\n - ")}
+- Non-Functional Requirements: 
+  ${requirements?.non_functional?.map((req) => req).join("\n - ")}
+
+**Features:**
+- Core: 
+  ${features?.coreModules?.map((module) => module.name).join("\n - ")}
+- Optional: 
+  ${features?.optionalModules?.map((module) => module.name).join("\n - ")}
+
+**Tech Stack:**
+- Frontend: ${techStack?.frontend.framework} / ${techStack?.frontend.language}
+- Backend: ${techStack?.backend.type}
+- Database: ${techStack?.database.type} / ${techStack?.database.system}
+
+## AI Assistant Persona
+
+When working on this project, the AI assistant should:
+
+- Act as a knowledgeable developer familiar with the technology stack
+- Prioritize solutions that align with the project's business goals
+- Consider both functional and non-functional requirements
+- Focus on delivering the core features first
+- Follow established patterns in the existing codebase
+- Provide clear explanations for implementation decisions
+
+## Coding Standards
+
+### General Guidelines
+- Write clean, maintainable code
+- Follow consistent naming conventions
+- Include appropriate error handling
+- Add comments for complex logic
+- Write unit tests for new functionality
+
+### Technology-Specific Standards
+- **${techStack?.frontend.framework}**: Follow component-based architecture
+- **${techStack?.backend.type}**: Implement proper separation of concerns
+- **${
+    techStack?.database.system
+  }**: Use parameterized queries to prevent injection
+
+---
+
+*Note: These rules provide general guidance for AI assistance with this project. Refer to the detailed specification documents for comprehensive implementation details.*`;
+
   if (useAIRules) {
     // Initialize ai rules variable
-    let aiRules: string | null = null;
+    let enhancedAIRules: string | null = null;
 
     try {
       // Attempt to generate ai rules
-      aiRules = await aiService.createAIRules(
+      enhancedAIRules = await aiService.createAIRules(
         project.name,
         project.description,
         project.business_goals || [],
@@ -188,15 +247,17 @@ export async function generateMarkdownZip(
         additionalInstructions
       );
 
-      if (aiRules) {
-        zip.file(".cursorrules", aiRules);
-        zip.file(".windsurfrules", aiRules);
-        zip.file("CLAUDE.md", aiRules);
+      if (enhancedAIRules) {
+        aiRules = enhancedAIRules;
       }
     } catch (error) {
       console.error("Error generating AI Rules:", error);
     }
   }
+
+  zip.file(".cursorrules", aiRules);
+  zip.file(".windsurfrules", aiRules);
+  zip.file("CLAUDE.md", aiRules);
 
   // Generate the zip file
   return await zip.generateAsync({ type: "blob" });
