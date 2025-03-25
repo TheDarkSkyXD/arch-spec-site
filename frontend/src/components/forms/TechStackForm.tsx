@@ -673,7 +673,7 @@ const TechStackForm = ({
           variant={hasAIFeatures ? "outline" : "ghost"}
           className={`flex items-center gap-2 relative ${
             !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
-          } ${isEnhancing ? "relative z-[60]" : ""}`}
+          }`}
           title={
             hasAIFeatures
               ? "Replace tech stack with AI-generated recommendations"

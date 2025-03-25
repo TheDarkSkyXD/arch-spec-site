@@ -666,7 +666,7 @@ export default function ApiEndpointsForm({
             variant={hasAIFeatures ? "outline" : "ghost"}
             className={`flex items-center gap-2 relative ${
               !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
-            } ${isAddingEndpoints ? "relative z-[60]" : ""}`}
+            }`}
             title={
               hasAIFeatures
                 ? "Generate new endpoints to complement existing ones"
@@ -702,7 +702,7 @@ export default function ApiEndpointsForm({
             variant={hasAIFeatures ? "outline" : "ghost"}
             className={`flex items-center gap-2 relative ${
               !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
-            } ${isEnhancing ? "relative z-[60]" : ""}`}
+            }`}
             title={
               hasAIFeatures
                 ? "Replace all endpoints with AI-generated ones"

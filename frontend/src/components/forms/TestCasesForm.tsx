@@ -757,7 +757,7 @@ export default function TestCasesForm({
             variant={hasAIFeatures ? "outline" : "ghost"}
             className={`flex items-center gap-2 relative ${
               !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
-            } ${isGeneratingTestCases ? "relative z-[60]" : ""}`}
+            }`}
             title={
               hasAIFeatures
                 ? "Generate new test cases based on requirements and features"
@@ -793,7 +793,7 @@ export default function TestCasesForm({
             variant={hasAIFeatures ? "outline" : "ghost"}
             className={`flex items-center gap-2 relative ${
               !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
-            } ${isEnhancing ? "relative z-[60]" : ""}`}
+            }`}
             title={
               hasAIFeatures
                 ? "Enhance existing test cases with AI"

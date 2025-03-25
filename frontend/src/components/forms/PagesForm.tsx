@@ -1055,7 +1055,7 @@ export default function PagesForm({
             variant={hasAIFeatures ? "outline" : "ghost"}
             className={`flex items-center gap-2 relative ${
               !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
-            } ${isAddingPages ? "relative z-[60]" : ""}`}
+            }`}
             title={
               hasAIFeatures
                 ? "Generate additional pages to complement existing ones"
@@ -1093,7 +1093,7 @@ export default function PagesForm({
             variant={hasAIFeatures ? "outline" : "ghost"}
             className={`flex items-center gap-2 relative ${
               !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
-            } ${isEnhancing ? "relative z-[60]" : ""}`}
+            }`}
             title={
               hasAIFeatures
                 ? "Replace all pages with AI-generated ones"

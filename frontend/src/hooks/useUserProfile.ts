@@ -41,13 +41,10 @@ export const useUserProfile = (): UseUserProfileResult => {
 
   // Load profile data from API
   const loadProfile = useCallback(async () => {
-    console.log("loadProfile");
-
     try {
       setIsLoading(true);
       setError(null);
       const freshProfile = await userApi.getCurrentUserProfile();
-      console.log("freshProfile", freshProfile);
       setProfile(freshProfile);
     } catch (err) {
       console.error("Error loading user profile:", err);
