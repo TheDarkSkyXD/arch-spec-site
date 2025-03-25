@@ -3,10 +3,12 @@ import "./App.css";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { queryClient } from "./lib/query-client";
-import { AuthProvider } from "./contexts/AuthContextProvider";
-import { ThemeProvider } from "./contexts/ThemeContextProvider";
-import { ToastProvider } from "./contexts/ToastContext";
-import { SubscriptionProvider } from "./contexts/SubscriptionContext";
+import {
+  AuthProvider,
+  ThemeProvider,
+  ToastProvider,
+  SubscriptionProvider,
+} from "./contexts";
 import ToastContainer from "./components/ui/ToastContainer";
 
 function App() {

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Mail, AlertCircle, Check } from "lucide-react";
 import AuthLayout from "../../layouts/AuthLayout";
-import { useAuth } from "../../contexts/AuthContext";
+import { useAuth } from "../../contexts";
 
 const ForgotPassword = () => {
   const { sendPasswordResetEmail } = useAuth();
