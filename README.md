@@ -30,15 +30,14 @@ ArchSpec is currently in **early access**. The core functionality is working, wh
 - ✅ One project template (more coming soon)
 - ✅ Manual data entry for all specification sections
 - ✅ LemonSqueezy payment integration
+- ✅ AI credit-based enhancement plan
 
 ### In Development
 
-- ⏳ AI credit-based enhancement plans
 - ⏳ Optimized AI calls (batching) for efficiency and error handling
 - ⏳ Intelligent knowledge graphs for "gaps" detection
 - ⏳ Implementation sequence generator
 - ⏳ Additional project templates
-- ⏳ UI polishing and bug fixes
 
 ## How to Use ArchSpec
 
