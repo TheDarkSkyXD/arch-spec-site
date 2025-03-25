@@ -143,7 +143,7 @@ const SubscriptionPage = () => {
                 await userApi.updateUserSubscription({
                   subscription_id: subscription.id,
                   plan: "premium",
-                  ai_credits: 500, // Default premium credits
+                  ai_credits: 300, // Default premium credits
                 });
                 console.log(
                   "User profile updated with subscription information"
@@ -450,7 +450,8 @@ const SubscriptionPage = () => {
       },
       {
         title: "AI-powered enhancements",
-        description: "Generate descriptions, features, and requirements with AI",
+        description:
+          "Generate descriptions, features, and requirements with AI",
       },
       {
         title: "Advanced tech stack recommendations",
