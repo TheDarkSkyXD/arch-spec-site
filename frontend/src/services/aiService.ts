@@ -198,10 +198,6 @@ interface EnhanceReadmeRequest extends BaseRequest {
   tech_stack: Record<string, unknown>;
 }
 
-interface EnhanceReadmeResponse {
-  enhanced_readme: string;
-}
-
 interface EnhanceUIDesignRequest extends BaseRequest {
   features: FeatureModule[];
   requirements: string[];
@@ -595,6 +591,50 @@ class AIService {
     }
   }
 
+  private async generateDocs(
+    category: string,
+    projectName: string,
+    projectDescription: string,
+    businessGoals: string[],
+    requirements: {
+      functional: string[];
+      non_functional: string[];
+    },
+    features: {
+      coreModules: FeatureModule[];
+      optionalModules?: FeatureModule[];
+    },
+    techStack: Record<string, unknown>,
+    additionalInstructions?: string
+  ): Promise<string | null> {
+    try {
+      const response = await apiClient.post(
+        `/api/ai-text/${category}`,
+        {
+          project_name: projectName,
+          project_description: projectDescription,
+          business_goals: businessGoals,
+          requirements: requirements,
+          features: features,
+          tech_stack: techStack,
+          additional_user_instruction: additionalInstructions,
+        } as EnhanceReadmeRequest
+      );
+
+      // Handle different response formats - enhanced_readme for README, ai_rules for AI rules
+      if (response.data.enhanced_readme) {
+        return response.data.enhanced_readme;
+      } else if (response.data.ai_rules) {
+        return response.data.ai_rules;
+      }
+      
+      return null;
+    } catch (error) {
+      console.error(`Error in generateDocs (${category}):`, error);
+      return null;
+    }
+  }
+
   /**
    * Enhance README markdown content using AI.
    *
@@ -620,27 +660,57 @@ class AIService {
       optionalModules?: FeatureModule[];
     },
     techStack: Record<string, unknown>,
-    additionalInstructions?: string
+    readMeAdditionalInstructions?: string
   ): Promise<string | null> {
-    try {
-      const response = await apiClient.post<EnhanceReadmeResponse>(
-        "/api/ai-text/enhance-readme",
-        {
-          project_name: projectName,
-          project_description: projectDescription,
-          business_goals: businessGoals,
-          requirements: requirements,
-          features: features,
-          tech_stack: techStack,
-          additional_user_instruction: additionalInstructions,
-        } as EnhanceReadmeRequest
-      );
+    return this.generateDocs(
+      "enhance-readme",
+      projectName,
+      projectDescription,
+      businessGoals,
+      requirements,
+      features,
+      techStack,
+      readMeAdditionalInstructions
+    );
+  }
 
-      return response.data.enhanced_readme;
-    } catch (error) {
-      console.error("Error enhancing README:", error);
-      return null;
-    }
+  /**
+   * Create AI rules using AI.
+   *
+   * @param projectName The project name
+   * @param projectDescription The project description
+   * @param businessGoals The business goals
+   * @param requirements The project requirements
+   * @param features The project features
+   * @param techStack The technology stack
+   * @param aiRulesAdditionalInstructions Optional custom instructions for the AI
+   * @returns The created AI rules or null if an error occurred
+   */
+  async createAIRules(
+    projectName: string,
+    projectDescription: string,
+    businessGoals: string[],
+    requirements: {
+      functional: string[];
+      non_functional: string[];
+    },
+    features: {
+      coreModules: FeatureModule[];
+      optionalModules?: FeatureModule[];
+    },
+    techStack: Record<string, unknown>,
+    aiRulesAdditionalInstructions?: string
+  ): Promise<string | null> {
+    return this.generateDocs(
+      "create-ai-rules",
+      projectName,
+      projectDescription,
+      businessGoals,
+      requirements,
+      features,
+      techStack,
+      aiRulesAdditionalInstructions
+    );
   }
 
   /**

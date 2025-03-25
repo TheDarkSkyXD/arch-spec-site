@@ -896,6 +896,29 @@ class TestCasesEnhanceResponse(BaseModel):
     )
 
 
+class ImplementationPromptGenerateRequest(BaseModel):
+    """Request for generating implementation prompts."""
+    category: str = Field(..., description="The category to generate prompts for")
+    project_id: str = Field(..., description="The project ID to generate prompts for")
+    prompt_type: Optional[ImplementationPromptType] = Field(None, description="Optional specific prompt type to generate")
+    additional_user_instruction: Optional[str] = Field(
+        None,
+        title="Additional User Instruction",
+        description="Custom instructions for the AI when generating implementation prompts",
+    )
+    
+
+class ImplementationPromptResponse(BaseModel):
+    """Response containing a generated implementation prompt."""
+    type: ImplementationPromptType
+    content: str
+    
+
+class ImplementationPromptsGenerateResponse(BaseModel):
+    """Response containing generated implementation prompts."""
+    prompts: List[ImplementationPromptResponse] 
+    
+    
 class EnhanceReadmeRequest(BaseModel):
     """Request model for enhancing project README."""
     
@@ -952,24 +975,21 @@ class EnhanceReadmeResponse(BaseModel):
     )
 
 
-class ImplementationPromptGenerateRequest(BaseModel):
-    """Request for generating implementation prompts."""
-    category: str = Field(..., description="The category to generate prompts for")
-    project_id: str = Field(..., description="The project ID to generate prompts for")
-    prompt_type: Optional[ImplementationPromptType] = Field(None, description="Optional specific prompt type to generate")
+class CreateAIRulesRequest(EnhanceReadmeRequest):
+    """Request model for creating AI rules."""
+    
     additional_user_instruction: Optional[str] = Field(
         None,
         title="Additional User Instruction",
-        description="Custom instructions for the AI when generating implementation prompts",
+        description="Custom instructions for the AI when creating AI rules",
     )
     
-
-class ImplementationPromptResponse(BaseModel):
-    """Response containing a generated implementation prompt."""
-    type: ImplementationPromptType
-    content: str
     
-
-class ImplementationPromptsGenerateResponse(BaseModel):
-    """Response containing generated implementation prompts."""
-    prompts: List[ImplementationPromptResponse] 
+class CreateAIRulesResponse(BaseModel):
+    """Response model for created AI rules."""
+    
+    ai_rules: str = Field(
+        ...,
+        title="AI Rules",
+        description="The created AI rules",
+    )

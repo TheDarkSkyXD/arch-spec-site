@@ -21,6 +21,7 @@ interface AIInstructionsModalProps {
   confirmText?: string;
   cancelText?: string;
   defaultInstructions?: string;
+  additionalOptions?: React.ReactNode; // Add this prop
 }
 
 const AIInstructionsModal: React.FC<AIInstructionsModalProps> = ({
@@ -32,6 +33,7 @@ const AIInstructionsModal: React.FC<AIInstructionsModalProps> = ({
   confirmText = "Enhance",
   cancelText = "Cancel",
   defaultInstructions = "",
+  additionalOptions,
 }) => {
   const [instructions, setInstructions] = useState(defaultInstructions);
 
@@ -55,6 +57,9 @@ const AIInstructionsModal: React.FC<AIInstructionsModalProps> = ({
           )}
         </DialogHeader>
         <div className="py-4">
+          {/* Render additional options if provided */}
+          {additionalOptions}
+          
           <div className="space-y-2">
             <Label htmlFor="ai-instructions">
               Custom AI Instructions (Optional)
