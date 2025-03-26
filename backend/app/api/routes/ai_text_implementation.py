@@ -14,7 +14,7 @@ from app.schemas.ai_text import (
     ImplementationPromptsGenerateResponse,
 )
 from app.schemas.shared_schemas import ImplementationPromptType
-from app.services.ai_service import INTELLIGENT_MODEL, AnthropicClient
+from app.services.ai_service import INTELLIGENT_MODEL, AIService
 from app.services.project_specs_service import ProjectSpecsService
 from app.core.firebase_auth import get_current_user
 from app.db.base import db
@@ -95,7 +95,7 @@ async def generate_implementation_prompt(
         usage_tracker = DatabaseUsageTracker(db.get_db())
         
         # Initialize the AI client with the logger and usage tracker
-        client = AnthropicClient(llm_logger, usage_tracker)
+        client = AIService(llm_logger, usage_tracker)
         
         # Get the database
         database = db.get_db()

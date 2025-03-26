@@ -13,7 +13,7 @@ from app.schemas.ai_text import (
     TargetUsersEnhanceRequest,
     TargetUsersEnhanceResponse,
 )
-from app.services.ai_service import INTELLIGENT_MODEL, AnthropicClient
+from app.services.ai_service import INTELLIGENT_MODEL, AIService
 from app.core.firebase_auth import get_current_user
 from app.utils.llm_logging import DefaultLLMLogger
 from app.services.db_usage_tracker import DatabaseUsageTracker
@@ -40,7 +40,7 @@ async def enhance_business_goals(
         usage_tracker = DatabaseUsageTracker(db.get_db())
         
         # Initialize the AI client with the logger and usage tracker
-        client = AnthropicClient(llm_logger, usage_tracker)
+        client = AIService(llm_logger, usage_tracker)
         
         # Create the system message, adjusting based on whether goals were provided
         if request.user_goals and len(request.user_goals) > 0:
@@ -151,7 +151,7 @@ async def enhance_target_users(
         usage_tracker = DatabaseUsageTracker(db.get_db())   
         
         # Initialize the AI client with the logger and usage tracker
-        client = AnthropicClient(llm_logger, usage_tracker)
+        client = AIService(llm_logger, usage_tracker)
         
         # Create the system message
         if request.target_users and len(request.target_users.strip()) > 0:

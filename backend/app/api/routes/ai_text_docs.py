@@ -13,7 +13,7 @@ from app.schemas.ai_text import (
     EnhanceReadmeRequest,
     EnhanceReadmeResponse,
 )
-from app.services.ai_service import FAST_MODEL, AnthropicClient
+from app.services.ai_service import FAST_MODEL, AIService
 from app.core.firebase_auth import get_current_user
 from app.utils.llm_logging import DefaultLLMLogger
 from app.db.base import db
@@ -39,7 +39,7 @@ async def enhance_readme(
         usage_tracker = DatabaseUsageTracker(db.get_db())
         
         # Initialize the AI client with the logger and usage tracker
-        client = AnthropicClient(llm_logger, usage_tracker)
+        client = AIService(llm_logger, usage_tracker)
         
         # Create the system message
         system_message = readme_system_prompt(request.additional_user_instruction)
@@ -109,7 +109,7 @@ async def create_ai_rules(
         usage_tracker = DatabaseUsageTracker(db.get_db())
         
         # Initialize the AI client with the logger and usage tracker
-        client = AnthropicClient(llm_logger, usage_tracker)
+        client = AIService(llm_logger, usage_tracker)
         
         # Create the system message
         system_message = create_ai_rules_system_prompt(request.additional_user_instruction)
