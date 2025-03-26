@@ -132,7 +132,7 @@ const LandingPage = () => {
                 </p>
                 <div className="mt-10">
                   <a
-                    href="https://youtube.com/@aidrivencoder"
+                    href="https://youtu.be/GP4igUPLrl8"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-primary-700 bg-white hover:bg-blue-50"
