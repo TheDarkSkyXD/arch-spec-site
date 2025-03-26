@@ -194,6 +194,10 @@ The application is deployed using:
 
 For local development, a Docker Compose file is provided for running MongoDB.
 
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
 ## Contact
 
 For questions about the hosted early access version or to provide feedback, please reach out:
