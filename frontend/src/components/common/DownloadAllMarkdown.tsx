@@ -169,6 +169,7 @@ const DownloadAllMarkdown = ({
         description="Choose which AI-enhanced documentation to include in your download. This will use AI credits."
         confirmText="Download with AI Enhancements"
         defaultInstructions=""
+        isAnyAIOptionEnabled={generateAIReadme || generateAIRules}
         additionalOptions={
           <div className="space-y-4 mb-4">
             <div className="flex items-center gap-2">
