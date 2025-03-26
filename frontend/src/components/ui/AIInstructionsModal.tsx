@@ -21,7 +21,8 @@ interface AIInstructionsModalProps {
   confirmText?: string;
   cancelText?: string;
   defaultInstructions?: string;
-  additionalOptions?: React.ReactNode; // Add this prop
+  additionalOptions?: React.ReactNode;
+  isAnyAIOptionEnabled?: boolean; // New prop to check if any AI option is enabled
 }
 
 const AIInstructionsModal: React.FC<AIInstructionsModalProps> = ({
@@ -34,6 +35,7 @@ const AIInstructionsModal: React.FC<AIInstructionsModalProps> = ({
   cancelText = "Cancel",
   defaultInstructions = "",
   additionalOptions,
+  isAnyAIOptionEnabled = true, // Default to true for backward compatibility
 }) => {
   const [instructions, setInstructions] = useState(defaultInstructions);
 
@@ -61,22 +63,30 @@ const AIInstructionsModal: React.FC<AIInstructionsModalProps> = ({
           {additionalOptions}
           
           <div className="space-y-2">
-            <Label htmlFor="ai-instructions">
-              Custom AI Instructions (Optional)
+            <Label 
+              htmlFor="ai-instructions"
+              className={!isAnyAIOptionEnabled ? "text-slate-400" : ""}
+            >
+              Custom AI Instructions {isAnyAIOptionEnabled ? "(Optional)" : "(Disabled - Enable an AI option)"}
             </Label>
             <Textarea
               id="ai-instructions"
               rows={5}
               value={instructions}
               onChange={(e) => setInstructions(e.target.value)}
-              placeholder="Enter any specific instructions for the AI enhancement..."
+              placeholder={isAnyAIOptionEnabled 
+                ? "Enter any specific instructions for the AI enhancement..." 
+                : "Enable at least one AI option to use custom instructions"}
               className="w-full"
+              disabled={!isAnyAIOptionEnabled}
             />
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Leave blank to use default AI behavior, or provide specific
-              guidance like "Focus on scalability" or "Target enterprise
-              customers"
-            </p>
+            {isAnyAIOptionEnabled && (
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Leave blank to use default AI behavior, or provide specific
+                guidance like "Focus on scalability" or "Target enterprise
+                customers"
+              </p>
+            )}
           </div>
         </div>
         <DialogFooter className="flex justify-end gap-2">
