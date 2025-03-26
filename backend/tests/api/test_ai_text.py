@@ -21,7 +21,7 @@ def test_client():
     return TestClient(app)
 
 
-@patch("app.services.ai_service.AnthropicClient")
+@patch("app.services.ai_service.AIService")
 def test_enhance_project_description(mock_anthropic_client, test_client):
     """Test the enhance project description endpoint."""
     # Mock the client's generate_response method to return a fixed response
@@ -56,7 +56,7 @@ def test_enhance_project_description(mock_anthropic_client, test_client):
     assert "technical writing assistant" in kwargs["system"]
 
 
-@patch("app.services.ai_service.AnthropicClient")
+@patch("app.services.ai_service.AIService")
 def test_enhance_business_goals_with_existing_goals(mock_anthropic_client, test_client):
     """Test the enhance business goals endpoint with existing goals."""
     # Mock the client's generate_response method to return a fixed response
@@ -105,7 +105,7 @@ def test_enhance_business_goals_with_existing_goals(mock_anthropic_client, test_
     assert "SMART" in kwargs["system"]
 
 
-@patch("app.services.ai_service.AnthropicClient")
+@patch("app.services.ai_service.AIService")
 def test_enhance_business_goals_without_existing_goals(mock_anthropic_client, test_client):
     """Test the enhance business goals endpoint without any existing goals."""
     # Mock the client's generate_response method to return a fixed response
@@ -155,7 +155,7 @@ def test_enhance_business_goals_without_existing_goals(mock_anthropic_client, te
     assert "SMART" in kwargs["system"]
 
 
-@patch("app.services.ai_service.AnthropicClient")
+@patch("app.services.ai_service.AIService")
 def test_enhance_requirements(mock_anthropic_client, test_client):
     """Test the enhance requirements endpoint with existing requirements."""
     # Mock the client's generate_response method to return a fixed response
@@ -211,7 +211,7 @@ def test_enhance_requirements(mock_anthropic_client, test_client):
     assert "requirements analyst" in kwargs["system"]
 
 
-@patch("app.services.ai_service.AnthropicClient")
+@patch("app.services.ai_service.AIService")
 def test_enhance_requirements_empty_requirements(mock_anthropic_client, test_client):
     """Test the enhance requirements endpoint with no existing requirements."""
     # Mock the client's generate_response method to return a fixed response
@@ -255,7 +255,7 @@ def test_enhance_requirements_empty_requirements(mock_anthropic_client, test_cli
     assert "Original requirements:" in args[0][0]["content"]
 
 
-@patch('app.api.routes.ai_text.AnthropicClient')
+@patch('app.api.routes.ai_text.AIService')
 async def test_enhance_readme(mock_anthropic_client, authorized_client):
     # Mock AI client response
     mock_client_instance = mock_anthropic_client.return_value

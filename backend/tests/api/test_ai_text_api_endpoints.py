@@ -111,8 +111,8 @@ def mock_get_current_user():
 
 @pytest.fixture
 def mock_anthropic_client():
-    """Mock the AnthropicClient."""
-    with patch("app.api.routes.ai_text.AnthropicClient") as mock:
+    """Mock the AIService."""
+    with patch("app.api.routes.ai_text.AIService") as mock:
         mock_instance = MagicMock()
         mock_instance.get_tool_use_response.return_value = {"data": MOCK_API_ENDPOINTS}
         mock.return_value = mock_instance
@@ -136,7 +136,7 @@ def test_enhance_api_endpoints_success(mock_get_current_user, mock_anthropic_cli
     assert "data" in response.json()
     assert "endpoints" in response.json()["data"]
     
-    # Verify that the AnthropicClient was called with the correct parameters
+    # Verify that the AIService was called with the correct parameters
     mock_anthropic_client.get_tool_use_response.assert_called_once()
     
     # Verify the response data
@@ -168,7 +168,7 @@ def test_enhance_api_endpoints_with_existing_endpoints(mock_get_current_user, mo
     assert "data" in response.json()
     assert "endpoints" in response.json()["data"]
     
-    # Verify that the AnthropicClient was called with the correct parameters
+    # Verify that the AIService was called with the correct parameters
     mock_anthropic_client.get_tool_use_response.assert_called_once()
 
 def test_enhance_api_endpoints_error_handling(mock_get_current_user, mock_anthropic_client):

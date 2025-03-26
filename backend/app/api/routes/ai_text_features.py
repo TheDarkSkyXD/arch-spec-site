@@ -13,7 +13,7 @@ from app.schemas.ai_text import (
     FeaturesEnhanceResponse,
     FeaturesData,
 )
-from app.services.ai_service import AnthropicClient, INTELLIGENT_MODEL
+from app.services.ai_service import AIService, INTELLIGENT_MODEL
 from app.core.firebase_auth import get_current_user
 from app.api.routes.ai_text_utils import extract_data_from_response
 from app.utils.llm_logging import DefaultLLMLogger
@@ -41,7 +41,7 @@ async def enhance_features(
         usage_tracker = DatabaseUsageTracker(db.get_db())
         
         # Initialize the AI client with the logger and usage tracker
-        client = AnthropicClient(llm_logger, usage_tracker)
+        client = AIService(llm_logger, usage_tracker)
         
         # Create the system message
         system_message = (
