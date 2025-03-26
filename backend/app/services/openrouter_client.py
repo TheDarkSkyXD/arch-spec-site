@@ -25,8 +25,8 @@ MODEL_MAPPING = {
 }
 
 # Default headers for OpenRouter
-DEFAULT_REFERER = "https://codefrost.app"
-DEFAULT_TITLE = "CodeFrost App"
+DEFAULT_REFERER = "https://archspec.dev"
+DEFAULT_TITLE = "ArchSpec"
 
 class OpenRouterClient(BaseLLMClient):
     """Client for interacting with Claude via OpenRouter using OpenAI SDK.

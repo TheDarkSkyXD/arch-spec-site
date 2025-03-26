@@ -37,8 +37,8 @@ class AnthropicSettings(BaseSettings):
 class OpenRouterSettings(BaseSettings):
     """OpenRouter API configuration settings."""
     api_key: str = Field("", env="OPENROUTER_API_KEY")
-    referer: str = Field("https://codefrost.app", env="OPENROUTER_REFERER")
-    title: str = Field("CodeFrost App", env="OPENROUTER_TITLE")
+    referer: str = Field("https://archspec.dev", env="OPENROUTER_REFERER")
+    title: str = Field("ArchSpec", env="OPENROUTER_TITLE")
     
     model_config = {
         "env_prefix": "OPENROUTER_"
