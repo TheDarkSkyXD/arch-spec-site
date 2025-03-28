@@ -128,12 +128,12 @@ async def lemonsqueezy_webhook(
 
 def verify_lemonsqueezy_signature(payload: str, signature: Optional[str]) -> bool:
     """Verify the LemonSqueezy webhook signature"""
-    if not signature or not settings.LEMONSQUEEZY_WEBHOOK_SECRET:
+    if not signature or not settings.lemonsqueezy.webhook_secret:
         return False
     
     # Create HMAC SHA256 signature using webhook secret
     expected_signature = hmac.new(
-        settings.LEMONSQUEEZY_WEBHOOK_SECRET.encode(),
+        settings.lemonsqueezy.webhook_secret.encode(),
         payload.encode(),
         hashlib.sha256
     ).hexdigest()
