@@ -14,8 +14,8 @@ class LemonSqueezyService:
     """Service for interacting with the LemonSqueezy API"""
 
     def __init__(self):
-        self.api_key = settings.LEMONSQUEEZY_API_KEY
-        self.store_id = settings.LEMONSQUEEZY_STORE_ID
+        self.api_key = settings.lemonsqueezy.api_key
+        self.store_id = settings.lemonsqueezy.store_id
         self.base_url = "https://api.lemonsqueezy.com/v1"
         self.headers = {
             "Accept": "application/vnd.api+json",
