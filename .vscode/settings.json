@@ -1,1 +1,7 @@
-{}
+{
+    "github.copilot.chat.codeGeneration.instructions": [
+        {
+            "file": "./docs/project-specs-instructions.md"
+        }
+    ]
+}
