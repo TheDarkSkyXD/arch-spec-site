@@ -34,13 +34,14 @@ from .seed.implementation_prompts import seed_sample_implementation_prompts
 
 HAS_API_ROUTER = True
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """
     Application lifespan context manager.
-    
+
     This handles setup and teardown for the application.
-    
+
     During startup, it:
     1. Connects to MongoDB
     2. Seeds the tech stack to the database (creates or updates)
@@ -50,7 +51,7 @@ async def lifespan(app: FastAPI):
        - Templates are validated against the tech stack for consistency
     4. Seeds sample implementation prompts to the database (creates or updates)
        - These are example prompts that users can import into their projects
-    
+
     During shutdown, it:
     1. Closes MongoDB connection
     """
@@ -61,7 +62,7 @@ async def lifespan(app: FastAPI):
         try:
             await db.connect_to_mongodb()
             logger.info("MongoDB connection established")
-            
+
             # Seed database with sample data if needed
             database = db.get_db()
             if database is not None:
@@ -72,20 +73,20 @@ async def lifespan(app: FastAPI):
 
                 # Seed template data
                 await seed_templates(database, clean_all=False)
-                
+
                 # Seed sample implementation prompts
                 await seed_sample_implementation_prompts(database, clean_all=False)
             else:
                 print("Database connection not available, skipping seeding")
         except Exception as e:
             logger.error(f"Error during MongoDB initialization: {str(e)}")
-        
+
         logger.info("Application startup complete")
     except Exception as e:
         logger.error(f"Error during startup: {str(e)}")
-    
+
     yield
-    
+
     # Teardown
     try:
         # Close MongoDB connection
@@ -94,8 +95,9 @@ async def lifespan(app: FastAPI):
         logger.info("MongoDB connection closed")
     except Exception as e:
         logger.error(f"Error during shutdown: {str(e)}")
-    
+
     logger.info("Application shutdown complete")
+
 
 # Create FastAPI app
 app = FastAPI(
@@ -130,6 +132,7 @@ if HAS_API_ROUTER:
 else:
     logger.warning("API router not available - only basic endpoints will work")
 
+
 # Debug endpoints
 @app.get("/", tags=["debug"])
 async def root() -> Dict[str, Any]:
@@ -137,13 +140,15 @@ async def root() -> Dict[str, Any]:
     return {
         "message": "ArchSpec API is running",
         "version": settings.version,
-        "environment": settings.environment
+        "environment": settings.environment,
     }
+
 
 @app.get("/health", tags=["debug"])
 async def health() -> Dict[str, str]:
     """Health check endpoint."""
     return {"status": "healthy"}
+
 
 # Global error handler
 @app.exception_handler(Exception)
@@ -151,6 +156,5 @@ async def generic_exception_handler(request: Request, exc: Exception):
     """Handle generic exceptions."""
     logger.error(f"Unhandled exception: {exc}")
     return JSONResponse(
-        status_code=500,
-        content={"detail": f"An unexpected error occurred: {str(exc)}"}
-    ) 
+        status_code=500, content={"detail": f"An unexpected error occurred: {str(exc)}"}
+    )

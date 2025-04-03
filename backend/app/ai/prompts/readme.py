@@ -2,6 +2,7 @@
 Prompts for AI-enhanced README generation.
 """
 
+
 def readme_system_prompt(additional_user_instruction=None) -> str:
     """
     System prompt for enhancing README content.
@@ -45,17 +46,17 @@ Make the README professional, informative, and visually well-organized.
 
 
 def get_readme_user_prompt(
-    project_name: str, 
+    project_name: str,
     project_description: str,
     business_goals: list,
     requirements: dict,
     features: dict,
     tech_stack: dict,
-    additional_user_instruction=None
+    additional_user_instruction=None,
 ) -> str:
     """
     User prompt for README enhancement.
-    
+
     Args:
         project_name: The name of the project
         project_description: The project description
@@ -64,28 +65,36 @@ def get_readme_user_prompt(
         features: Dictionary of features
         tech_stack: Dictionary of tech stack
         additional_user_instruction: Optional custom instructions
-        
+
     Returns:
         Formatted user prompt
     """
     # Format the business goals as a string
     formatted_goals = "\n".join([f"- {goal}" for goal in business_goals])
-    
+
     # Create a summary of requirements
     functional_count = len(requirements.get("functional", []))
     non_functional_count = len(requirements.get("non_functional", []))
-    
+
     # Create a summary of features
     core_modules = features.get("coreModules", [])
     optional_modules = features.get("optionalModules", [])
-    core_module_names = [module.get("name") for module in core_modules if isinstance(module, dict) and "name" in module]
-    optional_module_names = [module.get("name") for module in optional_modules if isinstance(module, dict) and "name" in module]
-    
+    core_module_names = [
+        module.get("name")
+        for module in core_modules
+        if isinstance(module, dict) and "name" in module
+    ]
+    optional_module_names = [
+        module.get("name")
+        for module in optional_modules
+        if isinstance(module, dict) and "name" in module
+    ]
+
     # Create a summary of tech stack
     frontend = tech_stack.get("frontend", {})
     backend = tech_stack.get("backend", {})
     database = tech_stack.get("database", {})
-    
+
     base_prompt = f"""
 Please generate a README.md file for the following project:
 
@@ -116,4 +125,4 @@ The README should mention that detailed documentation is available for each of t
 """
 
     # We don't need to add additional_user_instruction here, as it's already handled in the system prompt
-    return base_prompt 
+    return base_prompt

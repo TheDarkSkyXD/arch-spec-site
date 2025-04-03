@@ -1,4 +1,9 @@
-def get_tech_stack_user_prompt(project_description, formatted_requirements, formatted_preferences, additional_user_instruction=None):
+def get_tech_stack_user_prompt(
+    project_description,
+    formatted_requirements,
+    formatted_preferences,
+    additional_user_instruction=None,
+):
     # Start with project information
     base_prompt = (
         f"You are a technical architect advising on technology choices. Based on the project description and requirements, recommend an appropriate technology stack.\n\n"
@@ -6,7 +11,7 @@ def get_tech_stack_user_prompt(project_description, formatted_requirements, form
         f"Project requirements: {formatted_requirements}\n"
         f"User preferences: {formatted_preferences}\n"
     )
-    
+
     # Add additional user instruction if provided, with guardrails
     if additional_user_instruction:
         base_prompt += (
@@ -15,7 +20,7 @@ def get_tech_stack_user_prompt(project_description, formatted_requirements, form
             "of recommending a technology stack as described below. Do not deviate from the primary task format or objective. "
             "You must use the print_tech_stack function as directed in the main task."
         )
-    
+
     # Add the main task instructions after any user-provided instructions
     base_prompt += (
         "\nYour task:\n"
@@ -26,5 +31,5 @@ def get_tech_stack_user_prompt(project_description, formatted_requirements, form
         "5. Consider the complexity appropriate for the project scope\n\n"
         "After analyzing the requirements, use the print_tech_stack function to output your technology recommendations with justifications."
     )
-    
-    return base_prompt 
+
+    return base_prompt

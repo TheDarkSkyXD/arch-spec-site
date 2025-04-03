@@ -4,6 +4,7 @@ Utility for logging LLM responses.
 This module provides functions for logging LLM responses to both file and database
 for future retrieval and analysis.
 """
+
 import os
 import json
 import logging
@@ -11,6 +12,7 @@ from datetime import datetime
 from typing import Dict, Any, Optional
 from app.db.base import db
 from abc import ABC, abstractmethod
+
 
 class LLMLogger(ABC):
     @abstractmethod
@@ -20,7 +22,7 @@ class LLMLogger(ABC):
         raw_response: Any,
         project_id: Optional[str] = None,
         category: Optional[str] = None,
-        metadata: Optional[Dict[str, Any]] = None
+        metadata: Optional[Dict[str, Any]] = None,
     ) -> None:
         """Log an LLM response with associated metadata."""
         pass
@@ -33,8 +35,9 @@ llm_logger.setLevel(logging.INFO)
 # Ensure we have a directory for logs
 os.makedirs("logs/llm_responses", exist_ok=True)
 file_handler = logging.FileHandler("logs/llm_responses/llm_responses.log")
-file_handler.setFormatter(logging.Formatter('%(asctime)s - %(message)s'))
+file_handler.setFormatter(logging.Formatter("%(asctime)s - %(message)s"))
 llm_logger.addHandler(file_handler)
+
 
 # Custom encoder to handle non-serializable objects
 class CustomEncoder(json.JSONEncoder):
@@ -57,15 +60,15 @@ class DefaultLLMLogger(LLMLogger):
         raw_response: Any,
         project_id: Optional[str] = None,
         category: Optional[str] = None,
-        metadata: Optional[Dict[str, Any]] = None
+        metadata: Optional[Dict[str, Any]] = None,
     ) -> None:
         """Log LLM response to both file and database."""
         timestamp = datetime.now().isoformat()
-        
+
         # Ensure raw_response is a string
         if not isinstance(raw_response, str):
             raw_response = json.dumps(raw_response, cls=CustomEncoder)
-        
+
         # Create the log entry
         log_entry = {
             "timestamp": timestamp,
@@ -73,11 +76,11 @@ class DefaultLLMLogger(LLMLogger):
             "type": response_type,
             "raw_response": raw_response,
         }
-        
+
         # Add optional fields if they exist
         if category:
             log_entry["category"] = category
-        
+
         # Process metadata to ensure all objects are serializable
         if metadata:
             # Create a deep copy of metadata to avoid modifying the original
@@ -87,8 +90,7 @@ class DefaultLLMLogger(LLMLogger):
                 if hasattr(value, "__class__") and value.__class__.__name__ == "Usage":
                     # Convert Usage object to dictionary
                     processed_metadata[key] = {
-                        k: v for k, v in value.__dict__.items() 
-                        if not k.startswith('_')
+                        k: v for k, v in value.__dict__.items() if not k.startswith("_")
                     }
                 # Handle other non-serializable objects
                 elif not isinstance(value, (str, int, float, bool, list, dict, type(None))):
@@ -100,12 +102,12 @@ class DefaultLLMLogger(LLMLogger):
                         processed_metadata[key] = str(value)
                 else:
                     processed_metadata[key] = value
-            
+
             log_entry["metadata"] = processed_metadata
-        
+
         # Log to file
         llm_logger.info(json.dumps(log_entry, cls=CustomEncoder))
-        
+
         # Log to database if available
         try:
             database = db.get_db()

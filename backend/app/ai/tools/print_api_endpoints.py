@@ -15,42 +15,37 @@ def print_api_endpoints_input_schema():
                             "items": {
                                 "type": "object",
                                 "properties": {
-                                    "path": {
-                                        "type": "string",
-                                        "description": "API endpoint path"
-                                    },
+                                    "path": {"type": "string", "description": "API endpoint path"},
                                     "description": {
                                         "type": "string",
-                                        "description": "Brief description of the endpoint's purpose"
+                                        "description": "Brief description of the endpoint's purpose",
                                     },
                                     "methods": {
                                         "type": "array",
                                         "description": "HTTP methods supported by this endpoint",
                                         "items": {
                                             "type": "string",
-                                            "enum": ["GET", "POST", "PUT", "DELETE", "PATCH"]
-                                        }
+                                            "enum": ["GET", "POST", "PUT", "DELETE", "PATCH"],
+                                        },
                                     },
                                     "auth": {
                                         "type": "boolean",
-                                        "description": "Whether authentication is required for this endpoint"
+                                        "description": "Whether authentication is required for this endpoint",
                                     },
                                     "roles": {
                                         "type": "array",
                                         "description": "List of roles that can access this endpoint, if any",
-                                        "items": {
-                                            "type": "string"
-                                        }
-                                    }
+                                        "items": {"type": "string"},
+                                    },
                                 },
-                                "required": ["path", "description", "methods", "auth"]
-                            }
+                                "required": ["path", "description", "methods", "auth"],
+                            },
                         }
                     },
-                    "required": ["endpoints"]
+                    "required": ["endpoints"],
                 }
             },
-            "required": ["data"]
+            "required": ["data"],
         },
-        "cache_control": {"type": "ephemeral"}
-    } 
+        "cache_control": {"type": "ephemeral"},
+    }

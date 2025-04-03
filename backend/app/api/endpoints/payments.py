@@ -9,9 +9,15 @@ from fastapi.responses import JSONResponse
 
 from app.services.subscription_service import subscription_service
 from app.schemas.subscription import (
-    CustomerCreate, Customer, Subscription, SubscriptionPlan,
-    CheckoutCreate, CheckoutResponse, CustomerPortalRequest, CustomerPortalResponse,
-    WebhookEvent
+    CustomerCreate,
+    Customer,
+    Subscription,
+    SubscriptionPlan,
+    CheckoutCreate,
+    CheckoutResponse,
+    CustomerPortalRequest,
+    CustomerPortalResponse,
+    WebhookEvent,
 )
 from app.core.config import settings
 
@@ -34,9 +40,7 @@ async def create_customer(customer: CustomerCreate):
     """Create a new customer or get an existing one"""
     try:
         return await subscription_service.get_or_create_customer(
-            email=customer.email,
-            name=customer.name,
-            user_id=customer.user_id
+            email=customer.email, name=customer.name, user_id=customer.user_id
         )
     except Exception as e:
         logger.error(f"Error creating customer: {e}")
@@ -58,9 +62,7 @@ async def create_checkout(checkout: CheckoutCreate):
     """Create a checkout URL for a subscription"""
     try:
         return await subscription_service.create_checkout(
-            plan_id=checkout.plan_id,
-            email=checkout.email,
-            user_id=checkout.user_id
+            plan_id=checkout.plan_id, email=checkout.email, user_id=checkout.user_id
         )
     except Exception as e:
         logger.error(f"Error creating checkout: {e}")
@@ -78,31 +80,28 @@ async def create_customer_portal(portal: CustomerPortalRequest):
 
 
 @router.post("/webhooks/lemonsqueezy")
-async def lemonsqueezy_webhook(
-    request: Request,
-    x_signature: str = Header(None)
-):
+async def lemonsqueezy_webhook(request: Request, x_signature: str = Header(None)):
     """Handle LemonSqueezy webhooks"""
     try:
         # Get raw request body
         body = await request.body()
-        body_str = body.decode('utf-8')
-        
+        body_str = body.decode("utf-8")
+
         # Verify webhook signature
         if not verify_lemonsqueezy_signature(body_str, x_signature):
             raise HTTPException(status_code=401, detail="Invalid webhook signature")
-        
+
         # Parse request body
         try:
             body_json = json.loads(body_str)
         except json.JSONDecodeError:
             raise HTTPException(status_code=400, detail="Invalid JSON body")
-        
+
         # Get event name from meta
         event_name = body_json.get("meta", {}).get("event_name")
         if not event_name:
             raise HTTPException(status_code=400, detail="Missing event name")
-        
+
         # Process webhook based on event type
         if event_name == "subscription_created":
             await subscription_service.process_subscription_created(body_json)
@@ -117,7 +116,7 @@ async def lemonsqueezy_webhook(
         else:
             # Log other event types but don't process them
             logger.info(f"Received unhandled webhook event: {event_name}")
-        
+
         return JSONResponse(content={"status": "success"})
     except HTTPException:
         raise
@@ -130,13 +129,11 @@ def verify_lemonsqueezy_signature(payload: str, signature: Optional[str]) -> boo
     """Verify the LemonSqueezy webhook signature"""
     if not signature or not settings.lemonsqueezy.webhook_secret:
         return False
-    
+
     # Create HMAC SHA256 signature using webhook secret
     expected_signature = hmac.new(
-        settings.lemonsqueezy.webhook_secret.encode(),
-        payload.encode(),
-        hashlib.sha256
+        settings.lemonsqueezy.webhook_secret.encode(), payload.encode(), hashlib.sha256
     ).hexdigest()
-    
+
     # Compare signatures
-    return hmac.compare_digest(expected_signature, signature) 
+    return hmac.compare_digest(expected_signature, signature)

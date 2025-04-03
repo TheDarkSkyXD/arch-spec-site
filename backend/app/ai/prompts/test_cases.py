@@ -1,4 +1,9 @@
-def get_test_cases_user_prompt(formatted_requirements, formatted_features, formatted_test_cases=None, additional_user_instruction=None):
+def get_test_cases_user_prompt(
+    formatted_requirements,
+    formatted_features,
+    formatted_test_cases=None,
+    additional_user_instruction=None,
+):
     """
     Generate a prompt for creating test cases in Gherkin format
     """
@@ -12,7 +17,7 @@ def get_test_cases_user_prompt(formatted_requirements, formatted_features, forma
         f"Features:\n{formatted_features}\n\n"
         f"{existing_test_cases}"
     )
-    
+
     # Add additional user instruction if provided, with guardrails
     if additional_user_instruction:
         base_prompt += (
@@ -21,7 +26,7 @@ def get_test_cases_user_prompt(formatted_requirements, formatted_features, forma
             "of creating test cases in Gherkin format as described below. Do not deviate from the primary task format or objective. "
             "You must use the print_test_cases function as directed in the main task."
         )
-    
+
     # Add the main task instructions after any user-provided instructions
     base_prompt += (
         "\nYour task:\n"
@@ -42,5 +47,5 @@ def get_test_cases_user_prompt(formatted_requirements, formatted_features, forma
         "6. If generating from scratch, create test cases that comprehensively verify requirements\n\n"
         "Once you've analyzed the requirements and features, use the print_test_cases function to output the organized test cases."
     )
-    
-    return base_prompt 
+
+    return base_prompt

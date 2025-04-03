@@ -6,6 +6,7 @@ from bson import ObjectId
 
 class PyObjectId(str):
     """Custom ObjectId field for Pydantic models."""
+
     @classmethod
     def __get_validators__(cls):
         yield cls.validate
@@ -19,18 +20,21 @@ class PyObjectId(str):
 
 class UserBase(BaseModel):
     """Base user schema with common fields."""
+
     email: EmailStr = Field(..., description="User's email address")
     display_name: Optional[str] = Field(None, description="User's display name")
     photo_url: Optional[str] = Field(None, description="URL to user's profile photo")
-    
+
 
 class UserCreate(UserBase):
     """Schema for creating a new user."""
+
     firebase_uid: str = Field(..., description="Firebase Auth UID")
-    
+
 
 class UserUpdate(BaseModel):
     """Schema for updating user information."""
+
     display_name: Optional[str] = None
     photo_url: Optional[str] = None
     settings: Optional[Dict[str, Any]] = None
@@ -38,10 +42,11 @@ class UserUpdate(BaseModel):
     subscription_id: Optional[str] = None
     ai_credits: Optional[int] = None
     ai_credits_used: Optional[int] = None
-    
+
 
 class UserInDB(UserBase):
     """User schema as stored in the database."""
+
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     firebase_uid: str = Field(..., description="Firebase Auth UID")
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
@@ -49,8 +54,12 @@ class UserInDB(UserBase):
     last_login: Optional[datetime] = None
     is_active: bool = True
     settings: Dict[str, Any] = Field(default_factory=dict)
-    plan: Literal["free", "premium", "open_source"] = Field(default="free", description="User's subscription plan")
-    subscription_id: Optional[str] = Field(None, description="ID of the user's subscription if applicable")
+    plan: Literal["free", "premium", "open_source"] = Field(
+        default="free", description="User's subscription plan"
+    )
+    subscription_id: Optional[str] = Field(
+        None, description="ID of the user's subscription if applicable"
+    )
     ai_credits: int = Field(default=0, description="Available AI enhancement credits")
     ai_credits_used: int = Field(default=0, description="AI enhancement credits used so far")
     ai_credits_remaining: int = Field(default=0, description="AI enhancement credits remaining")
@@ -74,14 +83,15 @@ class UserInDB(UserBase):
                 "subscription_id": None,
                 "ai_credits": 0,
                 "ai_credits_used": 0,
-                "ai_credits_remaining": 0
+                "ai_credits_remaining": 0,
             }
-        }
+        },
     )
 
 
 class UserResponse(BaseModel):
     """User schema for API responses."""
+
     id: str = Field(..., alias="_id")
     email: EmailStr
     display_name: Optional[str] = None
@@ -95,7 +105,4 @@ class UserResponse(BaseModel):
     ai_credits: int = Field(default=0)
     ai_credits_used: int = Field(default=0)
     ai_credits_remaining: int = Field(default=0)
-    model_config = ConfigDict(
-        populate_by_name=True,
-        json_encoders={ObjectId: str}
-    )
+    model_config = ConfigDict(populate_by_name=True, json_encoders={ObjectId: str})

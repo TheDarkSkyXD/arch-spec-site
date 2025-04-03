@@ -15,37 +15,37 @@ def print_tech_stack_input_schema():
                             "properties": {
                                 "framework": {
                                     "type": ["string", "null"],
-                                    "description": "Recommended frontend framework or library"
+                                    "description": "Recommended frontend framework or library",
                                 },
                                 "language": {
                                     "type": ["string", "null"],
-                                    "description": "Recommended frontend programming language"
+                                    "description": "Recommended frontend programming language",
                                 },
                                 "stateManagement": {
                                     "type": ["string", "null"],
-                                    "description": "Recommended state management solution"
+                                    "description": "Recommended state management solution",
                                 },
                                 "uiLibrary": {
                                     "type": ["string", "null"],
-                                    "description": "Recommended UI component library or CSS framework"
+                                    "description": "Recommended UI component library or CSS framework",
                                 },
                                 "formHandling": {
                                     "type": ["string", "null"],
-                                    "description": "Recommended form handling library"
+                                    "description": "Recommended form handling library",
                                 },
                                 "routing": {
                                     "type": ["string", "null"],
-                                    "description": "Recommended routing solution"
+                                    "description": "Recommended routing solution",
                                 },
                                 "apiClient": {
                                     "type": ["string", "null"],
-                                    "description": "Recommended API client library"
+                                    "description": "Recommended API client library",
                                 },
                                 "metaFramework": {
                                     "type": ["string", "null"],
-                                    "description": "Recommended meta-framework"
-                                }
-                            }
+                                    "description": "Recommended meta-framework",
+                                },
+                            },
                         },
                         "backend": {
                             "type": "object",
@@ -53,21 +53,21 @@ def print_tech_stack_input_schema():
                             "properties": {
                                 "type": {
                                     "type": ["string", "null"],
-                                    "description": "Type of backend (e.g., traditional, serverless, BaaS)"
+                                    "description": "Type of backend (e.g., traditional, serverless, BaaS)",
                                 },
                                 "service": {
                                     "type": ["string", "null"],
-                                    "description": "Recommended backend service or framework"
+                                    "description": "Recommended backend service or framework",
                                 },
                                 "functions": {
                                     "type": ["string", "null"],
-                                    "description": "Recommended serverless functions solution"
+                                    "description": "Recommended serverless functions solution",
                                 },
                                 "realtime": {
                                     "type": ["string", "null"],
-                                    "description": "Recommended realtime solution"
-                                }
-                            }
+                                    "description": "Recommended realtime solution",
+                                },
+                            },
                         },
                         "database": {
                             "type": "object",
@@ -75,21 +75,21 @@ def print_tech_stack_input_schema():
                             "properties": {
                                 "type": {
                                     "type": ["string", "null"],
-                                    "description": "Type of database (e.g., SQL, NoSQL)"
+                                    "description": "Type of database (e.g., SQL, NoSQL)",
                                 },
                                 "system": {
                                     "type": ["string", "null"],
-                                    "description": "Recommended database system"
+                                    "description": "Recommended database system",
                                 },
                                 "hosting": {
                                     "type": ["string", "null"],
-                                    "description": "Recommended database hosting"
+                                    "description": "Recommended database hosting",
                                 },
                                 "orm": {
                                     "type": ["string", "null"],
-                                    "description": "Recommended ORM or database toolkit"
-                                }
-                            }
+                                    "description": "Recommended ORM or database toolkit",
+                                },
+                            },
                         },
                         "authentication": {
                             "type": "object",
@@ -97,16 +97,14 @@ def print_tech_stack_input_schema():
                             "properties": {
                                 "provider": {
                                     "type": ["string", "null"],
-                                    "description": "Recommended authentication provider"
+                                    "description": "Recommended authentication provider",
                                 },
                                 "methods": {
                                     "type": "array",
                                     "description": "Recommended authentication methods",
-                                    "items": {
-                                        "type": "string"
-                                    }
-                                }
-                            }
+                                    "items": {"type": "string"},
+                                },
+                            },
                         },
                         "hosting": {
                             "type": "object",
@@ -114,17 +112,17 @@ def print_tech_stack_input_schema():
                             "properties": {
                                 "frontend": {
                                     "type": ["string", "null"],
-                                    "description": "Recommended frontend hosting"
+                                    "description": "Recommended frontend hosting",
                                 },
                                 "backend": {
                                     "type": ["string", "null"],
-                                    "description": "Recommended backend hosting"
+                                    "description": "Recommended backend hosting",
                                 },
                                 "database": {
                                     "type": ["string", "null"],
-                                    "description": "Recommended database hosting if separate"
-                                }
-                            }
+                                    "description": "Recommended database hosting if separate",
+                                },
+                            },
                         },
                         "storage": {
                             "type": "object",
@@ -132,13 +130,13 @@ def print_tech_stack_input_schema():
                             "properties": {
                                 "type": {
                                     "type": ["string", "null"],
-                                    "description": "Type of storage solution"
+                                    "description": "Type of storage solution",
                                 },
                                 "service": {
                                     "type": ["string", "null"],
-                                    "description": "Recommended storage service"
-                                }
-                            }
+                                    "description": "Recommended storage service",
+                                },
+                            },
                         },
                         "deployment": {
                             "type": "object",
@@ -146,23 +144,31 @@ def print_tech_stack_input_schema():
                             "properties": {
                                 "ci_cd": {
                                     "type": ["string", "null"],
-                                    "description": "Recommended CI/CD solution"
+                                    "description": "Recommended CI/CD solution",
                                 },
                                 "containerization": {
                                     "type": ["string", "null"],
-                                    "description": "Recommended containerization solution"
-                                }
-                            }
+                                    "description": "Recommended containerization solution",
+                                },
+                            },
                         },
                         "overallJustification": {
                             "type": "string",
-                            "description": "Brief explanation of why this tech stack is appropriate for the project"
-                        }
+                            "description": "Brief explanation of why this tech stack is appropriate for the project",
+                        },
                     },
-                    "required": ["frontend", "backend", "database", "authentication", "hosting", "deployment", "overallJustification"]
+                    "required": [
+                        "frontend",
+                        "backend",
+                        "database",
+                        "authentication",
+                        "hosting",
+                        "deployment",
+                        "overallJustification",
+                    ],
                 }
             },
-            "required": ["data"]
+            "required": ["data"],
         },
-        "cache_control": {"type": "ephemeral"}
-    } 
+        "cache_control": {"type": "ephemeral"},
+    }

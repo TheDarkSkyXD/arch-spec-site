@@ -2,6 +2,7 @@
 Prompts for AI rules generation.
 """
 
+
 def create_ai_rules_system_prompt(additional_user_instruction: str) -> str:
     """
     System prompt for creating AI rules.
@@ -35,18 +36,19 @@ def create_ai_rules_system_prompt(additional_user_instruction: str) -> str:
 
     return base_prompt
 
+
 def get_create_ai_rules_user_prompt(
-    project_name: str, 
+    project_name: str,
     project_description: str,
     business_goals: list,
     requirements: dict,
     features: dict,
     tech_stack: dict,
-    additional_user_instruction: str
+    additional_user_instruction: str,
 ) -> str:
     """
     User prompt for creating AI rules.
-    
+
     Args:
         project_name: The name of the project
         project_description: The project description
@@ -55,24 +57,32 @@ def get_create_ai_rules_user_prompt(
         features: Dictionary of features
         tech_stack: Dictionary of tech stack
         additional_user_instruction: Optional custom instructions
-        
+
     Returns:
         Formatted user prompt
     """
     # Format the business goals as a string
     formatted_goals = "\n".join([f"- {goal}" for goal in business_goals])
-    
+
     # Create a summary of requirements
     functional_count = len(requirements.get("functional", []))
     non_functional_count = len(requirements.get("non_functional", []))
-    
+
     # Create a summary of features
     core_modules = features.get("coreModules", [])
     optional_modules = features.get("optionalModules", [])
-    core_module_names = [module.get("name") for module in core_modules if isinstance(module, dict) and "name" in module]
-    optional_module_names = [module.get("name") for module in optional_modules if isinstance(module, dict) and "name" in module]
-    
-    # Create a summary of tech stack  
+    core_module_names = [
+        module.get("name")
+        for module in core_modules
+        if isinstance(module, dict) and "name" in module
+    ]
+    optional_module_names = [
+        module.get("name")
+        for module in optional_modules
+        if isinstance(module, dict) and "name" in module
+    ]
+
+    # Create a summary of tech stack
     frontend = tech_stack.get("frontend", {})
     backend = tech_stack.get("backend", {})
     database = tech_stack.get("database", {})

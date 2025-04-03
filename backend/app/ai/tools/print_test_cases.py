@@ -17,22 +17,20 @@ def print_test_cases_input_schema():
                                 "properties": {
                                     "feature": {
                                         "type": "string",
-                                        "description": "The feature being tested (e.g., User Authentication, Shopping Cart)"
+                                        "description": "The feature being tested (e.g., User Authentication, Shopping Cart)",
                                     },
                                     "title": {
                                         "type": "string",
-                                        "description": "Title of the test case (e.g., Login with valid credentials)"
+                                        "description": "Title of the test case (e.g., Login with valid credentials)",
                                     },
                                     "description": {
                                         "type": "string",
-                                        "description": "Optional description of the test case"
+                                        "description": "Optional description of the test case",
                                     },
                                     "tags": {
                                         "type": "array",
                                         "description": "Optional tags for categorizing the test case (e.g., smoke, regression, ui)",
-                                        "items": {
-                                            "type": "string"
-                                        }
+                                        "items": {"type": "string"},
                                     },
                                     "scenarios": {
                                         "type": "array",
@@ -42,7 +40,7 @@ def print_test_cases_input_schema():
                                             "properties": {
                                                 "name": {
                                                     "type": "string",
-                                                    "description": "Name of the scenario (e.g., Successful login, Invalid credentials)"
+                                                    "description": "Name of the scenario (e.g., Successful login, Invalid credentials)",
                                                 },
                                                 "steps": {
                                                     "type": "array",
@@ -52,30 +50,36 @@ def print_test_cases_input_schema():
                                                         "properties": {
                                                             "type": {
                                                                 "type": "string",
-                                                                "enum": ["given", "when", "then", "and", "but"],
-                                                                "description": "Type of step"
+                                                                "enum": [
+                                                                    "given",
+                                                                    "when",
+                                                                    "then",
+                                                                    "and",
+                                                                    "but",
+                                                                ],
+                                                                "description": "Type of step",
                                                             },
                                                             "text": {
                                                                 "type": "string",
-                                                                "description": "Text of the step (e.g., the user enters valid credentials)"
-                                                            }
+                                                                "description": "Text of the step (e.g., the user enters valid credentials)",
+                                                            },
                                                         },
-                                                        "required": ["type", "text"]
-                                                    }
-                                                }
+                                                        "required": ["type", "text"],
+                                                    },
+                                                },
                                             },
-                                            "required": ["name", "steps"]
-                                        }
-                                    }
+                                            "required": ["name", "steps"],
+                                        },
+                                    },
                                 },
-                                "required": ["feature", "title", "scenarios"]
-                            }
+                                "required": ["feature", "title", "scenarios"],
+                            },
                         }
                     },
-                    "required": ["testCases"]
+                    "required": ["testCases"],
                 }
             },
-            "required": ["data"]
+            "required": ["data"],
         },
-        "cache_control": {"type": "ephemeral"}
-    } 
+        "cache_control": {"type": "ephemeral"},
+    }

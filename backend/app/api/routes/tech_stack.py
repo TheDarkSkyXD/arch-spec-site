@@ -1,22 +1,24 @@
 """
 API routes for tech stack compatibility.
 """
+
 import logging
 from fastapi import APIRouter, HTTPException
 
 from app.seed import tech_stack_data
 from ...db.base import db
-from ...schemas.tech_stack import (
-    TechStackData
-)
+from ...schemas.tech_stack import TechStackData
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-@router.get("", response_model=TechStackData,
-            summary="Get complete tech stack data",
-            description="Retrieves the full tech stack with all technologies and compatibility information")
+@router.get(
+    "",
+    response_model=TechStackData,
+    summary="Get complete tech stack data",
+    description="Retrieves the full tech stack with all technologies and compatibility information",
+)
 async def get_all_technology():
     """
     Retrieves the full tech stack with all technologies and compatibility information
@@ -37,5 +39,6 @@ async def get_all_technology():
             raise HTTPException(status_code=500, detail="Database connection not available")
     except Exception as e:
         logger.error(f"Error getting all technology options: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error getting all technology options: {str(e)}") 
-    
+        raise HTTPException(
+            status_code=500, detail=f"Error getting all technology options: {str(e)}"
+        )
