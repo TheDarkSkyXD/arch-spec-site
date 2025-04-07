@@ -1,10 +1,10 @@
 /**
  * Service for tech stack compatibility API interactions.
  */
-import apiClient from "../api/apiClient";
-import { TechStackData } from "../types/techStack";
-import { TechStackFormData } from "../components/forms/tech-stack/techStackSchema";
-import { ProjectTechStack } from "../types/templates";
+import apiClient from '../api/apiClient';
+import { TechStackData } from '../types/techStack';
+import { TechStackFormData } from '../components/forms/tech-stack/techStackSchema';
+import { ProjectTechStack } from '../types/templates';
 
 // Interface to match the backend response format
 interface TechStackSpec {
@@ -18,7 +18,7 @@ interface TechStackSpec {
 }
 
 // Define the API base URL to be consistent with other services
-const API_BASE_URL = "/api";
+const API_BASE_URL = '/api';
 
 /**
  * Tech Stack API service for compatibility checks and options.
@@ -31,12 +31,10 @@ export const techStackService = {
    */
   async getAllTechnology(): Promise<TechStackData> {
     try {
-      const response = await apiClient.get<TechStackData>(
-        `${API_BASE_URL}/tech-stack`
-      );
+      const response = await apiClient.get<TechStackData>(`${API_BASE_URL}/tech-stack`);
       return response.data;
     } catch (error) {
-      console.error("Error getting all technology:", error);
+      console.error('Error getting all technology:', error);
       throw error;
     }
   },
@@ -55,10 +53,7 @@ export const techStackService = {
 
       return response.data.data;
     } catch (error) {
-      console.error(
-        `Error fetching tech stack for project ${projectId}:`,
-        error
-      );
+      console.error(`Error fetching tech stack for project ${projectId}:`, error);
       return null;
     }
   },
@@ -91,7 +86,7 @@ export const techStackService = {
       );
 
       if (!response.data || !response.data.data) {
-        console.error("Invalid tech stack response:", response.data);
+        console.error('Invalid tech stack response:', response.data);
         return null;
       }
 
@@ -117,59 +112,59 @@ function convertFormToApiFormat(formData: TechStackFormData): ProjectTechStack {
 
   // Create the backend spec based on type
   let backend;
-  if (formData.backend_type === "framework") {
+  if (formData.backend_type === 'framework') {
     backend = {
-      type: "framework" as const,
-      framework: formData.backend_framework || "",
-      language: formData.backend_language || "",
+      type: 'framework' as const,
+      framework: formData.backend_framework || '',
+      language: formData.backend_language || '',
       realtime: formData.backend_realtime || undefined,
     };
-  } else if (formData.backend_type === "baas") {
+  } else if (formData.backend_type === 'baas') {
     backend = {
-      type: "baas" as const,
-      service: formData.backend_service || "",
+      type: 'baas' as const,
+      service: formData.backend_service || '',
       functions: formData.backend_functions || undefined,
       realtime: formData.backend_realtime || undefined,
     };
-  } else if (formData.backend_type === "serverless") {
+  } else if (formData.backend_type === 'serverless') {
     backend = {
-      type: "serverless" as const,
-      service: formData.backend_service || "",
-      language: formData.backend_language || "",
+      type: 'serverless' as const,
+      service: formData.backend_service || '',
+      language: formData.backend_language || '',
     };
   } else {
     // Default to empty framework if no type selected
     backend = {
-      type: "framework" as const,
-      framework: "",
-      language: "",
+      type: 'framework' as const,
+      framework: '',
+      language: '',
     };
   }
 
   // Create database spec
   const database = {
-    type: (formData.database_type as "sql" | "nosql") || "sql",
-    system: formData.database_system || "",
-    hosting: formData.database_hosting || "",
+    type: (formData.database_type as 'sql' | 'nosql') || 'sql',
+    system: formData.database_system || '',
+    hosting: formData.database_hosting || '',
     orm: formData.database_orm || undefined,
   };
 
   // Create authentication spec
   const authentication = {
-    provider: formData.auth_provider || "",
+    provider: formData.auth_provider || '',
     methods: formData.auth_methods ? [formData.auth_methods] : [],
   };
 
   // Create hosting spec
   const hosting = {
-    frontend: formData.hosting_frontend || "",
-    backend: formData.hosting_backend || "",
+    frontend: formData.hosting_frontend || '',
+    backend: formData.hosting_backend || '',
   };
 
   // Create storage spec if values provided
   const storage = formData.storage_service
     ? {
-        type: formData.storage_type || "objectStorage",
+        type: formData.storage_type || 'objectStorage',
         service: formData.storage_service,
       }
     : undefined;

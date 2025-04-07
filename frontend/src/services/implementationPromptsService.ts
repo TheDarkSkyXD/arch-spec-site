@@ -1,12 +1,12 @@
 /**
  * Service for implementation prompts API interactions.
  */
-import apiClient from "../api/apiClient";
+import apiClient from '../api/apiClient';
 import {
   ImplementationPrompts,
   ImplementationPrompt,
   ImplementationPromptType,
-} from "../types/templates";
+} from '../types/templates';
 
 // Interface to match the backend response format
 interface ImplementationPromptsSpec {
@@ -36,7 +36,7 @@ interface GenerateImplementationPromptResponse {
 }
 
 // Define the API base URL to be consistent with other services
-const API_BASE_URL = "/api";
+const API_BASE_URL = '/api';
 
 export const implementationPromptsService = {
   /**
@@ -45,19 +45,14 @@ export const implementationPromptsService = {
    * @param projectId - Project ID
    * @returns Promise containing the project implementation prompts
    */
-  async getImplementationPrompts(
-    projectId: string
-  ): Promise<ImplementationPrompts | null> {
+  async getImplementationPrompts(projectId: string): Promise<ImplementationPrompts | null> {
     try {
       const response = await apiClient.get<ImplementationPromptsSpec>(
         `${API_BASE_URL}/project-specs/${projectId}/implementation-prompts`
       );
 
       if (!response.data) {
-        console.error(
-          "Invalid implementation prompts response:",
-          response.data
-        );
+        console.error('Invalid implementation prompts response:', response.data);
         return null;
       }
 
@@ -65,10 +60,7 @@ export const implementationPromptsService = {
         data: response.data.data || {},
       };
     } catch (error) {
-      console.error(
-        `Error fetching implementation prompts for project ${projectId}:`,
-        error
-      );
+      console.error(`Error fetching implementation prompts for project ${projectId}:`, error);
       return null;
     }
   },
@@ -96,10 +88,7 @@ export const implementationPromptsService = {
       );
 
       if (!response.data) {
-        console.error(
-          "Invalid implementation prompts response:",
-          response.data
-        );
+        console.error('Invalid implementation prompts response:', response.data);
         return null;
       }
 
@@ -107,10 +96,7 @@ export const implementationPromptsService = {
         data: response.data.data || {},
       };
     } catch (error) {
-      console.error(
-        `Error saving implementation prompts for project ${projectId}:`,
-        error
-      );
+      console.error(`Error saving implementation prompts for project ${projectId}:`, error);
       return null;
     }
   },
@@ -127,10 +113,7 @@ export const implementationPromptsService = {
       }>(`${API_BASE_URL}/implementation-prompts/sample`);
 
       if (!response.data) {
-        console.error(
-          "Invalid sample implementation prompts response:",
-          response.data
-        );
+        console.error('Invalid sample implementation prompts response:', response.data);
         return null;
       }
 
@@ -138,7 +121,7 @@ export const implementationPromptsService = {
         data: response.data.data || {},
       };
     } catch (error) {
-      console.error("Error fetching sample implementation prompts:", error);
+      console.error('Error fetching sample implementation prompts:', error);
       return null;
     }
   },
@@ -166,17 +149,13 @@ export const implementationPromptsService = {
         additional_user_instruction: additionalInstructions,
       };
 
-      const response =
-        await apiClient.post<GenerateImplementationPromptResponse>(
-          `${API_BASE_URL}/ai-text/generate-implementation-prompt`,
-          payload
-        );
+      const response = await apiClient.post<GenerateImplementationPromptResponse>(
+        `${API_BASE_URL}/ai-text/generate-implementation-prompt`,
+        payload
+      );
 
       if (!response.data || !response.data.prompts) {
-        console.error(
-          "Invalid generated implementation prompts response:",
-          response.data
-        );
+        console.error('Invalid generated implementation prompts response:', response.data);
         return null;
       }
 
@@ -189,10 +168,7 @@ export const implementationPromptsService = {
         updated_at: new Date().toISOString(),
       }));
     } catch (error) {
-      console.error(
-        `Error generating implementation prompts for category ${category}:`,
-        error
-      );
+      console.error(`Error generating implementation prompts for category ${category}:`, error);
       return null;
     }
   },

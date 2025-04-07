@@ -1,8 +1,8 @@
-import React, { useState } from "react";
-import { Textarea } from "./textarea";
-import Button from "./Button";
-import { Label } from "./label";
-import { Lightbulb } from "lucide-react";
+import React, { useState } from 'react';
+import { Textarea } from './textarea';
+import Button from './Button';
+import { Label } from './label';
+import { Lightbulb } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "./dialog";
+} from './dialog';
 
 interface AIInstructionsModalProps {
   isOpen: boolean;
@@ -31,9 +31,9 @@ const AIInstructionsModal: React.FC<AIInstructionsModalProps> = ({
   onConfirm,
   title,
   description,
-  confirmText = "Enhance",
-  cancelText = "Cancel",
-  defaultInstructions = "",
+  confirmText = 'Enhance',
+  cancelText = 'Cancel',
+  defaultInstructions = '',
   additionalOptions,
   isAnyAIOptionEnabled = true, // Default to true for backward compatibility
 }) => {
@@ -52,39 +52,37 @@ const AIInstructionsModal: React.FC<AIInstructionsModalProps> = ({
             <Lightbulb className="h-5 w-5 text-yellow-500" />
             {title}
           </DialogTitle>
-          {description && (
-            <DialogDescription>
-              {description}
-            </DialogDescription>
-          )}
+          {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
         <div className="py-4">
           {/* Render additional options if provided */}
           {additionalOptions}
-          
+
           <div className="space-y-2">
-            <Label 
+            <Label
               htmlFor="ai-instructions"
-              className={!isAnyAIOptionEnabled ? "text-slate-400" : ""}
+              className={!isAnyAIOptionEnabled ? 'text-slate-400' : ''}
             >
-              Custom AI Instructions {isAnyAIOptionEnabled ? "(Optional)" : "(Disabled - Enable an AI option)"}
+              Custom AI Instructions{' '}
+              {isAnyAIOptionEnabled ? '(Optional)' : '(Disabled - Enable an AI option)'}
             </Label>
             <Textarea
               id="ai-instructions"
               rows={5}
               value={instructions}
               onChange={(e) => setInstructions(e.target.value)}
-              placeholder={isAnyAIOptionEnabled 
-                ? "Enter any specific instructions for the AI enhancement..." 
-                : "Enable at least one AI option to use custom instructions"}
+              placeholder={
+                isAnyAIOptionEnabled
+                  ? 'Enter any specific instructions for the AI enhancement...'
+                  : 'Enable at least one AI option to use custom instructions'
+              }
               className="w-full"
               disabled={!isAnyAIOptionEnabled}
             />
             {isAnyAIOptionEnabled && (
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Leave blank to use default AI behavior, or provide specific
-                guidance like "Focus on scalability" or "Target enterprise
-                customers"
+                Leave blank to use default AI behavior, or provide specific guidance like "Focus on
+                scalability" or "Target enterprise customers"
               </p>
             )}
           </div>

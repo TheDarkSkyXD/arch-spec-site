@@ -1,6 +1,6 @@
-import { create } from "zustand";
-import apiClient from "../api/apiClient";
-import { ProjectBase } from "../types/project";
+import { create } from 'zustand';
+import apiClient from '../api/apiClient';
+import { ProjectBase } from '../types/project';
 
 interface ProjectState {
   projects: ProjectBase[];
@@ -25,8 +25,8 @@ export const useProjectStore = create<ProjectState>((set) => ({
       const response = await apiClient.get(`/api/projects`);
       set({ projects: response.data, isLoading: false });
     } catch (error) {
-      console.error("Failed to fetch projects:", error);
-      set({ error: "Failed to fetch projects", isLoading: false });
+      console.error('Failed to fetch projects:', error);
+      set({ error: 'Failed to fetch projects', isLoading: false });
     }
   },
 
@@ -40,8 +40,8 @@ export const useProjectStore = create<ProjectState>((set) => ({
         isLoading: false,
       }));
     } catch (error) {
-      console.error("Failed to delete project:", error);
-      set({ error: "Failed to delete project", isLoading: false });
+      console.error('Failed to delete project:', error);
+      set({ error: 'Failed to delete project', isLoading: false });
     }
   },
 }));

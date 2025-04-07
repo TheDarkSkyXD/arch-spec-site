@@ -1,12 +1,12 @@
-import { UseFormRegister, Control, UseFormSetValue } from "react-hook-form";
-import { TechStackFormData } from "./techStackSchema";
-import { useEffect, useRef } from "react";
-import { ProjectTechStack } from "../../../types/templates";
-import { Technology } from "../../../types/techStack";
+import { UseFormRegister, Control, UseFormSetValue } from 'react-hook-form';
+import { TechStackFormData } from './techStackSchema';
+import { useEffect, useRef } from 'react';
+import { ProjectTechStack } from '../../../types/templates';
+import { Technology } from '../../../types/techStack';
 
 // Import shadcn UI components
-import { Label } from "../../ui/label";
-import { Select } from "../../ui/select";
+import { Label } from '../../ui/label';
+import { Select } from '../../ui/select';
 
 interface HostingSectionProps {
   register: UseFormRegister<TechStackFormData>;
@@ -30,8 +30,8 @@ const HostingSection = ({
   // Reset form values if templateId is null
   useEffect(() => {
     if (!initialData) {
-      setValue("hosting_frontend", "", { shouldDirty: false });
-      setValue("hosting_backend", "", { shouldDirty: false });
+      setValue('hosting_frontend', '', { shouldDirty: false });
+      setValue('hosting_backend', '', { shouldDirty: false });
     }
   }, [initialData, setValue]);
 
@@ -39,32 +39,26 @@ const HostingSection = ({
   useEffect(() => {
     if (!initialData) return;
 
-    console.log("Checking initial data for hosting section:", initialData);
+    console.log('Checking initial data for hosting section:', initialData);
 
     // Track values that were successfully set
     let valuesWereSet = false;
 
     // Check and set frontend hosting
     if (initialData.hosting?.frontend) {
-      setValue("hosting_frontend", initialData.hosting.frontend, {
+      setValue('hosting_frontend', initialData.hosting.frontend, {
         shouldDirty: true,
       });
-      console.log(
-        "Setting initial frontend hosting:",
-        initialData.hosting.frontend
-      );
+      console.log('Setting initial frontend hosting:', initialData.hosting.frontend);
       valuesWereSet = true;
     }
 
     // Check and set backend hosting
     if (initialData.hosting?.backend) {
-      setValue("hosting_backend", initialData.hosting.backend, {
+      setValue('hosting_backend', initialData.hosting.backend, {
         shouldDirty: true,
       });
-      console.log(
-        "Setting initial backend hosting:",
-        initialData.hosting.backend
-      );
+      console.log('Setting initial backend hosting:', initialData.hosting.backend);
       valuesWereSet = true;
     }
 
@@ -76,13 +70,11 @@ const HostingSection = ({
 
   return (
     <div>
-      <h3 className="text-lg font-medium text-slate-800 dark:text-slate-100 mb-4">
-        Hosting
-      </h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <h3 className="mb-4 text-lg font-medium text-slate-800 dark:text-slate-100">Hosting</h3>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div>
           <Label htmlFor="hosting_frontend">Frontend Hosting</Label>
-          <Select id="hosting_frontend" {...register("hosting_frontend")}>
+          <Select id="hosting_frontend" {...register('hosting_frontend')}>
             <option value="">Select Frontend Hosting</option>
             {hostingFrontendOptions.map((option) => (
               <option key={option.id} value={option.id}>
@@ -94,7 +86,7 @@ const HostingSection = ({
 
         <div>
           <Label htmlFor="hosting_backend">Backend Hosting</Label>
-          <Select id="hosting_backend" {...register("hosting_backend")}>
+          <Select id="hosting_backend" {...register('hosting_backend')}>
             <option value="">Select Backend Hosting</option>
             {hostingBackendOptions.map((option) => (
               <option key={option.id} value={option.id}>

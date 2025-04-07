@@ -1,15 +1,11 @@
-import Router from "./router";
-import "./App.css";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { queryClient } from "./lib/query-client";
-import {
-  AuthProvider,
-  ThemeProvider,
-  ToastProvider,
-  SubscriptionProvider,
-} from "./contexts";
-import ToastContainer from "./components/ui/ToastContainer";
+import { QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import './App.css';
+import { queryClient } from './lib/query-client';
+import Router from './router';
+
+import ToastContainer from './components/ui/ToastContainer';
+import { AuthProvider, SubscriptionProvider, ThemeProvider, ToastProvider } from './contexts';
 
 function App() {
   return (
@@ -20,7 +16,7 @@ function App() {
             <SubscriptionProvider>
               <Router />
               <ToastContainer />
-              {import.meta.env.MODE !== "production" && (
+              {import.meta.env.MODE !== 'production' && (
                 <ReactQueryDevtools initialIsOpen={false} />
               )}
             </SubscriptionProvider>

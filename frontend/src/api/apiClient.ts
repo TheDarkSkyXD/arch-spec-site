@@ -1,16 +1,16 @@
-import axios from "axios";
-import { getAuthToken } from "../services/auth";
+import axios from 'axios';
+import { getAuthToken } from '../services/auth';
 
 // Define API base URL based on environment
 const API_BASE_URL = import.meta.env.DEV
-  ? "http://localhost:8000" // Development
-  : import.meta.env.VITE_API_URL || "https://api.archspec.dev"; // Use env variable with fallback
+  ? 'http://localhost:8000' // Development
+  : import.meta.env.VITE_API_URL || 'https://api.archspec.dev'; // Use env variable with fallback
 
 // Create axios instance with auth header
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
-    "Content-Type": "application/json",
+    'Content-Type': 'application/json',
   },
 });
 
@@ -24,15 +24,15 @@ apiClient.interceptors.request.use(
 
     // Add development bypass header if in development mode
     if (import.meta.env.DEV) {
-      config.headers["X-Dev-Bypass"] = "true";
+      config.headers['X-Dev-Bypass'] = 'true';
     }
 
     // Ensure HTTPS is used in production
     if (!import.meta.env.DEV && config.url) {
       // Force HTTPS for all API requests
       const url = new URL(config.url, API_BASE_URL);
-      if (url.protocol === "http:") {
-        url.protocol = "https:";
+      if (url.protocol === 'http:') {
+        url.protocol = 'https:';
         config.url = url.toString();
       }
     }

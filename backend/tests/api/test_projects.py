@@ -12,6 +12,7 @@ from app.main import app
 def event_loop():
     """Create an event loop for each test module."""
     import asyncio
+
     loop = asyncio.new_event_loop()
     yield loop
     loop.close()
@@ -46,7 +47,7 @@ def test_get_projects(client, mock_db):
             "status": "draft",
             "created_at": "2023-01-01T00:00:00",
             "updated_at": "2023-01-01T00:00:00",
-            "metadata": {}
+            "metadata": {},
         },
         {
             "id": "test-id-2",
@@ -56,13 +57,13 @@ def test_get_projects(client, mock_db):
             "status": "completed",
             "created_at": "2023-01-02T00:00:00",
             "updated_at": "2023-01-02T00:00:00",
-            "metadata": {}
-        }
+            "metadata": {},
+        },
     ]
-    
+
     # Make request
     response = client.get("/api/projects")
-    
+
     # Check response
     assert response.status_code == 200
     data = response.json()
@@ -77,17 +78,17 @@ def test_create_project(client, mock_db):
     """Test creating a project."""
     # Setup mock
     mock_db.projects.insert_one = AsyncMock()
-    
+
     # Make request
     response = client.post(
         "/api/projects",
         json={
             "name": "New Project",
             "description": "New project description",
-            "template_type": "web_app"
-        }
+            "template_type": "web_app",
+        },
     )
-    
+
     # Check response
     assert response.status_code == 200
     data = response.json()
@@ -96,7 +97,7 @@ def test_create_project(client, mock_db):
     assert data["template_type"] == "web_app"
     assert "id" in data
     assert data["status"] == "draft"
-    
+
     # Check that insert_one was called
     mock_db.projects.insert_one.assert_called_once()
 
@@ -114,18 +115,18 @@ def test_get_project(client, mock_db):
         "status": "draft",
         "created_at": "2023-01-01T00:00:00",
         "updated_at": "2023-01-01T00:00:00",
-        "metadata": {}
+        "metadata": {},
     }
-    
+
     # Make request
     response = client.get("/api/projects/test-id")
-    
+
     # Check response
     assert response.status_code == 200
     data = response.json()
     assert data["id"] == "test-id"
     assert data["name"] == "Test Project"
-    
+
     # Check that find_one was called with correct ID
     mock_db.projects.find_one.assert_called_once_with({"id": "test-id"})
 
@@ -136,10 +137,10 @@ def test_get_project_not_found(client, mock_db):
     """Test getting a project that doesn't exist."""
     # Setup mock
     mock_db.projects.find_one.return_value = None
-    
+
     # Make request
     response = client.get("/api/projects/nonexistent-id")
-    
+
     # Check response
     assert response.status_code == 404
-    assert response.json()["detail"] == "Project not found" 
+    assert response.json()["detail"] == "Project not found"

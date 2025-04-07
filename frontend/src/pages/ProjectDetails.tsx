@@ -1,16 +1,11 @@
-import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { projectsService } from "../services/projectsService";
-import { techStackService } from "../services/techStackService";
-import { ProjectBase } from "../types/project";
-import { ChevronLeft, Loader2 } from "lucide-react";
-import MainLayout from "../layouts/MainLayout";
-import {
-  ProjectTechStack,
-  Requirements,
-  Api,
-  UIDesign,
-} from "../types/templates";
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { projectsService } from '../services/projectsService';
+import { techStackService } from '../services/techStackService';
+import { ProjectBase } from '../types/project';
+import { ChevronLeft, Loader2 } from 'lucide-react';
+import MainLayout from '../layouts/MainLayout';
+import { ProjectTechStack, Requirements, Api, UIDesign } from '../types/templates';
 import {
   useRequirements,
   useFeatures,
@@ -19,32 +14,32 @@ import {
   useDataModel,
   useTestCases,
   useUIDesign,
-} from "../hooks/useDataQueries";
-import { FeaturesData } from "../services/featuresService";
-import { TestCasesData } from "../services/testCasesService";
-import { Pages, DataModel } from "../types/templates";
-import DownloadAllMarkdown from "../components/common/DownloadAllMarkdown";
+} from '../hooks/useDataQueries';
+import { FeaturesData } from '../services/featuresService';
+import { TestCasesData } from '../services/testCasesService';
+import { Pages, DataModel } from '../types/templates';
+import DownloadAllMarkdown from '../components/common/DownloadAllMarkdown';
 
 // Import shadcn UI components
-import Button from "../components/ui/Button";
-import Card from "../components/ui/Card";
-import { userApi } from "../api/userApi";
-import { useSubscription } from "../contexts/SubscriptionContext";
-import { implementationPromptsService } from "../services/implementationPromptsService";
-import { ImplementationPrompts } from "../types/templates";
+import Button from '../components/ui/Button';
+import Card from '../components/ui/Card';
+import { userApi } from '../api/userApi';
+import { useSubscription } from '../contexts/SubscriptionContext';
+import { implementationPromptsService } from '../services/implementationPromptsService';
+import { ImplementationPrompts } from '../types/templates';
 
 // Import custom hook and section components
-import { SectionId, useSectionState } from "../hooks/useSectionState";
-import ProjectBasicsSection from "../components/project/ProjectBasicsSection";
-import TechStackSection from "../components/project/TechStackSection";
-import RequirementsSection from "../components/project/RequirementsSection";
-import FeaturesSection from "../components/project/FeaturesSection";
-import PagesSection from "../components/project/PagesSection";
-import DataModelSection from "../components/project/DataModelSection";
-import ApiEndpointsSection from "../components/project/ApiEndpointsSection";
-import TestCasesSection from "../components/project/TestCasesSection";
-import ImplementationPromptsSection from "../components/project/ImplementationPromptsSection";
-import UIDesignSection from "../components/project/UIDesignSection";
+import { SectionId, useSectionState } from '../hooks/useSectionState';
+import ProjectBasicsSection from '../components/project/ProjectBasicsSection';
+import TechStackSection from '../components/project/TechStackSection';
+import RequirementsSection from '../components/project/RequirementsSection';
+import FeaturesSection from '../components/project/FeaturesSection';
+import PagesSection from '../components/project/PagesSection';
+import DataModelSection from '../components/project/DataModelSection';
+import ApiEndpointsSection from '../components/project/ApiEndpointsSection';
+import TestCasesSection from '../components/project/TestCasesSection';
+import ImplementationPromptsSection from '../components/project/ImplementationPromptsSection';
+import UIDesignSection from '../components/project/UIDesignSection';
 
 const ProjectDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -57,27 +52,24 @@ const ProjectDetails = () => {
   const { refreshSubscriptionData } = useSubscription();
 
   // Use our custom hook for section state
-  const { expandedSections, sectionViewModes, toggleSection, changeViewMode } =
-    useSectionState();
+  const { expandedSections, sectionViewModes, toggleSection, changeViewMode } = useSectionState();
 
   // Use the hooks
-  const { data: requirements, isLoading: requirementsLoading } =
-    useRequirements(id);
+  const { data: requirements, isLoading: requirementsLoading } = useRequirements(id);
   const { data: features, isLoading: featuresLoading } = useFeatures(id);
   const { data: pages, isLoading: pagesLoading } = usePages(id);
   const { data: dataModel, isLoading: dataModelLoading } = useDataModel(id);
-  const { data: apiEndpoints, isLoading: apiEndpointsLoading } =
-    useApiEndpoints(id);
+  const { data: apiEndpoints, isLoading: apiEndpointsLoading } = useApiEndpoints(id);
   const { data: testCases, isLoading: testCasesLoading } = useTestCases(id);
 
   // Add UI Design hook
   const { data: uiDesign, isLoading: uiDesignLoading } = useUIDesign(id);
 
   // Add implementation prompts state
-  const [implementationPrompts, setImplementationPrompts] =
-    useState<ImplementationPrompts | null>(null);
-  const [implementationPromptsLoading, setImplementationPromptsLoading] =
-    useState(true);
+  const [implementationPrompts, setImplementationPrompts] = useState<ImplementationPrompts | null>(
+    null
+  );
+  const [implementationPromptsLoading, setImplementationPromptsLoading] = useState(true);
 
   useEffect(() => {
     const loadUserProfile = async () => {
@@ -93,7 +85,7 @@ const ProjectDetails = () => {
       setError(null);
 
       if (!id) {
-        setError("Project ID is missing");
+        setError('Project ID is missing');
         setLoading(false);
         return;
       }
@@ -103,11 +95,11 @@ const ProjectDetails = () => {
         if (projectData) {
           setProject(projectData);
         } else {
-          setError("Project not found");
+          setError('Project not found');
         }
       } catch (err) {
-        console.error("Error fetching project:", err);
-        setError("Failed to load project details");
+        console.error('Error fetching project:', err);
+        setError('Failed to load project details');
       } finally {
         setLoading(false);
       }
@@ -126,7 +118,7 @@ const ProjectDetails = () => {
         const techStackData = await techStackService.getTechStack(id);
         setTechStack(techStackData);
       } catch (err) {
-        console.error("Error fetching tech stack:", err);
+        console.error('Error fetching tech stack:', err);
         // Not setting an error state here as the project should still display
         // even if tech stack data fails to load
       } finally {
@@ -144,11 +136,10 @@ const ProjectDetails = () => {
 
       setImplementationPromptsLoading(true);
       try {
-        const data =
-          await implementationPromptsService.getImplementationPrompts(id);
+        const data = await implementationPromptsService.getImplementationPrompts(id);
         setImplementationPrompts(data);
       } catch (err) {
-        console.error("Error fetching implementation prompts:", err);
+        console.error('Error fetching implementation prompts:', err);
       } finally {
         setImplementationPromptsLoading(false);
       }
@@ -180,66 +171,60 @@ const ProjectDetails = () => {
     }
   };
 
-  const handleRequirementsUpdate = (
-    _updatedRequirements: Partial<Requirements>
-  ) => {
+  const handleRequirementsUpdate = (_updatedRequirements: Partial<Requirements>) => {
     // Update is handled by refetching from the backend
-    console.log("Requirements updated:", _updatedRequirements);
+    console.log('Requirements updated:', _updatedRequirements);
   };
 
   const handleFeaturesUpdate = (_updatedFeatures: FeaturesData) => {
     // Update is handled by refetching from the backend
-    console.log("Features updated:", _updatedFeatures);
+    console.log('Features updated:', _updatedFeatures);
   };
 
   const handlePagesUpdate = (_updatedPages: Pages) => {
     // Update is handled by refetching from the backend
-    console.log("Pages updated:", _updatedPages);
+    console.log('Pages updated:', _updatedPages);
   };
 
   const handleDataModelUpdate = (_updatedDataModel: Partial<DataModel>) => {
     // Update is handled by refetching from the backend
-    console.log("Data Model updated:", _updatedDataModel);
+    console.log('Data Model updated:', _updatedDataModel);
   };
 
   const handleApiEndpointsUpdate = (_updatedApiEndpoints: Api) => {
     // Update is handled by refetching from the backend
-    console.log("API Endpoints updated:", _updatedApiEndpoints);
+    console.log('API Endpoints updated:', _updatedApiEndpoints);
   };
 
   const handleTestCasesUpdate = (_updatedTestCases: TestCasesData) => {
     // Update is handled by refetching from the backend
-    console.log("Test Cases updated:", _updatedTestCases);
+    console.log('Test Cases updated:', _updatedTestCases);
   };
 
   const handleUIDesignUpdate = (_updatedUIDesign: UIDesign) => {
     // Update is handled by refetching from the backend
-    console.log("UI Design updated:", _updatedUIDesign);
+    console.log('UI Design updated:', _updatedUIDesign);
   };
 
-  const handleImplementationPromptsUpdate = (
-    updatedPrompts: Partial<ImplementationPrompts>
-  ) => {
+  const handleImplementationPromptsUpdate = (updatedPrompts: Partial<ImplementationPrompts>) => {
     // Update local state immediately so the preview shows the latest changes
     setImplementationPrompts(updatedPrompts as ImplementationPrompts);
-    console.log("Implementation Prompts updated:", updatedPrompts);
+    console.log('Implementation Prompts updated:', updatedPrompts);
   };
 
   return (
     <MainLayout>
-      <div className="container max-w-6xl mx-auto px-4 py-8">
-        <div className="flex items-center mb-6">
+      <div className="container mx-auto max-w-6xl px-4 py-8">
+        <div className="mb-6 flex items-center">
           <Button
-            onClick={() => navigate("/projects")}
+            onClick={() => navigate('/projects')}
             variant="ghost"
-            className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 mr-3"
+            className="mr-3 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
           >
             <ChevronLeft size={20} />
           </Button>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-            {loading
-              ? "Loading Project..."
-              : project?.name || "Project Details"}
+            {loading ? 'Loading Project...' : project?.name || 'Project Details'}
           </h1>
           {project && !loading && (
             <div className="ml-auto">
@@ -260,19 +245,19 @@ const ProjectDetails = () => {
         </div>
 
         {loading ? (
-          <Card className="flex justify-center items-center py-16">
-            <Loader2 className="h-8 w-8 text-primary-600 animate-spin mr-3" />
-            <span className="text-slate-600 dark:text-slate-300 font-medium">
+          <Card className="flex items-center justify-center py-16">
+            <Loader2 className="mr-3 h-8 w-8 animate-spin text-primary-600" />
+            <span className="font-medium text-slate-600 dark:text-slate-300">
               Loading project details...
             </span>
           </Card>
         ) : error ? (
-          <Card className="flex justify-center items-center py-16">
+          <Card className="flex items-center justify-center py-16">
             <div className="text-center">
-              <div className="text-red-500 mb-4">
+              <div className="mb-4 text-red-500">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-16 w-16 mx-auto"
+                  className="mx-auto h-16 w-16"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -285,15 +270,15 @@ const ProjectDetails = () => {
                   />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-2">
+              <h3 className="mb-2 text-xl font-semibold text-slate-800 dark:text-slate-100">
                 {error}
               </h3>
-              <p className="text-slate-500 dark:text-slate-400 mb-6">
+              <p className="mb-6 text-slate-500 dark:text-slate-400">
                 There was a problem loading the project details.
               </p>
               <Button
-                onClick={() => navigate("/projects")}
-                className="px-5 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg shadow-sm"
+                onClick={() => navigate('/projects')}
+                className="rounded-lg bg-primary-600 px-5 py-2 text-white shadow-sm hover:bg-primary-700"
               >
                 Return to Projects
               </Button>

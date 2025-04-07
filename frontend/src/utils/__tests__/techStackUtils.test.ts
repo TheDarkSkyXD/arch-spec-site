@@ -1,10 +1,7 @@
-import {
-  getCompatibleTechnologies,
-  filterCompatibleTechnologies,
-} from "../techStackUtils";
-import { TechStackData } from "../../types/techStack";
+import { getCompatibleTechnologies, filterCompatibleTechnologies } from '../techStackUtils';
+import { TechStackData } from '../../types/techStack';
 
-describe("Tech Stack Utilities", () => {
+describe('Tech Stack Utilities', () => {
   let testTechStackData: TechStackData;
 
   beforeEach(() => {
@@ -12,25 +9,25 @@ describe("Tech Stack Utilities", () => {
     testTechStackData = {
       categories: {
         frontend: {
-          frameworks: ["React", "Vue", "Angular"],
-          languages: ["JavaScript", "TypeScript"],
-          stateManagement: ["Redux", "MobX", "Vuex"],
-          uiLibraries: ["Material-UI", "Tailwind CSS", "Bootstrap"],
+          frameworks: ['React', 'Vue', 'Angular'],
+          languages: ['JavaScript', 'TypeScript'],
+          stateManagement: ['Redux', 'MobX', 'Vuex'],
+          uiLibraries: ['Material-UI', 'Tailwind CSS', 'Bootstrap'],
           formHandling: [],
           routing: [],
           apiClients: [],
           metaFrameworks: [],
         },
         backend: {
-          frameworks: ["Express.js", "NestJS", "Django"],
-          languages: ["JavaScript", "TypeScript", "Python"],
-          baas: ["Firebase", "Supabase"],
+          frameworks: ['Express.js', 'NestJS', 'Django'],
+          languages: ['JavaScript', 'TypeScript', 'Python'],
+          baas: ['Firebase', 'Supabase'],
           serverless: [],
           realtime: [],
         },
         database: {
-          sql: ["PostgreSQL", "MySQL"],
-          nosql: ["MongoDB", "DynamoDB"],
+          sql: ['PostgreSQL', 'MySQL'],
+          nosql: ['MongoDB', 'DynamoDB'],
           hosting: [],
           clients: [],
         },
@@ -48,8 +45,8 @@ describe("Tech Stack Utilities", () => {
           fileSystem: [],
         },
         hosting: {
-          frontend: ["Vercel", "Netlify"],
-          backend: ["Heroku", "AWS"],
+          frontend: ['Vercel', 'Netlify'],
+          backend: ['Heroku', 'AWS'],
           database: [],
         },
         testing: {
@@ -61,140 +58,136 @@ describe("Tech Stack Utilities", () => {
       technologies: {
         frameworks: {
           React: {
-            type: "frontend",
-            description: "A JavaScript library for building user interfaces",
-            languages: ["JavaScript", "TypeScript"],
+            type: 'frontend',
+            description: 'A JavaScript library for building user interfaces',
+            languages: ['JavaScript', 'TypeScript'],
             compatibleWith: {
-              stateManagement: ["Redux", "MobX"],
-              uiLibraries: ["Material-UI", "Tailwind CSS"],
-              hosting: ["Vercel", "Netlify"],
+              stateManagement: ['Redux', 'MobX'],
+              uiLibraries: ['Material-UI', 'Tailwind CSS'],
+              hosting: ['Vercel', 'Netlify'],
             },
           },
           Vue: {
-            type: "frontend",
-            description: "Progressive JavaScript Framework",
-            languages: ["JavaScript", "TypeScript"],
+            type: 'frontend',
+            description: 'Progressive JavaScript Framework',
+            languages: ['JavaScript', 'TypeScript'],
             compatibleWith: {
-              stateManagement: ["Vuex"],
-              uiLibraries: ["Tailwind CSS", "Bootstrap"],
-              hosting: ["Vercel", "Netlify"],
+              stateManagement: ['Vuex'],
+              uiLibraries: ['Tailwind CSS', 'Bootstrap'],
+              hosting: ['Vercel', 'Netlify'],
             },
           },
-          "Express.js": {
-            type: "backend",
-            description:
-              "Fast, unopinionated, minimalist web framework for Node.js",
-            language: "JavaScript",
+          'Express.js': {
+            type: 'backend',
+            description: 'Fast, unopinionated, minimalist web framework for Node.js',
+            language: 'JavaScript',
             compatibleWith: {
-              databases: ["MongoDB", "PostgreSQL", "MySQL"],
-              hosting: ["Heroku", "AWS"],
+              databases: ['MongoDB', 'PostgreSQL', 'MySQL'],
+              hosting: ['Heroku', 'AWS'],
             },
           },
           Django: {
-            type: "backend",
-            description: "Python web framework",
-            language: "Python",
+            type: 'backend',
+            description: 'Python web framework',
+            language: 'Python',
             compatibleWith: {
-              databases: ["PostgreSQL", "MySQL"],
-              hosting: ["Heroku"],
+              databases: ['PostgreSQL', 'MySQL'],
+              hosting: ['Heroku'],
             },
           },
         },
         stateManagement: {
           Redux: {
-            description: "A predictable state container for JavaScript apps",
-            compatibleWith: ["React"] ,
+            description: 'A predictable state container for JavaScript apps',
+            compatibleWith: ['React'],
           },
           MobX: {
-            description: "Simple, scalable state management",
+            description: 'Simple, scalable state management',
             compatibleWith: {
-              frameworks: ["React", "Angular"],
+              frameworks: ['React', 'Angular'],
             },
           },
           Vuex: {
-            description:
-              "State management pattern + library for Vue.js applications",
+            description: 'State management pattern + library for Vue.js applications',
             compatibleWith: {
-              frameworks: ["Vue"],
+              frameworks: ['Vue'],
             },
           },
         },
         databases: {
           MongoDB: {
-            type: "nosql",
-            description: "Document-oriented NoSQL database",
+            type: 'nosql',
+            description: 'Document-oriented NoSQL database',
             compatibleWith: {
-              frameworks: ["React", "Express.js"],
-              hosting: ["MongoDB Atlas", "AWS"],
+              frameworks: ['React', 'Express.js'],
+              hosting: ['MongoDB Atlas', 'AWS'],
             },
           },
           PostgreSQL: {
-            type: "sql",
-            description: "Powerful, open source object-relational database",
+            type: 'sql',
+            description: 'Powerful, open source object-relational database',
             compatibleWith: {
-              frameworks: ["React", "Vue", "Express.js", "Django"],
-              hosting: ["AWS RDS", "Heroku"],
+              frameworks: ['React', 'Vue', 'Express.js', 'Django'],
+              hosting: ['AWS RDS', 'Heroku'],
             },
           },
           MySQL: {
-            type: "sql",
-            description: "Open-source relational database management system",
+            type: 'sql',
+            description: 'Open-source relational database management system',
             compatibleWith: {
-              frameworks: ["Vue", "Express.js", "Django"],
-              hosting: ["AWS RDS", "Digital Ocean"],
+              frameworks: ['Vue', 'Express.js', 'Django'],
+              hosting: ['AWS RDS', 'Digital Ocean'],
             },
           },
         },
         uiLibraries: {
-          "Material-UI": {
-            description:
-              "React components for faster and easier web development",
+          'Material-UI': {
+            description: 'React components for faster and easier web development',
             compatibleWith: {
-              frameworks: ["React"],
+              frameworks: ['React'],
             },
           },
-          "Tailwind CSS": {
-            description: "A utility-first CSS framework",
+          'Tailwind CSS': {
+            description: 'A utility-first CSS framework',
             compatibleWith: {
-              frameworks: ["React", "Vue"],
+              frameworks: ['React', 'Vue'],
             },
           },
           Bootstrap: {
-            description:
-              "Open source toolkit for developing with HTML, CSS, and JS",
+            description: 'Open source toolkit for developing with HTML, CSS, and JS',
             compatibleWith: {
-              frameworks: ["Vue", "Angular"],
+              frameworks: ['Vue', 'Angular'],
             },
           },
         },
         hosting: {
           Vercel: {
-            type: "frontend",
-            description: "Platform for frontend frameworks and static sites",
+            type: 'frontend',
+            description: 'Platform for frontend frameworks and static sites',
             compatibleWith: {
-              frontend: ["React", "Vue", "Next.js"],
+              frontend: ['React', 'Vue', 'Next.js'],
             },
           },
           Netlify: {
-            type: "frontend",
-            description: "Platform for modern web projects",
+            type: 'frontend',
+            description: 'Platform for modern web projects',
             compatibleWith: {
-              frontend: ["React", "Vue", "Gatsby"],
+              frontend: ['React', 'Vue', 'Gatsby'],
             },
           },
           Heroku: {
-            type: "backend",
+            type: 'backend',
             description:
-              "Cloud platform that lets companies build, deliver, monitor and scale apps",
+              'Cloud platform that lets companies build, deliver, monitor and scale apps',
             compatibleWith: {
-              backend: ["Express.js", "Django", "Rails"],
+              backend: ['Express.js', 'Django', 'Rails'],
             },
           },
           AWS: {
-            type: "backend",
-            description: "On-demand cloud computing platforms and APIs",
+            type: 'backend',
+            description: 'On-demand cloud computing platforms and APIs',
             compatibleWith: {
-              backend: ["Express.js", "NestJS"],
+              backend: ['Express.js', 'NestJS'],
             },
           },
         },
@@ -213,41 +206,41 @@ describe("Tech Stack Utilities", () => {
     };
   });
 
-  describe("getCompatibleTechnologies", () => {
-    it("should return compatible technologies from the target category", () => {
+  describe('getCompatibleTechnologies', () => {
+    it('should return compatible technologies from the target category', () => {
       const compatibleStateManagement = getCompatibleTechnologies(
         testTechStackData,
-        "frameworks",
-        "React",
-        "stateManagement"
+        'frameworks',
+        'React',
+        'stateManagement'
       );
 
-      expect(compatibleStateManagement).toEqual(["Redux", "MobX"]);
+      expect(compatibleStateManagement).toEqual(['Redux', 'MobX']);
     });
 
-    it("should return an empty array if the technology is not found", () => {
+    it('should return an empty array if the technology is not found', () => {
       const result = getCompatibleTechnologies(
         testTechStackData,
-        "frameworks",
-        "NonExistentFramework",
-        "stateManagement"
+        'frameworks',
+        'NonExistentFramework',
+        'stateManagement'
       );
 
       expect(result).toEqual([]);
     });
 
-    it("should return an empty array if the category is not found", () => {
+    it('should return an empty array if the category is not found', () => {
       const result = getCompatibleTechnologies(
         testTechStackData,
-        "nonExistentCategory",
-        "React",
-        "stateManagement"
+        'nonExistentCategory',
+        'React',
+        'stateManagement'
       );
 
       expect(result).toEqual([]);
     });
 
-    it("should return an empty array if the compatibleWith property is missing", () => {
+    it('should return an empty array if the compatibleWith property is missing', () => {
       // Create a tech with no compatibleWith property
       const brokenTechStackData: TechStackData = {
         ...testTechStackData,
@@ -256,8 +249,8 @@ describe("Tech Stack Utilities", () => {
           frameworks: {
             ...testTechStackData.technologies.frameworks,
             BrokenFramework: {
-              type: "frontend",
-              description: "A broken framework with no compatibility info",
+              type: 'frontend',
+              description: 'A broken framework with no compatibility info',
               compatibleWith: {},
             } as any,
           },
@@ -266,15 +259,15 @@ describe("Tech Stack Utilities", () => {
 
       const result = getCompatibleTechnologies(
         brokenTechStackData,
-        "frameworks",
-        "BrokenFramework",
-        "stateManagement"
+        'frameworks',
+        'BrokenFramework',
+        'stateManagement'
       );
 
       expect(result).toEqual([]);
     });
 
-    it("should handle when compatibleWith is an array", () => {
+    it('should handle when compatibleWith is an array', () => {
       // Create a tech with compatibleWith as an array
       const arrayCompatTechStackData: TechStackData = {
         ...testTechStackData,
@@ -283,8 +276,8 @@ describe("Tech Stack Utilities", () => {
           stateManagement: {
             ...testTechStackData.technologies.stateManagement,
             SimpleRedux: {
-              description: "Simplified state management",
-              compatibleWith: ["React", "Preact", "Vue"],
+              description: 'Simplified state management',
+              compatibleWith: ['React', 'Preact', 'Vue'],
             } as any,
           },
         },
@@ -292,68 +285,64 @@ describe("Tech Stack Utilities", () => {
 
       const result = getCompatibleTechnologies(
         arrayCompatTechStackData,
-        "stateManagement",
-        "SimpleRedux",
-        "frameworks"
+        'stateManagement',
+        'SimpleRedux',
+        'frameworks'
       );
 
-      expect(result).toEqual(["React", "Preact", "Vue"]);
+      expect(result).toEqual(['React', 'Preact', 'Vue']);
     });
   });
 
-  describe("filterCompatibleTechnologies", () => {
-    it("should return all technologies in a category when no selections are made", () => {
-      const result = filterCompatibleTechnologies(
-        testTechStackData,
-        {},
-        "stateManagement"
-      );
+  describe('filterCompatibleTechnologies', () => {
+    it('should return all technologies in a category when no selections are made', () => {
+      const result = filterCompatibleTechnologies(testTechStackData, {}, 'stateManagement');
 
       // Should return all state management options
-      expect(result).toContain("Redux");
-      expect(result).toContain("MobX");
-      expect(result).toContain("Vuex");
+      expect(result).toContain('Redux');
+      expect(result).toContain('MobX');
+      expect(result).toContain('Vuex');
     });
 
-    it("should filter technologies based on a single selection", () => {
+    it('should filter technologies based on a single selection', () => {
       const result = filterCompatibleTechnologies(
         testTechStackData,
-        { frameworks: "React" },
-        "stateManagement"
+        { frameworks: 'React' },
+        'stateManagement'
       );
 
-      expect(result).toEqual(["Redux", "MobX"]);
-      expect(result).not.toContain("Vuex");
+      expect(result).toEqual(['Redux', 'MobX']);
+      expect(result).not.toContain('Vuex');
     });
 
-    it("should return an empty array when there are no compatible technologies", () => {
+    it('should return an empty array when there are no compatible technologies', () => {
       const result = filterCompatibleTechnologies(
         testTechStackData,
         {
-          frameworks: "React",
-          stateManagement: "Vuex", // Vuex is not compatible with React
+          frameworks: 'React',
+          stateManagement: 'Vuex', // Vuex is not compatible with React
         },
-        "databases"
+        'databases'
       );
 
       expect(result).toEqual([]);
     });
 
-    it("should handle complex intersections correctly", () => {
+    it('should handle complex intersections correctly', () => {
       const result = filterCompatibleTechnologies(
         testTechStackData,
         {
-          frameworks: "Express.js",
-          databases: "PostgreSQL",
+          frameworks: 'Express.js',
+          databases: 'PostgreSQL',
         },
-        "hosting"
+        'hosting'
       );
 
       // Only Heroku is compatible with both Express.js and PostgreSQL
-      expect(result).toEqual(["Heroku"]);
-      expect(result).not.toContain("AWS");
-      expect(result).not.toContain("Vercel");
-      expect(result).not.toContain("Netlify");
+      expect(result).toEqual(['Heroku']);
+      expect(result).not.toContain('AWS');
+      expect(result).not.toContain('Vercel');
+      expect(result).not.toContain('Netlify');
     });
   });
 });

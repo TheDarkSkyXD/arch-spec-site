@@ -1,10 +1,10 @@
-import React from "react";
-import { SectionId, ViewMode } from "../../hooks/useSectionState";
-import ProjectSection from "./ProjectSection";
-import UIDesignForm from "../forms/UIDesignForm";
-import UIDesignPreview from "../previews/UIDesignMarkdownView";
-import { markdownService } from "../../services/markdown";
-import { UIDesign } from "../../types/templates";
+import React from 'react';
+import { SectionId, ViewMode } from '../../hooks/useSectionState';
+import ProjectSection from './ProjectSection';
+import UIDesignForm from '../forms/UIDesignForm';
+import UIDesignPreview from '../previews/UIDesignMarkdownView';
+import { markdownService } from '../../services/markdown';
+import { UIDesign } from '../../types/templates';
 
 interface UIDesignSectionProps {
   uiDesign: UIDesign | null;
@@ -41,15 +41,9 @@ const UIDesignSection: React.FC<UIDesignSectionProps> = ({
       viewMode={viewMode}
       onViewModeChange={onViewModeChange}
       isLoading={isLoading}
-      markdown={
-        uiDesign
-          ? markdownService.generateUIDesignMarkdown(uiDesign)
-          : undefined
-      }
+      markdown={uiDesign ? markdownService.generateUIDesignMarkdown(uiDesign) : undefined}
       markdownFileName={
-        projectName
-          ? markdownService.generateFileName(projectName, "ui-design")
-          : undefined
+        projectName ? markdownService.generateFileName(projectName, 'ui-design') : undefined
       }
       editContent={
         <UIDesignForm
@@ -60,11 +54,7 @@ const UIDesignSection: React.FC<UIDesignSectionProps> = ({
         />
       }
       previewContent={
-        <UIDesignPreview
-          data={uiDesign}
-          projectName={projectName}
-          isLoading={isLoading}
-        />
+        <UIDesignPreview data={uiDesign} projectName={projectName} isLoading={isLoading} />
       }
     />
   );

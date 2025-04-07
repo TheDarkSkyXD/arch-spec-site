@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from 'react';
 import {
   Trash2,
   ToggleLeft,
@@ -13,24 +13,24 @@ import {
   Sparkles,
   RefreshCw,
   Lock,
-} from "lucide-react";
-import { Pages } from "../../types/templates";
-import { pagesService } from "../../services/pagesService";
-import { useToast } from "../../contexts/ToastContext";
-import { projectsService } from "../../services/projectsService";
-import { featuresService } from "../../services/featuresService";
-import { requirementsService } from "../../services/requirementsService";
-import { aiService } from "../../services/aiService";
-import { PageComponent } from "../../services/aiService";
-import { useSubscription } from "../../contexts/SubscriptionContext";
-import AIInstructionsModal from "../ui/AIInstructionsModal";
-import { useUserProfile } from "../../hooks/useUserProfile";
+} from 'lucide-react';
+import { Pages } from '../../types/templates';
+import { pagesService } from '../../services/pagesService';
+import { useToast } from '../../contexts/ToastContext';
+import { projectsService } from '../../services/projectsService';
+import { featuresService } from '../../services/featuresService';
+import { requirementsService } from '../../services/requirementsService';
+import { aiService } from '../../services/aiService';
+import { PageComponent } from '../../services/aiService';
+import { useSubscription } from '../../contexts/SubscriptionContext';
+import AIInstructionsModal from '../ui/AIInstructionsModal';
+import { useUserProfile } from '../../hooks/useUserProfile';
 // Import shadcn UI components
-import Button from "../ui/Button";
-import Input from "../ui/Input";
-import Card from "../ui/Card";
-import { Label } from "../ui/label";
-import { PremiumFeatureBadge, ProcessingOverlay } from "../ui/index";
+import Button from '../ui/Button';
+import Input from '../ui/Input';
+import Card from '../ui/Card';
+import { Label } from '../ui/label';
+import { PremiumFeatureBadge, ProcessingOverlay } from '../ui/index';
 
 interface PagesFormProps {
   initialData?: Pages;
@@ -38,38 +38,28 @@ interface PagesFormProps {
   onSuccess?: (data: Pages) => void;
 }
 
-export default function PagesForm({
-  initialData,
-  projectId,
-  onSuccess,
-}: PagesFormProps) {
+export default function PagesForm({ initialData, projectId, onSuccess }: PagesFormProps) {
   const { showToast } = useToast();
   const { hasAIFeatures } = useSubscription();
   const { aiCreditsRemaining } = useUserProfile();
-  const [publicPages, setPublicPages] = useState<PageComponent[]>(
-    initialData?.public || []
-  );
+  const [publicPages, setPublicPages] = useState<PageComponent[]>(initialData?.public || []);
   const [authenticatedPages, setAuthenticatedPages] = useState<PageComponent[]>(
     initialData?.authenticated || []
   );
-  const [adminPages, setAdminPages] = useState<PageComponent[]>(
-    initialData?.admin || []
-  );
-  const [activeTab, setActiveTab] = useState<
-    "public" | "authenticated" | "admin"
-  >("public");
-  const [newPageName, setNewPageName] = useState("");
-  const [newPagePath, setNewPagePath] = useState("");
+  const [adminPages, setAdminPages] = useState<PageComponent[]>(initialData?.admin || []);
+  const [activeTab, setActiveTab] = useState<'public' | 'authenticated' | 'admin'>('public');
+  const [newPageName, setNewPageName] = useState('');
+  const [newPagePath, setNewPagePath] = useState('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   // Add state for error and success messages
-  const [error, setError] = useState<string>("");
+  const [error, setError] = useState<string>('');
 
   // Add state for AI enhancement
   const [isEnhancing, setIsEnhancing] = useState<boolean>(false);
   const [isAddingPages, setIsAddingPages] = useState<boolean>(false);
-  const [projectDescription, setProjectDescription] = useState<string>("");
+  const [projectDescription, setProjectDescription] = useState<string>('');
   const [projectFeatures, setProjectFeatures] = useState<
     { name: string; description: string; enabled: boolean }[]
   >([]);
@@ -77,22 +67,18 @@ export default function PagesForm({
 
   // Editing state
   const [isEditing, setIsEditing] = useState(false);
-  const [editingPageType, setEditingPageType] = useState<
-    "public" | "authenticated" | "admin"
-  >("public");
+  const [editingPageType, setEditingPageType] = useState<'public' | 'authenticated' | 'admin'>(
+    'public'
+  );
   const [editingPageIndex, setEditingPageIndex] = useState<number | null>(null);
 
   // Component management state
-  const [expandedPageIndex, setExpandedPageIndex] = useState<number | null>(
-    null
+  const [expandedPageIndex, setExpandedPageIndex] = useState<number | null>(null);
+  const [expandedPageType, setExpandedPageType] = useState<'public' | 'authenticated' | 'admin'>(
+    'public'
   );
-  const [expandedPageType, setExpandedPageType] = useState<
-    "public" | "authenticated" | "admin"
-  >("public");
-  const [newComponentName, setNewComponentName] = useState("");
-  const [editingComponentIndex, setEditingComponentIndex] = useState<
-    number | null
-  >(null);
+  const [newComponentName, setNewComponentName] = useState('');
+  const [editingComponentIndex, setEditingComponentIndex] = useState<number | null>(null);
 
   // Add a ref for the new component input
   const newComponentInputRef = useRef<HTMLInputElement>(null);
@@ -112,11 +98,7 @@ export default function PagesForm({
 
   // Focus maintenance effect - moved from ComponentsEditor
   useEffect(() => {
-    if (
-      newComponentName &&
-      newComponentInputRef.current &&
-      expandedPageIndex !== null
-    ) {
+    if (newComponentName && newComponentInputRef.current && expandedPageIndex !== null) {
       newComponentInputRef.current.focus();
     }
   }, [newComponentName, expandedPageIndex]);
@@ -129,13 +111,13 @@ export default function PagesForm({
         try {
           const pagesData = await pagesService.getPages(projectId);
           if (pagesData) {
-            console.log("Fetched pages data:", pagesData);
+            console.log('Fetched pages data:', pagesData);
             setPublicPages(pagesData.public || []);
             setAuthenticatedPages(pagesData.authenticated || []);
             setAdminPages(pagesData.admin || []);
           }
         } catch (error) {
-          console.error("Error fetching pages:", error);
+          console.error('Error fetching pages:', error);
         } finally {
           setIsLoading(false);
         }
@@ -154,7 +136,7 @@ export default function PagesForm({
       const projectDetails = await projectsService.getProjectById(projectId);
 
       if (projectDetails) {
-        setProjectDescription(projectDetails.description || "");
+        setProjectDescription(projectDetails.description || '');
 
         // Fetch features
         const featuresData = await featuresService.getFeatures(projectId);
@@ -168,9 +150,7 @@ export default function PagesForm({
         }
 
         // Fetch requirements
-        const requirementsData = await requirementsService.getRequirements(
-          projectId
-        );
+        const requirementsData = await requirementsService.getRequirements(projectId);
         if (requirementsData) {
           // Combine functional and non-functional requirements
           const allRequirements = [
@@ -181,7 +161,7 @@ export default function PagesForm({
         }
       }
     } catch (error) {
-      console.error("Error fetching project details:", error);
+      console.error('Error fetching project details:', error);
     }
   };
 
@@ -197,9 +177,9 @@ export default function PagesForm({
     // Check if user has remaining AI credits
     if (aiCreditsRemaining <= 0) {
       showToast({
-        title: "Insufficient AI Credits",
+        title: 'Insufficient AI Credits',
         description: "You've used all your AI credits for this billing period",
-        type: "warning",
+        type: 'warning',
       });
       return;
     }
@@ -207,37 +187,35 @@ export default function PagesForm({
     // Check if user has access to AI features
     if (!hasAIFeatures) {
       showToast({
-        title: "Premium Feature",
-        description: "Upgrade to Premium to use AI-powered features",
-        type: "info",
+        title: 'Premium Feature',
+        description: 'Upgrade to Premium to use AI-powered features',
+        type: 'info',
       });
       return;
     }
 
     if (!projectId) {
       showToast({
-        title: "Error",
-        description: "Project must be saved before pages can be enhanced",
-        type: "error",
+        title: 'Error',
+        description: 'Project must be saved before pages can be enhanced',
+        type: 'error',
       });
       return;
     }
 
     if (!projectDescription) {
       showToast({
-        title: "Warning",
-        description:
-          "Project description is missing. Pages may not be properly enhanced.",
-        type: "warning",
+        title: 'Warning',
+        description: 'Project description is missing. Pages may not be properly enhanced.',
+        type: 'warning',
       });
     }
 
     if (projectFeatures.length === 0) {
       showToast({
-        title: "Warning",
-        description:
-          "No features found. Pages will be based only on project description.",
-        type: "warning",
+        title: 'Warning',
+        description: 'No features found. Pages will be based only on project description.',
+        type: 'warning',
       });
     }
 
@@ -249,9 +227,9 @@ export default function PagesForm({
     // Check if user has remaining AI credits
     if (aiCreditsRemaining <= 0) {
       showToast({
-        title: "Insufficient AI Credits",
+        title: 'Insufficient AI Credits',
         description: "You've used all your AI credits for this billing period",
-        type: "warning",
+        type: 'warning',
       });
       return;
     }
@@ -259,28 +237,27 @@ export default function PagesForm({
     // Check if user has access to AI features
     if (!hasAIFeatures) {
       showToast({
-        title: "Premium Feature",
-        description: "Upgrade to Premium to use AI-powered features",
-        type: "info",
+        title: 'Premium Feature',
+        description: 'Upgrade to Premium to use AI-powered features',
+        type: 'info',
       });
       return;
     }
 
     if (!projectId) {
       showToast({
-        title: "Error",
-        description: "Project must be saved before pages can be enhanced",
-        type: "error",
+        title: 'Error',
+        description: 'Project must be saved before pages can be enhanced',
+        type: 'error',
       });
       return;
     }
 
     if (!projectDescription) {
       showToast({
-        title: "Warning",
-        description:
-          "Project description is missing. Pages may not be properly generated.",
-        type: "warning",
+        title: 'Warning',
+        description: 'Project description is missing. Pages may not be properly generated.',
+        type: 'warning',
       });
     }
 
@@ -291,7 +268,7 @@ export default function PagesForm({
   const enhancePages = async (additionalInstructions?: string) => {
     setIsEnhancing(true);
     try {
-      console.log("Enhancing pages with AI...");
+      console.log('Enhancing pages with AI...');
 
       // Create the current pages data to pass
       const currentPages = {
@@ -305,9 +282,7 @@ export default function PagesForm({
         projectFeatures,
         requirements,
         // Only pass existing pages if we have some
-        publicPages.length > 0 ||
-          authenticatedPages.length > 0 ||
-          adminPages.length > 0
+        publicPages.length > 0 || authenticatedPages.length > 0 || adminPages.length > 0
           ? currentPages
           : undefined,
         additionalInstructions
@@ -320,23 +295,23 @@ export default function PagesForm({
         setAdminPages(enhancedPages.admin || []);
 
         showToast({
-          title: "Success",
-          description: "Pages enhanced successfully",
-          type: "success",
+          title: 'Success',
+          description: 'Pages enhanced successfully',
+          type: 'success',
         });
       } else {
         showToast({
-          title: "Warning",
-          description: "No enhanced pages returned",
-          type: "warning",
+          title: 'Warning',
+          description: 'No enhanced pages returned',
+          type: 'warning',
         });
       }
     } catch (error) {
-      console.error("Error enhancing pages:", error);
+      console.error('Error enhancing pages:', error);
       showToast({
-        title: "Error",
-        description: "Failed to enhance pages",
-        type: "error",
+        title: 'Error',
+        description: 'Failed to enhance pages',
+        type: 'error',
       });
     } finally {
       setIsEnhancing(false);
@@ -359,65 +334,55 @@ export default function PagesForm({
       if (enhancedPages) {
         // Add new pages to existing ones (avoiding duplicates by path)
         const existingPublicPaths = new Set(publicPages.map((p) => p.path));
-        const newPublicPages = enhancedPages.public.filter(
-          (p) => !existingPublicPaths.has(p.path)
-        );
+        const newPublicPages = enhancedPages.public.filter((p) => !existingPublicPaths.has(p.path));
 
-        const existingAuthPaths = new Set(
-          authenticatedPages.map((p) => p.path)
-        );
+        const existingAuthPaths = new Set(authenticatedPages.map((p) => p.path));
         const newAuthPages = enhancedPages.authenticated.filter(
           (p) => !existingAuthPaths.has(p.path)
         );
 
         const existingAdminPaths = new Set(adminPages.map((p) => p.path));
-        const newAdminPages = enhancedPages.admin.filter(
-          (p) => !existingAdminPaths.has(p.path)
-        );
+        const newAdminPages = enhancedPages.admin.filter((p) => !existingAdminPaths.has(p.path));
 
         // Update state with combined pages
         setPublicPages([...publicPages, ...newPublicPages]);
         setAuthenticatedPages([...authenticatedPages, ...newAuthPages]);
         setAdminPages([...adminPages, ...newAdminPages]);
 
-        const totalNewPages =
-          newPublicPages.length + newAuthPages.length + newAdminPages.length;
+        const totalNewPages = newPublicPages.length + newAuthPages.length + newAdminPages.length;
 
         showToast({
-          title: "Success",
+          title: 'Success',
           description: `Added ${totalNewPages} new pages`,
-          type: "success",
+          type: 'success',
         });
       } else {
         showToast({
-          title: "Warning",
-          description: "No new pages generated",
-          type: "warning",
+          title: 'Warning',
+          description: 'No new pages generated',
+          type: 'warning',
         });
       }
     } catch (error) {
-      console.error("Error adding AI pages:", error);
+      console.error('Error adding AI pages:', error);
       showToast({
-        title: "Error",
-        description: "Failed to generate new pages",
-        type: "error",
+        title: 'Error',
+        description: 'Failed to generate new pages',
+        type: 'error',
       });
     } finally {
       setIsAddingPages(false);
     }
   };
 
-  const handleTogglePage = (
-    type: "public" | "authenticated" | "admin",
-    index: number
-  ) => {
+  const handleTogglePage = (type: 'public' | 'authenticated' | 'admin', index: number) => {
     let pages: PageComponent[] = [];
     let setPages: React.Dispatch<React.SetStateAction<PageComponent[]>>;
 
-    if (type === "public") {
+    if (type === 'public') {
       pages = [...publicPages];
       setPages = setPublicPages;
-    } else if (type === "authenticated") {
+    } else if (type === 'authenticated') {
       pages = [...authenticatedPages];
       setPages = setAuthenticatedPages;
     } else {
@@ -437,13 +402,13 @@ export default function PagesForm({
     const newErrors: Record<string, string> = {};
 
     if (!newPageName.trim()) {
-      newErrors.name = "Page name is required";
+      newErrors.name = 'Page name is required';
     }
 
     if (!newPagePath.trim()) {
-      newErrors.path = "Page path is required";
-    } else if (!newPagePath.startsWith("/")) {
-      newErrors.path = "Path must start with /";
+      newErrors.path = 'Page path is required';
+    } else if (!newPagePath.startsWith('/')) {
+      newErrors.path = 'Path must start with /';
     }
 
     setErrors(newErrors);
@@ -460,9 +425,9 @@ export default function PagesForm({
       enabled: true,
     };
 
-    if (activeTab === "public") {
+    if (activeTab === 'public') {
       setPublicPages([...publicPages, newPage]);
-    } else if (activeTab === "authenticated") {
+    } else if (activeTab === 'authenticated') {
       setAuthenticatedPages([...authenticatedPages, newPage]);
     } else {
       setAdminPages([...adminPages, newPage]);
@@ -471,9 +436,9 @@ export default function PagesForm({
     resetPageForm();
 
     showToast({
-      title: "Success",
-      description: "New page added successfully",
-      type: "success",
+      title: 'Success',
+      description: 'New page added successfully',
+      type: 'success',
     });
   };
 
@@ -488,28 +453,23 @@ export default function PagesForm({
     };
 
     // Preserve existing components if available
-    if (editingPageType === "public" && publicPages[editingPageIndex]) {
+    if (editingPageType === 'public' && publicPages[editingPageIndex]) {
       updatedPage.components = [...publicPages[editingPageIndex].components];
       updatedPage.enabled = publicPages[editingPageIndex].enabled;
-    } else if (
-      editingPageType === "authenticated" &&
-      authenticatedPages[editingPageIndex]
-    ) {
-      updatedPage.components = [
-        ...authenticatedPages[editingPageIndex].components,
-      ];
+    } else if (editingPageType === 'authenticated' && authenticatedPages[editingPageIndex]) {
+      updatedPage.components = [...authenticatedPages[editingPageIndex].components];
       updatedPage.enabled = authenticatedPages[editingPageIndex].enabled;
-    } else if (editingPageType === "admin" && adminPages[editingPageIndex]) {
+    } else if (editingPageType === 'admin' && adminPages[editingPageIndex]) {
       updatedPage.components = [...adminPages[editingPageIndex].components];
       updatedPage.enabled = adminPages[editingPageIndex].enabled;
     }
 
     // Update the appropriate pages array
-    if (editingPageType === "public") {
+    if (editingPageType === 'public') {
       const updatedPages = [...publicPages];
       updatedPages[editingPageIndex] = updatedPage;
       setPublicPages(updatedPages);
-    } else if (editingPageType === "authenticated") {
+    } else if (editingPageType === 'authenticated') {
       const updatedPages = [...authenticatedPages];
       updatedPages[editingPageIndex] = updatedPage;
       setAuthenticatedPages(updatedPages);
@@ -523,27 +483,24 @@ export default function PagesForm({
     resetPageForm();
 
     showToast({
-      title: "Success",
-      description: "Page updated successfully",
-      type: "success",
+      title: 'Success',
+      description: 'Page updated successfully',
+      type: 'success',
     });
   };
 
-  const handleStartEditPage = (
-    type: "public" | "authenticated" | "admin",
-    index: number
-  ) => {
+  const handleStartEditPage = (type: 'public' | 'authenticated' | 'admin', index: number) => {
     // Set the active tab to match the page being edited
     setActiveTab(type);
 
     // Get the page to edit
     let pageToEdit: PageComponent | null = null;
 
-    if (type === "public" && publicPages[index]) {
+    if (type === 'public' && publicPages[index]) {
       pageToEdit = publicPages[index];
-    } else if (type === "authenticated" && authenticatedPages[index]) {
+    } else if (type === 'authenticated' && authenticatedPages[index]) {
       pageToEdit = authenticatedPages[index];
-    } else if (type === "admin" && adminPages[index]) {
+    } else if (type === 'admin' && adminPages[index]) {
       pageToEdit = adminPages[index];
     }
 
@@ -563,20 +520,17 @@ export default function PagesForm({
   };
 
   const resetPageForm = () => {
-    setNewPageName("");
-    setNewPagePath("");
+    setNewPageName('');
+    setNewPagePath('');
     setIsEditing(false);
     setEditingPageIndex(null);
     setErrors({});
   };
 
-  const handleRemovePage = (
-    type: "public" | "authenticated" | "admin",
-    index: number
-  ) => {
-    if (type === "public") {
+  const handleRemovePage = (type: 'public' | 'authenticated' | 'admin', index: number) => {
+    if (type === 'public') {
       setPublicPages(publicPages.filter((_, i) => i !== index));
-    } else if (type === "authenticated") {
+    } else if (type === 'authenticated') {
       setAuthenticatedPages(authenticatedPages.filter((_, i) => i !== index));
     } else {
       setAdminPages(adminPages.filter((_, i) => i !== index));
@@ -588,17 +542,14 @@ export default function PagesForm({
     }
 
     showToast({
-      title: "Success",
-      description: "Page removed successfully",
-      type: "success",
+      title: 'Success',
+      description: 'Page removed successfully',
+      type: 'success',
     });
   };
 
   // Component Management Functions
-  const togglePageExpand = (
-    type: "public" | "authenticated" | "admin",
-    index: number
-  ) => {
+  const togglePageExpand = (type: 'public' | 'authenticated' | 'admin', index: number) => {
     if (expandedPageIndex === index && expandedPageType === type) {
       // Close if already open
       setExpandedPageIndex(null);
@@ -611,20 +562,17 @@ export default function PagesForm({
     }
 
     // Reset new component form
-    setNewComponentName("");
+    setNewComponentName('');
   };
 
   const getExpandedPage = (): PageComponent | null => {
     if (expandedPageIndex === null) return null;
 
-    if (expandedPageType === "public" && publicPages[expandedPageIndex]) {
+    if (expandedPageType === 'public' && publicPages[expandedPageIndex]) {
       return publicPages[expandedPageIndex];
-    } else if (
-      expandedPageType === "authenticated" &&
-      authenticatedPages[expandedPageIndex]
-    ) {
+    } else if (expandedPageType === 'authenticated' && authenticatedPages[expandedPageIndex]) {
       return authenticatedPages[expandedPageIndex];
-    } else if (expandedPageType === "admin" && adminPages[expandedPageIndex]) {
+    } else if (expandedPageType === 'admin' && adminPages[expandedPageIndex]) {
       return adminPages[expandedPageIndex];
     }
 
@@ -637,12 +585,12 @@ export default function PagesForm({
     // Create a copy of the page with updated components
     let updatedPage: PageComponent;
 
-    if (expandedPageType === "public") {
+    if (expandedPageType === 'public') {
       updatedPage = { ...publicPages[expandedPageIndex], components };
       const updatedPages = [...publicPages];
       updatedPages[expandedPageIndex] = updatedPage;
       setPublicPages(updatedPages);
-    } else if (expandedPageType === "authenticated") {
+    } else if (expandedPageType === 'authenticated') {
       updatedPage = { ...authenticatedPages[expandedPageIndex], components };
       const updatedPages = [...authenticatedPages];
       updatedPages[expandedPageIndex] = updatedPage;
@@ -658,9 +606,9 @@ export default function PagesForm({
   const handleAddComponent = () => {
     if (!newComponentName.trim()) {
       showToast({
-        title: "Error",
-        description: "Component name is required",
-        type: "error",
+        title: 'Error',
+        description: 'Component name is required',
+        type: 'error',
       });
       return;
     }
@@ -668,17 +616,14 @@ export default function PagesForm({
     const expandedPage = getExpandedPage();
     if (!expandedPage) return;
 
-    const updatedComponents = [
-      ...expandedPage.components,
-      newComponentName.trim(),
-    ];
+    const updatedComponents = [...expandedPage.components, newComponentName.trim()];
     updatePageComponents(updatedComponents);
-    setNewComponentName("");
+    setNewComponentName('');
 
     showToast({
-      title: "Success",
-      description: "Component added successfully",
-      type: "success",
+      title: 'Success',
+      description: 'Component added successfully',
+      type: 'success',
     });
   };
 
@@ -695,9 +640,9 @@ export default function PagesForm({
     setEditingComponentIndex(null);
 
     showToast({
-      title: "Success",
-      description: "Component updated successfully",
-      type: "success",
+      title: 'Success',
+      description: 'Component updated successfully',
+      type: 'success',
     });
   };
 
@@ -705,15 +650,13 @@ export default function PagesForm({
     const expandedPage = getExpandedPage();
     if (!expandedPage) return;
 
-    const updatedComponents = expandedPage.components.filter(
-      (_, i) => i !== index
-    );
+    const updatedComponents = expandedPage.components.filter((_, i) => i !== index);
     updatePageComponents(updatedComponents);
 
     showToast({
-      title: "Success",
-      description: "Component removed successfully",
-      type: "success",
+      title: 'Success',
+      description: 'Component removed successfully',
+      type: 'success',
     });
   };
 
@@ -721,14 +664,14 @@ export default function PagesForm({
     e.preventDefault();
 
     // Clear previous messages
-    setError("");
+    setError('');
 
     if (!projectId) {
-      const errorMessage = "Project must be saved before pages can be saved";
+      const errorMessage = 'Project must be saved before pages can be saved';
       showToast({
-        title: "Error",
+        title: 'Error',
         description: errorMessage,
-        type: "error",
+        type: 'error',
       });
       setError(errorMessage);
       return;
@@ -746,34 +689,34 @@ export default function PagesForm({
 
       if (result) {
         showToast({
-          title: "Success",
-          description: "Pages saved successfully",
-          type: "success",
+          title: 'Success',
+          description: 'Pages saved successfully',
+          type: 'success',
         });
 
         if (onSuccess) {
           onSuccess(result);
         }
       } else {
-        const errorMessage = "Failed to save pages";
+        const errorMessage = 'Failed to save pages';
         showToast({
-          title: "Error",
+          title: 'Error',
           description: errorMessage,
-          type: "error",
+          type: 'error',
         });
         setError(errorMessage);
-        setTimeout(() => setError(""), 5000);
+        setTimeout(() => setError(''), 5000);
       }
     } catch (error) {
-      console.error("Error saving pages:", error);
-      const errorMessage = "An unexpected error occurred";
+      console.error('Error saving pages:', error);
+      const errorMessage = 'An unexpected error occurred';
       showToast({
-        title: "Error",
+        title: 'Error',
         description: errorMessage,
-        type: "error",
+        type: 'error',
       });
       setError(errorMessage);
-      setTimeout(() => setError(""), 5000);
+      setTimeout(() => setError(''), 5000);
     } finally {
       setIsSubmitting(false);
     }
@@ -785,14 +728,12 @@ export default function PagesForm({
     if (!page) return null;
 
     return (
-      <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700 space-y-3">
-        <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300">
-          Components
-        </h4>
+      <div className="mt-3 space-y-3 border-t border-slate-200 pt-3 dark:border-slate-700">
+        <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300">Components</h4>
 
         {/* Components list */}
         {page.components.length === 0 ? (
-          <div className="text-sm text-slate-500 dark:text-slate-400 italic">
+          <div className="text-sm italic text-slate-500 dark:text-slate-400">
             No components added yet
           </div>
         ) : (
@@ -800,19 +741,19 @@ export default function PagesForm({
             {page.components.map((component, idx) => (
               <li
                 key={idx}
-                className="flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700"
+                className="flex items-center justify-between rounded border border-slate-200 bg-slate-50 p-2 dark:border-slate-700 dark:bg-slate-800"
               >
                 {editingComponentIndex === idx ? (
-                  <div className="flex-1 flex space-x-2">
+                  <div className="flex flex-1 space-x-2">
                     <input
                       type="text"
                       defaultValue={component}
-                      className="flex-1 p-1 text-sm border border-slate-300 dark:border-slate-600 rounded focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                      className="flex-1 rounded border border-slate-300 bg-white p-1 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
                       autoFocus
                       onKeyDown={(e) => {
-                        if (e.key === "Enter") {
+                        if (e.key === 'Enter') {
                           handleEditComponent(idx, e.currentTarget.value);
-                        } else if (e.key === "Escape") {
+                        } else if (e.key === 'Escape') {
                           setEditingComponentIndex(null);
                         }
                       }}
@@ -827,9 +768,7 @@ export default function PagesForm({
                   </div>
                 ) : (
                   <>
-                    <span className="text-sm text-slate-700 dark:text-slate-300">
-                      {component}
-                    </span>
+                    <span className="text-sm text-slate-700 dark:text-slate-300">{component}</span>
                     <div className="flex space-x-1">
                       <button
                         onClick={() => setEditingComponentIndex(idx)}
@@ -854,16 +793,16 @@ export default function PagesForm({
         )}
 
         {/* Add new component form */}
-        <div className="flex space-x-2 mt-2">
+        <div className="mt-2 flex space-x-2">
           <input
             ref={newComponentInputRef}
             type="text"
             value={newComponentName}
             onChange={(e) => setNewComponentName(e.target.value)}
             placeholder="New component name"
-            className="flex-1 p-2 text-sm border border-slate-300 dark:border-slate-600 rounded focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+            className="flex-1 rounded border border-slate-300 bg-white p-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
             onKeyDown={(e) => {
-              if (e.key === "Enter" && newComponentName.trim()) {
+              if (e.key === 'Enter' && newComponentName.trim()) {
                 e.preventDefault();
                 handleAddComponent();
               }
@@ -873,10 +812,10 @@ export default function PagesForm({
             type="button"
             onClick={handleAddComponent}
             disabled={!newComponentName.trim()}
-            className={`flex items-center px-3 py-1 rounded text-sm ${
+            className={`flex items-center rounded px-3 py-1 text-sm ${
               !newComponentName.trim()
-                ? "bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed"
-                : "bg-primary-600 text-white hover:bg-primary-700 dark:hover:bg-primary-500"
+                ? 'cursor-not-allowed bg-slate-200 text-slate-400 dark:bg-slate-700 dark:text-slate-500'
+                : 'bg-primary-600 text-white hover:bg-primary-700 dark:hover:bg-primary-500'
             }`}
           >
             <Plus size={14} className="mr-1" />
@@ -891,26 +830,22 @@ export default function PagesForm({
   const renderPageCard = (
     page: PageComponent,
     index: number,
-    type: "public" | "authenticated" | "admin"
+    type: 'public' | 'authenticated' | 'admin'
   ) => {
     const isExpanded = expandedPageIndex === index && expandedPageType === type;
 
     return (
       <div
         key={index}
-        className="border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 overflow-hidden"
+        className="overflow-hidden rounded-lg border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800"
       >
-        <div className="p-3 flex justify-between items-center">
+        <div className="flex items-center justify-between p-3">
           <div>
             <div className="flex items-center gap-1">
-              <span className="font-medium text-slate-800 dark:text-slate-200">
-                {page.name}
-              </span>
-              <span className="text-xs text-slate-500 dark:text-slate-400">
-                ({page.path})
-              </span>
+              <span className="font-medium text-slate-800 dark:text-slate-200">{page.name}</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400">({page.path})</span>
             </div>
-            <div className="flex items-center text-xs text-slate-500 dark:text-slate-400 mt-1">
+            <div className="mt-1 flex items-center text-xs text-slate-500 dark:text-slate-400">
               <Layers size={12} className="mr-1" />
               <span>{page.components.length} components</span>
             </div>
@@ -919,15 +854,15 @@ export default function PagesForm({
             <button
               type="button"
               onClick={() => togglePageExpand(type, index)}
-              className="p-1 text-slate-400 dark:text-slate-500 hover:text-primary-600 dark:hover:text-primary-500"
-              title={isExpanded ? "Collapse components" : "Expand components"}
+              className="p-1 text-slate-400 hover:text-primary-600 dark:text-slate-500 dark:hover:text-primary-500"
+              title={isExpanded ? 'Collapse components' : 'Expand components'}
             >
               {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
             </button>
             <button
               type="button"
               onClick={() => handleStartEditPage(type, index)}
-              className="p-1 text-slate-400 dark:text-slate-500 hover:text-primary-600 dark:hover:text-primary-500"
+              className="p-1 text-slate-400 hover:text-primary-600 dark:text-slate-500 dark:hover:text-primary-500"
               title="Edit page"
             >
               <Edit size={16} />
@@ -935,14 +870,11 @@ export default function PagesForm({
             <button
               type="button"
               onClick={() => handleTogglePage(type, index)}
-              className="p-1 text-slate-400 dark:text-slate-500 hover:text-primary-600 dark:hover:text-primary-500"
-              title={page.enabled ? "Disable page" : "Enable page"}
+              className="p-1 text-slate-400 hover:text-primary-600 dark:text-slate-500 dark:hover:text-primary-500"
+              title={page.enabled ? 'Disable page' : 'Enable page'}
             >
               {page.enabled ? (
-                <ToggleRight
-                  size={20}
-                  className="text-primary-600 dark:text-primary-500"
-                />
+                <ToggleRight size={20} className="text-primary-600 dark:text-primary-500" />
               ) : (
                 <ToggleLeft size={20} />
               )}
@@ -950,7 +882,7 @@ export default function PagesForm({
             <button
               type="button"
               onClick={() => handleRemovePage(type, index)}
-              className="p-1 text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400"
+              className="p-1 text-slate-400 hover:text-red-500 dark:text-slate-500 dark:hover:text-red-400"
               title="Remove page"
             >
               <Trash2 size={16} />
@@ -975,31 +907,25 @@ export default function PagesForm({
   // Helper to get the appropriate message for the overlay
   const getEnhancementMessage = () => {
     if (isEnhancing) {
-      return "AI is analyzing your project to generate an optimal page structure. Please wait...";
+      return 'AI is analyzing your project to generate an optimal page structure. Please wait...';
     }
     if (isAddingPages) {
-      return "AI is generating additional pages based on your project requirements. Please wait...";
+      return 'AI is generating additional pages based on your project requirements. Please wait...';
     }
-    return "AI enhancement in progress...";
+    return 'AI enhancement in progress...';
   };
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <Loader2 className="h-6 w-6 text-primary-600 animate-spin mr-3" />
-        <span className="text-slate-600 dark:text-slate-300">
-          Loading pages...
-        </span>
+        <Loader2 className="mr-3 h-6 w-6 animate-spin text-primary-600" />
+        <span className="text-slate-600 dark:text-slate-300">Loading pages...</span>
       </div>
     );
   }
 
   return (
-    <form
-      id="pages-form"
-      onSubmit={handleSubmit}
-      className="space-y-8 relative"
-    >
+    <form id="pages-form" onSubmit={handleSubmit} className="relative space-y-8">
       {/* Processing Overlay */}
       <ProcessingOverlay
         isVisible={isAnyEnhancementInProgress()}
@@ -1028,38 +954,36 @@ export default function PagesForm({
 
       {/* Error Message */}
       {error && (
-        <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-md mb-4">
+        <div className="mb-4 rounded-md bg-red-50 p-3 text-red-600 dark:bg-red-900/20 dark:text-red-400">
           {error}
         </div>
       )}
 
       <div className="space-y-6">
         <div>
-          <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-4">
+          <h2 className="mb-4 text-xl font-semibold text-slate-800 dark:text-slate-100">
             Application Pages
           </h2>
-          <p className="text-slate-600 dark:text-slate-400 mb-6">
+          <p className="mb-6 text-slate-600 dark:text-slate-400">
             Define the pages that will be included in your application.
           </p>
         </div>
 
         {/* AI Enhancement Buttons */}
-        <div className="flex justify-end items-center gap-3 mb-4">
+        <div className="mb-4 flex items-center justify-end gap-3">
           {!hasAIFeatures && <PremiumFeatureBadge />}
           <Button
             type="button"
             onClick={openAddModal}
-            disabled={
-              isAddingPages || isEnhancing || !projectId || !hasAIFeatures
-            }
-            variant={hasAIFeatures ? "outline" : "ghost"}
-            className={`flex items-center gap-2 relative ${
-              !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
+            disabled={isAddingPages || isEnhancing || !projectId || !hasAIFeatures}
+            variant={hasAIFeatures ? 'outline' : 'ghost'}
+            className={`relative flex items-center gap-2 ${
+              !hasAIFeatures ? 'cursor-not-allowed opacity-50' : ''
             }`}
             title={
               hasAIFeatures
-                ? "Generate additional pages to complement existing ones"
-                : "Upgrade to Premium to use AI-powered features"
+                ? 'Generate additional pages to complement existing ones'
+                : 'Upgrade to Premium to use AI-powered features'
             }
           >
             {isAddingPages ? (
@@ -1069,11 +993,7 @@ export default function PagesForm({
               </>
             ) : (
               <>
-                {hasAIFeatures ? (
-                  <Sparkles className="h-4 w-4" />
-                ) : (
-                  <Lock className="h-4 w-4" />
-                )}
+                {hasAIFeatures ? <Sparkles className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
                 <span>Add AI Pages</span>
               </>
             )}
@@ -1090,14 +1010,14 @@ export default function PagesForm({
                 authenticatedPages.length === 0 &&
                 adminPages.length === 0)
             }
-            variant={hasAIFeatures ? "outline" : "ghost"}
-            className={`flex items-center gap-2 relative ${
-              !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
+            variant={hasAIFeatures ? 'outline' : 'ghost'}
+            className={`relative flex items-center gap-2 ${
+              !hasAIFeatures ? 'cursor-not-allowed opacity-50' : ''
             }`}
             title={
               hasAIFeatures
-                ? "Replace all pages with AI-generated ones"
-                : "Upgrade to Premium to use AI-powered features"
+                ? 'Replace all pages with AI-generated ones'
+                : 'Upgrade to Premium to use AI-powered features'
             }
           >
             {isEnhancing ? (
@@ -1107,11 +1027,7 @@ export default function PagesForm({
               </>
             ) : (
               <>
-                {hasAIFeatures ? (
-                  <RefreshCw className="h-4 w-4" />
-                ) : (
-                  <Lock className="h-4 w-4" />
-                )}
+                {hasAIFeatures ? <RefreshCw className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
                 <span>Replace All</span>
               </>
             )}
@@ -1123,33 +1039,33 @@ export default function PagesForm({
           <div className="flex border-b border-slate-200 dark:border-slate-700">
             <button
               type="button"
-              onClick={() => setActiveTab("public")}
+              onClick={() => setActiveTab('public')}
               className={`px-4 py-3 text-sm font-medium ${
-                activeTab === "public"
-                  ? "border-b-2 border-primary-500 text-primary-600 dark:text-primary-400"
-                  : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300"
+                activeTab === 'public'
+                  ? 'border-b-2 border-primary-500 text-primary-600 dark:text-primary-400'
+                  : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'
               }`}
             >
               Public Pages
             </button>
             <button
               type="button"
-              onClick={() => setActiveTab("authenticated")}
+              onClick={() => setActiveTab('authenticated')}
               className={`px-4 py-3 text-sm font-medium ${
-                activeTab === "authenticated"
-                  ? "border-b-2 border-primary-500 text-primary-600 dark:text-primary-400"
-                  : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300"
+                activeTab === 'authenticated'
+                  ? 'border-b-2 border-primary-500 text-primary-600 dark:text-primary-400'
+                  : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'
               }`}
             >
               Authenticated Pages
             </button>
             <button
               type="button"
-              onClick={() => setActiveTab("admin")}
+              onClick={() => setActiveTab('admin')}
               className={`px-4 py-3 text-sm font-medium ${
-                activeTab === "admin"
-                  ? "border-b-2 border-primary-500 text-primary-600 dark:text-primary-400"
-                  : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300"
+                activeTab === 'admin'
+                  ? 'border-b-2 border-primary-500 text-primary-600 dark:text-primary-400'
+                  : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'
               }`}
             >
               Admin Pages
@@ -1158,57 +1074,51 @@ export default function PagesForm({
 
           {/* Tab Contents */}
           <div className="p-4">
-            <div className={activeTab === "public" ? "block" : "hidden"}>
+            <div className={activeTab === 'public' ? 'block' : 'hidden'}>
               {publicPages.length === 0 ? (
-                <p className="text-center text-slate-500 dark:text-slate-400 py-4">
+                <p className="py-4 text-center text-slate-500 dark:text-slate-400">
                   No public pages defined yet
                 </p>
               ) : (
                 <div className="space-y-2">
-                  {publicPages.map((page, index) =>
-                    renderPageCard(page, index, "public")
-                  )}
+                  {publicPages.map((page, index) => renderPageCard(page, index, 'public'))}
                 </div>
               )}
             </div>
 
-            <div className={activeTab === "authenticated" ? "block" : "hidden"}>
+            <div className={activeTab === 'authenticated' ? 'block' : 'hidden'}>
               {authenticatedPages.length === 0 ? (
-                <p className="text-center text-slate-500 dark:text-slate-400 py-4">
+                <p className="py-4 text-center text-slate-500 dark:text-slate-400">
                   No authenticated pages defined yet
                 </p>
               ) : (
                 <div className="space-y-2">
                   {authenticatedPages.map((page, index) =>
-                    renderPageCard(page, index, "authenticated")
+                    renderPageCard(page, index, 'authenticated')
                   )}
                 </div>
               )}
             </div>
 
-            <div className={activeTab === "admin" ? "block" : "hidden"}>
+            <div className={activeTab === 'admin' ? 'block' : 'hidden'}>
               {adminPages.length === 0 ? (
-                <p className="text-center text-slate-500 dark:text-slate-400 py-4">
+                <p className="py-4 text-center text-slate-500 dark:text-slate-400">
                   No admin pages defined yet
                 </p>
               ) : (
                 <div className="space-y-2">
-                  {adminPages.map((page, index) =>
-                    renderPageCard(page, index, "admin")
-                  )}
+                  {adminPages.map((page, index) => renderPageCard(page, index, 'admin'))}
                 </div>
               )}
             </div>
 
             {/* Add/Edit Page Form */}
-            <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
-              <div className="flex justify-between items-center mb-3">
+            <div className="mt-4 border-t border-slate-200 pt-4 dark:border-slate-700">
+              <div className="mb-3 flex items-center justify-between">
                 <h3 className="text-sm font-medium text-slate-700 dark:text-slate-300">
                   {isEditing
-                    ? "Edit Page"
-                    : `Add a New ${
-                        activeTab.charAt(0).toUpperCase() + activeTab.slice(1)
-                      } Page`}
+                    ? 'Edit Page'
+                    : `Add a New ${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} Page`}
                 </h3>
                 {isEditing && (
                   <Button
@@ -1223,7 +1133,7 @@ export default function PagesForm({
                 )}
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
                   <Label htmlFor="pageName">Page Name</Label>
                   <Input
@@ -1252,24 +1162,16 @@ export default function PagesForm({
               <div className="mt-4 flex justify-end">
                 {isEditing ? (
                   <div className="space-x-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={resetPageForm}
-                    >
+                    <Button type="button" variant="outline" onClick={resetPageForm}>
                       Cancel
                     </Button>
                     <Button
                       type="button"
                       onClick={handleEditPage}
                       disabled={!newPageName || !newPagePath}
-                      variant={
-                        !newPageName || !newPagePath ? "outline" : "default"
-                      }
+                      variant={!newPageName || !newPagePath ? 'outline' : 'default'}
                       className={
-                        !newPageName || !newPagePath
-                          ? "opacity-50 cursor-not-allowed"
-                          : ""
+                        !newPageName || !newPagePath ? 'cursor-not-allowed opacity-50' : ''
                       }
                     >
                       Save Changes
@@ -1280,14 +1182,8 @@ export default function PagesForm({
                     type="button"
                     onClick={handleAddPage}
                     disabled={!newPageName || !newPagePath}
-                    variant={
-                      !newPageName || !newPagePath ? "outline" : "default"
-                    }
-                    className={
-                      !newPageName || !newPagePath
-                        ? "opacity-50 cursor-not-allowed"
-                        : ""
-                    }
+                    variant={!newPageName || !newPagePath ? 'outline' : 'default'}
+                    className={!newPageName || !newPagePath ? 'cursor-not-allowed opacity-50' : ''}
                   >
                     Add Page
                   </Button>
@@ -1302,14 +1198,10 @@ export default function PagesForm({
         <Button
           type="submit"
           disabled={isSubmitting || !projectId}
-          variant={!projectId || isSubmitting ? "outline" : "default"}
-          className={
-            !projectId || isSubmitting
-              ? "bg-gray-400 text-white hover:bg-gray-400"
-              : ""
-          }
+          variant={!projectId || isSubmitting ? 'outline' : 'default'}
+          className={!projectId || isSubmitting ? 'bg-gray-400 text-white hover:bg-gray-400' : ''}
         >
-          {isSubmitting ? "Saving..." : "Save Pages"}
+          {isSubmitting ? 'Saving...' : 'Save Pages'}
         </Button>
       </div>
     </form>

@@ -1,23 +1,23 @@
-import { useState } from "react";
+import { useState } from 'react';
 
 // Define view modes
 export enum ViewMode {
-  EDIT = "edit",
-  PREVIEW = "preview",
+  EDIT = 'edit',
+  PREVIEW = 'preview',
 }
 
 // Define section IDs for consistency
 export enum SectionId {
-  BASICS = "basics",
-  TECH_STACK = "techStack",
-  REQUIREMENTS = "requirements",
-  FEATURES = "features",
-  PAGES = "pages",
-  DATA_MODEL = "dataModel",
-  API_ENDPOINTS = "apiEndpoints",
-  TEST_CASES = "testCases",
-  IMPLEMENTATION_PROMPTS = "implementationPrompts",
-  UI_DESIGN = "uiDesign",
+  BASICS = 'basics',
+  TECH_STACK = 'techStack',
+  REQUIREMENTS = 'requirements',
+  FEATURES = 'features',
+  PAGES = 'pages',
+  DATA_MODEL = 'dataModel',
+  API_ENDPOINTS = 'apiEndpoints',
+  TEST_CASES = 'testCases',
+  IMPLEMENTATION_PROMPTS = 'implementationPrompts',
+  UI_DESIGN = 'uiDesign',
 }
 
 // Create default states for initialization
@@ -47,13 +47,9 @@ const DEFAULT_VIEW_MODES: Record<SectionId, ViewMode> = {
   [SectionId.UI_DESIGN]: ViewMode.EDIT,
 };
 
-export const useSectionState = (
-  initialExpanded?: Partial<Record<SectionId, boolean>>
-) => {
+export const useSectionState = (initialExpanded?: Partial<Record<SectionId, boolean>>) => {
   // State to track expanded sections with default values
-  const [expandedSections, setExpandedSections] = useState<
-    Record<SectionId, boolean>
-  >({
+  const [expandedSections, setExpandedSections] = useState<Record<SectionId, boolean>>({
     ...DEFAULT_EXPANDED_STATE,
     ...(initialExpanded || {}),
   });

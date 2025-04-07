@@ -8,9 +8,9 @@ import {
   signInWithPopup,
   sendPasswordResetEmail,
   GithubAuthProvider,
-} from "firebase/auth";
-import { auth } from "../firebase/config";
-import { getAuthErrorMessage } from "../utils/authErrorHandler";
+} from 'firebase/auth';
+import { auth } from '../firebase/config';
+import { getAuthErrorMessage } from '../utils/authErrorHandler';
 
 // User type definition
 export interface User {
@@ -34,16 +34,9 @@ const mapFirebaseUser = async (firebaseUser: FirebaseUser): Promise<User> => {
 };
 
 // Sign in with email and password
-export const signInWithEmail = async (
-  email: string,
-  password: string
-): Promise<User> => {
+export const signInWithEmail = async (email: string, password: string): Promise<User> => {
   try {
-    const userCredential = await signInWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
     return await mapFirebaseUser(userCredential.user);
   } catch (error) {
     // Use the error handler utility to get a user-friendly message
@@ -54,16 +47,9 @@ export const signInWithEmail = async (
 };
 
 // Sign up with email and password
-export const signUpWithEmail = async (
-  email: string,
-  password: string
-): Promise<User> => {
+export const signUpWithEmail = async (email: string, password: string): Promise<User> => {
   try {
-    const userCredential = await createUserWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     return await mapFirebaseUser(userCredential.user);
   } catch (error) {
     // Use the error handler utility to get a user-friendly message
@@ -126,9 +112,7 @@ export const resetPassword = async (email: string): Promise<void> => {
 };
 
 // Listen to auth state changes
-export const onAuthStateChange = (
-  callback: (user: User | null) => void
-): (() => void) => {
+export const onAuthStateChange = (callback: (user: User | null) => void): (() => void) => {
   return onAuthStateChanged(auth, async (firebaseUser) => {
     if (firebaseUser) {
       const user = await mapFirebaseUser(firebaseUser);
@@ -162,7 +146,7 @@ export const getAuthToken = async (): Promise<string | null> => {
   try {
     return await user.getIdToken();
   } catch (error) {
-    console.error("Error getting auth token:", error);
+    console.error('Error getting auth token:', error);
     return null;
   }
 };

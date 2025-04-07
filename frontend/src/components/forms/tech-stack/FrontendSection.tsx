@@ -1,32 +1,22 @@
-import {
-  UseFormRegister,
-  FormState,
-  useWatch,
-  Control,
-  UseFormSetValue,
-} from "react-hook-form";
-import {
-  Technology,
-  UILibrary,
-  StateManagement,
-} from "../../../types/techStack";
-import { TechStackFormData } from "../tech-stack/techStackSchema";
-import { useEffect, useMemo, useRef } from "react";
+import { UseFormRegister, FormState, useWatch, Control, UseFormSetValue } from 'react-hook-form';
+import { Technology, UILibrary, StateManagement } from '../../../types/techStack';
+import { TechStackFormData } from '../tech-stack/techStackSchema';
+import { useEffect, useMemo, useRef } from 'react';
 import {
   filterLanguageOptions,
   filterFrameworkOptions,
   filterUILibraryOptions,
   filterStateManagementOptions,
-} from "../../../utils/techStackFilterUtils";
-import { ProjectTechStack } from "../../../types/templates";
+} from '../../../utils/techStackFilterUtils';
+import { ProjectTechStack } from '../../../types/templates';
 
 // Import shadcn UI components
-import { Label } from "../../ui/label";
-import { Select } from "../../ui/select";
+import { Label } from '../../ui/label';
+import { Select } from '../../ui/select';
 
 interface FrontendSectionProps {
   register: UseFormRegister<TechStackFormData>;
-  errors: FormState<TechStackFormData>["errors"];
+  errors: FormState<TechStackFormData>['errors'];
   frontendFrameworks: Technology[];
   uiLibraryOptions: UILibrary[];
   stateManagementOptions: StateManagement[];
@@ -51,23 +41,19 @@ const FrontendSection = ({
   // Watch for form value changes
   const watchedValues = useWatch({
     control,
-    name: ["frontend", "frontend_language", "ui_library", "state_management"],
+    name: ['frontend', 'frontend_language', 'ui_library', 'state_management'],
   });
 
-  const [
-    selectedFramework,
-    selectedLanguage,
-    selectedUILibrary,
-    selectedStateManagement,
-  ] = watchedValues;
+  const [selectedFramework, selectedLanguage, selectedUILibrary, selectedStateManagement] =
+    watchedValues;
 
   // Reset form values if templateId is null
   useEffect(() => {
     if (!initialData) {
-      setValue("frontend", "", { shouldDirty: false });
-      setValue("frontend_language", "", { shouldDirty: false });
-      setValue("ui_library", "", { shouldDirty: false });
-      setValue("state_management", "", { shouldDirty: false });
+      setValue('frontend', '', { shouldDirty: false });
+      setValue('frontend_language', '', { shouldDirty: false });
+      setValue('ui_library', '', { shouldDirty: false });
+      setValue('state_management', '', { shouldDirty: false });
     }
   }, [initialData, setValue]);
 
@@ -170,7 +156,7 @@ const FrontendSection = ({
   useEffect(() => {
     if (!initialData || initialDataAppliedRef.current) return;
 
-    console.log("Checking initial data for frontend section:", initialData);
+    console.log('Checking initial data for frontend section:', initialData);
 
     // Track values that were successfully set
     let valuesWereSet = false;
@@ -181,34 +167,26 @@ const FrontendSection = ({
         (framework) => framework.id === initialData.frontend.framework
       );
       if (frameworkExists) {
-        setValue("frontend", initialData.frontend.framework, {
+        setValue('frontend', initialData.frontend.framework, {
           shouldDirty: true,
         });
-        console.log("Setting initial framework:", initialData.frontend);
+        console.log('Setting initial framework:', initialData.frontend);
         valuesWereSet = true;
       } else {
-        console.log(
-          "Initial framework not available in options:",
-          initialData.frontend
-        );
+        console.log('Initial framework not available in options:', initialData.frontend);
       }
     }
 
     if (!selectedLanguage && initialData.frontend.language) {
-      const languageExists = filteredLanguages.includes(
-        initialData.frontend.language
-      );
+      const languageExists = filteredLanguages.includes(initialData.frontend.language);
       if (languageExists) {
-        setValue("frontend_language", initialData.frontend.language, {
+        setValue('frontend_language', initialData.frontend.language, {
           shouldDirty: true,
         });
-        console.log("Setting initial language:", initialData.frontend.language);
+        console.log('Setting initial language:', initialData.frontend.language);
         valuesWereSet = true;
       } else {
-        console.log(
-          "Initial language not available in options:",
-          initialData.frontend.language
-        );
+        console.log('Initial language not available in options:', initialData.frontend.language);
       }
     }
 
@@ -217,19 +195,13 @@ const FrontendSection = ({
         (lib) => lib.id === initialData.frontend.uiLibrary
       );
       if (uiLibraryExists) {
-        setValue("ui_library", initialData.frontend.uiLibrary, {
+        setValue('ui_library', initialData.frontend.uiLibrary, {
           shouldDirty: true,
         });
-        console.log(
-          "Setting initial UI library:",
-          initialData.frontend.uiLibrary
-        );
+        console.log('Setting initial UI library:', initialData.frontend.uiLibrary);
         valuesWereSet = true;
       } else {
-        console.log(
-          "Initial UI library not available in options:",
-          initialData.frontend.uiLibrary
-        );
+        console.log('Initial UI library not available in options:', initialData.frontend.uiLibrary);
       }
     }
 
@@ -238,17 +210,14 @@ const FrontendSection = ({
         (sm) => sm.id === initialData.frontend.stateManagement
       );
       if (stateManagementExists) {
-        setValue("state_management", initialData.frontend.stateManagement, {
+        setValue('state_management', initialData.frontend.stateManagement, {
           shouldDirty: true,
         });
-        console.log(
-          "Setting initial state management:",
-          initialData.frontend.stateManagement
-        );
+        console.log('Setting initial state management:', initialData.frontend.stateManagement);
         valuesWereSet = true;
       } else {
         console.log(
-          "Initial state management not available in options:",
+          'Initial state management not available in options:',
           initialData.frontend.stateManagement
         );
       }
@@ -273,15 +242,13 @@ const FrontendSection = ({
 
   return (
     <div>
-      <h3 className="text-lg font-medium text-slate-800 dark:text-slate-100 mb-4">
-        Frontend
-      </h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <h3 className="mb-4 text-lg font-medium text-slate-800 dark:text-slate-100">Frontend</h3>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         <div>
           <Label htmlFor="frontend">Framework</Label>
           <Select
             id="frontend"
-            {...register("frontend")}
+            {...register('frontend')}
             error={errors.frontend?.message?.toString()}
           >
             <option value="">Select Framework</option>
@@ -297,7 +264,7 @@ const FrontendSection = ({
           <Label htmlFor="frontend_language">Language</Label>
           <Select
             id="frontend_language"
-            {...register("frontend_language")}
+            {...register('frontend_language')}
             error={errors.frontend_language?.message?.toString()}
           >
             <option value="">Select Language</option>
@@ -311,7 +278,7 @@ const FrontendSection = ({
 
         <div>
           <Label htmlFor="ui_library">UI Library</Label>
-          <Select id="ui_library" {...register("ui_library")}>
+          <Select id="ui_library" {...register('ui_library')}>
             <option value="">Select UI Library</option>
             {filteredUILibraries.map((lib) => (
               <option key={lib.id} value={lib.id}>
@@ -324,7 +291,7 @@ const FrontendSection = ({
         {/* State Management dropdown */}
         <div>
           <Label htmlFor="state_management">State Management</Label>
-          <Select id="state_management" {...register("state_management")}>
+          <Select id="state_management" {...register('state_management')}>
             <option value="">Select State Management</option>
             {filteredStateManagement.map((sm) => (
               <option key={sm.id} value={sm.id}>

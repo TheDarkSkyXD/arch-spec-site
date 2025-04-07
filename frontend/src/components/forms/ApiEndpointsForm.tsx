@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 import {
   PlusCircle,
   Trash2,
@@ -9,30 +9,27 @@ import {
   Edit,
   Sparkles,
   RefreshCw,
-} from "lucide-react";
-import {
-  ApiEndpoint,
-  apiEndpointsService,
-} from "../../services/apiEndpointsService";
-import { useToast } from "../../contexts/ToastContext";
-import { Api } from "../../types/templates";
-import { aiService } from "../../services/aiService";
-import { projectsService } from "../../services/projectsService";
-import { featuresService } from "../../services/featuresService";
-import { dataModelService } from "../../services/dataModelService";
-import { requirementsService } from "../../services/requirementsService";
-import { useSubscription } from "../../contexts/SubscriptionContext";
-import AIInstructionsModal from "../ui/AIInstructionsModal";
-import { useUserProfile } from "../../hooks/useUserProfile";
+} from 'lucide-react';
+import { ApiEndpoint, apiEndpointsService } from '../../services/apiEndpointsService';
+import { useToast } from '../../contexts/ToastContext';
+import { Api } from '../../types/templates';
+import { aiService } from '../../services/aiService';
+import { projectsService } from '../../services/projectsService';
+import { featuresService } from '../../services/featuresService';
+import { dataModelService } from '../../services/dataModelService';
+import { requirementsService } from '../../services/requirementsService';
+import { useSubscription } from '../../contexts/SubscriptionContext';
+import AIInstructionsModal from '../ui/AIInstructionsModal';
+import { useUserProfile } from '../../hooks/useUserProfile';
 
 // Import shadcn UI components
-import Button from "../ui/Button";
-import Input from "../ui/Input";
-import { Textarea } from "../ui/textarea";
-import { Checkbox } from "../ui/checkbox";
-import Card from "../ui/Card";
-import PremiumFeatureBadge from "../ui/PremiumFeatureBadge";
-import { ProcessingOverlay } from "../ui/index";
+import Button from '../ui/Button';
+import Input from '../ui/Input';
+import { Textarea } from '../ui/textarea';
+import { Checkbox } from '../ui/checkbox';
+import Card from '../ui/Card';
+import PremiumFeatureBadge from '../ui/PremiumFeatureBadge';
+import { ProcessingOverlay } from '../ui/index';
 
 interface ApiEndpointsFormProps {
   initialData?: Api;
@@ -48,35 +45,31 @@ export default function ApiEndpointsForm({
   const { showToast } = useToast();
   const { hasAIFeatures } = useSubscription();
   const { aiCreditsRemaining } = useUserProfile();
-  const [endpoints, setEndpoints] = useState<ApiEndpoint[]>(
-    initialData?.endpoints || []
-  );
+  const [endpoints, setEndpoints] = useState<ApiEndpoint[]>(initialData?.endpoints || []);
   const [expandedEndpoint, setExpandedEndpoint] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [editingEndpointIndex, setEditingEndpointIndex] = useState<
-    number | null
-  >(null);
-  const [error, setError] = useState<string>("");
+  const [editingEndpointIndex, setEditingEndpointIndex] = useState<number | null>(null);
+  const [error, setError] = useState<string>('');
 
   // AI enhancement state
   const [isEnhancing, setIsEnhancing] = useState<boolean>(false);
   const [isAddingEndpoints, setIsAddingEndpoints] = useState<boolean>(false);
-  const [projectDescription, setProjectDescription] = useState<string>("");
+  const [projectDescription, setProjectDescription] = useState<string>('');
   const [features, setFeatures] = useState<any[]>([]);
   const [dataModels, setDataModels] = useState<any>({});
   const [requirements, setRequirements] = useState<string[]>([]);
 
   // New endpoint form state
   const [newEndpoint, setNewEndpoint] = useState<ApiEndpoint>({
-    path: "",
-    description: "",
-    methods: ["GET"],
+    path: '',
+    description: '',
+    methods: ['GET'],
     auth: false,
     roles: [],
   });
   const [showNewEndpointForm, setShowNewEndpointForm] = useState(false);
-  const [newRole, setNewRole] = useState("");
+  const [newRole, setNewRole] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Add state for AI instructions modals
@@ -88,18 +81,18 @@ export default function ApiEndpointsForm({
     // Check if user has remaining AI credits
     if (aiCreditsRemaining <= 0) {
       showToast({
-        title: "Insufficient AI Credits",
+        title: 'Insufficient AI Credits',
         description: "You've used all your AI credits for this billing period",
-        type: "warning",
+        type: 'warning',
       });
       return;
     }
 
     if (!projectId) {
       showToast({
-        title: "Error",
-        description: "Project must be saved before endpoints can be enhanced",
-        type: "error",
+        title: 'Error',
+        description: 'Project must be saved before endpoints can be enhanced',
+        type: 'error',
       });
       return;
     }
@@ -107,28 +100,26 @@ export default function ApiEndpointsForm({
     // Check if user has access to AI features
     if (!hasAIFeatures) {
       showToast({
-        title: "Premium Feature",
-        description: "Upgrade to Premium to use AI-powered features",
-        type: "info",
+        title: 'Premium Feature',
+        description: 'Upgrade to Premium to use AI-powered features',
+        type: 'info',
       });
       return;
     }
 
     if (!projectDescription) {
       showToast({
-        title: "Warning",
-        description:
-          "Project description is missing. Endpoints may not be properly enhanced.",
-        type: "warning",
+        title: 'Warning',
+        description: 'Project description is missing. Endpoints may not be properly enhanced.',
+        type: 'warning',
       });
     }
 
     if (features.length === 0) {
       showToast({
-        title: "Warning",
-        description:
-          "No features found. Endpoints will be based only on project description.",
-        type: "warning",
+        title: 'Warning',
+        description: 'No features found. Endpoints will be based only on project description.',
+        type: 'warning',
       });
     }
 
@@ -140,18 +131,18 @@ export default function ApiEndpointsForm({
     // Check if user has remaining AI credits
     if (aiCreditsRemaining <= 0) {
       showToast({
-        title: "Insufficient AI Credits",
+        title: 'Insufficient AI Credits',
         description: "You've used all your AI credits for this billing period",
-        type: "warning",
+        type: 'warning',
       });
       return;
     }
 
     if (!projectId) {
       showToast({
-        title: "Error",
-        description: "Project must be saved before endpoints can be enhanced",
-        type: "error",
+        title: 'Error',
+        description: 'Project must be saved before endpoints can be enhanced',
+        type: 'error',
       });
       return;
     }
@@ -159,19 +150,18 @@ export default function ApiEndpointsForm({
     // Check if user has access to AI features
     if (!hasAIFeatures) {
       showToast({
-        title: "Premium Feature",
-        description: "Upgrade to Premium to use AI-powered features",
-        type: "info",
+        title: 'Premium Feature',
+        description: 'Upgrade to Premium to use AI-powered features',
+        type: 'info',
       });
       return;
     }
 
     if (!projectDescription) {
       showToast({
-        title: "Warning",
-        description:
-          "Project description is missing. Endpoints may not be properly generated.",
-        type: "warning",
+        title: 'Warning',
+        description: 'Project description is missing. Endpoints may not be properly generated.',
+        type: 'warning',
       });
     }
 
@@ -196,23 +186,23 @@ export default function ApiEndpointsForm({
         setEndpoints(enhancedEndpoints.endpoints || []);
 
         showToast({
-          title: "Success",
-          description: "API endpoints enhanced successfully",
-          type: "success",
+          title: 'Success',
+          description: 'API endpoints enhanced successfully',
+          type: 'success',
         });
       } else {
         showToast({
-          title: "Warning",
-          description: "No enhanced endpoints returned",
-          type: "warning",
+          title: 'Warning',
+          description: 'No enhanced endpoints returned',
+          type: 'warning',
         });
       }
     } catch (error) {
-      console.error("Error enhancing endpoints:", error);
+      console.error('Error enhancing endpoints:', error);
       showToast({
-        title: "Error",
-        description: "Failed to enhance endpoints",
-        type: "error",
+        title: 'Error',
+        description: 'Failed to enhance endpoints',
+        type: 'error',
       });
     } finally {
       setIsEnhancing(false);
@@ -237,23 +227,23 @@ export default function ApiEndpointsForm({
         setEndpoints([...endpoints, ...enhancedEndpoints.endpoints]);
 
         showToast({
-          title: "Success",
+          title: 'Success',
           description: `Added ${enhancedEndpoints.endpoints.length} new endpoints`,
-          type: "success",
+          type: 'success',
         });
       } else {
         showToast({
-          title: "Warning",
-          description: "No new endpoints generated",
-          type: "warning",
+          title: 'Warning',
+          description: 'No new endpoints generated',
+          type: 'warning',
         });
       }
     } catch (error) {
-      console.error("Error adding AI endpoints:", error);
+      console.error('Error adding AI endpoints:', error);
       showToast({
-        title: "Error",
-        description: "Failed to generate new endpoints",
-        type: "error",
+        title: 'Error',
+        description: 'Failed to generate new endpoints',
+        type: 'error',
       });
     } finally {
       setIsAddingEndpoints(false);
@@ -273,14 +263,12 @@ export default function ApiEndpointsForm({
       if (projectId && !initialData) {
         setIsLoading(true);
         try {
-          const apiEndpointsData = await apiEndpointsService.getApiEndpoints(
-            projectId
-          );
+          const apiEndpointsData = await apiEndpointsService.getApiEndpoints(projectId);
           if (apiEndpointsData) {
             setEndpoints(apiEndpointsData.endpoints || []);
           }
         } catch (error) {
-          console.error("Error fetching API endpoints:", error);
+          console.error('Error fetching API endpoints:', error);
         } finally {
           setIsLoading(false);
         }
@@ -299,7 +287,7 @@ export default function ApiEndpointsForm({
       const projectDetails = await projectsService.getProjectById(projectId);
 
       if (projectDetails) {
-        setProjectDescription(projectDetails.description || "");
+        setProjectDescription(projectDetails.description || '');
 
         // Fetch features
         const featuresData = await featuresService.getFeatures(projectId);
@@ -314,9 +302,7 @@ export default function ApiEndpointsForm({
         }
 
         // Fetch requirements
-        const requirementsData = await requirementsService.getRequirements(
-          projectId
-        );
+        const requirementsData = await requirementsService.getRequirements(projectId);
         if (requirementsData) {
           // Combine functional and non-functional requirements
           const allRequirements = [
@@ -327,7 +313,7 @@ export default function ApiEndpointsForm({
         }
       }
     } catch (error) {
-      console.error("Error fetching project details:", error);
+      console.error('Error fetching project details:', error);
     }
   };
 
@@ -346,15 +332,15 @@ export default function ApiEndpointsForm({
     const newErrors: Record<string, string> = {};
 
     if (!newEndpoint.path.trim()) {
-      newErrors.path = "Endpoint path is required";
+      newErrors.path = 'Endpoint path is required';
     }
 
     if (!newEndpoint.description.trim()) {
-      newErrors.description = "Endpoint description is required";
+      newErrors.description = 'Endpoint description is required';
     }
 
     if (newEndpoint.methods.length === 0) {
-      newErrors.methods = "At least one HTTP method must be selected";
+      newErrors.methods = 'At least one HTTP method must be selected';
     }
 
     setErrors(newErrors);
@@ -368,20 +354,20 @@ export default function ApiEndpointsForm({
 
     // Reset the form
     setNewEndpoint({
-      path: "",
-      description: "",
-      methods: ["GET"],
+      path: '',
+      description: '',
+      methods: ['GET'],
       auth: false,
       roles: [],
     });
     setShowNewEndpointForm(false);
-    setNewRole("");
+    setNewRole('');
 
     // Show success toast
     showToast({
-      title: "Success",
-      description: "New API endpoint added successfully",
-      type: "success",
+      title: 'Success',
+      description: 'New API endpoint added successfully',
+      type: 'success',
     });
   };
 
@@ -410,14 +396,14 @@ export default function ApiEndpointsForm({
 
     // Reset the form data
     setNewEndpoint({
-      path: "",
-      description: "",
-      methods: ["GET"],
+      path: '',
+      description: '',
+      methods: ['GET'],
       auth: false,
       roles: [],
     });
 
-    setNewRole("");
+    setNewRole('');
     setErrors({});
   };
 
@@ -434,20 +420,20 @@ export default function ApiEndpointsForm({
 
       // Reset the form
       setNewEndpoint({
-        path: "",
-        description: "",
-        methods: ["GET"],
+        path: '',
+        description: '',
+        methods: ['GET'],
         auth: false,
         roles: [],
       });
 
-      setNewRole("");
+      setNewRole('');
 
       // Show success toast
       showToast({
-        title: "Success",
-        description: "API endpoint updated successfully",
-        type: "success",
+        title: 'Success',
+        description: 'API endpoint updated successfully',
+        type: 'success',
       });
     }
   };
@@ -460,9 +446,9 @@ export default function ApiEndpointsForm({
 
     // Show success toast
     showToast({
-      title: "Success",
-      description: "API endpoint removed successfully",
-      type: "success",
+      title: 'Success',
+      description: 'API endpoint removed successfully',
+      type: 'success',
     });
   };
 
@@ -484,7 +470,7 @@ export default function ApiEndpointsForm({
     if (errors.methods) {
       setErrors({
         ...errors,
-        methods: "",
+        methods: '',
       });
     }
   };
@@ -504,7 +490,7 @@ export default function ApiEndpointsForm({
       ...newEndpoint,
       roles: [...(newEndpoint.roles || []), newRole.trim()],
     });
-    setNewRole("");
+    setNewRole('');
   };
 
   const handleRemoveRole = (role: string) => {
@@ -518,15 +504,14 @@ export default function ApiEndpointsForm({
     e.preventDefault();
 
     // Clear previous messages
-    setError("");
+    setError('');
 
     if (!projectId) {
-      const errorMessage =
-        "Project must be saved before API endpoints can be saved";
+      const errorMessage = 'Project must be saved before API endpoints can be saved';
       showToast({
-        title: "Error",
+        title: 'Error',
         description: errorMessage,
-        type: "error",
+        type: 'error',
       });
       setError(errorMessage);
       return;
@@ -538,41 +523,38 @@ export default function ApiEndpointsForm({
         endpoints: endpoints,
       };
 
-      const result = await apiEndpointsService.saveApiEndpoints(
-        projectId,
-        data
-      );
+      const result = await apiEndpointsService.saveApiEndpoints(projectId, data);
 
       if (result) {
         showToast({
-          title: "Success",
-          description: "API endpoints saved successfully",
-          type: "success",
+          title: 'Success',
+          description: 'API endpoints saved successfully',
+          type: 'success',
         });
 
         if (onSuccess) {
           onSuccess(result);
         }
       } else {
-        const errorMessage = "Failed to save API endpoints";
+        const errorMessage = 'Failed to save API endpoints';
         showToast({
-          title: "Error",
+          title: 'Error',
           description: errorMessage,
-          type: "error",
+          type: 'error',
         });
         setError(errorMessage);
-        setTimeout(() => setError(""), 5000);
+        setTimeout(() => setError(''), 5000);
       }
     } catch (error) {
-      console.error("Error saving API endpoints:", error);
-      const errorMessage = "An unexpected error occurred";
+      console.error('Error saving API endpoints:', error);
+      const errorMessage = 'An unexpected error occurred';
       showToast({
-        title: "Error",
+        title: 'Error',
         description: errorMessage,
-        type: "error",
+        type: 'error',
       });
       setError(errorMessage);
-      setTimeout(() => setError(""), 5000);
+      setTimeout(() => setError(''), 5000);
     } finally {
       setIsSubmitting(false);
     }
@@ -586,31 +568,25 @@ export default function ApiEndpointsForm({
   // Helper to get the appropriate message for the overlay
   const getEnhancementMessage = () => {
     if (isEnhancing) {
-      return "AI is analyzing your project to create optimal API endpoints. Please wait...";
+      return 'AI is analyzing your project to create optimal API endpoints. Please wait...';
     }
     if (isAddingEndpoints) {
-      return "AI is generating additional API endpoints based on your project requirements. Please wait...";
+      return 'AI is generating additional API endpoints based on your project requirements. Please wait...';
     }
-    return "AI enhancement in progress...";
+    return 'AI enhancement in progress...';
   };
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <Loader2 className="h-6 w-6 text-primary-600 animate-spin mr-3" />
-        <span className="text-slate-600 dark:text-slate-300">
-          Loading API endpoints...
-        </span>
+        <Loader2 className="mr-3 h-6 w-6 animate-spin text-primary-600" />
+        <span className="text-slate-600 dark:text-slate-300">Loading API endpoints...</span>
       </div>
     );
   }
 
   return (
-    <form
-      id="api-endpoints-form"
-      onSubmit={handleSubmit}
-      className="space-y-8 relative"
-    >
+    <form id="api-endpoints-form" onSubmit={handleSubmit} className="relative space-y-8">
       {/* Processing Overlay */}
       <ProcessingOverlay
         isVisible={isAnyEnhancementInProgress()}
@@ -639,38 +615,36 @@ export default function ApiEndpointsForm({
 
       {/* Error Message */}
       {error && (
-        <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-md mb-4">
+        <div className="mb-4 rounded-md bg-red-50 p-3 text-red-600 dark:bg-red-900/20 dark:text-red-400">
           {error}
         </div>
       )}
 
       <div className="space-y-6">
         <div>
-          <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-4">
+          <h2 className="mb-4 text-xl font-semibold text-slate-800 dark:text-slate-100">
             API Endpoints
           </h2>
-          <p className="text-slate-600 dark:text-slate-400 mb-6">
+          <p className="mb-6 text-slate-600 dark:text-slate-400">
             Define the API endpoints for your application.
           </p>
         </div>
 
         {/* AI Enhancement Buttons */}
-        <div className="flex justify-end items-center gap-3 mb-4">
+        <div className="mb-4 flex items-center justify-end gap-3">
           {!hasAIFeatures && <PremiumFeatureBadge />}
           <Button
             type="button"
             onClick={openAddModal}
-            disabled={
-              isAddingEndpoints || isEnhancing || !projectId || !hasAIFeatures
-            }
-            variant={hasAIFeatures ? "outline" : "ghost"}
-            className={`flex items-center gap-2 relative ${
-              !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
+            disabled={isAddingEndpoints || isEnhancing || !projectId || !hasAIFeatures}
+            variant={hasAIFeatures ? 'outline' : 'ghost'}
+            className={`relative flex items-center gap-2 ${
+              !hasAIFeatures ? 'cursor-not-allowed opacity-50' : ''
             }`}
             title={
               hasAIFeatures
-                ? "Generate new endpoints to complement existing ones"
-                : "Upgrade to Premium to use AI-powered features"
+                ? 'Generate new endpoints to complement existing ones'
+                : 'Upgrade to Premium to use AI-powered features'
             }
           >
             {isAddingEndpoints ? (
@@ -680,11 +654,7 @@ export default function ApiEndpointsForm({
               </>
             ) : (
               <>
-                {hasAIFeatures ? (
-                  <Sparkles className="h-4 w-4" />
-                ) : (
-                  <Lock className="h-4 w-4" />
-                )}
+                {hasAIFeatures ? <Sparkles className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
                 <span>Add AI Endpoints</span>
               </>
             )}
@@ -699,14 +669,14 @@ export default function ApiEndpointsForm({
               !hasAIFeatures ||
               endpoints.length === 0
             }
-            variant={hasAIFeatures ? "outline" : "ghost"}
-            className={`flex items-center gap-2 relative ${
-              !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
+            variant={hasAIFeatures ? 'outline' : 'ghost'}
+            className={`relative flex items-center gap-2 ${
+              !hasAIFeatures ? 'cursor-not-allowed opacity-50' : ''
             }`}
             title={
               hasAIFeatures
-                ? "Replace all endpoints with AI-generated ones"
-                : "Upgrade to Premium to use AI-powered features"
+                ? 'Replace all endpoints with AI-generated ones'
+                : 'Upgrade to Premium to use AI-powered features'
             }
           >
             {isEnhancing ? (
@@ -716,11 +686,7 @@ export default function ApiEndpointsForm({
               </>
             ) : (
               <>
-                {hasAIFeatures ? (
-                  <RefreshCw className="h-4 w-4" />
-                ) : (
-                  <Lock className="h-4 w-4" />
-                )}
+                {hasAIFeatures ? <RefreshCw className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
                 <span>Replace All</span>
               </>
             )}
@@ -743,18 +709,16 @@ export default function ApiEndpointsForm({
 
         {/* New/Edit Endpoint Form */}
         {(showNewEndpointForm || editingEndpointIndex !== null) && (
-          <Card className="p-4 border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
-            <h3 className="text-lg font-medium text-slate-800 dark:text-slate-200 mb-4">
-              {editingEndpointIndex !== null
-                ? "Edit Endpoint"
-                : "Add New Endpoint"}
+          <Card className="border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800">
+            <h3 className="mb-4 text-lg font-medium text-slate-800 dark:text-slate-200">
+              {editingEndpointIndex !== null ? 'Edit Endpoint' : 'Add New Endpoint'}
             </h3>
 
             <div className="space-y-4">
               <div>
                 <label
                   htmlFor="path"
-                  className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1"
+                  className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300"
                 >
                   Path <span className="text-red-500">*</span>
                 </label>
@@ -762,9 +726,7 @@ export default function ApiEndpointsForm({
                   id="path"
                   type="text"
                   value={newEndpoint.path}
-                  onChange={(e) =>
-                    setNewEndpoint({ ...newEndpoint, path: e.target.value })
-                  }
+                  onChange={(e) => setNewEndpoint({ ...newEndpoint, path: e.target.value })}
                   placeholder="/api/users"
                   error={errors.path}
                 />
@@ -773,7 +735,7 @@ export default function ApiEndpointsForm({
               <div>
                 <label
                   htmlFor="description"
-                  className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1"
+                  className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300"
                 >
                   Description <span className="text-red-500">*</span>
                 </label>
@@ -793,40 +755,38 @@ export default function ApiEndpointsForm({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
                   HTTP Methods <span className="text-red-500">*</span>
                 </label>
                 <div className="flex flex-wrap gap-2">
-                  {["GET", "POST", "PUT", "DELETE", "PATCH"].map((method) => (
+                  {['GET', 'POST', 'PUT', 'DELETE', 'PATCH'].map((method) => (
                     <button
                       key={method}
                       type="button"
                       onClick={() => handleMethodToggle(method)}
-                      className={`px-3 py-1 rounded-full text-xs font-medium ${
+                      className={`rounded-full px-3 py-1 text-xs font-medium ${
                         newEndpoint.methods.includes(method)
-                          ? method === "GET"
-                            ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 border-2 border-green-300 dark:border-green-700"
-                            : method === "POST"
-                            ? "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 border-2 border-blue-300 dark:border-blue-700"
-                            : method === "PUT"
-                            ? "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 border-2 border-yellow-300 dark:border-yellow-700"
-                            : method === "DELETE"
-                            ? "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 border-2 border-red-300 dark:border-red-700"
-                            : "bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 border-2 border-purple-300 dark:border-purple-700"
-                          : "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600"
+                          ? method === 'GET'
+                            ? 'border-2 border-green-300 bg-green-100 text-green-800 dark:border-green-700 dark:bg-green-900/30 dark:text-green-300'
+                            : method === 'POST'
+                              ? 'border-2 border-blue-300 bg-blue-100 text-blue-800 dark:border-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                              : method === 'PUT'
+                                ? 'border-2 border-yellow-300 bg-yellow-100 text-yellow-800 dark:border-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300'
+                                : method === 'DELETE'
+                                  ? 'border-2 border-red-300 bg-red-100 text-red-800 dark:border-red-700 dark:bg-red-900/30 dark:text-red-300'
+                                  : 'border-2 border-purple-300 bg-purple-100 text-purple-800 dark:border-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
+                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-400 dark:hover:bg-slate-600'
                       }`}
                     >
                       {method}
                     </button>
                   ))}
                 </div>
-                {errors.methods && (
-                  <p className="mt-1 text-sm text-red-500">{errors.methods}</p>
-                )}
+                {errors.methods && <p className="mt-1 text-sm text-red-500">{errors.methods}</p>}
               </div>
 
               <div className="mt-3">
-                <div className="flex items-center mb-2">
+                <div className="mb-2 flex items-center">
                   <Checkbox
                     id="auth"
                     checked={newEndpoint.auth}
@@ -843,20 +803,20 @@ export default function ApiEndpointsForm({
                 {newEndpoint.auth && (
                   <div className="mt-3 pl-6">
                     <div className="mb-2">
-                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                      <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
                         Required Roles
                       </label>
-                      <div className="flex flex-wrap gap-1 mb-2">
+                      <div className="mb-2 flex flex-wrap gap-1">
                         {newEndpoint.roles?.map((role) => (
                           <span
                             key={role}
-                            className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300"
+                            className="inline-flex items-center rounded-full bg-purple-100 px-2 py-1 text-xs font-medium text-purple-800 dark:bg-purple-900/30 dark:text-purple-300"
                           >
                             {role}
                             <button
                               type="button"
                               onClick={() => handleRemoveRole(role)}
-                              className="ml-1 text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-200"
+                              className="ml-1 text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-200"
                             >
                               &times;
                             </button>
@@ -875,11 +835,11 @@ export default function ApiEndpointsForm({
                           type="button"
                           onClick={handleAddRole}
                           disabled={!newRole.trim()}
-                          variant={!newRole.trim() ? "outline" : "default"}
+                          variant={!newRole.trim() ? 'outline' : 'default'}
                           className={
                             !newRole.trim()
-                              ? "cursor-not-allowed"
-                              : "bg-purple-600 text-white hover:bg-purple-700 dark:hover:bg-purple-500"
+                              ? 'cursor-not-allowed'
+                              : 'bg-purple-600 text-white hover:bg-purple-700 dark:hover:bg-purple-500'
                           }
                         >
                           <PlusCircle size={16} />
@@ -890,7 +850,7 @@ export default function ApiEndpointsForm({
                 )}
               </div>
 
-              <div className="flex justify-end gap-2 mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+              <div className="mt-4 flex justify-end gap-2 border-t border-slate-200 pt-4 dark:border-slate-700">
                 <Button
                   type="button"
                   variant="outline"
@@ -906,11 +866,7 @@ export default function ApiEndpointsForm({
                 </Button>
                 <Button
                   type="button"
-                  onClick={
-                    editingEndpointIndex !== null
-                      ? handleSaveEdit
-                      : handleAddEndpoint
-                  }
+                  onClick={editingEndpointIndex !== null ? handleSaveEdit : handleAddEndpoint}
                   disabled={
                     !newEndpoint.path.trim() ||
                     !newEndpoint.description.trim() ||
@@ -921,13 +877,11 @@ export default function ApiEndpointsForm({
                     !newEndpoint.path.trim() ||
                     !newEndpoint.description.trim() ||
                     newEndpoint.methods.length === 0
-                      ? "cursor-not-allowed opacity-50"
-                      : ""
+                      ? 'cursor-not-allowed opacity-50'
+                      : ''
                   }
                 >
-                  {editingEndpointIndex !== null
-                    ? "Save Changes"
-                    : "Add Endpoint"}
+                  {editingEndpointIndex !== null ? 'Save Changes' : 'Add Endpoint'}
                 </Button>
               </div>
             </div>
@@ -938,20 +892,18 @@ export default function ApiEndpointsForm({
         {!showNewEndpointForm &&
           editingEndpointIndex === null &&
           (endpoints.length === 0 ? (
-            <Card className="p-6 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-center">
-              <p className="text-slate-600 dark:text-slate-400">
-                No API endpoints defined yet
-              </p>
+            <Card className="border border-slate-200 bg-slate-50 p-6 text-center dark:border-slate-700 dark:bg-slate-800">
+              <p className="text-slate-600 dark:text-slate-400">No API endpoints defined yet</p>
             </Card>
           ) : (
             <div className="space-y-4">
               {endpoints.map((endpoint, index) => (
                 <Card
                   key={index}
-                  className="border border-slate-200 dark:border-slate-700 overflow-hidden"
+                  className="overflow-hidden border border-slate-200 dark:border-slate-700"
                 >
                   <div
-                    className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700"
+                    className="flex cursor-pointer items-center justify-between bg-slate-50 p-3 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700"
                     onClick={() => toggleEndpointExpand(index)}
                   >
                     <div className="flex items-center gap-3">
@@ -959,16 +911,16 @@ export default function ApiEndpointsForm({
                         {endpoint.methods.map((method) => (
                           <span
                             key={method}
-                            className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                              method === "GET"
-                                ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300"
-                                : method === "POST"
-                                ? "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300"
-                                : method === "PUT"
-                                ? "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300"
-                                : method === "DELETE"
-                                ? "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300"
-                                : "bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-300"
+                            className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${
+                              method === 'GET'
+                                ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+                                : method === 'POST'
+                                  ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'
+                                  : method === 'PUT'
+                                    ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300'
+                                    : method === 'DELETE'
+                                      ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
+                                      : 'bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-300'
                             }`}
                           >
                             {method}
@@ -994,7 +946,7 @@ export default function ApiEndpointsForm({
                           e.stopPropagation();
                           handleEditEndpoint(index);
                         }}
-                        className="text-slate-400 dark:text-slate-500 hover:text-blue-500 dark:hover:text-blue-400"
+                        className="text-slate-400 hover:text-blue-500 dark:text-slate-500 dark:hover:text-blue-400"
                       >
                         <Edit size={16} />
                       </Button>
@@ -1006,28 +958,22 @@ export default function ApiEndpointsForm({
                           e.stopPropagation();
                           handleRemoveEndpoint(index);
                         }}
-                        className="text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400"
+                        className="text-slate-400 hover:text-red-500 dark:text-slate-500 dark:hover:text-red-400"
                       >
                         <Trash2 size={16} />
                       </Button>
                       {expandedEndpoint === index ? (
-                        <ChevronUp
-                          size={16}
-                          className="text-slate-500 dark:text-slate-400"
-                        />
+                        <ChevronUp size={16} className="text-slate-500 dark:text-slate-400" />
                       ) : (
-                        <ChevronDown
-                          size={16}
-                          className="text-slate-500 dark:text-slate-400"
-                        />
+                        <ChevronDown size={16} className="text-slate-500 dark:text-slate-400" />
                       )}
                     </div>
                   </div>
 
                   {expandedEndpoint === index && (
-                    <div className="p-3 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+                    <div className="border-t border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900">
                       <div className="mb-3">
-                        <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1">
+                        <label className="mb-1 block text-xs text-slate-500 dark:text-slate-400">
                           Description
                         </label>
                         <p className="text-sm text-slate-700 dark:text-slate-300">
@@ -1037,14 +983,14 @@ export default function ApiEndpointsForm({
 
                       {endpoint.roles && endpoint.roles.length > 0 && (
                         <div>
-                          <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1">
+                          <label className="mb-1 block text-xs text-slate-500 dark:text-slate-400">
                             Required Roles
                           </label>
-                          <div className="flex flex-wrap gap-1 mt-1">
+                          <div className="mt-1 flex flex-wrap gap-1">
                             {endpoint.roles.map((role) => (
                               <span
                                 key={role}
-                                className="inline-flex px-2 py-1 text-xs rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300"
+                                className="inline-flex rounded-full bg-purple-100 px-2 py-1 text-xs text-purple-800 dark:bg-purple-900/30 dark:text-purple-300"
                               >
                                 {role}
                               </span>
@@ -1065,17 +1011,15 @@ export default function ApiEndpointsForm({
           type="submit"
           disabled={isSubmitting || !projectId || editingEndpointIndex !== null}
           variant={
-            !projectId || isSubmitting || editingEndpointIndex !== null
-              ? "outline"
-              : "default"
+            !projectId || isSubmitting || editingEndpointIndex !== null ? 'outline' : 'default'
           }
           className={
             !projectId || isSubmitting || editingEndpointIndex !== null
-              ? "bg-gray-400 text-white hover:bg-gray-400"
-              : ""
+              ? 'bg-gray-400 text-white hover:bg-gray-400'
+              : ''
           }
         >
-          {isSubmitting ? "Saving..." : "Save API Endpoints"}
+          {isSubmitting ? 'Saving...' : 'Save API Endpoints'}
         </Button>
       </div>
     </form>

@@ -1,13 +1,13 @@
-import { useState, useEffect } from "react";
-import { useAuth } from "../contexts";
-import { userApi } from "../api/userApi";
-import { toast } from "react-hot-toast";
-import Button from "../components/ui/Button";
-import Card from "../components/ui/Card";
-import Spinner from "../components/ui/Spinner";
-import ProfileLayout from "../layouts/ProfileLayout";
+import { useState, useEffect } from 'react';
+import { useAuth } from '../contexts';
+import { userApi } from '../api/userApi';
+import { toast } from 'react-hot-toast';
+import Button from '../components/ui/Button';
+import Card from '../components/ui/Card';
+import Spinner from '../components/ui/Spinner';
+import ProfileLayout from '../layouts/ProfileLayout';
 
-type ColorScheme = "light" | "dark" | "system";
+type ColorScheme = 'light' | 'dark' | 'system';
 
 interface UserSettings {
   theme: ColorScheme;
@@ -17,7 +17,7 @@ interface UserSettings {
 }
 
 const defaultSettings: UserSettings = {
-  theme: "system",
+  theme: 'system',
   notifications: true,
   emailUpdates: false,
 };
@@ -51,12 +51,10 @@ const UserSettingsPage = () => {
         });
 
         // Apply theme setting to the document
-        applyTheme(
-          (userSettings?.theme as ColorScheme) || defaultSettings.theme
-        );
+        applyTheme((userSettings?.theme as ColorScheme) || defaultSettings.theme);
       } catch (error) {
-        console.error("Error loading settings:", error);
-        setError("Failed to load settings. Using default settings.");
+        console.error('Error loading settings:', error);
+        setError('Failed to load settings. Using default settings.');
 
         // Fallback to cached settings if available
         if (currentUser?.profile?.settings) {
@@ -66,10 +64,7 @@ const UserSettingsPage = () => {
           });
 
           // Apply theme setting to the document
-          applyTheme(
-            (currentUser.profile.settings?.theme as ColorScheme) ||
-              defaultSettings.theme
-          );
+          applyTheme((currentUser.profile.settings?.theme as ColorScheme) || defaultSettings.theme);
         }
       } finally {
         setLoading(false);
@@ -79,25 +74,23 @@ const UserSettingsPage = () => {
     loadSettings();
   }, [currentUser]);
 
-  const applyTheme = (theme: "light" | "dark" | "system") => {
+  const applyTheme = (theme: 'light' | 'dark' | 'system') => {
     const root = window.document.documentElement;
 
     // Remove all theme classes
-    root.classList.remove("light", "dark");
+    root.classList.remove('light', 'dark');
 
     // Apply selected theme
-    if (theme === "system") {
+    if (theme === 'system') {
       // Check system preference
-      const prefersDark = window.matchMedia(
-        "(prefers-color-scheme: dark)"
-      ).matches;
-      root.classList.add(prefersDark ? "dark" : "light");
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      root.classList.add(prefersDark ? 'dark' : 'light');
     } else {
       root.classList.add(theme);
     }
   };
 
-  const handleThemeChange = (theme: "light" | "dark" | "system") => {
+  const handleThemeChange = (theme: 'light' | 'dark' | 'system') => {
     setSettings((prev) => ({
       ...prev,
       theme,
@@ -120,11 +113,11 @@ const UserSettingsPage = () => {
 
     try {
       await userApi.updateUserSettings(settings);
-      toast.success("Settings saved successfully");
+      toast.success('Settings saved successfully');
     } catch (error) {
-      console.error("Error saving settings:", error);
-      toast.error("Failed to save settings");
-      setError("Failed to save settings. Please try again later.");
+      console.error('Error saving settings:', error);
+      toast.error('Failed to save settings');
+      setError('Failed to save settings. Please try again later.');
     } finally {
       setSaving(false);
     }
@@ -133,7 +126,7 @@ const UserSettingsPage = () => {
   if (loading) {
     return (
       <ProfileLayout title="User Settings">
-        <div className="flex justify-center items-center h-full">
+        <div className="flex h-full items-center justify-center">
           <Spinner size="lg" />
         </div>
       </ProfileLayout>
@@ -143,10 +136,8 @@ const UserSettingsPage = () => {
   if (!currentUser) {
     return (
       <ProfileLayout title="User Settings">
-        <div className="flex flex-col justify-center items-center h-full p-8">
-          <div className="text-red-500 mb-4">
-            You must be signed in to view settings
-          </div>
+        <div className="flex h-full flex-col items-center justify-center p-8">
+          <div className="mb-4 text-red-500">You must be signed in to view settings</div>
           <Button href="/login">Sign In</Button>
         </div>
       </ProfileLayout>
@@ -157,34 +148,30 @@ const UserSettingsPage = () => {
     <ProfileLayout title="User Settings">
       <div className="grid grid-cols-1 gap-6">
         {error && (
-          <div className="p-4 bg-red-50 border border-red-100 text-red-600 rounded-md">
-            {error}
-          </div>
+          <div className="rounded-md border border-red-100 bg-red-50 p-4 text-red-600">{error}</div>
         )}
 
         {/* Appearance Settings */}
         <Card>
-          <h2 className="text-xl font-semibold mb-4">Appearance</h2>
+          <h2 className="mb-4 text-xl font-semibold">Appearance</h2>
 
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Theme
-              </label>
+              <label className="mb-2 block text-sm font-medium text-gray-700">Theme</label>
               <div className="flex flex-wrap gap-4">
                 <ThemeButton
-                  active={settings.theme === "light"}
-                  onClick={() => handleThemeChange("light")}
+                  active={settings.theme === 'light'}
+                  onClick={() => handleThemeChange('light')}
                   label="Light"
                 />
                 <ThemeButton
-                  active={settings.theme === "dark"}
-                  onClick={() => handleThemeChange("dark")}
+                  active={settings.theme === 'dark'}
+                  onClick={() => handleThemeChange('dark')}
                   label="Dark"
                 />
                 <ThemeButton
-                  active={settings.theme === "system"}
-                  onClick={() => handleThemeChange("system")}
+                  active={settings.theme === 'system'}
+                  onClick={() => handleThemeChange('system')}
                   label="System"
                 />
               </div>
@@ -249,10 +236,10 @@ const ThemeButton = ({ active, onClick, label }: ThemeButtonProps) => {
     <button
       type="button"
       onClick={onClick}
-      className={`px-4 py-2 rounded-md ${
+      className={`rounded-md px-4 py-2 ${
         active
-          ? "bg-blue-100 text-blue-700 border border-blue-300"
-          : "bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200"
+          ? 'border border-blue-300 bg-blue-100 text-blue-700'
+          : 'border border-gray-200 bg-gray-100 text-gray-700 hover:bg-gray-200'
       }`}
     >
       {label}

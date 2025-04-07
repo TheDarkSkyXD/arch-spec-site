@@ -1,6 +1,6 @@
-import React from "react";
-import { DataModel } from "../../types/templates";
-import CollapsibleSection from "./CollapsibleSection";
+import React from 'react';
+import { DataModel } from '../../types/templates';
+import CollapsibleSection from './CollapsibleSection';
 
 interface DataModelSectionProps {
   dataModel: DataModel;
@@ -8,38 +8,29 @@ interface DataModelSectionProps {
   onToggle: () => void;
 }
 
-const DataModelSection: React.FC<DataModelSectionProps> = ({
-  dataModel,
-  isOpen,
-  onToggle,
-}) => {
+const DataModelSection: React.FC<DataModelSectionProps> = ({ dataModel, isOpen, onToggle }) => {
   return (
     <CollapsibleSection title="Data Model" isOpen={isOpen} onToggle={onToggle}>
       <div className="space-y-6">
         {/* Entities */}
         <div>
-          <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">
-            Entities
-          </h4>
+          <h4 className="mb-3 text-sm font-medium text-slate-700 dark:text-slate-300">Entities</h4>
           {dataModel.entities && dataModel.entities.length > 0 ? (
             <div className="space-y-4">
               {dataModel.entities.map((entity, index) => (
-                <div
-                  key={index}
-                  className="p-3 bg-slate-50 dark:bg-slate-700/30 rounded-lg"
-                >
-                  <h5 className="text-sm font-medium text-slate-800 dark:text-slate-100 mb-1">
+                <div key={index} className="rounded-lg bg-slate-50 p-3 dark:bg-slate-700/30">
+                  <h5 className="mb-1 text-sm font-medium text-slate-800 dark:text-slate-100">
                     {entity.name}
                   </h5>
 
                   {entity.description && (
-                    <p className="text-xs text-slate-600 dark:text-slate-400 mb-2">
+                    <p className="mb-2 text-xs text-slate-600 dark:text-slate-400">
                       {entity.description}
                     </p>
                   )}
 
                   <div className="mt-2">
-                    <div className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">
+                    <div className="mb-1 text-xs font-medium text-slate-500 dark:text-slate-400">
                       Fields:
                     </div>
                     <div className="overflow-x-auto">
@@ -65,23 +56,20 @@ const DataModelSection: React.FC<DataModelSectionProps> = ({
                             >
                               <td className="px-2 py-1.5 text-slate-800 dark:text-slate-200">
                                 {field.name}
-                                {field.primaryKey && (
-                                  <span className="ml-1 text-blue-500">🔑</span>
-                                )}
+                                {field.primaryKey && <span className="ml-1 text-blue-500">🔑</span>}
                               </td>
                               <td className="px-2 py-1.5 text-slate-600 dark:text-slate-300">
                                 {field.type}
                               </td>
                               <td className="px-2 py-1.5 text-slate-600 dark:text-slate-400">
                                 {[
-                                  field.required && "required",
-                                  field.unique && "unique",
-                                  field.generated && "generated",
-                                  field.default !== undefined &&
-                                    `default: ${field.default}`,
+                                  field.required && 'required',
+                                  field.unique && 'unique',
+                                  field.generated && 'generated',
+                                  field.default !== undefined && `default: ${field.default}`,
                                 ]
                                   .filter(Boolean)
-                                  .join(", ")}
+                                  .join(', ')}
                               </td>
                             </tr>
                           ))}
@@ -100,20 +88,20 @@ const DataModelSection: React.FC<DataModelSectionProps> = ({
         {/* Relationships */}
         {dataModel.relationships && dataModel.relationships.length > 0 && (
           <div>
-            <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">
+            <h4 className="mb-3 text-sm font-medium text-slate-700 dark:text-slate-300">
               Relationships
             </h4>
             <div className="space-y-2">
               {dataModel.relationships.map((relationship, index) => (
                 <div
                   key={index}
-                  className="p-3 bg-slate-50 dark:bg-slate-700/30 rounded-lg text-sm"
+                  className="rounded-lg bg-slate-50 p-3 text-sm dark:bg-slate-700/30"
                 >
                   <div className="flex items-center gap-2">
                     <span className="font-medium text-slate-800 dark:text-slate-100">
                       {relationship.from_entity}
                     </span>
-                    <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 rounded-full text-xs">
+                    <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs text-blue-800 dark:bg-blue-900/40 dark:text-blue-300">
                       {relationship.type}
                     </span>
                     <span className="font-medium text-slate-800 dark:text-slate-100">
@@ -121,14 +109,10 @@ const DataModelSection: React.FC<DataModelSectionProps> = ({
                     </span>
                   </div>
                   <div className="mt-1 text-xs text-slate-600 dark:text-slate-400">
-                    via field:{" "}
-                    <span className="font-mono">{relationship.field}</span>
+                    via field: <span className="font-mono">{relationship.field}</span>
                     {relationship.throughTable && (
                       <span className="ml-2">
-                        through:{" "}
-                        <span className="font-mono">
-                          {relationship.throughTable}
-                        </span>
+                        through: <span className="font-mono">{relationship.throughTable}</span>
                       </span>
                     )}
                   </div>

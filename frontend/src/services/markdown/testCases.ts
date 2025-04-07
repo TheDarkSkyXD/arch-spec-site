@@ -1,15 +1,10 @@
-import {
-  TestCasesData,
-  GherkinTestCase,
-} from "../../services/testCasesService";
+import { TestCasesData, GherkinTestCase } from '../../services/testCasesService';
 
 /**
  * Generate markdown for test cases using Gherkin format
  */
-export function generateTestCasesMarkdown(
-  data: Partial<TestCasesData> | null
-): string {
-  if (!data || !data.testCases || data.testCases.length === 0) return "";
+export function generateTestCasesMarkdown(data: Partial<TestCasesData> | null): string {
+  if (!data || !data.testCases || data.testCases.length === 0) return '';
 
   let markdown = `# Test Cases\n\n`;
 
@@ -25,9 +20,7 @@ export function generateTestCasesMarkdown(
 
     // Add tags if they exist
     if (testCase.tags && testCase.tags.length > 0) {
-      markdown += `**Tags**: ${testCase.tags
-        .map((tag) => `@${tag}`)
-        .join(", ")}\n\n`;
+      markdown += `**Tags**: ${testCase.tags.map((tag) => `@${tag}`).join(', ')}\n\n`;
     }
 
     // Add scenarios

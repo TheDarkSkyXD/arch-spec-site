@@ -1,6 +1,6 @@
-import { UIDesign } from "../types/templates";
-import apiClient from "../api/apiClient";
-const API_BASE_URL = "/api";
+import { UIDesign } from '../types/templates';
+import apiClient from '../api/apiClient';
+const API_BASE_URL = '/api';
 
 interface UIDesignResponse {
   id: string;
@@ -32,7 +32,7 @@ export class UIDesignService {
 
       return response.data.data;
     } catch (error) {
-      console.error("Error fetching UI design:", error);
+      console.error('Error fetching UI design:', error);
       throw error;
     }
   }
@@ -43,10 +43,7 @@ export class UIDesignService {
    * @param uiDesignData The UI design data to save
    * @returns The saved UI design data
    */
-  static async saveUIDesign(
-    projectId: string,
-    uiDesignData: UIDesign
-  ): Promise<UIDesign | null> {
+  static async saveUIDesign(projectId: string, uiDesignData: UIDesign): Promise<UIDesign | null> {
     try {
       const response = await apiClient.put<UIDesign>(
         `${API_BASE_URL}/project-specs/${projectId}/ui-design`,
@@ -61,7 +58,7 @@ export class UIDesignService {
 
       return response.data;
     } catch (error) {
-      console.error("Error saving UI design:", error);
+      console.error('Error saving UI design:', error);
       throw error;
     }
   }

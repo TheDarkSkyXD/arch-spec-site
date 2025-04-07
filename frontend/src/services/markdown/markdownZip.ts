@@ -1,5 +1,5 @@
-import JSZip from "jszip";
-import { ProjectBase } from "../../types/project";
+import JSZip from 'jszip';
+import { ProjectBase } from '../../types/project';
 import {
   ProjectTechStack,
   Requirements,
@@ -8,21 +8,21 @@ import {
   Api,
   ImplementationPrompts,
   UIDesign,
-} from "../../types/templates";
-import { FeaturesData } from "../featuresService";
-import { TestCasesData } from "../testCasesService";
-import { aiService } from "../aiService";
-import { generateApiEndpointsMarkdown } from "./apiEndpoints";
-import { generateDataModelMarkdown } from "./dataModel";
-import { generateFeaturesMarkdown } from "./features";
-import { generatePagesMarkdown } from "./pages";
-import { generateProjectBasicsMarkdown } from "./projectBasics";
-import { generateRequirementsMarkdown } from "./requirements";
-import { generateTechStackMarkdown } from "./techStack";
-import { generateTestCasesMarkdown } from "./testCases";
-import { generateUIDesignMarkdown } from "./uiDesign";
-import { generateFileName } from "./utils";
-import { generateImplementationPromptsMarkdown } from "./implementationPrompts";
+} from '../../types/templates';
+import { FeaturesData } from '../featuresService';
+import { TestCasesData } from '../testCasesService';
+import { aiService } from '../aiService';
+import { generateApiEndpointsMarkdown } from './apiEndpoints';
+import { generateDataModelMarkdown } from './dataModel';
+import { generateFeaturesMarkdown } from './features';
+import { generatePagesMarkdown } from './pages';
+import { generateProjectBasicsMarkdown } from './projectBasics';
+import { generateRequirementsMarkdown } from './requirements';
+import { generateTechStackMarkdown } from './techStack';
+import { generateTestCasesMarkdown } from './testCases';
+import { generateUIDesignMarkdown } from './uiDesign';
+import { generateFileName } from './utils';
+import { generateImplementationPromptsMarkdown } from './implementationPrompts';
 
 /**
  * Creates a zip file containing all markdown files for a project
@@ -60,89 +60,64 @@ export async function generateMarkdownZip(
   const zip = new JSZip();
 
   // Create a specs folder for all specification documents
-  const specsFolder = zip.folder("specs");
+  const specsFolder = zip.folder('specs');
 
   if (!specsFolder) {
-    throw new Error("Failed to create specs folder in zip file");
+    throw new Error('Failed to create specs folder in zip file');
   }
 
   // Add each markdown file to the specs folder
   if (project) {
     const basicsMarkdown = generateProjectBasicsMarkdown(project);
-    specsFolder.file(generateFileName(project.name, "basics"), basicsMarkdown);
+    specsFolder.file(generateFileName(project.name, 'basics'), basicsMarkdown);
   }
 
   if (techStack) {
     const techStackMarkdown = generateTechStackMarkdown(techStack);
-    specsFolder.file(
-      generateFileName(project.name, "tech-stack"),
-      techStackMarkdown
-    );
+    specsFolder.file(generateFileName(project.name, 'tech-stack'), techStackMarkdown);
   }
 
   if (requirements) {
     const requirementsMarkdown = generateRequirementsMarkdown(requirements);
-    specsFolder.file(
-      generateFileName(project.name, "requirements"),
-      requirementsMarkdown
-    );
+    specsFolder.file(generateFileName(project.name, 'requirements'), requirementsMarkdown);
   }
 
   if (features) {
     const featuresMarkdown = generateFeaturesMarkdown(features);
-    specsFolder.file(
-      generateFileName(project.name, "features"),
-      featuresMarkdown
-    );
+    specsFolder.file(generateFileName(project.name, 'features'), featuresMarkdown);
   }
 
   if (pages) {
     const pagesMarkdown = generatePagesMarkdown(pages);
-    specsFolder.file(generateFileName(project.name, "pages"), pagesMarkdown);
+    specsFolder.file(generateFileName(project.name, 'pages'), pagesMarkdown);
   }
 
   if (dataModel) {
     const dataModelMarkdown = generateDataModelMarkdown(dataModel);
-    specsFolder.file(
-      generateFileName(project.name, "data-model"),
-      dataModelMarkdown
-    );
+    specsFolder.file(generateFileName(project.name, 'data-model'), dataModelMarkdown);
   }
 
   if (apiEndpoints) {
     const apiEndpointsMarkdown = generateApiEndpointsMarkdown(apiEndpoints);
-    specsFolder.file(
-      generateFileName(project.name, "api-endpoints"),
-      apiEndpointsMarkdown
-    );
+    specsFolder.file(generateFileName(project.name, 'api-endpoints'), apiEndpointsMarkdown);
   }
 
   if (testCases) {
     const testCasesMarkdown = generateTestCasesMarkdown(testCases);
-    specsFolder.file(
-      generateFileName(project.name, "test-cases"),
-      testCasesMarkdown
-    );
+    specsFolder.file(generateFileName(project.name, 'test-cases'), testCasesMarkdown);
   }
 
   // UI Design markdown
   if (uiDesign) {
     const uiDesignMarkdown = generateUIDesignMarkdown(uiDesign);
-    specsFolder.file(
-      generateFileName(project.name, "ui-design"),
-      uiDesignMarkdown
-    );
+    specsFolder.file(generateFileName(project.name, 'ui-design'), uiDesignMarkdown);
   }
 
   // Implementation Prompts markdown
   if (implementationPrompts) {
-    const implementationPromptsMarkdown = generateImplementationPromptsMarkdown(
-      implementationPrompts
-    );
-    specsFolder.file(
-      "implementation-prompts.md",
-      implementationPromptsMarkdown
-    );
+    const implementationPromptsMarkdown =
+      generateImplementationPromptsMarkdown(implementationPrompts);
+    specsFolder.file('implementation-prompts.md', implementationPromptsMarkdown);
   }
 
   // Initialize readme variable
@@ -193,10 +168,10 @@ export async function generateMarkdownZip(
       }
     }
   } catch (error) {
-    console.error("Error generating AI README:", error);
+    console.error('Error generating AI README:', error);
   }
 
-  zip.file("README.md", readme);
+  zip.file('README.md', readme);
 
   let aiRules = `
 # Project Rules for ${project.name}
@@ -207,19 +182,19 @@ export async function generateMarkdownZip(
 ${project.description}
 
 **Business Goals:**
-${project.business_goals?.join("\n")}
+${project.business_goals?.join('\n')}
 
 **Requirements Overview:**
 - Functional Requirements: 
-  ${requirements?.functional?.map((req) => req).join("\n - ")}
+  ${requirements?.functional?.map((req) => req).join('\n - ')}
 - Non-Functional Requirements: 
-  ${requirements?.non_functional?.map((req) => req).join("\n - ")}
+  ${requirements?.non_functional?.map((req) => req).join('\n - ')}
 
 **Features:**
 - Core: 
-  ${features?.coreModules?.map((module) => module.name).join("\n - ")}
+  ${features?.coreModules?.map((module) => module.name).join('\n - ')}
 - Optional: 
-  ${features?.optionalModules?.map((module) => module.name).join("\n - ")}
+  ${features?.optionalModules?.map((module) => module.name).join('\n - ')}
 
 **Tech Stack:**
 - Frontend: ${techStack?.frontend.framework} / ${techStack?.frontend.language}
@@ -249,9 +224,7 @@ When working on this project, the AI assistant should:
 ### Technology-Specific Standards
 - **${techStack?.frontend.framework}**: Follow component-based architecture
 - **${techStack?.backend.type}**: Implement proper separation of concerns
-- **${
-    techStack?.database.system
-  }**: Use parameterized queries to prevent injection
+- **${techStack?.database.system}**: Use parameterized queries to prevent injection
 
 ---
 
@@ -283,14 +256,14 @@ When working on this project, the AI assistant should:
         aiRules = enhancedAIRules;
       }
     } catch (error) {
-      console.error("Error generating AI Rules:", error);
+      console.error('Error generating AI Rules:', error);
     }
   }
 
-  zip.file(".cursorrules", aiRules);
-  zip.file(".windsurfrules", aiRules);
-  zip.file("CLAUDE.md", aiRules);
+  zip.file('.cursorrules', aiRules);
+  zip.file('.windsurfrules', aiRules);
+  zip.file('CLAUDE.md', aiRules);
 
   // Generate the zip file
-  return await zip.generateAsync({ type: "blob" });
+  return await zip.generateAsync({ type: 'blob' });
 }

@@ -16,41 +16,38 @@ export interface FrontendTechStack {
 
 // Backend Types
 export interface FrameworkBackend {
-  type: "framework";
+  type: 'framework';
   framework: string; // Express.js, NestJS, Django, etc.
   language: string; // JavaScript, TypeScript, Python, etc.
   realtime?: string | null;
 }
 
 export interface BaaSBackend {
-  type: "baas";
+  type: 'baas';
   service: string; // Supabase, Firebase, etc.
   functions?: string | null;
   realtime?: string | null;
 }
 
 export interface ServerlessBackend {
-  type: "serverless";
+  type: 'serverless';
   service: string; // AWS Lambda, Azure Functions, etc.
   language: string; // JavaScript, TypeScript, Python, etc.
 }
 
 // Combined Backend
-export type BackendTechStack =
-  | FrameworkBackend
-  | BaaSBackend
-  | ServerlessBackend;
+export type BackendTechStack = FrameworkBackend | BaaSBackend | ServerlessBackend;
 
 // Database Types
 export interface SQLDatabase {
-  type: "sql";
+  type: 'sql';
   system: string; // PostgreSQL, MySQL, etc.
   hosting: string; // Supabase, AWS RDS, etc.
   orm?: string | null;
 }
 
 export interface NoSQLDatabase {
-  type: "nosql";
+  type: 'nosql';
   system: string; // MongoDB, Firestore, etc.
   hosting: string; // MongoDB Atlas, Firebase, etc.
   client?: string | null;
@@ -238,9 +235,9 @@ export interface Documentation {
 }
 
 export enum ImplementationPromptType {
-  MAIN = "main",
-  FOLLOWUP_1 = "followup_1",
-  FOLLOWUP_2 = "followup_2",
+  MAIN = 'main',
+  FOLLOWUP_1 = 'followup_1',
+  FOLLOWUP_2 = 'followup_2',
 }
 
 export interface ImplementationPrompt {

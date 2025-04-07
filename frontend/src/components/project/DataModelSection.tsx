@@ -41,8 +41,10 @@ const DataModelSection: React.FC<DataModelSectionProps> = ({
       viewMode={viewMode}
       onViewModeChange={onViewModeChange}
       isLoading={isLoading}
-      markdown={dataModel ? markdownService.generateDataModelMarkdown(dataModel as DataModel) : undefined}
-      markdownFileName={markdownService.generateFileName(projectName, "data-model")}
+      markdown={
+        dataModel ? markdownService.generateDataModelMarkdown(dataModel as DataModel) : undefined
+      }
+      markdownFileName={markdownService.generateFileName(projectName, 'data-model')}
       editContent={
         <DataModelForm
           initialData={dataModel || undefined}
@@ -51,10 +53,10 @@ const DataModelSection: React.FC<DataModelSectionProps> = ({
         />
       }
       previewContent={
-        <DataModelPreview 
-          data={dataModel as DataModel | null} 
+        <DataModelPreview
+          data={dataModel as DataModel | null}
           projectName={projectName}
-          isLoading={isLoading} 
+          isLoading={isLoading}
         />
       }
     />

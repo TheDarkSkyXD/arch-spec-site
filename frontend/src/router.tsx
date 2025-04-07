@@ -1,54 +1,54 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import Dashboard from "./pages/Dashboard";
-import NewProject from "./pages/NewProject";
-import Projects from "./pages/Projects";
-import ProjectDetails from "./pages/ProjectDetails";
-import Templates from "./pages/Templates";
-import Settings from "./pages/Settings";
-import Profile from "./pages/Profile";
-import UserSettings from "./pages/UserSettings";
-import SecuritySettings from "./pages/SecuritySettings";
-import Documentation from "./pages/Documentation";
-import ProtectedRoute from "./components/ProtectedRoute";
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import Dashboard from './pages/Dashboard';
+import NewProject from './pages/NewProject';
+import Projects from './pages/Projects';
+import ProjectDetails from './pages/ProjectDetails';
+import Templates from './pages/Templates';
+import Settings from './pages/Settings';
+import Profile from './pages/Profile';
+import UserSettings from './pages/UserSettings';
+import SecuritySettings from './pages/SecuritySettings';
+import Documentation from './pages/Documentation';
+import ProtectedRoute from './components/ProtectedRoute';
 // Auth pages
-import Login from "./pages/auth/Login";
-import Register from "./pages/auth/Register";
-import ForgotPassword from "./pages/auth/ForgotPassword";
-import ResetPassword from "./pages/auth/ResetPassword";
+import Login from './pages/auth/Login';
+import Register from './pages/auth/Register';
+import ForgotPassword from './pages/auth/ForgotPassword';
+import ResetPassword from './pages/auth/ResetPassword';
 // Landing page
-import LandingPage from "./pages/LandingPage";
+import LandingPage from './pages/LandingPage';
 // Subscription pages
-import Subscription from "./pages/Subscription";
-import SubscriptionPlan from "./pages/SubscriptionPlan";
-import CheckoutSuccess from "./pages/CheckoutSuccess";
+import Subscription from './pages/Subscription';
+import SubscriptionPlan from './pages/SubscriptionPlan';
+import CheckoutSuccess from './pages/CheckoutSuccess';
 
 // Router configuration
 const router = createBrowserRouter([
   // Public landing page
   {
-    path: "/",
+    path: '/',
     element: <LandingPage />,
   },
   // Auth routes (public)
   {
-    path: "/login",
+    path: '/login',
     element: <Login />,
   },
   {
-    path: "/register",
+    path: '/register',
     element: <Register />,
   },
   {
-    path: "/forgot-password",
+    path: '/forgot-password',
     element: <ForgotPassword />,
   },
   {
-    path: "/reset-password",
+    path: '/reset-password',
     element: <ResetPassword />,
   },
   // Protected routes (require authentication)
   {
-    path: "/dashboard",
+    path: '/dashboard',
     element: (
       <ProtectedRoute>
         <Dashboard />
@@ -56,7 +56,7 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: "/new-project",
+    path: '/new-project',
     element: (
       <ProtectedRoute>
         <NewProject />
@@ -64,7 +64,7 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: "/projects",
+    path: '/projects',
     element: (
       <ProtectedRoute>
         <Projects />
@@ -72,7 +72,7 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: "/projects/:id",
+    path: '/projects/:id',
     element: (
       <ProtectedRoute>
         <ProjectDetails />
@@ -80,7 +80,7 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: "/templates",
+    path: '/templates',
     element: (
       <ProtectedRoute>
         <Templates />
@@ -88,7 +88,7 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: "/settings",
+    path: '/settings',
     element: (
       <ProtectedRoute>
         <Settings />
@@ -96,7 +96,7 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: "/docs",
+    path: '/docs',
     element: (
       <ProtectedRoute>
         <Documentation />
@@ -104,7 +104,7 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: "/profile",
+    path: '/profile',
     element: (
       <ProtectedRoute>
         <Profile />
@@ -112,7 +112,7 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: "/user-settings",
+    path: '/user-settings',
     element: (
       <ProtectedRoute>
         <UserSettings />
@@ -120,7 +120,7 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: "/security-settings",
+    path: '/security-settings',
     element: (
       <ProtectedRoute>
         <SecuritySettings />
@@ -129,7 +129,7 @@ const router = createBrowserRouter([
   },
   // Subscription routes
   {
-    path: "/subscription",
+    path: '/subscription',
     element: (
       <ProtectedRoute>
         <Subscription />
@@ -137,7 +137,7 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: "/subscription-plan",
+    path: '/subscription-plan',
     element: (
       <ProtectedRoute>
         <SubscriptionPlan />
@@ -145,7 +145,7 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: "/checkout/success",
+    path: '/checkout/success',
     element: (
       <ProtectedRoute>
         <CheckoutSuccess />

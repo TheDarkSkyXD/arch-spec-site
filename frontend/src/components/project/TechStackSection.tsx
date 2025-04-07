@@ -42,7 +42,7 @@ const TechStackSection: React.FC<TechStackSectionProps> = ({
       onViewModeChange={onViewModeChange}
       isLoading={isLoading}
       markdown={techStack ? markdownService.generateTechStackMarkdown(techStack) : undefined}
-      markdownFileName={markdownService.generateFileName(projectName, "tech-stack")}
+      markdownFileName={markdownService.generateFileName(projectName, 'tech-stack')}
       editContent={
         <TechStackForm
           initialData={techStack || undefined}
@@ -51,11 +51,7 @@ const TechStackSection: React.FC<TechStackSectionProps> = ({
         />
       }
       previewContent={
-        <TechStackPreview 
-          data={techStack} 
-          projectName={projectName} 
-          isLoading={isLoading} 
-        />
+        <TechStackPreview data={techStack} projectName={projectName} isLoading={isLoading} />
       }
     />
   );

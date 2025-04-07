@@ -1,6 +1,6 @@
-import { useState, useRef, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../contexts";
+import { useState, useRef, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts';
 
 const UserAccountDropdown = () => {
   const { currentUser, signOut } = useAuth();
@@ -11,26 +11,23 @@ const UserAccountDropdown = () => {
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
 
   const handleSignOut = async () => {
     try {
       await signOut();
-      navigate("/login");
+      navigate('/login');
     } catch (error) {
-      console.error("Error signing out:", error);
+      console.error('Error signing out:', error);
     }
   };
 
@@ -44,15 +41,15 @@ const UserAccountDropdown = () => {
         aria-expanded={isOpen}
         aria-haspopup="true"
       >
-        <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
+        <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-gray-200">
           {currentUser.photoURL ? (
             <img
               src={currentUser.photoURL}
-              alt={currentUser.displayName || "User"}
-              className="w-full h-full object-cover"
+              alt={currentUser.displayName || 'User'}
+              className="h-full w-full object-cover"
               onError={(e) => {
                 // Replace with initials on error
-                (e.target as HTMLImageElement).style.display = "none";
+                (e.target as HTMLImageElement).style.display = 'none';
               }}
             />
           ) : (
@@ -60,20 +57,16 @@ const UserAccountDropdown = () => {
               {currentUser.displayName
                 ? currentUser.displayName.charAt(0).toUpperCase()
                 : currentUser.email
-                ? currentUser.email.charAt(0).toUpperCase()
-                : "U"}
+                  ? currentUser.email.charAt(0).toUpperCase()
+                  : 'U'}
             </span>
           )}
         </div>
-        <span className="text-sm font-medium hidden md:block">
-          {currentUser.displayName ||
-            currentUser.email?.split("@")[0] ||
-            "User"}
+        <span className="hidden text-sm font-medium md:block">
+          {currentUser.displayName || currentUser.email?.split('@')[0] || 'User'}
         </span>
         <svg
-          className={`w-4 h-4 transition-transform ${
-            isOpen ? "rotate-180" : ""
-          }`}
+          className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 20 20"
           fill="currentColor"
@@ -87,14 +80,10 @@ const UserAccountDropdown = () => {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
-          <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-700">
-            <p className="text-sm font-medium">
-              {currentUser.displayName || "User"}
-            </p>
-            <p className="text-xs text-gray-500 truncate">
-              {currentUser.email}
-            </p>
+        <div className="absolute right-0 z-10 mt-2 w-48 rounded-md border border-gray-200 bg-white py-1 shadow-lg dark:border-gray-700 dark:bg-gray-800">
+          <div className="border-b border-gray-200 px-4 py-2 dark:border-gray-700">
+            <p className="text-sm font-medium">{currentUser.displayName || 'User'}</p>
+            <p className="truncate text-xs text-gray-500">{currentUser.email}</p>
           </div>
 
           <Link
@@ -132,7 +121,7 @@ const UserAccountDropdown = () => {
           <div className="border-t border-gray-200 dark:border-gray-700">
             <button
               onClick={handleSignOut}
-              className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:text-red-400 dark:hover:bg-gray-700"
+              className="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-100 dark:text-red-400 dark:hover:bg-gray-700"
             >
               Sign Out
             </button>

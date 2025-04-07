@@ -1,8 +1,5 @@
-import {
-  lemonSqueezySetup,
-  getAuthenticatedUser,
-} from "@lemonsqueezy/lemonsqueezy.js";
-import axios from "axios";
+import { lemonSqueezySetup, getAuthenticatedUser } from '@lemonsqueezy/lemonsqueezy.js';
+import axios from 'axios';
 
 // User type definition since auth module is not available
 export interface User {
@@ -16,7 +13,7 @@ export interface SubscriptionPlan {
   id: string;
   name: string;
   price: number;
-  interval: "month" | "year";
+  interval: 'month' | 'year';
   intervalCount: number;
   hasFreeTrial: boolean;
   trialDays: number;
@@ -26,7 +23,7 @@ export interface SubscriptionPlan {
 
 export interface Subscription {
   id: string;
-  status: "active" | "past_due" | "canceled" | "expired" | "on_trial";
+  status: 'active' | 'past_due' | 'canceled' | 'expired' | 'on_trial';
   current_period_end: Date;
   plan_id: string;
   customer_id: string;
@@ -62,7 +59,7 @@ interface CacheItem<T> {
  * Service for handling payments and subscriptions via LemonSqueezy
  */
 class PaymentService {
-  private apiUrl = "/api/payments";
+  private apiUrl = '/api/payments';
   private planCache: CacheItem<SubscriptionPlan[]> | null = null;
   private customerCache: Map<string, CacheItem<Customer>> = new Map();
   private readonly CACHE_TTL = 5 * 60 * 1000; // 5 minutes in milliseconds
@@ -71,13 +68,11 @@ class PaymentService {
    * Initialize LemonSqueezy SDK
    * @param apiKey - LemonSqueezy API key (optional, can be configured in backend)
    */
-  initialize(
-    apiKey: string = import.meta.env.VITE_LEMON_SQUEEZY_API_KEY
-  ): void {
+  initialize(apiKey: string = import.meta.env.VITE_LEMON_SQUEEZY_API_KEY): void {
     lemonSqueezySetup({
       apiKey,
       onError: (error) => {
-        console.error("LemonSqueezy error:", error);
+        console.error('LemonSqueezy error:', error);
       },
     });
   }
@@ -90,14 +85,14 @@ class PaymentService {
       const { data, error } = await getAuthenticatedUser();
 
       if (error) {
-        console.error("LemonSqueezy auth error:", error.message);
+        console.error('LemonSqueezy auth error:', error.message);
         return false;
       }
 
-      console.log("LemonSqueezy authenticated user:", data);
+      console.log('LemonSqueezy authenticated user:', data);
       return true;
     } catch (error) {
-      console.error("Failed to verify LemonSqueezy authentication:", error);
+      console.error('Failed to verify LemonSqueezy authentication:', error);
       return false;
     }
   }
@@ -105,18 +100,16 @@ class PaymentService {
   /**
    * Get available subscription plans
    */
-  async getSubscriptionPlans(
-    forceRefresh = false
-  ): Promise<SubscriptionPlan[]> {
+  async getSubscriptionPlans(forceRefresh = false): Promise<SubscriptionPlan[]> {
     try {
       // Return from cache if available and not forcing refresh
       const now = Date.now();
       if (!forceRefresh && this.planCache && now < this.planCache.expiresAt) {
-        console.log("Using cached subscription plans");
+        console.log('Using cached subscription plans');
         return this.planCache.data;
       }
 
-      console.log("Fetching subscription plans from API");
+      console.log('Fetching subscription plans from API');
       const response = await axios.get(`${this.apiUrl}/plans`);
 
       // Cache the response
@@ -128,10 +121,10 @@ class PaymentService {
 
       return response.data;
     } catch (error) {
-      console.error("Failed to fetch subscription plans:", error);
+      console.error('Failed to fetch subscription plans:', error);
       // If cache exists but is expired, still return it as fallback
       if (this.planCache) {
-        console.log("Using expired cached plans as fallback");
+        console.log('Using expired cached plans as fallback');
         return this.planCache.data;
       }
       throw error;
@@ -141,10 +134,7 @@ class PaymentService {
   /**
    * Get or create customer for the current user
    */
-  async getOrCreateCustomer(
-    user: User,
-    forceRefresh = false
-  ): Promise<Customer> {
+  async getOrCreateCustomer(user: User, forceRefresh = false): Promise<Customer> {
     try {
       const cacheKey = user.email;
       const now = Date.now();
@@ -155,11 +145,11 @@ class PaymentService {
         this.customerCache.has(cacheKey) &&
         now < this.customerCache.get(cacheKey)!.expiresAt
       ) {
-        console.log("Using cached customer data");
+        console.log('Using cached customer data');
         return this.customerCache.get(cacheKey)!.data;
       }
 
-      console.log("Fetching or creating customer from API");
+      console.log('Fetching or creating customer from API');
       const response = await axios.post(`${this.apiUrl}/customers`, {
         email: user.email,
         name: user.displayName || user.email,
@@ -175,10 +165,10 @@ class PaymentService {
 
       return response.data;
     } catch (error) {
-      console.error("Failed to get or create customer:", error);
+      console.error('Failed to get or create customer:', error);
       // If cache exists, still return it as fallback
       if (this.customerCache.has(user.email)) {
-        console.log("Using expired cached customer data as fallback");
+        console.log('Using expired cached customer data as fallback');
         return this.customerCache.get(user.email)!.data;
       }
       throw error;
@@ -188,40 +178,28 @@ class PaymentService {
   /**
    * Get user's active subscription if any
    */
-  async getCurrentSubscription(
-    email: string,
-    shouldRefresh = false
-  ): Promise<Subscription | null> {
+  async getCurrentSubscription(email: string, shouldRefresh = false): Promise<Subscription | null> {
     try {
       // Add a cache-busting parameter if we need a fresh fetch
-      const cacheBuster = shouldRefresh ? `&_=${Date.now()}` : "";
-      console.log(
-        `Fetching current subscription for ${email}, refresh=${shouldRefresh}`
-      );
+      const cacheBuster = shouldRefresh ? `&_=${Date.now()}` : '';
+      console.log(`Fetching current subscription for ${email}, refresh=${shouldRefresh}`);
       const response = await axios.get(
-        `${this.apiUrl}/subscriptions/current?email=${encodeURIComponent(
-          email
-        )}${cacheBuster}`
+        `${this.apiUrl}/subscriptions/current?email=${encodeURIComponent(email)}${cacheBuster}`
       );
 
       // Log the response data to help diagnose issues
-      console.log("Subscription response:", response.data);
+      console.log('Subscription response:', response.data);
 
       if (response.data) {
         // Convert ISO string dates to Date objects
-        if (
-          response.data.currentPeriodEnd &&
-          typeof response.data.currentPeriodEnd === "string"
-        ) {
-          response.data.currentPeriodEnd = new Date(
-            response.data.currentPeriodEnd
-          );
+        if (response.data.currentPeriodEnd && typeof response.data.currentPeriodEnd === 'string') {
+          response.data.currentPeriodEnd = new Date(response.data.currentPeriodEnd);
         }
       }
 
       return response.data || null;
     } catch (error) {
-      console.error("Failed to fetch current subscription:", error);
+      console.error('Failed to fetch current subscription:', error);
       return null;
     }
   }
@@ -242,7 +220,7 @@ class PaymentService {
       });
       return { url: response.data.url };
     } catch (error) {
-      console.error("Failed to create checkout URL:", error);
+      console.error('Failed to create checkout URL:', error);
       throw error;
     }
   }
@@ -253,11 +231,9 @@ class PaymentService {
   async hasActiveSubscription(email: string): Promise<boolean> {
     try {
       const subscription = await this.getCurrentSubscription(email);
-      return (
-        !!subscription && ["active", "on_trial"].includes(subscription.status)
-      );
+      return !!subscription && ['active', 'on_trial'].includes(subscription.status);
     } catch (error) {
-      console.error("Failed to check subscription status:", error);
+      console.error('Failed to check subscription status:', error);
       return false;
     }
   }
@@ -280,7 +256,7 @@ class PaymentService {
         window.location.href = checkoutUrl;
       }
     } catch (error) {
-      console.error("LemonSqueezy checkout error:", error);
+      console.error('LemonSqueezy checkout error:', error);
       throw error;
     }
   }
@@ -289,7 +265,7 @@ class PaymentService {
    * Clear all caches, useful when needing fresh data
    */
   clearCaches(): void {
-    console.log("Clearing all payment service caches");
+    console.log('Clearing all payment service caches');
     this.planCache = null;
     this.customerCache.clear();
   }
@@ -304,7 +280,7 @@ class PaymentService {
       });
       return { url: response.data.url };
     } catch (error) {
-      console.error("Failed to create customer portal URL:", error);
+      console.error('Failed to create customer portal URL:', error);
       throw error;
     }
   }

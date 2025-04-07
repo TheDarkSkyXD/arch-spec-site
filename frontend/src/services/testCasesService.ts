@@ -1,7 +1,7 @@
 /**
  * Service for test cases API interactions.
  */
-import apiClient from "../api/apiClient";
+import apiClient from '../api/apiClient';
 
 // Define Gherkin test case interface
 export interface GherkinTestCase {
@@ -12,7 +12,7 @@ export interface GherkinTestCase {
   scenarios: Array<{
     name: string;
     steps: Array<{
-      type: "given" | "when" | "then" | "and" | "but";
+      type: 'given' | 'when' | 'then' | 'and' | 'but';
       text: string;
     }>;
   }>;
@@ -37,7 +37,7 @@ interface TestCasesSpec {
 }
 
 // Define the API base URL to be consistent with other services
-const API_BASE_URL = "/api";
+const API_BASE_URL = '/api';
 
 export const testCasesService = {
   /**
@@ -53,7 +53,7 @@ export const testCasesService = {
       );
 
       if (!response.data || !response.data.data) {
-        console.error("Invalid test cases response:", response.data);
+        console.error('Invalid test cases response:', response.data);
         return null;
       }
 
@@ -61,10 +61,7 @@ export const testCasesService = {
         testCases: response.data.data.testCases || [],
       };
     } catch (error) {
-      console.error(
-        `Error fetching test cases for project ${projectId}:`,
-        error
-      );
+      console.error(`Error fetching test cases for project ${projectId}:`, error);
       return null;
     }
   },
@@ -76,10 +73,7 @@ export const testCasesService = {
    * @param data - Test cases data
    * @returns Promise containing the updated test cases
    */
-  async saveTestCases(
-    projectId: string,
-    data: TestCasesData
-  ): Promise<TestCasesData | null> {
+  async saveTestCases(projectId: string, data: TestCasesData): Promise<TestCasesData | null> {
     try {
       const payload = {
         data: {
@@ -93,7 +87,7 @@ export const testCasesService = {
       );
 
       if (!response.data || !response.data.data) {
-        console.error("Invalid test cases response:", response.data);
+        console.error('Invalid test cases response:', response.data);
         return null;
       }
 

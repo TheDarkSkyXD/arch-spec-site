@@ -10,12 +10,12 @@ from anthropic import Anthropic
 def test_set_encoder():
     """Test the SetEncoder class."""
     encoder = SetEncoder()
-    
+
     # Test encoding a set
     result = encoder.default({"a", "b", "c"})
     assert isinstance(result, list)
     assert set(result) == {"a", "b", "c"}
-    
+
     # Test encoding a non-set
     with pytest.raises(TypeError):
         encoder.default(123)
@@ -25,7 +25,7 @@ def test_set_encoder():
 def test_anthropic_client_init(mock_anthropic):
     """Test initializing the AIService."""
     client = AIService()
-    
+
     # Check that client is initialized with the correct attributes
     # Instead of checking equality with the mock, check that it's an instance of Anthropic
     assert client.client is not None
@@ -72,27 +72,23 @@ async def test_process_specification(mock_generate_response):
         ]
     }
     """
-    
+
     # Create client and test
     client = AIService()
-    
+
     # Create test specification
     spec = {
         "requirements": {
             "project_type": "Web Application",
             "functional": ["Test requirement"],
             "non_functional": ["Test non-functional requirement"],
-            "tech_stack": {
-                "frontend": "React",
-                "backend": "FastAPI",
-                "database": "MongoDB"
-            }
+            "tech_stack": {"frontend": "React", "backend": "FastAPI", "database": "MongoDB"},
         }
     }
-    
+
     # Process specification
     result = await client.process_specification(spec)
-    
+
     # Check result
     assert "architecture" in result
     assert "diagram" in result["architecture"]
@@ -101,7 +97,7 @@ async def test_process_specification(mock_generate_response):
     assert "entities" in result["data_model"]
     assert "implementation" in result
     assert "file_structure" in result["implementation"]
-    
+
     # Check that generate_response was called
     mock_generate_response.assert_called_once()
 
@@ -109,24 +105,20 @@ async def test_process_specification(mock_generate_response):
 def test_generate_prompt():
     """Test generating a prompt."""
     client = AIService()
-    
+
     # Create test specification
     spec = {
         "requirements": {
             "project_type": "Web Application",
             "functional": ["Test requirement"],
             "non_functional": ["Test non-functional requirement"],
-            "tech_stack": {
-                "frontend": "React",
-                "backend": "FastAPI",
-                "database": "MongoDB"
-            }
+            "tech_stack": {"frontend": "React", "backend": "FastAPI", "database": "MongoDB"},
         }
     }
-    
+
     # Generate prompt
     prompt = client._generate_prompt(spec)
-    
+
     # Check prompt
     assert "Web Application" in prompt
     assert "Test requirement" in prompt
@@ -142,27 +134,27 @@ def test_get_tool_use_response_with_tool_use(mock_anthropic):
     # Set up mock response with tool_use content block
     mock_client = MagicMock()
     mock_anthropic.return_value = mock_client
-    
+
     mock_content_block = MagicMock()
     mock_content_block.type = "tool_use"
     mock_content_block.input = {"key": "value"}
-    
+
     mock_response = MagicMock()
     mock_response.content = [mock_content_block]
     mock_client.messages.create.return_value = mock_response
-    
+
     # Create client and test parameters
     client = AIService()
     # Replace the real client with our mock
     client.client = mock_client
-    
+
     system_prompt = "Test system prompt"
     tools = [{"type": "function", "function": {"name": "test_function"}}]
     messages = [{"role": "user", "content": "Test message"}]
-    
+
     # Call the method
     result = client.get_tool_use_response(system_prompt, tools, messages)
-    
+
     # Check that the client was called with the right parameters
     mock_client.messages.create.assert_called_once_with(
         model=client.model,
@@ -170,9 +162,9 @@ def test_get_tool_use_response_with_tool_use(mock_anthropic):
         temperature=client.temperature,
         system=system_prompt,
         tools=tools,
-        messages=messages
+        messages=messages,
     )
-    
+
     # Check the result
     assert result == {"key": "value"}
 
@@ -183,27 +175,27 @@ def test_get_tool_use_response_fallback_to_json(mock_anthropic):
     # Set up mock response with text content block containing JSON
     mock_client = MagicMock()
     mock_anthropic.return_value = mock_client
-    
+
     mock_text_block = MagicMock()
     mock_text_block.type = "text"
-    mock_text_block.text = "Here is the result: {\"key\": \"value\"}"
-    
+    mock_text_block.text = 'Here is the result: {"key": "value"}'
+
     mock_response = MagicMock()
     mock_response.content = [mock_text_block]
     mock_client.messages.create.return_value = mock_response
-    
+
     # Create client and test parameters
     client = AIService()
     # Replace the real client with our mock
     client.client = mock_client
-    
+
     system_prompt = "Test system prompt"
     tools = [{"type": "function", "function": {"name": "test_function"}}]
     messages = [{"role": "user", "content": "Test message"}]
-    
+
     # Call the method
     result = client.get_tool_use_response(system_prompt, tools, messages)
-    
+
     # Check the result
     assert result == {"key": "value"}
 
@@ -215,19 +207,19 @@ def test_get_tool_use_response_error_handling(mock_anthropic):
     mock_client = MagicMock()
     mock_anthropic.return_value = mock_client
     mock_client.messages.create.side_effect = Exception("Test error")
-    
+
     # Create client and test parameters
     client = AIService()
     # Replace the real client with our mock
     client.client = mock_client
-    
+
     system_prompt = "Test system prompt"
     tools = [{"type": "function", "function": {"name": "test_function"}}]
     messages = [{"role": "user", "content": "Test message"}]
-    
+
     # Call the method
     result = client.get_tool_use_response(system_prompt, tools, messages)
-    
+
     # Check the result
     assert "error" in result
-    assert "Test error" in result["error"] 
+    assert "Test error" in result["error"]

@@ -1,7 +1,7 @@
 /**
  * Service for features API interactions.
  */
-import apiClient from "../api/apiClient";
+import apiClient from '../api/apiClient';
 
 // Define feature module interface
 export interface FeatureModule {
@@ -33,7 +33,7 @@ interface FeaturesSpec {
 }
 
 // Define the API base URL to be consistent with other services
-const API_BASE_URL = "/api";
+const API_BASE_URL = '/api';
 
 export const featuresService = {
   /**
@@ -49,7 +49,7 @@ export const featuresService = {
       );
 
       if (!response.data || !response.data.data) {
-        console.error("Invalid features response:", response.data);
+        console.error('Invalid features response:', response.data);
         return null;
       }
 
@@ -71,10 +71,7 @@ export const featuresService = {
    * @param data - Features data
    * @returns Promise containing the updated features
    */
-  async saveFeatures(
-    projectId: string,
-    data: FeaturesData
-  ): Promise<FeaturesData | null> {
+  async saveFeatures(projectId: string, data: FeaturesData): Promise<FeaturesData | null> {
     try {
       // Convert snake_case from frontend to camelCase for backend
       const payload = {
@@ -90,7 +87,7 @@ export const featuresService = {
       );
 
       if (!response.data || !response.data.data) {
-        console.error("Invalid features response:", response.data);
+        console.error('Invalid features response:', response.data);
         return null;
       }
 

@@ -1,4 +1,4 @@
-import { Technology, Database, ORM, Hosting } from "../types/techStack";
+import { Technology, Database, ORM, Hosting } from '../types/techStack';
 
 // Filter database systems based on selections
 export const filterDatabaseSystems = (
@@ -24,14 +24,10 @@ export const filterDatabaseSystems = (
 
   // Filter by hosting compatibility if selected
   if (selectedHosting) {
-    const hostingOption = allDatabaseHosting.find(
-      (h) => h.id === selectedHosting
-    );
+    const hostingOption = allDatabaseHosting.find((h) => h.id === selectedHosting);
     if (hostingOption?.compatibleWith?.database) {
       const compatibleDatabases = hostingOption.compatibleWith.database;
-      filtered = filtered.filter((db) =>
-        compatibleDatabases.includes(db.id as string)
-      );
+      filtered = filtered.filter((db) => compatibleDatabases.includes(db.id as string));
     }
   }
 
@@ -42,9 +38,7 @@ export const filterDatabaseSystems = (
       const compatibleDatabases = Array.isArray(ormOption.compatibleWith)
         ? ormOption.compatibleWith
         : Object.keys(ormOption.compatibleWith);
-      filtered = filtered.filter((db) =>
-        compatibleDatabases.includes(db.id as string)
-      );
+      filtered = filtered.filter((db) => compatibleDatabases.includes(db.id as string));
     }
   }
 
@@ -69,9 +63,7 @@ export const filterDatabaseHosting = (
 
   // If database system is selected, get compatible hosting
   if (selectedSystem) {
-    const system = allDatabases.find(
-      (db) => db.id === selectedSystem
-    ) as Database;
+    const system = allDatabases.find((db) => db.id === selectedSystem) as Database;
     if (system?.compatibleWith?.hosting) {
       compatibleHosting = system.compatibleWith.hosting;
     }
@@ -111,9 +103,7 @@ export const filterDatabaseHosting = (
         .filter((db) => ormCompatible.includes(db.id as string))
         .some((db) => {
           const dbOption = db as Database;
-          return dbOption.compatibleWith?.hosting?.includes(
-            hosting.id as string
-          );
+          return dbOption.compatibleWith?.hosting?.includes(hosting.id as string);
         });
     }
 
@@ -131,7 +121,7 @@ export const filterOrmOptions = (
   allOrms: Technology[]
 ): Technology[] => {
   // Only show ORMs for SQL databases
-  if (selectedType === "nosql") {
+  if (selectedType === 'nosql') {
     return [];
   }
 
@@ -145,23 +135,17 @@ export const filterOrmOptions = (
 
   // If database system is selected, filter by compatible ORMs
   if (selectedSystem) {
-    const system = allDatabases.find(
-      (db) => db.id === selectedSystem
-    ) as Database;
+    const system = allDatabases.find((db) => db.id === selectedSystem) as Database;
     if (system?.compatibleWith?.orms) {
       const compatibleOrms = system.compatibleWith.orms;
-      filtered = filtered.filter((orm) =>
-        compatibleOrms.includes(orm.id as string)
-      );
+      filtered = filtered.filter((orm) => compatibleOrms.includes(orm.id as string));
     }
   }
 
   // Filter by hosting compatibility if selected
   if (selectedHosting) {
     // Find databases compatible with this hosting
-    const hostingOption = allDatabaseHosting.find(
-      (h) => h.id === selectedHosting
-    );
+    const hostingOption = allDatabaseHosting.find((h) => h.id === selectedHosting);
     if (hostingOption?.compatibleWith?.database) {
       const compatibleDbs = hostingOption.compatibleWith.database;
 
@@ -173,16 +157,12 @@ export const filterOrmOptions = (
         .forEach((db) => {
           const dbOption = db as Database;
           if (dbOption.compatibleWith?.orms) {
-            dbOption.compatibleWith.orms.forEach((orm) =>
-              compatibleOrms.add(orm)
-            );
+            dbOption.compatibleWith.orms.forEach((orm) => compatibleOrms.add(orm));
           }
         });
 
       if (compatibleOrms.size > 0) {
-        filtered = filtered.filter((orm) =>
-          compatibleOrms.has(orm.id as string)
-        );
+        filtered = filtered.filter((orm) => compatibleOrms.has(orm.id as string));
       }
     }
   }

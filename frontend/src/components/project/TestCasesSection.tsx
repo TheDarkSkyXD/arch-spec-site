@@ -42,7 +42,7 @@ const TestCasesSection: React.FC<TestCasesSectionProps> = ({
       onViewModeChange={onViewModeChange}
       isLoading={isLoading}
       markdown={testCases ? markdownService.generateTestCasesMarkdown(testCases) : undefined}
-      markdownFileName={markdownService.generateFileName(projectName, "test-cases")}
+      markdownFileName={markdownService.generateFileName(projectName, 'test-cases')}
       editContent={
         <TestCasesForm
           initialData={testCases || undefined}
@@ -51,11 +51,7 @@ const TestCasesSection: React.FC<TestCasesSectionProps> = ({
         />
       }
       previewContent={
-        <TestCasesPreview 
-          data={testCases} 
-          projectName={projectName}
-          isLoading={isLoading} 
-        />
+        <TestCasesPreview data={testCases} projectName={projectName} isLoading={isLoading} />
       }
     />
   );

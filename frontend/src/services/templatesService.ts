@@ -1,8 +1,8 @@
 /**
  * Service for interacting with project templates API.
  */
-import apiClient from "../api/apiClient";
-import { ProjectTemplate } from "../types";
+import apiClient from '../api/apiClient';
+import { ProjectTemplate } from '../types';
 
 // Define interface for API response structure
 interface TemplateResponse {
@@ -21,12 +21,12 @@ const isValidTemplate = (template: unknown): boolean => {
   return (
     template !== null &&
     template !== undefined &&
-    typeof template === "object" &&
+    typeof template === 'object' &&
     template !== null &&
-    "name" in template &&
-    "version" in template &&
-    "description" in template &&
-    "techStack" in template
+    'name' in template &&
+    'version' in template &&
+    'description' in template &&
+    'techStack' in template
   );
 };
 
@@ -41,22 +41,13 @@ export const templatesService = {
    */
   async getTemplates(): Promise<ProjectTemplate[]> {
     try {
-      console.log(
-        "Fetching templates with apiClient, baseURL:",
-        apiClient.defaults.baseURL
-      );
-      const response = await apiClient.get<TemplatesListResponse>(
-        `/api/templates`
-      );
-      console.log("Templates API response:", response.config.url);
+      console.log('Fetching templates with apiClient, baseURL:', apiClient.defaults.baseURL);
+      const response = await apiClient.get<TemplatesListResponse>(`/api/templates`);
+      console.log('Templates API response:', response.config.url);
 
       // Validate response structure
-      if (
-        !response.data ||
-        !response.data.templates ||
-        !Array.isArray(response.data.templates)
-      ) {
-        console.error("Invalid API response format:", response.data);
+      if (!response.data || !response.data.templates || !Array.isArray(response.data.templates)) {
+        console.error('Invalid API response format:', response.data);
         return [];
       }
 
@@ -72,7 +63,7 @@ export const templatesService = {
         })
         .filter((template) => isValidTemplate(template));
     } catch (error) {
-      console.error("Error fetching templates:", error);
+      console.error('Error fetching templates:', error);
       return [];
     }
   },
@@ -85,24 +76,12 @@ export const templatesService = {
    */
   async getTemplateById(id: string): Promise<ProjectTemplate | null> {
     try {
-      console.log(
-        "Fetching template by ID with apiClient, baseURL:",
-        apiClient.defaults.baseURL
-      );
-      const response = await apiClient.get<TemplateResponse>(
-        `/api/templates/${id}`
-      );
-      console.log("Template by ID API response:", response.config.url);
+      console.log('Fetching template by ID with apiClient, baseURL:', apiClient.defaults.baseURL);
+      const response = await apiClient.get<TemplateResponse>(`/api/templates/${id}`);
+      console.log('Template by ID API response:', response.config.url);
 
-      if (
-        !response.data ||
-        !response.data.template ||
-        !isValidTemplate(response.data.template)
-      ) {
-        console.error(
-          "Invalid template structure in API response:",
-          response.data
-        );
+      if (!response.data || !response.data.template || !isValidTemplate(response.data.template)) {
+        console.error('Invalid template structure in API response:', response.data);
         return null;
       }
 
@@ -129,25 +108,12 @@ export const templatesService = {
     templateData: Partial<ProjectTemplate>
   ): Promise<ProjectTemplate | null> {
     try {
-      console.log(
-        "Updating template with apiClient, baseURL:",
-        apiClient.defaults.baseURL
-      );
-      const response = await apiClient.put<TemplateResponse>(
-        `/api/templates/${id}`,
-        templateData
-      );
-      console.log("Update template API response:", response.config.url);
+      console.log('Updating template with apiClient, baseURL:', apiClient.defaults.baseURL);
+      const response = await apiClient.put<TemplateResponse>(`/api/templates/${id}`, templateData);
+      console.log('Update template API response:', response.config.url);
 
-      if (
-        !response.data ||
-        !response.data.template ||
-        !isValidTemplate(response.data.template)
-      ) {
-        console.error(
-          "Invalid template structure in API response:",
-          response.data
-        );
+      if (!response.data || !response.data.template || !isValidTemplate(response.data.template)) {
+        console.error('Invalid template structure in API response:', response.data);
         return null;
       }
 

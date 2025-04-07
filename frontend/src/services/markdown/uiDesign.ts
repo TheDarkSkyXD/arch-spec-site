@@ -1,10 +1,10 @@
-import { UIDesign } from "../../types/templates";
+import { UIDesign } from '../../types/templates';
 
 /**
  * Generate markdown for UI Design
  */
 export function generateUIDesignMarkdown(data: UIDesign | null): string {
-  if (!data) return "";
+  if (!data) return '';
 
   let markdown = `# UI Design Specification\n\n`;
 
@@ -55,9 +55,7 @@ export function generateUIDesignMarkdown(data: UIDesign | null): string {
   markdown += `## Border Radius\n`;
   if (data.borderRadius) {
     Object.entries(data.borderRadius).forEach(([size, value]) => {
-      markdown += `- ${
-        size.charAt(0).toUpperCase() + size.slice(1)
-      }: \`${value}\`\n`;
+      markdown += `- ${size.charAt(0).toUpperCase() + size.slice(1)}: \`${value}\`\n`;
     });
   } else {
     markdown += `*No border radius defined*\n`;
@@ -68,9 +66,7 @@ export function generateUIDesignMarkdown(data: UIDesign | null): string {
   markdown += `## Shadows\n`;
   if (data.shadows) {
     Object.entries(data.shadows).forEach(([size, value]) => {
-      markdown += `- ${
-        size.charAt(0).toUpperCase() + size.slice(1)
-      }: \`${value}\`\n`;
+      markdown += `- ${size.charAt(0).toUpperCase() + size.slice(1)}: \`${value}\`\n`;
     });
   } else {
     markdown += `*No shadows defined*\n`;
@@ -95,9 +91,7 @@ export function generateUIDesignMarkdown(data: UIDesign | null): string {
   markdown += `## Component Styles\n`;
   if (data.components) {
     Object.entries(data.components).forEach(([component, style]) => {
-      markdown += `- ${
-        component.charAt(0).toUpperCase() + component.slice(1)
-      }: \`${style}\`\n`;
+      markdown += `- ${component.charAt(0).toUpperCase() + component.slice(1)}: \`${style}\`\n`;
     });
   } else {
     markdown += `*No component styles defined*\n`;
@@ -111,13 +105,11 @@ export function generateUIDesignMarkdown(data: UIDesign | null): string {
 
     if (data.darkMode.colors) {
       markdown += `\n### Dark Mode Colors\n`;
-      Object.entries(data.darkMode.colors).forEach(
-        ([colorName, colorValue]) => {
-          markdown += `- ${
-            colorName.charAt(0).toUpperCase() + colorName.slice(1)
-          }: \`${colorValue}\`\n`;
-        }
-      );
+      Object.entries(data.darkMode.colors).forEach(([colorName, colorValue]) => {
+        markdown += `- ${
+          colorName.charAt(0).toUpperCase() + colorName.slice(1)
+        }: \`${colorValue}\`\n`;
+      });
     }
   } else {
     markdown += `*No dark mode settings defined*\n`;

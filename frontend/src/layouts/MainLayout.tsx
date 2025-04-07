@@ -1,5 +1,5 @@
-import { ReactNode } from "react";
-import Navigation from "../components/Navigation";
+import { ReactNode } from 'react';
+import Navigation from '../components/Navigation';
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -8,12 +8,12 @@ interface MainLayoutProps {
 
 const MainLayout = ({ children }: MainLayoutProps) => {
   return (
-    <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-950 dark:text-white">
+    <div className="flex min-h-screen flex-col bg-slate-50 dark:bg-slate-950 dark:text-white">
       <Navigation />
 
-      <div className="pt-16 flex-1 flex">
+      <div className="flex flex-1 pt-16">
         <main className={`flex-1`}>
-          <div className="p-5 md:p-8 h-full">{children}</div>
+          <div className="h-full p-5 md:p-8">{children}</div>
         </main>
       </div>
     </div>

@@ -1,6 +1,6 @@
-import React from "react";
-import { ProjectTemplate } from "../../types/templates";
-import TemplateDetails from "../templates/TemplateDetails";
+import React from 'react';
+import { ProjectTemplate } from '../../types/templates';
+import TemplateDetails from '../templates/TemplateDetails';
 
 interface TemplateDetailsModalProps {
   template: ProjectTemplate;
@@ -23,8 +23,8 @@ const TemplateDetailsModal: React.FC<TemplateDetailsModalProps> = ({
         className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
         onClick={onClose}
       ></div>
-      <div className="relative min-h-screen flex items-center justify-center">
-        <div className="relative bg-white dark:bg-slate-900 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto m-4 scrollbar-custom">
+      <div className="relative flex min-h-screen items-center justify-center">
+        <div className="scrollbar-custom relative m-4 max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-lg bg-white shadow-xl dark:bg-slate-900">
           <style>
             {`
             .scrollbar-custom {
@@ -77,13 +77,13 @@ const TemplateDetailsModal: React.FC<TemplateDetailsModalProps> = ({
             }
             `}
           </style>
-          <div className="sticky top-0 bg-white dark:bg-slate-900 z-10 flex justify-between items-center p-4 border-b border-slate-200 dark:border-slate-700">
+          <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
             <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100">
               Template Details
             </h2>
             <button
               onClick={onClose}
-              className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400"
+              className="rounded-full p-2 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -104,13 +104,13 @@ const TemplateDetailsModal: React.FC<TemplateDetailsModalProps> = ({
           <div className="p-6">
             <TemplateDetails template={template} />
           </div>
-          <div className="sticky bottom-0 bg-white dark:bg-slate-900 z-10 border-t border-slate-200 dark:border-slate-700 p-4 flex justify-end">
+          <div className="sticky bottom-0 z-10 flex justify-end border-t border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
             <button
               onClick={() => {
                 onClose();
                 onUseTemplate(template.id || template.version);
               }}
-              className="px-4 py-2 bg-primary-600 dark:bg-primary-900 hover:bg-primary-700 dark:hover:bg-primary-800 text-white rounded-lg"
+              className="rounded-lg bg-primary-600 px-4 py-2 text-white hover:bg-primary-700 dark:bg-primary-900 dark:hover:bg-primary-800"
             >
               Use This Template
             </button>

@@ -41,8 +41,12 @@ const ImplementationPromptsSection: React.FC<ImplementationPromptsSectionProps> 
       viewMode={viewMode}
       onViewModeChange={onViewModeChange}
       isLoading={isLoading}
-      markdown={implementationPrompts ? markdownService.generateImplementationPromptsMarkdown(implementationPrompts) : undefined}
-      markdownFileName={markdownService.generateFileName(projectName, "implementation-prompts")}
+      markdown={
+        implementationPrompts
+          ? markdownService.generateImplementationPromptsMarkdown(implementationPrompts)
+          : undefined
+      }
+      markdownFileName={markdownService.generateFileName(projectName, 'implementation-prompts')}
       editContent={
         <ImplementationPromptsForm
           initialData={implementationPrompts || undefined}
@@ -51,10 +55,10 @@ const ImplementationPromptsSection: React.FC<ImplementationPromptsSectionProps> 
         />
       }
       previewContent={
-        <ImplementationPromptsPreview 
-          data={implementationPrompts || undefined} 
+        <ImplementationPromptsPreview
+          data={implementationPrompts || undefined}
           projectName={projectName}
-          isLoading={isLoading} 
+          isLoading={isLoading}
         />
       }
     />

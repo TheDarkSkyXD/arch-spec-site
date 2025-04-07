@@ -1,22 +1,22 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { templatesService } from "../services/templatesService";
-import { techStackService } from "../services/techStackService";
-import { requirementsService } from "../services/requirementsService";
-import { featuresService, FeaturesData } from "../services/featuresService";
-import { testCasesService, TestCasesData } from "../services/testCasesService";
-import { pagesService } from "../services/pagesService";
-import { useState, useEffect } from "react";
-import { Requirements, Pages, DataModel } from "../types/templates";
-import { apiEndpointsService } from "../services/apiEndpointsService";
-import { Api } from "../types/templates";
-import { dataModelService } from "../services/dataModelService";
-import { uiDesignService } from "../services/uiDesignService";
-import { UIDesign } from "../types/templates";
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { templatesService } from '../services/templatesService';
+import { techStackService } from '../services/techStackService';
+import { requirementsService } from '../services/requirementsService';
+import { featuresService, FeaturesData } from '../services/featuresService';
+import { testCasesService, TestCasesData } from '../services/testCasesService';
+import { pagesService } from '../services/pagesService';
+import { useState, useEffect } from 'react';
+import { Requirements, Pages, DataModel } from '../types/templates';
+import { apiEndpointsService } from '../services/apiEndpointsService';
+import { Api } from '../types/templates';
+import { dataModelService } from '../services/dataModelService';
+import { uiDesignService } from '../services/uiDesignService';
+import { UIDesign } from '../types/templates';
 
 // Query keys for different types of data
 export const QUERY_KEYS = {
-  TECH_STACK: "techStack",
-  TEMPLATES: "templates",
+  TECH_STACK: 'techStack',
+  TEMPLATES: 'templates',
 };
 
 /**
@@ -65,7 +65,7 @@ export function useTemplate(templateId?: string) {
   return useQuery({
     queryKey: [QUERY_KEYS.TEMPLATES, templateId],
     queryFn: async () => {
-      if (!templateId) throw new Error("Template ID is required");
+      if (!templateId) throw new Error('Template ID is required');
       const template = await templatesService.getTemplateById(templateId);
       return template;
     },
@@ -105,12 +105,10 @@ export function useRequirements(projectId?: string) {
       setError(null);
 
       try {
-        const requirements = await requirementsService.getRequirements(
-          projectId
-        );
+        const requirements = await requirementsService.getRequirements(projectId);
         setData(requirements as Requirements);
       } catch (err) {
-        console.error("Error fetching requirements:", err);
+        console.error('Error fetching requirements:', err);
         setError(err instanceof Error ? err : new Error(String(err)));
       } finally {
         setIsLoading(false);
@@ -145,7 +143,7 @@ export function useFeatures(projectId?: string) {
         const features = await featuresService.getFeatures(projectId);
         setData(features);
       } catch (err) {
-        console.error("Error fetching features:", err);
+        console.error('Error fetching features:', err);
         setError(err instanceof Error ? err : new Error(String(err)));
       } finally {
         setIsLoading(false);
@@ -180,7 +178,7 @@ export function usePages(projectId?: string) {
         const pages = await pagesService.getPages(projectId);
         setData(pages);
       } catch (err) {
-        console.error("Error fetching pages:", err);
+        console.error('Error fetching pages:', err);
         setError(err instanceof Error ? err : new Error(String(err)));
       } finally {
         setIsLoading(false);
@@ -215,7 +213,7 @@ export function useDataModel(projectId?: string) {
         const dataModel = await dataModelService.getDataModel(projectId);
         setData(dataModel);
       } catch (err) {
-        console.error("Error fetching data model:", err);
+        console.error('Error fetching data model:', err);
         setError(err instanceof Error ? err : new Error(String(err)));
       } finally {
         setIsLoading(false);
@@ -247,12 +245,10 @@ export function useApiEndpoints(projectId?: string) {
       setError(null);
 
       try {
-        const apiEndpoints = await apiEndpointsService.getApiEndpoints(
-          projectId
-        );
+        const apiEndpoints = await apiEndpointsService.getApiEndpoints(projectId);
         setData(apiEndpoints);
       } catch (err) {
-        console.error("Error fetching API endpoints:", err);
+        console.error('Error fetching API endpoints:', err);
         setError(err instanceof Error ? err : new Error(String(err)));
       } finally {
         setIsLoading(false);
@@ -287,7 +283,7 @@ export function useTestCases(projectId?: string) {
         const testCases = await testCasesService.getTestCases(projectId);
         setData(testCases);
       } catch (err) {
-        console.error("Error fetching test cases:", err);
+        console.error('Error fetching test cases:', err);
         setError(err instanceof Error ? err : new Error(String(err)));
       } finally {
         setIsLoading(false);
@@ -322,7 +318,7 @@ export function useUIDesign(projectId?: string) {
         const uiDesign = await uiDesignService.getUIDesign(projectId);
         setData(uiDesign);
       } catch (err) {
-        console.error("Error fetching UI design:", err);
+        console.error('Error fetching UI design:', err);
         setError(err instanceof Error ? err : new Error(String(err)));
       } finally {
         setIsLoading(false);

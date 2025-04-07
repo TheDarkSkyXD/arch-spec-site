@@ -41,8 +41,10 @@ const ApiEndpointsSection: React.FC<ApiEndpointsSectionProps> = ({
       viewMode={viewMode}
       onViewModeChange={onViewModeChange}
       isLoading={isLoading}
-      markdown={apiEndpoints ? markdownService.generateApiEndpointsMarkdown(apiEndpoints) : undefined}
-      markdownFileName={markdownService.generateFileName(projectName, "api-endpoints")}
+      markdown={
+        apiEndpoints ? markdownService.generateApiEndpointsMarkdown(apiEndpoints) : undefined
+      }
+      markdownFileName={markdownService.generateFileName(projectName, 'api-endpoints')}
       editContent={
         <ApiEndpointsForm
           initialData={apiEndpoints || undefined}
@@ -51,11 +53,7 @@ const ApiEndpointsSection: React.FC<ApiEndpointsSectionProps> = ({
         />
       }
       previewContent={
-        <ApiEndpointsPreview 
-          data={apiEndpoints} 
-          projectName={projectName}
-          isLoading={isLoading} 
-        />
+        <ApiEndpointsPreview data={apiEndpoints} projectName={projectName} isLoading={isLoading} />
       }
     />
   );

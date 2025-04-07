@@ -1,51 +1,35 @@
-import { DataModel, Entity, EntityField } from "../../types/templates";
-import { formatMarkdownTable } from "./tableFormatter";
+import { DataModel, Entity, EntityField } from '../../types/templates';
+import { formatMarkdownTable } from './tableFormatter';
 
 /**
  * Generate markdown for data model with precise column formatting
  */
-export function generateDataModelMarkdown(
-  data: Partial<DataModel> | null
-): string {
-  if (!data) return "";
+export function generateDataModelMarkdown(data: Partial<DataModel> | null): string {
+  if (!data) return '';
 
   let markdown = `# Data Model\n\n`;
 
   // Helper function to render entity fields as a code block table
   const renderEntityFieldsTable = (fields: EntityField[]) => {
     if (!fields || fields.length === 0) {
-      return "*No fields defined*\n\n";
+      return '*No fields defined*\n\n';
     }
 
     // Define headers
-    const headers = [
-      "Field",
-      "Type",
-      "Required",
-      "Unique",
-      "Primary Key",
-      "Default",
-    ];
+    const headers = ['Field', 'Type', 'Required', 'Unique', 'Primary Key', 'Default'];
 
     // Create rows
     const rows = fields.map((field) => [
       field.name,
       field.type,
-      field.required ? "Yes" : "No",
-      field.unique ? "Yes" : "No",
-      field.primaryKey ? "Yes" : "No",
-      field.default !== undefined ? `${field.default}` : "null",
+      field.required ? 'Yes' : 'No',
+      field.unique ? 'Yes' : 'No',
+      field.primaryKey ? 'Yes' : 'No',
+      field.default !== undefined ? `${field.default}` : 'null',
     ]);
 
     // Custom separators for the table header
-    const separators = [
-      "-----",
-      "----",
-      "--------",
-      "------",
-      "-----------",
-      "-------",
-    ];
+    const separators = ['-----', '----', '--------', '------', '-----------', '-------'];
 
     return formatMarkdownTable(headers, rows, separators);
   };
@@ -79,31 +63,19 @@ export function generateDataModelMarkdown(
     markdown += `## Relationships\n\n`;
 
     // Define headers
-    const headers = [
-      "Type",
-      "From Entity",
-      "To Entity",
-      "Field",
-      "Description",
-    ];
+    const headers = ['Type', 'From Entity', 'To Entity', 'Field', 'Description'];
 
     // Create rows
     const rows = data.relationships.map((rel) => [
       rel.type,
-      rel.from_entity || "-",
-      rel.to_entity || "-",
-      rel.field || "-",
-      rel.throughTable ? `Via ${rel.throughTable}` : "",
+      rel.from_entity || '-',
+      rel.to_entity || '-',
+      rel.field || '-',
+      rel.throughTable ? `Via ${rel.throughTable}` : '',
     ]);
 
     // Custom separators for the table header
-    const separators = [
-      "----",
-      "-----------",
-      "---------",
-      "-----",
-      "-----------",
-    ];
+    const separators = ['----', '-----------', '---------', '-----', '-----------'];
 
     markdown += formatMarkdownTable(headers, rows, separators);
   } else {

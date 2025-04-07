@@ -1,6 +1,6 @@
-import React from "react";
-import { CheckCircle } from "lucide-react";
-import { ProjectTemplate } from "../../types";
+import React from 'react';
+import { CheckCircle } from 'lucide-react';
+import { ProjectTemplate } from '../../types';
 
 interface TemplateCardProps {
   template: ProjectTemplate;
@@ -8,21 +8,17 @@ interface TemplateCardProps {
   onSelect: () => void;
 }
 
-const TemplateCard: React.FC<TemplateCardProps> = ({
-  template,
-  isSelected,
-  onSelect,
-}) => {
+const TemplateCard: React.FC<TemplateCardProps> = ({ template, isSelected, onSelect }) => {
   // Get icon based on template type
   const getTemplateIcon = () => {
-    if (template.techStack.frontend.framework === "React") {
-      return "⚛️";
-    } else if (template.techStack.frontend.framework === "Vue.js") {
-      return "🟢";
-    } else if (template.techStack.frontend.framework === "Angular") {
-      return "🔴";
+    if (template.techStack.frontend.framework === 'React') {
+      return '⚛️';
+    } else if (template.techStack.frontend.framework === 'Vue.js') {
+      return '🟢';
+    } else if (template.techStack.frontend.framework === 'Angular') {
+      return '🔴';
     } else {
-      return "🧩";
+      return '🧩';
     }
   };
 
@@ -32,44 +28,40 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
       .map((feature) => feature.name);
 
     return (
-      enabledFeatures.slice(0, 3).join(", ") +
-      (enabledFeatures.length > 3
-        ? `, +${enabledFeatures.length - 3} more`
-        : "")
+      enabledFeatures.slice(0, 3).join(', ') +
+      (enabledFeatures.length > 3 ? `, +${enabledFeatures.length - 3} more` : '')
     );
   };
 
   return (
     <div
-      className={`border rounded-lg p-5 cursor-pointer transition-all hover:shadow-md ${
+      className={`cursor-pointer rounded-lg border p-5 transition-all hover:shadow-md ${
         isSelected
-          ? "border-primary-500 ring-2 ring-primary-100 bg-primary-50"
-          : "border-slate-200 hover:border-primary-300"
+          ? 'border-primary-500 bg-primary-50 ring-2 ring-primary-100'
+          : 'border-slate-200 hover:border-primary-300'
       }`}
       onClick={onSelect}
     >
-      <div className="h-32 bg-slate-100 rounded flex items-center justify-center mb-4 relative">
+      <div className="relative mb-4 flex h-32 items-center justify-center rounded bg-slate-100">
         <span className="text-5xl">{getTemplateIcon()}</span>
         {isSelected && (
-          <div className="absolute top-2 right-2">
-            <CheckCircle size={20} className="text-primary-600 fill-white" />
+          <div className="absolute right-2 top-2">
+            <CheckCircle size={20} className="fill-white text-primary-600" />
           </div>
         )}
       </div>
 
       <h3 className="font-medium text-slate-800">{template.name}</h3>
-      <p className="text-sm text-slate-600 mt-1 line-clamp-2">
-        {template.description}
-      </p>
+      <p className="mt-1 line-clamp-2 text-sm text-slate-600">{template.description}</p>
 
       <div className="mt-3 flex flex-wrap gap-1">
-        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
+        <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-1 text-xs font-medium text-slate-800">
           {template.techStack.frontend.framework}
         </span>
-        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
+        <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-1 text-xs font-medium text-slate-800">
           {template.techStack.backend.type}
         </span>
-        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
+        <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-1 text-xs font-medium text-slate-800">
           {template.techStack.database.type}
         </span>
       </div>

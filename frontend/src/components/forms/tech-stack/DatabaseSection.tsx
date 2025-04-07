@@ -1,27 +1,21 @@
-import {
-  UseFormRegister,
-  FormState,
-  Control,
-  UseFormSetValue,
-  useWatch,
-} from "react-hook-form";
-import { Database, Hosting, Technology } from "../../../types/techStack";
-import { TechStackFormData } from "../tech-stack/techStackSchema";
-import { useEffect, useRef, useMemo } from "react";
-import { ProjectTechStack } from "../../../types/templates";
+import { UseFormRegister, FormState, Control, UseFormSetValue, useWatch } from 'react-hook-form';
+import { Database, Hosting, Technology } from '../../../types/techStack';
+import { TechStackFormData } from '../tech-stack/techStackSchema';
+import { useEffect, useRef, useMemo } from 'react';
+import { ProjectTechStack } from '../../../types/templates';
 import {
   filterDatabaseSystems,
   filterDatabaseHosting,
   filterOrmOptions,
-} from "../../../utils/databaseTechStackFilterUtils";
+} from '../../../utils/databaseTechStackFilterUtils';
 
 // Import shadcn UI components
-import { Label } from "../../ui/label";
-import { Select } from "../../ui/select";
+import { Label } from '../../ui/label';
+import { Select } from '../../ui/select';
 
 interface DatabaseSectionProps {
   register: UseFormRegister<TechStackFormData>;
-  errors: FormState<TechStackFormData>["errors"];
+  errors: FormState<TechStackFormData>['errors'];
   allDatabases: Database[];
   allDatabaseHosting: Hosting[];
   allOrms: Technology[];
@@ -46,12 +40,7 @@ const DatabaseSection = ({
   // Watch for form value changes
   const watchedValues = useWatch({
     control,
-    name: [
-      "database_type",
-      "database_system",
-      "database_hosting",
-      "database_orm",
-    ],
+    name: ['database_type', 'database_system', 'database_hosting', 'database_orm'],
   });
 
   const [
@@ -64,10 +53,10 @@ const DatabaseSection = ({
   // Reset form values if templateId is null
   useEffect(() => {
     if (!initialData) {
-      setValue("database_type", "", { shouldDirty: false });
-      setValue("database_system", "", { shouldDirty: false });
-      setValue("database_hosting", "", { shouldDirty: false });
-      setValue("database_orm", "", { shouldDirty: false });
+      setValue('database_type', '', { shouldDirty: false });
+      setValue('database_system', '', { shouldDirty: false });
+      setValue('database_hosting', '', { shouldDirty: false });
+      setValue('database_orm', '', { shouldDirty: false });
     }
   }, [initialData, setValue]);
 
@@ -138,38 +127,35 @@ const DatabaseSection = ({
   useEffect(() => {
     // Auto-select database type if only one option is available in filtered databases
     if (filteredDatabases.length > 0 && !selectedDatabaseType) {
-      const types = [...new Set(filteredDatabases.map((db) => (db as Database).type || ""))];
+      const types = [...new Set(filteredDatabases.map((db) => (db as Database).type || ''))];
       if (types.length === 1) {
-        setValue("database_type", types[0], { shouldDirty: true });
-        console.log("Auto-selected database type:", types[0]);
+        setValue('database_type', types[0], { shouldDirty: true });
+        console.log('Auto-selected database type:', types[0]);
       }
     }
 
     // Auto-select database system if only one option is available
     if (filteredDatabases.length === 1 && !selectedDatabaseSystem) {
-      setValue("database_system", filteredDatabases[0].id as string, {
+      setValue('database_system', filteredDatabases[0].id as string, {
         shouldDirty: true,
       });
-      console.log("Auto-selected database system:", filteredDatabases[0].id);
+      console.log('Auto-selected database system:', filteredDatabases[0].id);
     }
 
     // Auto-select database hosting if only one option is available
     if (filteredDatabaseHosting.length === 1 && !selectedDatabaseHosting) {
-      setValue("database_hosting", filteredDatabaseHosting[0].id as string, {
+      setValue('database_hosting', filteredDatabaseHosting[0].id as string, {
         shouldDirty: true,
       });
-      console.log(
-        "Auto-selected database hosting:",
-        filteredDatabaseHosting[0].id
-      );
+      console.log('Auto-selected database hosting:', filteredDatabaseHosting[0].id);
     }
 
     // Auto-select ORM if only one option is available
     if (filteredOrms.length === 1 && !selectedDatabaseOrm) {
-      setValue("database_orm", filteredOrms[0].id as string, {
+      setValue('database_orm', filteredOrms[0].id as string, {
         shouldDirty: true,
       });
-      console.log("Auto-selected ORM:", filteredOrms[0].id);
+      console.log('Auto-selected ORM:', filteredOrms[0].id);
     }
   }, [
     filteredDatabases,
@@ -186,34 +172,32 @@ const DatabaseSection = ({
   useEffect(() => {
     if (!initialData || initialDataAppliedRef.current) return;
 
-    console.log("Checking initial data for database section:", initialData);
+    console.log('Checking initial data for database section:', initialData);
 
     // Track values that were successfully set
     let valuesWereSet = false;
 
     // Check and set database type
     if (initialData.database.type) {
-      setValue("database_type", initialData.database.type, {
+      setValue('database_type', initialData.database.type, {
         shouldDirty: true,
       });
-      console.log("Setting initial database type:", initialData.database.type);
+      console.log('Setting initial database type:', initialData.database.type);
       valuesWereSet = true;
     }
 
     // Check and set database if it exists in options
     if (initialData.database.system) {
-      const dbExists = allDatabases.some(
-        (db) => db.id === initialData.database.system
-      );
+      const dbExists = allDatabases.some((db) => db.id === initialData.database.system);
       if (dbExists) {
-        setValue("database_system", initialData.database.system, {
+        setValue('database_system', initialData.database.system, {
           shouldDirty: true,
         });
-        console.log("Setting initial database:", initialData.database.system);
+        console.log('Setting initial database:', initialData.database.system);
         valuesWereSet = true;
       } else {
         console.log(
-          "Initial database system not available in options:",
+          'Initial database system not available in options:',
           initialData.database.system
         );
       }
@@ -222,23 +206,20 @@ const DatabaseSection = ({
     // Check and set database provider
     if (initialData.database.hosting) {
       // For simplicity, we're not validating database_hosting against a list of options
-      setValue("database_hosting", initialData.database.hosting, {
+      setValue('database_hosting', initialData.database.hosting, {
         shouldDirty: true,
       });
-      console.log(
-        "Setting initial database provider:",
-        initialData.database.hosting
-      );
+      console.log('Setting initial database provider:', initialData.database.hosting);
       valuesWereSet = true;
     }
 
     // Check and set ORM
-    if (initialData.database.type === "sql" && initialData.database.orm) {
+    if (initialData.database.type === 'sql' && initialData.database.orm) {
       // For simplicity, we're not validating orm against a list of options
-      setValue("database_orm", initialData.database.orm, {
+      setValue('database_orm', initialData.database.orm, {
         shouldDirty: true,
       });
-      console.log("Setting initial ORM:", initialData.database.orm);
+      console.log('Setting initial ORM:', initialData.database.orm);
       valuesWereSet = true;
     }
 
@@ -250,15 +231,13 @@ const DatabaseSection = ({
 
   return (
     <div>
-      <h3 className="text-lg font-medium text-slate-800 dark:text-slate-100 mb-4">
-        Database
-      </h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <h3 className="mb-4 text-lg font-medium text-slate-800 dark:text-slate-100">Database</h3>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div>
           <Label htmlFor="database_type">Type</Label>
           <Select
             id="database_type"
-            {...register("database_type")}
+            {...register('database_type')}
             error={errors.database_type?.message?.toString()}
           >
             <option value="">Select Database Type</option>
@@ -269,7 +248,7 @@ const DatabaseSection = ({
 
         <div>
           <Label htmlFor="database_system">Database System</Label>
-          <Select id="database_system" {...register("database_system")}>
+          <Select id="database_system" {...register('database_system')}>
             <option value="">Select Database System</option>
             {filteredDatabases.map((db) => (
               <option key={db.id} value={db.id}>
@@ -281,7 +260,7 @@ const DatabaseSection = ({
 
         <div>
           <Label htmlFor="database_hosting">Database Hosting</Label>
-          <Select id="database_hosting" {...register("database_hosting")}>
+          <Select id="database_hosting" {...register('database_hosting')}>
             <option value="">Select Database Hosting</option>
             {filteredDatabaseHosting.map((hosting) => (
               <option key={hosting.id} value={hosting.id}>
@@ -296,8 +275,8 @@ const DatabaseSection = ({
           <Label htmlFor="database_orm">ORM / Database Access</Label>
           <Select
             id="database_orm"
-            {...register("database_orm")}
-            disabled={selectedDatabaseType === "nosql"}
+            {...register('database_orm')}
+            disabled={selectedDatabaseType === 'nosql'}
           >
             <option value="">Select ORM</option>
             {filteredOrms.map((orm) => (

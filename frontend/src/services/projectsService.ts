@@ -1,8 +1,8 @@
 /**
  * Service for interacting with projects API.
  */
-import apiClient from "../api/apiClient";
-import { ProjectBase } from "../types/project";
+import apiClient from '../api/apiClient';
+import { ProjectBase } from '../types/project';
 
 // Define interface for API response structure
 interface ProjectResponse {
@@ -25,10 +25,10 @@ const isValidProject = (project: unknown): boolean => {
   return (
     project !== null &&
     project !== undefined &&
-    typeof project === "object" &&
-    "id" in (project as object) &&
-    "name" in (project as object) &&
-    "description" in (project as object)
+    typeof project === 'object' &&
+    'id' in (project as object) &&
+    'name' in (project as object) &&
+    'description' in (project as object)
   );
 };
 
@@ -40,10 +40,10 @@ const convertToProjectBase = (response: ProjectResponse): ProjectBase => {
     id: response.id,
     name: response.name,
     description: response.description,
-    version: response.version || "1.0.0",
+    version: response.version || '1.0.0',
     business_goals: response.business_goals || [],
-    target_users: response.target_users || "",
-    domain: response.domain || "",
+    target_users: response.target_users || '',
+    domain: response.domain || '',
   };
 };
 
@@ -65,22 +65,16 @@ export const projectsService = {
     domain?: string;
   }): Promise<ProjectBase | null> {
     try {
-      const response = await apiClient.post<ProjectResponse>(
-        `/api/projects`,
-        projectData
-      );
+      const response = await apiClient.post<ProjectResponse>(`/api/projects`, projectData);
 
       if (!response.data || !isValidProject(response.data)) {
-        console.error(
-          "Invalid project structure in API response:",
-          response.data
-        );
+        console.error('Invalid project structure in API response:', response.data);
         return null;
       }
 
       return convertToProjectBase(response.data);
     } catch (error) {
-      console.error("Error creating project:", error);
+      console.error('Error creating project:', error);
       return null;
     }
   },
@@ -95,16 +89,14 @@ export const projectsService = {
       const response = await apiClient.get<ProjectResponse[]>(`/api/projects`);
 
       if (!response.data || !Array.isArray(response.data)) {
-        console.error("Invalid API response format:", response.data);
+        console.error('Invalid API response format:', response.data);
         return [];
       }
 
       // Convert projects from API format to frontend format
-      return response.data
-        .filter((project) => isValidProject(project))
-        .map(convertToProjectBase);
+      return response.data.filter((project) => isValidProject(project)).map(convertToProjectBase);
     } catch (error) {
-      console.error("Error fetching projects:", error);
+      console.error('Error fetching projects:', error);
       return [];
     }
   },
@@ -117,15 +109,10 @@ export const projectsService = {
    */
   async getProjectById(id: string): Promise<ProjectBase | null> {
     try {
-      const response = await apiClient.get<ProjectResponse>(
-        `/api/projects/${id}`
-      );
+      const response = await apiClient.get<ProjectResponse>(`/api/projects/${id}`);
 
       if (!response.data || !isValidProject(response.data)) {
-        console.error(
-          "Invalid project structure in API response:",
-          response.data
-        );
+        console.error('Invalid project structure in API response:', response.data);
         return null;
       }
 
@@ -154,16 +141,10 @@ export const projectsService = {
     }
   ): Promise<ProjectBase | null> {
     try {
-      const response = await apiClient.put<ProjectResponse>(
-        `/api/projects/${id}`,
-        projectData
-      );
+      const response = await apiClient.put<ProjectResponse>(`/api/projects/${id}`, projectData);
 
       if (!response.data || !isValidProject(response.data)) {
-        console.error(
-          "Invalid project structure in API response:",
-          response.data
-        );
+        console.error('Invalid project structure in API response:', response.data);
         return null;
       }
 

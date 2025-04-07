@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 import {
   PlusCircle,
   Trash2,
@@ -8,19 +8,19 @@ import {
   RefreshCw,
   Lock,
   Edit,
-} from "lucide-react";
-import { requirementsService } from "../../services/requirementsService";
-import { projectsService } from "../../services/projectsService";
-import { aiService } from "../../services/aiService";
-import { useToast } from "../../contexts/ToastContext";
-import { useSubscription } from "../../contexts/SubscriptionContext";
-import { Requirements } from "../../types/templates";
-import Button from "../ui/Button";
-import Input from "../ui/Input";
-import Card from "../ui/Card";
-import { PremiumFeatureBadge, ProcessingOverlay } from "../ui/index";
-import AIInstructionsModal from "../ui/AIInstructionsModal";
-import { useUserProfile } from "../../hooks/useUserProfile";
+} from 'lucide-react';
+import { requirementsService } from '../../services/requirementsService';
+import { projectsService } from '../../services/projectsService';
+import { aiService } from '../../services/aiService';
+import { useToast } from '../../contexts/ToastContext';
+import { useSubscription } from '../../contexts/SubscriptionContext';
+import { Requirements } from '../../types/templates';
+import Button from '../ui/Button';
+import Input from '../ui/Input';
+import Card from '../ui/Card';
+import { PremiumFeatureBadge, ProcessingOverlay } from '../ui/index';
+import AIInstructionsModal from '../ui/AIInstructionsModal';
+import { useUserProfile } from '../../hooks/useUserProfile';
 
 interface RequirementsFormProps {
   initialData?: Partial<Requirements>;
@@ -36,32 +36,27 @@ export default function RequirementsForm({
   const { showToast } = useToast();
   const { hasAIFeatures } = useSubscription();
   const { aiCreditsRemaining } = useUserProfile();
-  const [functionalReqs, setFunctionalReqs] = useState<string[]>(
-    initialData?.functional || []
-  );
+  const [functionalReqs, setFunctionalReqs] = useState<string[]>(initialData?.functional || []);
   const [nonFunctionalReqs, setNonFunctionalReqs] = useState<string[]>(
     initialData?.non_functional || []
   );
-  const [newFunctionalReq, setNewFunctionalReq] = useState("");
-  const [newNonFunctionalReq, setNewNonFunctionalReq] = useState("");
+  const [newFunctionalReq, setNewFunctionalReq] = useState('');
+  const [newNonFunctionalReq, setNewNonFunctionalReq] = useState('');
   // Add state for inline editing
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  const [editingType, setEditingType] = useState<
-    "functional" | "non-functional" | null
-  >(null);
-  const [editingValue, setEditingValue] = useState("");
+  const [editingType, setEditingType] = useState<'functional' | 'non-functional' | null>(null);
+  const [editingValue, setEditingValue] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   // Add state for form-level error and success messages
-  const [error, setError] = useState<string>("");
+  const [error, setError] = useState<string>('');
   // Add state for AI enhancement
   const [isEnhancing, setIsEnhancing] = useState<boolean>(false);
-  const [projectDescription, setProjectDescription] = useState<string>("");
+  const [projectDescription, setProjectDescription] = useState<string>('');
   const [businessGoals, setBusinessGoals] = useState<string[]>([]);
   // Add a new state for the second button loading state
-  const [isAddingRequirements, setIsAddingRequirements] =
-    useState<boolean>(false);
+  const [isAddingRequirements, setIsAddingRequirements] = useState<boolean>(false);
 
   // Add state for AI instructions modals
   const [isEnhanceModalOpen, setIsEnhanceModalOpen] = useState<boolean>(false);
@@ -81,15 +76,13 @@ export default function RequirementsForm({
       if (projectId && !initialData) {
         setIsLoading(true);
         try {
-          const requirementsData = await requirementsService.getRequirements(
-            projectId
-          );
+          const requirementsData = await requirementsService.getRequirements(projectId);
           if (requirementsData) {
             setFunctionalReqs(requirementsData.functional || []);
             setNonFunctionalReqs(requirementsData.non_functional || []);
           }
         } catch (error) {
-          console.error("Error fetching requirements:", error);
+          console.error('Error fetching requirements:', error);
         } finally {
           setIsLoading(false);
         }
@@ -108,11 +101,11 @@ export default function RequirementsForm({
       const projectDetails = await projectsService.getProjectById(projectId);
 
       if (projectDetails) {
-        setProjectDescription(projectDetails.description || "");
+        setProjectDescription(projectDetails.description || '');
         setBusinessGoals(projectDetails.business_goals || []);
       }
     } catch (error) {
-      console.error("Error fetching project details:", error);
+      console.error('Error fetching project details:', error);
     }
   };
 
@@ -127,14 +120,14 @@ export default function RequirementsForm({
     if (!newFunctionalReq.trim()) return;
 
     setFunctionalReqs([...functionalReqs, newFunctionalReq]);
-    setNewFunctionalReq("");
+    setNewFunctionalReq('');
   };
 
   const addNonFunctionalRequirement = () => {
     if (!newNonFunctionalReq.trim()) return;
 
     setNonFunctionalReqs([...nonFunctionalReqs, newNonFunctionalReq]);
-    setNewNonFunctionalReq("");
+    setNewNonFunctionalReq('');
   };
 
   const removeFunctionalRequirement = (index: number) => {
@@ -142,7 +135,7 @@ export default function RequirementsForm({
 
     // If we're removing the last item before a divider, or the first item after a divider,
     // we should also remove the divider if it exists
-    const dividerIndex = newReqs.indexOf("---");
+    const dividerIndex = newReqs.indexOf('---');
     if (dividerIndex !== -1) {
       // Check if there are items before and after the divider
       const hasBefore = dividerIndex > 0;
@@ -162,7 +155,7 @@ export default function RequirementsForm({
 
     // If we're removing the last item before a divider, or the first item after a divider,
     // we should also remove the divider if it exists
-    const dividerIndex = newReqs.indexOf("---");
+    const dividerIndex = newReqs.indexOf('---');
     if (dividerIndex !== -1) {
       // Check if there are items before and after the divider
       const hasBefore = dividerIndex > 0;
@@ -181,10 +174,9 @@ export default function RequirementsForm({
   const openEnhanceModal = () => {
     if (!projectId) {
       showToast({
-        title: "Error",
-        description:
-          "Project must be saved before requirements can be enhanced",
-        type: "error",
+        title: 'Error',
+        description: 'Project must be saved before requirements can be enhanced',
+        type: 'error',
       });
       return;
     }
@@ -192,9 +184,9 @@ export default function RequirementsForm({
     // Check if user has remaining AI credits
     if (aiCreditsRemaining <= 0) {
       showToast({
-        title: "Insufficient AI Credits",
+        title: 'Insufficient AI Credits',
         description: "You've used all your AI credits for this billing period",
-        type: "warning",
+        type: 'warning',
       });
       return;
     }
@@ -202,20 +194,19 @@ export default function RequirementsForm({
     // Check if user has access to AI features
     if (!hasAIFeatures) {
       showToast({
-        title: "Premium Feature",
+        title: 'Premium Feature',
         description:
-          "AI enhancement is only available on Premium and Open Source plans. Please upgrade to use this feature.",
-        type: "warning",
+          'AI enhancement is only available on Premium and Open Source plans. Please upgrade to use this feature.',
+        type: 'warning',
       });
       return;
     }
 
     if (!projectDescription) {
       showToast({
-        title: "Warning",
-        description:
-          "Project description is missing. Requirements may not be properly enhanced.",
-        type: "warning",
+        title: 'Warning',
+        description: 'Project description is missing. Requirements may not be properly enhanced.',
+        type: 'warning',
       });
     }
 
@@ -224,10 +215,9 @@ export default function RequirementsForm({
 
     if (allRequirements.length === 0) {
       showToast({
-        title: "Warning",
-        description:
-          "No requirements to enhance. Please add some requirements first.",
-        type: "warning",
+        title: 'Warning',
+        description: 'No requirements to enhance. Please add some requirements first.',
+        type: 'warning',
       });
       return;
     }
@@ -239,10 +229,9 @@ export default function RequirementsForm({
   const openAddModal = () => {
     if (!projectId) {
       showToast({
-        title: "Error",
-        description:
-          "Project must be saved before requirements can be enhanced",
-        type: "error",
+        title: 'Error',
+        description: 'Project must be saved before requirements can be enhanced',
+        type: 'error',
       });
       return;
     }
@@ -250,9 +239,9 @@ export default function RequirementsForm({
     // Check if user has remaining AI credits
     if (aiCreditsRemaining <= 0) {
       showToast({
-        title: "Insufficient AI Credits",
+        title: 'Insufficient AI Credits',
         description: "You've used all your AI credits for this billing period",
-        type: "warning",
+        type: 'warning',
       });
       return;
     }
@@ -260,20 +249,19 @@ export default function RequirementsForm({
     // Check if user has access to AI features
     if (!hasAIFeatures) {
       showToast({
-        title: "Premium Feature",
+        title: 'Premium Feature',
         description:
-          "AI-generated requirements are only available on Premium and Open Source plans. Please upgrade to use this feature.",
-        type: "warning",
+          'AI-generated requirements are only available on Premium and Open Source plans. Please upgrade to use this feature.',
+        type: 'warning',
       });
       return;
     }
 
     if (!projectDescription) {
       showToast({
-        title: "Warning",
-        description:
-          "Project description is missing. Requirements may not be properly enhanced.",
-        type: "warning",
+        title: 'Warning',
+        description: 'Project description is missing. Requirements may not be properly enhanced.',
+        type: 'warning',
       });
     }
 
@@ -299,32 +287,32 @@ export default function RequirementsForm({
         const functionalRequirements: string[] = [];
         const nonFunctionalRequirements: string[] = [];
 
-        console.log("Enhanced requirements from AI:", enhancedRequirements);
+        console.log('Enhanced requirements from AI:', enhancedRequirements);
 
         // Categorize requirements based on [Category] prefix first, then fall back to content keywords
         enhancedRequirements.forEach((req) => {
           const lowerCaseReq = req.toLowerCase();
 
           // First check for explicit category prefixes
-          if (lowerCaseReq.startsWith("[functional]")) {
+          if (lowerCaseReq.startsWith('[functional]')) {
             functionalRequirements.push(req); // Keep original format for categorization
           } else if (
-            lowerCaseReq.startsWith("[non-functional]") ||
-            lowerCaseReq.startsWith("[nonfunctional]")
+            lowerCaseReq.startsWith('[non-functional]') ||
+            lowerCaseReq.startsWith('[nonfunctional]')
           ) {
             nonFunctionalRequirements.push(req); // Keep original format for categorization
           }
           // Fall back to keyword detection if no category prefix is found
           else if (
-            lowerCaseReq.includes("non-functional") ||
-            lowerCaseReq.includes("nonfunctional") ||
-            lowerCaseReq.includes("nfr") ||
-            lowerCaseReq.includes("quality") ||
-            lowerCaseReq.includes("performance") ||
-            lowerCaseReq.includes("security") ||
-            lowerCaseReq.includes("usability") ||
-            lowerCaseReq.includes("reliability") ||
-            lowerCaseReq.includes("maintainability")
+            lowerCaseReq.includes('non-functional') ||
+            lowerCaseReq.includes('nonfunctional') ||
+            lowerCaseReq.includes('nfr') ||
+            lowerCaseReq.includes('quality') ||
+            lowerCaseReq.includes('performance') ||
+            lowerCaseReq.includes('security') ||
+            lowerCaseReq.includes('usability') ||
+            lowerCaseReq.includes('reliability') ||
+            lowerCaseReq.includes('maintainability')
           ) {
             nonFunctionalRequirements.push(req);
           } else {
@@ -333,36 +321,30 @@ export default function RequirementsForm({
           }
         });
 
-        console.log(
-          "Categorized functional requirements:",
-          functionalRequirements
-        );
-        console.log(
-          "Categorized non-functional requirements:",
-          nonFunctionalRequirements
-        );
+        console.log('Categorized functional requirements:', functionalRequirements);
+        console.log('Categorized non-functional requirements:', nonFunctionalRequirements);
 
         setFunctionalReqs(functionalRequirements);
         setNonFunctionalReqs(nonFunctionalRequirements);
 
         showToast({
-          title: "Success",
-          description: "Requirements enhanced successfully",
-          type: "success",
+          title: 'Success',
+          description: 'Requirements enhanced successfully',
+          type: 'success',
         });
       } else {
         showToast({
-          title: "Warning",
-          description: "No enhanced requirements returned",
-          type: "warning",
+          title: 'Warning',
+          description: 'No enhanced requirements returned',
+          type: 'warning',
         });
       }
     } catch (error) {
-      console.error("Error enhancing requirements:", error);
+      console.error('Error enhancing requirements:', error);
       showToast({
-        title: "Error",
-        description: "Failed to enhance requirements",
-        type: "error",
+        title: 'Error',
+        description: 'Failed to enhance requirements',
+        type: 'error',
       });
     } finally {
       setIsEnhancing(false);
@@ -388,32 +370,32 @@ export default function RequirementsForm({
         const newFunctionalRequirements: string[] = [];
         const newNonFunctionalRequirements: string[] = [];
 
-        console.log("New requirements from AI:", enhancedRequirements);
+        console.log('New requirements from AI:', enhancedRequirements);
 
         // Categorize requirements based on [Category] prefix first, then fall back to content keywords
         enhancedRequirements.forEach((req) => {
           const lowerCaseReq = req.toLowerCase();
 
           // First check for explicit category prefixes
-          if (lowerCaseReq.startsWith("[functional]")) {
+          if (lowerCaseReq.startsWith('[functional]')) {
             newFunctionalRequirements.push(req); // Keep original format for categorization
           } else if (
-            lowerCaseReq.startsWith("[non-functional]") ||
-            lowerCaseReq.startsWith("[nonfunctional]")
+            lowerCaseReq.startsWith('[non-functional]') ||
+            lowerCaseReq.startsWith('[nonfunctional]')
           ) {
             newNonFunctionalRequirements.push(req); // Keep original format for categorization
           }
           // Fall back to keyword detection if no category prefix is found
           else if (
-            lowerCaseReq.includes("non-functional") ||
-            lowerCaseReq.includes("nonfunctional") ||
-            lowerCaseReq.includes("nfr") ||
-            lowerCaseReq.includes("quality") ||
-            lowerCaseReq.includes("performance") ||
-            lowerCaseReq.includes("security") ||
-            lowerCaseReq.includes("usability") ||
-            lowerCaseReq.includes("reliability") ||
-            lowerCaseReq.includes("maintainability")
+            lowerCaseReq.includes('non-functional') ||
+            lowerCaseReq.includes('nonfunctional') ||
+            lowerCaseReq.includes('nfr') ||
+            lowerCaseReq.includes('quality') ||
+            lowerCaseReq.includes('performance') ||
+            lowerCaseReq.includes('security') ||
+            lowerCaseReq.includes('usability') ||
+            lowerCaseReq.includes('reliability') ||
+            lowerCaseReq.includes('maintainability')
           ) {
             newNonFunctionalRequirements.push(req);
           } else {
@@ -423,56 +405,41 @@ export default function RequirementsForm({
         });
 
         // If there are already requirements and we're adding new ones, add a divider
-        const divider = "---";
+        const divider = '---';
 
         // Add new requirements to existing requirements with a divider if needed
         if (functionalReqs.length > 0 && newFunctionalRequirements.length > 0) {
-          setFunctionalReqs([
-            ...functionalReqs,
-            divider,
-            ...newFunctionalRequirements,
-          ]);
+          setFunctionalReqs([...functionalReqs, divider, ...newFunctionalRequirements]);
         } else {
           setFunctionalReqs([...functionalReqs, ...newFunctionalRequirements]);
         }
 
-        if (
-          nonFunctionalReqs.length > 0 &&
-          newNonFunctionalRequirements.length > 0
-        ) {
-          setNonFunctionalReqs([
-            ...nonFunctionalReqs,
-            divider,
-            ...newNonFunctionalRequirements,
-          ]);
+        if (nonFunctionalReqs.length > 0 && newNonFunctionalRequirements.length > 0) {
+          setNonFunctionalReqs([...nonFunctionalReqs, divider, ...newNonFunctionalRequirements]);
         } else {
-          setNonFunctionalReqs([
-            ...nonFunctionalReqs,
-            ...newNonFunctionalRequirements,
-          ]);
+          setNonFunctionalReqs([...nonFunctionalReqs, ...newNonFunctionalRequirements]);
         }
 
         showToast({
-          title: "Success",
+          title: 'Success',
           description: `Added ${
-            newFunctionalRequirements.length +
-            newNonFunctionalRequirements.length
+            newFunctionalRequirements.length + newNonFunctionalRequirements.length
           } new requirements`,
-          type: "success",
+          type: 'success',
         });
       } else {
         showToast({
-          title: "Warning",
-          description: "No new requirements generated",
-          type: "warning",
+          title: 'Warning',
+          description: 'No new requirements generated',
+          type: 'warning',
         });
       }
     } catch (error) {
-      console.error("Error adding AI requirements:", error);
+      console.error('Error adding AI requirements:', error);
       showToast({
-        title: "Error",
-        description: "Failed to generate new requirements",
-        type: "error",
+        title: 'Error',
+        description: 'Failed to generate new requirements',
+        type: 'error',
       });
     } finally {
       setIsAddingRequirements(false);
@@ -491,16 +458,15 @@ export default function RequirementsForm({
 
     setErrors(newErrors);
     // Clear previous form-level messages
-    setError("");
+    setError('');
 
     if (Object.keys(newErrors).length === 0) {
       if (!projectId) {
-        const errorMessage =
-          "Project must be saved before requirements can be saved";
+        const errorMessage = 'Project must be saved before requirements can be saved';
         showToast({
-          title: "Error",
+          title: 'Error',
           description: errorMessage,
-          type: "error",
+          type: 'error',
         });
         setError(errorMessage);
         return;
@@ -513,41 +479,38 @@ export default function RequirementsForm({
           non_functional: nonFunctionalReqs,
         };
 
-        const result = await requirementsService.saveRequirements(
-          projectId,
-          data
-        );
+        const result = await requirementsService.saveRequirements(projectId, data);
 
         if (result) {
           showToast({
-            title: "Success",
-            description: "Requirements saved successfully",
-            type: "success",
+            title: 'Success',
+            description: 'Requirements saved successfully',
+            type: 'success',
           });
 
           if (onSuccess) {
             onSuccess(result);
           }
         } else {
-          const errorMessage = "Failed to save requirements";
+          const errorMessage = 'Failed to save requirements';
           showToast({
-            title: "Error",
+            title: 'Error',
             description: errorMessage,
-            type: "error",
+            type: 'error',
           });
           setError(errorMessage);
-          setTimeout(() => setError(""), 5000);
+          setTimeout(() => setError(''), 5000);
         }
       } catch (error) {
-        console.error("Error saving requirements:", error);
-        const errorMessage = "An unexpected error occurred";
+        console.error('Error saving requirements:', error);
+        const errorMessage = 'An unexpected error occurred';
         showToast({
-          title: "Error",
+          title: 'Error',
           description: errorMessage,
-          type: "error",
+          type: 'error',
         });
         setError(errorMessage);
-        setTimeout(() => setError(""), 5000);
+        setTimeout(() => setError(''), 5000);
       } finally {
         setIsSubmitting(false);
       }
@@ -562,19 +525,15 @@ export default function RequirementsForm({
   // Helper to get the appropriate message for the overlay
   const getEnhancementMessage = () => {
     if (isEnhancing) {
-      return "AI is enhancing your requirements. Please wait...";
+      return 'AI is enhancing your requirements. Please wait...';
     }
     if (isAddingRequirements) {
-      return "AI is generating new requirements for your project. Please wait...";
+      return 'AI is generating new requirements for your project. Please wait...';
     }
-    return "AI enhancement in progress...";
+    return 'AI enhancement in progress...';
   };
 
-  const handleStartEdit = (
-    index: number,
-    type: "functional" | "non-functional",
-    value: string
-  ) => {
+  const handleStartEdit = (index: number, type: 'functional' | 'non-functional', value: string) => {
     setEditingIndex(index);
     setEditingType(type);
     setEditingValue(value);
@@ -583,13 +542,13 @@ export default function RequirementsForm({
   const handleCancelEdit = () => {
     setEditingIndex(null);
     setEditingType(null);
-    setEditingValue("");
+    setEditingValue('');
   };
 
   const handleSaveEdit = () => {
     if (!editingValue.trim() || editingIndex === null || !editingType) return;
 
-    if (editingType === "functional") {
+    if (editingType === 'functional') {
       const newReqs = [...functionalReqs];
       newReqs[editingIndex] = editingValue.trim();
       setFunctionalReqs(newReqs);
@@ -600,9 +559,9 @@ export default function RequirementsForm({
     }
 
     showToast({
-      title: "Success",
-      description: "Requirement updated successfully",
-      type: "success",
+      title: 'Success',
+      description: 'Requirement updated successfully',
+      type: 'success',
     });
 
     handleCancelEdit();
@@ -611,20 +570,14 @@ export default function RequirementsForm({
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <Loader2 className="h-6 w-6 text-primary-600 animate-spin mr-3" />
-        <span className="text-slate-600 dark:text-slate-300">
-          Loading requirements...
-        </span>
+        <Loader2 className="mr-3 h-6 w-6 animate-spin text-primary-600" />
+        <span className="text-slate-600 dark:text-slate-300">Loading requirements...</span>
       </div>
     );
   }
 
   return (
-    <form
-      id="requirements-form"
-      onSubmit={handleSubmit}
-      className="space-y-8 relative"
-    >
+    <form id="requirements-form" onSubmit={handleSubmit} className="relative space-y-8">
       {/* Processing Overlay */}
       <ProcessingOverlay
         isVisible={isAnyEnhancementInProgress()}
@@ -653,42 +606,36 @@ export default function RequirementsForm({
 
       {/* Error Message */}
       {error && (
-        <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-md mb-4">
+        <div className="mb-4 rounded-md bg-red-50 p-3 text-red-600 dark:bg-red-900/20 dark:text-red-400">
           {error}
         </div>
       )}
 
       <div>
-        <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-4">
+        <h2 className="mb-4 text-xl font-semibold text-slate-800 dark:text-slate-100">
           Project Requirements
         </h2>
-        <p className="text-slate-600 dark:text-slate-400 mb-6">
-          Define the functional and non-functional requirements for your
-          project.
+        <p className="mb-6 text-slate-600 dark:text-slate-400">
+          Define the functional and non-functional requirements for your project.
         </p>
       </div>
 
       {/* AI Enhancement Buttons */}
-      <div className="flex justify-end mb-4">
+      <div className="mb-4 flex justify-end">
         <div className="flex items-center gap-3">
           {!hasAIFeatures && <PremiumFeatureBadge />}
           <Button
             type="button"
             onClick={openAddModal}
-            disabled={
-              isAddingRequirements ||
-              isEnhancing ||
-              !projectId ||
-              !hasAIFeatures
-            }
-            variant={hasAIFeatures ? "outline" : "ghost"}
-            className={`flex items-center gap-2 relative ${
-              !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
+            disabled={isAddingRequirements || isEnhancing || !projectId || !hasAIFeatures}
+            variant={hasAIFeatures ? 'outline' : 'ghost'}
+            className={`relative flex items-center gap-2 ${
+              !hasAIFeatures ? 'cursor-not-allowed opacity-50' : ''
             }`}
             title={
               hasAIFeatures
-                ? "Generate new requirements to complement existing ones"
-                : "Upgrade to Premium to use AI-powered features"
+                ? 'Generate new requirements to complement existing ones'
+                : 'Upgrade to Premium to use AI-powered features'
             }
           >
             {isAddingRequirements ? (
@@ -698,11 +645,7 @@ export default function RequirementsForm({
               </>
             ) : (
               <>
-                {hasAIFeatures ? (
-                  <Sparkles className="h-4 w-4" />
-                ) : (
-                  <Lock className="h-4 w-4" />
-                )}
+                {hasAIFeatures ? <Sparkles className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
                 <span>Add AI Requirements</span>
               </>
             )}
@@ -717,14 +660,14 @@ export default function RequirementsForm({
               !hasAIFeatures ||
               (functionalReqs.length === 0 && nonFunctionalReqs.length === 0)
             }
-            variant={hasAIFeatures ? "outline" : "ghost"}
-            className={`flex items-center gap-2 relative ${
-              !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
+            variant={hasAIFeatures ? 'outline' : 'ghost'}
+            className={`relative flex items-center gap-2 ${
+              !hasAIFeatures ? 'cursor-not-allowed opacity-50' : ''
             }`}
             title={
               hasAIFeatures
-                ? "Replace all requirements with enhanced versions"
-                : "Upgrade to Premium to use AI-powered features"
+                ? 'Replace all requirements with enhanced versions'
+                : 'Upgrade to Premium to use AI-powered features'
             }
           >
             {isEnhancing ? (
@@ -734,11 +677,7 @@ export default function RequirementsForm({
               </>
             ) : (
               <>
-                {hasAIFeatures ? (
-                  <RefreshCw className="h-4 w-4" />
-                ) : (
-                  <Lock className="h-4 w-4" />
-                )}
+                {hasAIFeatures ? <RefreshCw className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
                 <span>Replace All</span>
               </>
             )}
@@ -756,7 +695,7 @@ export default function RequirementsForm({
         </p>
 
         {errors.functional && (
-          <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md flex items-start gap-2 text-red-700 dark:text-red-400">
+          <div className="flex items-start gap-2 rounded-md border border-red-200 bg-red-50 p-3 text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">
             <AlertCircle size={16} className="mt-0.5" />
             <span>{errors.functional}</span>
           </div>
@@ -764,20 +703,20 @@ export default function RequirementsForm({
 
         <div className="space-y-2">
           {functionalReqs.map((req, index) =>
-            req === "---" ? (
+            req === '---' ? (
               <div
                 key={`divider-${index}`}
-                className="border-t border-dashed border-slate-300 dark:border-slate-600 my-4 py-1 px-3 text-xs text-center text-slate-500 dark:text-slate-400"
+                className="my-4 border-t border-dashed border-slate-300 px-3 py-1 text-center text-xs text-slate-500 dark:border-slate-600 dark:text-slate-400"
               >
                 New AI-generated requirements
               </div>
             ) : (
               <Card
                 key={index}
-                className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
+                className="flex items-center justify-between border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800"
               >
-                {editingIndex === index && editingType === "functional" ? (
-                  <div className="flex gap-2 w-full">
+                {editingIndex === index && editingType === 'functional' ? (
+                  <div className="flex w-full gap-2">
                     <Input
                       type="text"
                       value={editingValue}
@@ -785,24 +724,14 @@ export default function RequirementsForm({
                       className="flex-1"
                       autoFocus
                       onKeyDown={(e) => {
-                        if (e.key === "Enter") handleSaveEdit();
-                        if (e.key === "Escape") handleCancelEdit();
+                        if (e.key === 'Enter') handleSaveEdit();
+                        if (e.key === 'Escape') handleCancelEdit();
                       }}
                     />
-                    <Button
-                      type="button"
-                      onClick={handleSaveEdit}
-                      variant="default"
-                      size="sm"
-                    >
+                    <Button type="button" onClick={handleSaveEdit} variant="default" size="sm">
                       Save
                     </Button>
-                    <Button
-                      type="button"
-                      onClick={handleCancelEdit}
-                      variant="outline"
-                      size="sm"
-                    >
+                    <Button type="button" onClick={handleCancelEdit} variant="outline" size="sm">
                       Cancel
                     </Button>
                   </div>
@@ -814,10 +743,8 @@ export default function RequirementsForm({
                         type="button"
                         variant="ghost"
                         size="sm"
-                        onClick={() =>
-                          handleStartEdit(index, "functional", req)
-                        }
-                        className="text-slate-400 dark:text-slate-500 hover:text-blue-500 dark:hover:text-blue-400"
+                        onClick={() => handleStartEdit(index, 'functional', req)}
+                        className="text-slate-400 hover:text-blue-500 dark:text-slate-500 dark:hover:text-blue-400"
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
@@ -826,7 +753,7 @@ export default function RequirementsForm({
                         variant="ghost"
                         size="sm"
                         onClick={() => removeFunctionalRequirement(index)}
-                        className="text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400"
+                        className="text-slate-400 hover:text-red-500 dark:text-slate-500 dark:hover:text-red-400"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -850,8 +777,8 @@ export default function RequirementsForm({
             type="button"
             onClick={addFunctionalRequirement}
             disabled={!newFunctionalReq.trim()}
-            variant={!newFunctionalReq.trim() ? "outline" : "default"}
-            className={!newFunctionalReq.trim() ? "cursor-not-allowed" : ""}
+            variant={!newFunctionalReq.trim() ? 'outline' : 'default'}
+            className={!newFunctionalReq.trim() ? 'cursor-not-allowed' : ''}
           >
             <PlusCircle size={20} />
           </Button>
@@ -864,26 +791,25 @@ export default function RequirementsForm({
           Non-Functional Requirements
         </h3>
         <p className="text-sm text-slate-600 dark:text-slate-400">
-          What qualities should your application have (performance, security,
-          usability, etc.)?
+          What qualities should your application have (performance, security, usability, etc.)?
         </p>
 
         <div className="space-y-2">
           {nonFunctionalReqs.map((req, index) =>
-            req === "---" ? (
+            req === '---' ? (
               <div
                 key={`divider-${index}`}
-                className="border-t border-dashed border-slate-300 dark:border-slate-600 my-4 py-1 px-3 text-xs text-center text-slate-500 dark:text-slate-400"
+                className="my-4 border-t border-dashed border-slate-300 px-3 py-1 text-center text-xs text-slate-500 dark:border-slate-600 dark:text-slate-400"
               >
                 New AI-generated requirements
               </div>
             ) : (
               <Card
                 key={index}
-                className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
+                className="flex items-center justify-between border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800"
               >
-                {editingIndex === index && editingType === "non-functional" ? (
-                  <div className="flex gap-2 w-full">
+                {editingIndex === index && editingType === 'non-functional' ? (
+                  <div className="flex w-full gap-2">
                     <Input
                       type="text"
                       value={editingValue}
@@ -891,24 +817,14 @@ export default function RequirementsForm({
                       className="flex-1"
                       autoFocus
                       onKeyDown={(e) => {
-                        if (e.key === "Enter") handleSaveEdit();
-                        if (e.key === "Escape") handleCancelEdit();
+                        if (e.key === 'Enter') handleSaveEdit();
+                        if (e.key === 'Escape') handleCancelEdit();
                       }}
                     />
-                    <Button
-                      type="button"
-                      onClick={handleSaveEdit}
-                      variant="default"
-                      size="sm"
-                    >
+                    <Button type="button" onClick={handleSaveEdit} variant="default" size="sm">
                       Save
                     </Button>
-                    <Button
-                      type="button"
-                      onClick={handleCancelEdit}
-                      variant="outline"
-                      size="sm"
-                    >
+                    <Button type="button" onClick={handleCancelEdit} variant="outline" size="sm">
                       Cancel
                     </Button>
                   </div>
@@ -920,10 +836,8 @@ export default function RequirementsForm({
                         type="button"
                         variant="ghost"
                         size="sm"
-                        onClick={() =>
-                          handleStartEdit(index, "non-functional", req)
-                        }
-                        className="text-slate-400 dark:text-slate-500 hover:text-blue-500 dark:hover:text-blue-400"
+                        onClick={() => handleStartEdit(index, 'non-functional', req)}
+                        className="text-slate-400 hover:text-blue-500 dark:text-slate-500 dark:hover:text-blue-400"
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
@@ -932,7 +846,7 @@ export default function RequirementsForm({
                         variant="ghost"
                         size="sm"
                         onClick={() => removeNonFunctionalRequirement(index)}
-                        className="text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400"
+                        className="text-slate-400 hover:text-red-500 dark:text-slate-500 dark:hover:text-red-400"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -956,8 +870,8 @@ export default function RequirementsForm({
             type="button"
             onClick={addNonFunctionalRequirement}
             disabled={!newNonFunctionalReq.trim()}
-            variant={!newNonFunctionalReq.trim() ? "outline" : "default"}
-            className={!newNonFunctionalReq.trim() ? "cursor-not-allowed" : ""}
+            variant={!newNonFunctionalReq.trim() ? 'outline' : 'default'}
+            className={!newNonFunctionalReq.trim() ? 'cursor-not-allowed' : ''}
           >
             <PlusCircle size={20} />
           </Button>
@@ -968,14 +882,10 @@ export default function RequirementsForm({
         <Button
           type="submit"
           disabled={isSubmitting || !projectId}
-          variant={!projectId || isSubmitting ? "outline" : "default"}
-          className={
-            !projectId || isSubmitting
-              ? "bg-gray-400 text-white hover:bg-gray-400"
-              : ""
-          }
+          variant={!projectId || isSubmitting ? 'outline' : 'default'}
+          className={!projectId || isSubmitting ? 'bg-gray-400 text-white hover:bg-gray-400' : ''}
         >
-          {isSubmitting ? "Saving..." : "Save Requirements"}
+          {isSubmitting ? 'Saving...' : 'Save Requirements'}
         </Button>
       </div>
     </form>

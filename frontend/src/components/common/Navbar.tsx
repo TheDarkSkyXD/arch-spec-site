@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
   FileCode,
@@ -12,8 +12,8 @@ import {
   X,
   ChevronDown,
   Sun,
-} from "lucide-react";
-import { useTheme } from "../../hooks/useTheme";
+} from 'lucide-react';
+import { useTheme } from '../../hooks/useTheme';
 
 const Navbar = () => {
   const location = useLocation();
@@ -26,14 +26,14 @@ const Navbar = () => {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 z-50">
-      <div className="flex items-center justify-between h-16 px-4">
+    <header className="fixed left-0 right-0 top-0 z-50 border-b border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">
+      <div className="flex h-16 items-center justify-between px-4">
         <div className="flex items-center">
           <Link
             to="/"
-            className="text-xl font-bold flex items-center gap-2 transition-transform hover:scale-105"
+            className="flex items-center gap-2 text-xl font-bold transition-transform hover:scale-105"
           >
-            <div className="bg-primary-600 text-white p-1.5 rounded-md">
+            <div className="rounded-md bg-primary-600 p-1.5 text-white">
               <FileCode size={20} />
             </div>
             <span className="font-heading font-bold tracking-tight text-slate-800 dark:text-white">
@@ -41,15 +41,15 @@ const Navbar = () => {
             </span>
           </Link>
 
-          <div className="hidden lg:flex items-center ml-8">
+          <div className="ml-8 hidden items-center lg:flex">
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                 <Search size={16} className="text-slate-400" />
               </div>
               <input
                 type="text"
                 placeholder="Search for projects..."
-                className="border border-slate-200 dark:border-slate-700 rounded-lg py-1.5 pl-9 pr-4 text-sm bg-slate-50 dark:bg-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 w-64"
+                className="w-64 rounded-lg border border-slate-200 bg-slate-50 py-1.5 pl-9 pr-4 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
               />
             </div>
           </div>
@@ -58,19 +58,19 @@ const Navbar = () => {
         <div className="flex md:hidden">
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="p-2 rounded text-slate-500 dark:text-slate-400"
+            className="rounded p-2 text-slate-500 dark:text-slate-400"
           >
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
 
-        <nav className="hidden md:flex items-center space-x-1">
+        <nav className="hidden items-center space-x-1 md:flex">
           <Link
             to="/"
-            className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
-              isActive("/")
-                ? "bg-slate-100 dark:bg-slate-800 text-primary-600"
-                : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-primary-600"
+            className={`rounded-md px-3 py-2 text-sm font-medium transition-all duration-200 ${
+              isActive('/')
+                ? 'bg-slate-100 text-primary-600 dark:bg-slate-800'
+                : 'text-slate-600 hover:bg-slate-50 hover:text-primary-600 dark:text-slate-300 dark:hover:bg-slate-800'
             }`}
           >
             <div className="flex items-center gap-1.5">
@@ -80,10 +80,10 @@ const Navbar = () => {
           </Link>
           <Link
             to="/projects"
-            className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
-              isActive("/projects")
-                ? "bg-slate-100 dark:bg-slate-800 text-primary-600"
-                : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-primary-600"
+            className={`rounded-md px-3 py-2 text-sm font-medium transition-all duration-200 ${
+              isActive('/projects')
+                ? 'bg-slate-100 text-primary-600 dark:bg-slate-800'
+                : 'text-slate-600 hover:bg-slate-50 hover:text-primary-600 dark:text-slate-300 dark:hover:bg-slate-800'
             }`}
           >
             <div className="flex items-center gap-1.5">
@@ -93,10 +93,10 @@ const Navbar = () => {
           </Link>
           <Link
             to="/templates"
-            className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
-              isActive("/templates")
-                ? "bg-slate-100 dark:bg-slate-800 text-primary-600"
-                : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-primary-600"
+            className={`rounded-md px-3 py-2 text-sm font-medium transition-all duration-200 ${
+              isActive('/templates')
+                ? 'bg-slate-100 text-primary-600 dark:bg-slate-800'
+                : 'text-slate-600 hover:bg-slate-50 hover:text-primary-600 dark:text-slate-300 dark:hover:bg-slate-800'
             }`}
           >
             <div className="flex items-center gap-1.5">
@@ -105,20 +105,20 @@ const Navbar = () => {
             </div>
           </Link>
 
-          <div className="flex items-center pl-3 space-x-1 ml-2 border-l border-slate-200 dark:border-slate-700">
-            <button className="p-2 rounded text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 relative">
+          <div className="ml-2 flex items-center space-x-1 border-l border-slate-200 pl-3 dark:border-slate-700">
+            <button className="relative rounded p-2 text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800">
               <Bell size={18} />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-primary-600 rounded-full border border-white dark:border-slate-900"></span>
+              <span className="absolute right-1 top-1 h-2 w-2 rounded-full border border-white bg-primary-600 dark:border-slate-900"></span>
             </button>
             <button
               onClick={toggleTheme}
-              className="p-2 rounded text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
+              className="rounded p-2 text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800"
             >
               {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
             </button>
-            <div className="relative group ml-1">
-              <button className="flex items-center gap-1 p-1 rounded hover:bg-slate-50 dark:hover:bg-slate-800">
-                <div className="w-7 h-7 rounded-full bg-primary-600 flex items-center justify-center text-white text-sm font-medium">
+            <div className="group relative ml-1">
+              <button className="flex items-center gap-1 rounded p-1 hover:bg-slate-50 dark:hover:bg-slate-800">
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary-600 text-sm font-medium text-white">
                   A
                 </div>
                 <ChevronDown size={14} className="text-slate-400" />
@@ -130,26 +130,26 @@ const Navbar = () => {
 
       {/* Mobile menu */}
       {isMenuOpen && (
-        <div className="md:hidden bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 absolute w-full">
+        <div className="absolute w-full border-t border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900 md:hidden">
           <div className="p-4">
             <div className="relative mb-4">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                 <Search size={16} className="text-slate-400" />
               </div>
               <input
                 type="text"
                 placeholder="Search..."
-                className="border border-slate-200 dark:border-slate-700 rounded-md py-2 pl-9 pr-4 text-sm bg-slate-50 dark:bg-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 w-full"
+                className="w-full rounded-md border border-slate-200 bg-slate-50 py-2 pl-9 pr-4 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
               />
             </div>
 
             <nav className="flex flex-col space-y-1">
               <Link
                 to="/"
-                className={`px-3 py-2.5 rounded-md text-sm font-medium transition-all duration-200 ${
-                  isActive("/")
-                    ? "bg-slate-100 dark:bg-slate-800 text-primary-600"
-                    : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-primary-600"
+                className={`rounded-md px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
+                  isActive('/')
+                    ? 'bg-slate-100 text-primary-600 dark:bg-slate-800'
+                    : 'text-slate-600 hover:bg-slate-50 hover:text-primary-600 dark:text-slate-300 dark:hover:bg-slate-800'
                 }`}
               >
                 <div className="flex items-center gap-2">
@@ -159,10 +159,10 @@ const Navbar = () => {
               </Link>
               <Link
                 to="/projects"
-                className={`px-3 py-2.5 rounded-md text-sm font-medium transition-all duration-200 ${
-                  isActive("/projects")
-                    ? "bg-slate-100 dark:bg-slate-800 text-primary-600"
-                    : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-primary-600"
+                className={`rounded-md px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
+                  isActive('/projects')
+                    ? 'bg-slate-100 text-primary-600 dark:bg-slate-800'
+                    : 'text-slate-600 hover:bg-slate-50 hover:text-primary-600 dark:text-slate-300 dark:hover:bg-slate-800'
                 }`}
               >
                 <div className="flex items-center gap-2">
@@ -172,10 +172,10 @@ const Navbar = () => {
               </Link>
               <Link
                 to="/templates"
-                className={`px-3 py-2.5 rounded-md text-sm font-medium transition-all duration-200 ${
-                  isActive("/templates")
-                    ? "bg-slate-100 dark:bg-slate-800 text-primary-600"
-                    : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-primary-600"
+                className={`rounded-md px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
+                  isActive('/templates')
+                    ? 'bg-slate-100 text-primary-600 dark:bg-slate-800'
+                    : 'text-slate-600 hover:bg-slate-50 hover:text-primary-600 dark:text-slate-300 dark:hover:bg-slate-800'
                 }`}
               >
                 <div className="flex items-center gap-2">
@@ -185,14 +185,14 @@ const Navbar = () => {
               </Link>
             </nav>
 
-            <div className="flex justify-between mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
-              <button className="flex items-center gap-2 text-slate-600 dark:text-slate-300 py-2 px-3 rounded-md hover:bg-slate-50 dark:hover:bg-slate-800">
+            <div className="mt-4 flex justify-between border-t border-slate-200 pt-4 dark:border-slate-700">
+              <button className="flex items-center gap-2 rounded-md px-3 py-2 text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800">
                 <User size={18} />
                 <span>Profile</span>
               </button>
               <button
                 onClick={toggleTheme}
-                className="flex items-center gap-2 text-slate-600 dark:text-slate-300 py-2 px-3 rounded-md hover:bg-slate-50 dark:hover:bg-slate-800"
+                className="flex items-center gap-2 rounded-md px-3 py-2 text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
               >
                 {isDarkMode ? (
                   <>

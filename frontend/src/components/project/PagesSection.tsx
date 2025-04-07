@@ -42,21 +42,11 @@ const PagesSection: React.FC<PagesSectionProps> = ({
       onViewModeChange={onViewModeChange}
       isLoading={isLoading}
       markdown={pages ? markdownService.generatePagesMarkdown(pages) : undefined}
-      markdownFileName={markdownService.generateFileName(projectName, "pages")}
+      markdownFileName={markdownService.generateFileName(projectName, 'pages')}
       editContent={
-        <PagesForm
-          initialData={pages || undefined}
-          projectId={projectId}
-          onSuccess={onSuccess}
-        />
+        <PagesForm initialData={pages || undefined} projectId={projectId} onSuccess={onSuccess} />
       }
-      previewContent={
-        <PagesPreview 
-          data={pages} 
-          projectName={projectName}
-          isLoading={isLoading} 
-        />
-      }
+      previewContent={<PagesPreview data={pages} projectName={projectName} isLoading={isLoading} />}
     />
   );
 };

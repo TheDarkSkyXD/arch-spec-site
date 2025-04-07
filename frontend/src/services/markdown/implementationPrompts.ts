@@ -2,12 +2,12 @@ import {
   ImplementationPrompts,
   ImplementationPrompt,
   ImplementationPromptType,
-} from "../../types/templates";
+} from '../../types/templates';
 import {
   IMPLEMENTATION_CATEGORIES,
   CATEGORY_LABELS,
   PROMPT_TYPE_LABELS,
-} from "../../constants/implementationPrompts";
+} from '../../constants/implementationPrompts';
 
 /**
  * Generate markdown for a category of implementation prompts
@@ -21,7 +21,7 @@ function generateCategoryMarkdown(
   categoryLabel: string
 ): string {
   if (!categoryPrompts || categoryPrompts.length === 0) {
-    return "";
+    return '';
   }
 
   let markdown = `## ${categoryLabel}\n\n`;
@@ -43,7 +43,7 @@ function generateCategoryMarkdown(
     // Add a note for follow-up prompts
     if (prompt.type === ImplementationPromptType.FOLLOWUP_1) {
       markdown +=
-        "_Use this prompt if the main prompt execution stopped before completing the task._\n\n";
+        '_Use this prompt if the main prompt execution stopped before completing the task._\n\n';
     } else if (prompt.type === ImplementationPromptType.FOLLOWUP_2) {
       markdown +=
         "_Use this prompt as a last resort if the previous prompts didn't complete the task._\n\n";
@@ -64,13 +64,9 @@ export function generateCategoryImplementationPromptsMarkdown(
   implementationPrompts: ImplementationPrompts,
   category: string
 ): string {
-  if (
-    !implementationPrompts ||
-    !implementationPrompts.data ||
-    !CATEGORY_LABELS[category]
-  ) {
+  if (!implementationPrompts || !implementationPrompts.data || !CATEGORY_LABELS[category]) {
     return `# ${
-      CATEGORY_LABELS[category] || "Unknown Category"
+      CATEGORY_LABELS[category] || 'Unknown Category'
     }\n\nNo implementation prompts defined for this category.`;
   }
 
@@ -82,7 +78,7 @@ export function generateCategoryImplementationPromptsMarkdown(
       CATEGORY_LABELS[category]
     );
   } else {
-    markdown += "No prompts defined for this category.";
+    markdown += 'No prompts defined for this category.';
   }
 
   return markdown;
@@ -98,14 +94,14 @@ export function generateImplementationPromptsMarkdown(
   implementationPrompts: ImplementationPrompts
 ): string {
   if (!implementationPrompts || !implementationPrompts.data) {
-    return "# Implementation Prompts\n\nNo implementation prompts defined.";
+    return '# Implementation Prompts\n\nNo implementation prompts defined.';
   }
 
-  let markdown = "# Implementation Prompts\n\n";
+  let markdown = '# Implementation Prompts\n\n';
   markdown +=
-    "This document contains prompts for implementing different aspects of your project using AI tools. ";
+    'This document contains prompts for implementing different aspects of your project using AI tools. ';
   markdown +=
-    "The prompts are organized by implementation phase and should be used in the numbered sequence.\n\n";
+    'The prompts are organized by implementation phase and should be used in the numbered sequence.\n\n';
 
   // Count total prompts
   const totalPrompts = Object.values(implementationPrompts.data).reduce(
@@ -114,21 +110,18 @@ export function generateImplementationPromptsMarkdown(
   );
 
   markdown += `**Total prompts:** ${totalPrompts}\n\n`;
-  markdown += "---\n\n";
+  markdown += '---\n\n';
 
   // Generate markdown for each category that has prompts, in the original order
   IMPLEMENTATION_CATEGORIES.forEach((category) => {
-    if (
-      implementationPrompts.data[category] &&
-      implementationPrompts.data[category].length > 0
-    ) {
+    if (implementationPrompts.data[category] && implementationPrompts.data[category].length > 0) {
       markdown += generateCategoryMarkdown(
         implementationPrompts.data[category],
         CATEGORY_LABELS[category]
       );
 
       // Add a separator between categories
-      markdown += "---\n\n";
+      markdown += '---\n\n';
     }
   });
 

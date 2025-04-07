@@ -1,8 +1,4 @@
-import {
-  Categories,
-  Technologies,
-  TechStackData,
-} from "../types/techStack";
+import { Categories, Technologies, TechStackData } from '../types/techStack';
 
 /**
  * Find all compatible technologies from one category based on a selected technology
@@ -20,7 +16,7 @@ export function getCompatibleTechnologies(
   targetCategory: string
 ): string[] {
   // Get the technology object
-  const category = selectedCategory as keyof TechStackData["technologies"];
+  const category = selectedCategory as keyof TechStackData['technologies'];
   const technologies = techStackData.technologies[category];
   if (!technologies) return [];
 
@@ -28,7 +24,7 @@ export function getCompatibleTechnologies(
   if (!technology) return [];
 
   // Access the compatibleWith property
-  const compatibleWith = (technology).compatibleWith;
+  const compatibleWith = technology.compatibleWith;
   if (!compatibleWith) return [];
 
   // If compatibleWith is an array, return it directly
@@ -64,35 +60,20 @@ export function filterCompatibleTechnologies(
   // If no selections have been made, return all technologies in the target category
   const selectionEntries = Object.entries(selections);
   if (selectionEntries.length === 0) {
-    const categoryKey = findCategoryKeyForSubcategory(
-      techStackData,
-      targetCategory
-    );
+    const categoryKey = findCategoryKeyForSubcategory(techStackData, targetCategory);
     if (categoryKey) {
-      const categoryObj =
-        techStackData.categories[categoryKey as keyof Categories];
+      const categoryObj = techStackData.categories[categoryKey as keyof Categories];
       if (categoryObj && targetCategory in categoryObj) {
         // Use a safer type assertion by first converting to unknown
-        return (categoryObj as unknown as Record<string, string[]>)[
-          targetCategory
-        ];
+        return (categoryObj as unknown as Record<string, string[]>)[targetCategory];
       }
     }
-    return Object.keys(
-      techStackData.technologies[targetCategory as keyof Technologies] || {}
-    );
+    return Object.keys(techStackData.technologies[targetCategory as keyof Technologies] || {});
   }
 
   // For each selection, get compatible technologies
   const compatibleSets = selectionEntries.map(([category, technology]) => {
-    return new Set(
-      getCompatibleTechnologies(
-        techStackData,
-        category,
-        technology,
-        targetCategory
-      )
-    );
+    return new Set(getCompatibleTechnologies(techStackData, category, technology, targetCategory));
   });
 
   // Find intersection of all sets
@@ -124,7 +105,7 @@ function findCategoryKeyForSubcategory(
   const categories = techStackData.categories;
 
   for (const [key, value] of Object.entries(categories)) {
-    if (value && typeof value === "object" && subcategory in value) {
+    if (value && typeof value === 'object' && subcategory in value) {
       return key;
     }
   }

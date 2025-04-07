@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
-import { useAuth } from "../contexts";
-import paymentService, { Subscription } from "../services/paymentService";
+import { useState, useEffect } from 'react';
+import { useAuth } from '../contexts';
+import paymentService, { Subscription } from '../services/paymentService';
 
 interface UseSubscriptionResult {
   isSubscriptionActive: boolean;
@@ -22,10 +22,8 @@ export const useSubscription = (): UseSubscriptionResult => {
   const auth = useAuth();
   const user = auth?.currentUser as AuthUser | undefined;
 
-  const [isSubscriptionActive, setIsSubscriptionActive] =
-    useState<boolean>(false);
-  const [isSubscriptionLoading, setIsSubscriptionLoading] =
-    useState<boolean>(true);
+  const [isSubscriptionActive, setIsSubscriptionActive] = useState<boolean>(false);
+  const [isSubscriptionLoading, setIsSubscriptionLoading] = useState<boolean>(true);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
 
   const checkSubscription = async () => {
@@ -37,14 +35,9 @@ export const useSubscription = (): UseSubscriptionResult => {
 
     try {
       setIsSubscriptionLoading(true);
-      const currentSubscription = await paymentService.getCurrentSubscription(
-        user.email
-      );
+      const currentSubscription = await paymentService.getCurrentSubscription(user.email);
 
-      if (
-        currentSubscription &&
-        ["active", "on_trial"].includes(currentSubscription.status)
-      ) {
+      if (currentSubscription && ['active', 'on_trial'].includes(currentSubscription.status)) {
         setIsSubscriptionActive(true);
         setSubscription(currentSubscription);
       } else {
@@ -52,7 +45,7 @@ export const useSubscription = (): UseSubscriptionResult => {
         setSubscription(currentSubscription);
       }
     } catch (error) {
-      console.error("Error checking subscription status:", error);
+      console.error('Error checking subscription status:', error);
       setIsSubscriptionActive(false);
     } finally {
       setIsSubscriptionLoading(false);

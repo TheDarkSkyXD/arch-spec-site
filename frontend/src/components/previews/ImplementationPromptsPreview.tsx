@@ -1,18 +1,15 @@
-import { useState } from "react";
-import { Copy, Download, Check } from "lucide-react";
-import { useToast } from "../../contexts/ToastContext";
-import {
-  ImplementationPrompts,
-  ImplementationPromptType,
-} from "../../types/templates";
+import { useState } from 'react';
+import { Copy, Download, Check } from 'lucide-react';
+import { useToast } from '../../contexts/ToastContext';
+import { ImplementationPrompts, ImplementationPromptType } from '../../types/templates';
 import {
   IMPLEMENTATION_CATEGORIES,
   CATEGORY_LABELS,
   PROMPT_TYPE_LABELS,
-} from "../../constants/implementationPrompts";
-import Button from "../ui/Button";
-import Card from "../ui/Card";
-import Spinner from "../ui/Spinner";
+} from '../../constants/implementationPrompts';
+import Button from '../ui/Button';
+import Card from '../ui/Card';
+import Spinner from '../ui/Spinner';
 
 interface ImplementationPromptsPreviewProps {
   projectId?: string; // Making this optional since it's not used
@@ -29,9 +26,9 @@ export default function ImplementationPromptsPreview({
   const [expandedCategory, setExpandedCategory] = useState<string | null>(
     // Start with the first category expanded if it has prompts
     // Add null check to prevent TypeScript error
-    data?.data && 
-    IMPLEMENTATION_CATEGORIES[0] in data.data && 
-    data.data[IMPLEMENTATION_CATEGORIES[0]]?.length > 0
+    data?.data &&
+      IMPLEMENTATION_CATEGORIES[0] in data.data &&
+      data.data[IMPLEMENTATION_CATEGORIES[0]]?.length > 0
       ? IMPLEMENTATION_CATEGORIES[0]
       : null
   );
@@ -42,21 +39,21 @@ export default function ImplementationPromptsPreview({
       await navigator.clipboard.writeText(content);
       setCopiedPromptId(promptId);
       showToast({
-        title: "Copied",
-        description: "Prompt copied to clipboard",
-        type: "success",
+        title: 'Copied',
+        description: 'Prompt copied to clipboard',
+        type: 'success',
       });
-      
+
       // Reset the copied state after 2 seconds
       setTimeout(() => {
         setCopiedPromptId(null);
       }, 2000);
     } catch (err) {
-      console.error("Failed to copy text: ", err);
+      console.error('Failed to copy text: ', err);
       showToast({
-        title: "Error",
-        description: "Failed to copy prompt to clipboard",
-        type: "error",
+        title: 'Error',
+        description: 'Failed to copy prompt to clipboard',
+        type: 'error',
       });
     }
   };
@@ -66,7 +63,7 @@ export default function ImplementationPromptsPreview({
       if (!data) return;
 
       // Create a properly formatted text for download
-      let content = "# IMPLEMENTATION PROMPTS\n\n";
+      let content = '# IMPLEMENTATION PROMPTS\n\n';
 
       IMPLEMENTATION_CATEGORIES.forEach((category) => {
         if (data.data[category] && data.data[category].length > 0) {
@@ -87,32 +84,32 @@ export default function ImplementationPromptsPreview({
             content += `${prompt.content}\n\n`;
           });
 
-          content += "\n";
+          content += '\n';
         }
       });
 
       // Create a blob and download link
-      const blob = new Blob([content], { type: "text/markdown" });
+      const blob = new Blob([content], { type: 'text/markdown' });
       const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
+      const link = document.createElement('a');
       link.href = url;
-      link.download = "implementation_prompts.md";
+      link.download = 'implementation_prompts.md';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
 
       showToast({
-        title: "Downloaded",
-        description: "Implementation prompts downloaded successfully",
-        type: "success",
+        title: 'Downloaded',
+        description: 'Implementation prompts downloaded successfully',
+        type: 'success',
       });
     } catch (err) {
-      console.error("Failed to download prompts: ", err);
+      console.error('Failed to download prompts: ', err);
       showToast({
-        title: "Error",
-        description: "Failed to download implementation prompts",
-        type: "error",
+        title: 'Error',
+        description: 'Failed to download implementation prompts',
+        type: 'error',
       });
     }
   };
@@ -123,7 +120,7 @@ export default function ImplementationPromptsPreview({
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center p-8">
+      <div className="flex items-center justify-center p-8">
         <Spinner size="md" />
         <span className="ml-3 text-slate-600 dark:text-slate-300">
           Loading implementation prompts...
@@ -135,8 +132,8 @@ export default function ImplementationPromptsPreview({
   // If no data or empty data
   if (!data || !data.data || Object.keys(data.data).length === 0) {
     return (
-      <div className="p-6 bg-white dark:bg-slate-800 rounded-lg shadow-sm">
-        <div className="text-center py-8">
+      <div className="rounded-lg bg-white p-6 shadow-sm dark:bg-slate-800">
+        <div className="py-8 text-center">
           <p className="text-slate-600 dark:text-slate-400">
             No implementation prompts defined yet.
           </p>
@@ -157,16 +154,16 @@ export default function ImplementationPromptsPreview({
   );
 
   return (
-    <div className="p-6 bg-white dark:bg-slate-800 rounded-lg shadow-sm space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-6 rounded-lg bg-white p-6 shadow-sm dark:bg-slate-800">
+      <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100">
             Implementation Prompts
           </h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            {totalPrompts} prompt{totalPrompts !== 1 ? "s" : ""} across{" "}
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            {totalPrompts} prompt{totalPrompts !== 1 ? 's' : ''} across{' '}
             {categoriesWithPrompts.length} categor
-            {categoriesWithPrompts.length !== 1 ? "ies" : "y"}
+            {categoriesWithPrompts.length !== 1 ? 'ies' : 'y'}
           </p>
         </div>
         <Button
@@ -185,14 +182,14 @@ export default function ImplementationPromptsPreview({
           categoriesWithPrompts.map((category) => (
             <div
               key={category}
-              className="border border-slate-200 dark:border-slate-700 rounded-md overflow-hidden"
+              className="overflow-hidden rounded-md border border-slate-200 dark:border-slate-700"
             >
               <button
                 onClick={() => toggleCategory(category)}
-                className={`w-full flex justify-between items-center p-3 text-left hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors ${
+                className={`flex w-full items-center justify-between p-3 text-left transition-colors hover:bg-slate-50 dark:hover:bg-slate-700 ${
                   expandedCategory === category
-                    ? "bg-slate-100 dark:bg-slate-700"
-                    : "bg-white dark:bg-slate-800"
+                    ? 'bg-slate-100 dark:bg-slate-700'
+                    : 'bg-white dark:bg-slate-800'
                 }`}
               >
                 <span className="font-medium text-slate-700 dark:text-slate-200">
@@ -200,12 +197,12 @@ export default function ImplementationPromptsPreview({
                 </span>
                 <span className="text-xs text-slate-500 dark:text-slate-400">
                   {data.data[category].length} prompt
-                  {data.data[category].length !== 1 ? "s" : ""}
+                  {data.data[category].length !== 1 ? 's' : ''}
                 </span>
               </button>
 
               {expandedCategory === category && (
-                <div className="p-3 space-y-3 bg-slate-50 dark:bg-slate-800">
+                <div className="space-y-3 bg-slate-50 p-3 dark:bg-slate-800">
                   {data.data[category]
                     .sort((a, b) => {
                       const typeOrder = {
@@ -218,28 +215,23 @@ export default function ImplementationPromptsPreview({
                     .map((prompt) => (
                       <Card
                         key={prompt.id}
-                        className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 p-3"
+                        className="border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900"
                       >
-                        <div className="flex justify-between items-start mb-2">
+                        <div className="mb-2 flex items-start justify-between">
                           <div className="flex items-center gap-2">
-                            <span className="inline-block px-2 py-1 text-xs rounded bg-primary-100 dark:bg-primary-900 text-primary-800 dark:text-primary-200">
+                            <span className="inline-block rounded bg-primary-100 px-2 py-1 text-xs text-primary-800 dark:bg-primary-900 dark:text-primary-200">
                               {PROMPT_TYPE_LABELS[prompt.type]}
                             </span>
                             {prompt.updated_at && (
                               <span className="text-xs text-slate-400 dark:text-slate-500">
-                                Updated:{" "}
-                                {new Date(
-                                  prompt.updated_at
-                                ).toLocaleDateString()}
+                                Updated: {new Date(prompt.updated_at).toLocaleDateString()}
                               </span>
                             )}
                           </div>
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() =>
-                              copyPromptToClipboard(prompt.content, prompt.id)
-                            }
+                            onClick={() => copyPromptToClipboard(prompt.content, prompt.id)}
                             className="text-slate-500 hover:text-primary-500"
                             title="Copy prompt to clipboard"
                           >
@@ -250,7 +242,7 @@ export default function ImplementationPromptsPreview({
                             )}
                           </Button>
                         </div>
-                        <pre className="whitespace-pre-wrap text-slate-600 dark:text-slate-300 text-sm mt-2 font-sans">
+                        <pre className="mt-2 whitespace-pre-wrap font-sans text-sm text-slate-600 dark:text-slate-300">
                           {prompt.content}
                         </pre>
                       </Card>
@@ -260,9 +252,8 @@ export default function ImplementationPromptsPreview({
             </div>
           ))
         ) : (
-          <p className="text-center text-slate-500 dark:text-slate-400 py-6">
-            No implementation prompts have been defined yet. Go to the edit tab
-            to create some.
+          <p className="py-6 text-center text-slate-500 dark:text-slate-400">
+            No implementation prompts have been defined yet. Go to the edit tab to create some.
           </p>
         )}
       </div>

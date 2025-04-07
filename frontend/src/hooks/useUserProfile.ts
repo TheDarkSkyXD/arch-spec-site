@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
-import { useAuth } from "../contexts";
-import { userApi, UserProfile } from "../api/userApi";
-import { toast } from "react-hot-toast";
+import { useState, useEffect, useCallback } from 'react';
+import { useAuth } from '../contexts';
+import { userApi, UserProfile } from '../api/userApi';
+import { toast } from 'react-hot-toast';
 
 interface UseUserProfileResult {
   // User profile data
@@ -26,9 +26,7 @@ interface UseUserProfileResult {
  */
 export const useUserProfile = (): UseUserProfileResult => {
   const { currentUser } = useAuth();
-  const [profile, setProfile] = useState<UserProfile | null>(
-    currentUser?.profile || null
-  );
+  const [profile, setProfile] = useState<UserProfile | null>(currentUser?.profile || null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -47,8 +45,8 @@ export const useUserProfile = (): UseUserProfileResult => {
       const freshProfile = await userApi.getCurrentUserProfile();
       setProfile(freshProfile);
     } catch (err) {
-      console.error("Error loading user profile:", err);
-      setError("Failed to load user profile data");
+      console.error('Error loading user profile:', err);
+      setError('Failed to load user profile data');
     } finally {
       setIsLoading(false);
     }
@@ -63,10 +61,7 @@ export const useUserProfile = (): UseUserProfileResult => {
   const hasEnoughAICredits = useCallback(
     (requiredCredits: number = 1): boolean => {
       // If no profile or not a premium user, they don't have access to AI features
-      if (
-        !profile ||
-        (profile.plan !== "premium" && profile.plan !== "open_source")
-      ) {
+      if (!profile || (profile.plan !== 'premium' && profile.plan !== 'open_source')) {
         return false;
       }
 
@@ -92,8 +87,8 @@ export const useUserProfile = (): UseUserProfileResult => {
         setProfile(updatedProfile);
         return true;
       } catch (err) {
-        console.error("Error updating AI credits usage:", err);
-        toast.error("Failed to update AI credits usage");
+        console.error('Error updating AI credits usage:', err);
+        toast.error('Failed to update AI credits usage');
         return false;
       }
     },

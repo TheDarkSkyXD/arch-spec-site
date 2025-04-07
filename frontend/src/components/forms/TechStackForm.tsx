@@ -1,6 +1,6 @@
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect, useState } from 'react';
 import {
   BaaS,
   BackendFramework,
@@ -14,41 +14,38 @@ import {
   TechStackData,
   Technology,
   UILibrary,
-} from "../../types/techStack";
-import { useTechStack } from "../../hooks/useDataQueries";
-import { techStackService } from "../../services/techStackService";
+} from '../../types/techStack';
+import { useTechStack } from '../../hooks/useDataQueries';
+import { techStackService } from '../../services/techStackService';
 // Import AI service for tech stack enhancement
-import { aiService } from "../../services/aiService";
+import { aiService } from '../../services/aiService';
 
 // Import shadcn UI components
-import Button from "../ui/Button";
-import Card from "../ui/Card";
+import Button from '../ui/Button';
+import Card from '../ui/Card';
 // Import Lucide icons for AI enhancement buttons
-import { Loader2, Sparkles, Lock } from "lucide-react";
-import AIInstructionsModal from "../ui/AIInstructionsModal";
+import { Loader2, Sparkles, Lock } from 'lucide-react';
+import AIInstructionsModal from '../ui/AIInstructionsModal';
 
 // Import schema
-import {
-  techStackSchema,
-  TechStackFormData,
-} from "./tech-stack/techStackSchema";
+import { techStackSchema, TechStackFormData } from './tech-stack/techStackSchema';
 
 // Import section components
-import FrontendSection from "./tech-stack/FrontendSection";
-import BackendSection from "./tech-stack/BackendSection";
-import DatabaseSection from "./tech-stack/DatabaseSection";
-import AuthenticationSection from "./tech-stack/AuthenticationSection";
-import HostingSection from "./tech-stack/HostingSection";
-import StorageSection from "./tech-stack/StorageSection";
-import DeploymentSection from "./tech-stack/DeploymentSection";
-import { ProjectTechStack } from "../../types/templates";
-import { useToast } from "../../contexts/ToastContext";
+import FrontendSection from './tech-stack/FrontendSection';
+import BackendSection from './tech-stack/BackendSection';
+import DatabaseSection from './tech-stack/DatabaseSection';
+import AuthenticationSection from './tech-stack/AuthenticationSection';
+import HostingSection from './tech-stack/HostingSection';
+import StorageSection from './tech-stack/StorageSection';
+import DeploymentSection from './tech-stack/DeploymentSection';
+import { ProjectTechStack } from '../../types/templates';
+import { useToast } from '../../contexts/ToastContext';
 // Import services to fetch project info for AI enhancement
-import { projectsService } from "../../services/projectsService";
-import { requirementsService } from "../../services/requirementsService";
-import { useSubscription } from "../../contexts/SubscriptionContext";
-import { PremiumFeatureBadge, ProcessingOverlay } from "../ui/index";
-import { useUserProfile } from "../../hooks/useUserProfile";
+import { projectsService } from '../../services/projectsService';
+import { requirementsService } from '../../services/requirementsService';
+import { useSubscription } from '../../contexts/SubscriptionContext';
+import { PremiumFeatureBadge, ProcessingOverlay } from '../ui/index';
+import { useUserProfile } from '../../hooks/useUserProfile';
 
 interface TechStackFormProps {
   initialData?: ProjectTechStack;
@@ -56,47 +53,42 @@ interface TechStackFormProps {
   onSuccess?: (techStackData: ProjectTechStack) => void;
 }
 
-const TechStackForm = ({
-  initialData,
-  projectId,
-  onSuccess,
-}: TechStackFormProps) => {
+const TechStackForm = ({ initialData, projectId, onSuccess }: TechStackFormProps) => {
   const { showToast } = useToast();
   const { hasAIFeatures } = useSubscription();
   const { aiCreditsRemaining } = useUserProfile();
   // State for options
-  const [techStackOptions, setTechStackOptions] =
-    useState<TechStackData | null>(null);
+  const [techStackOptions, setTechStackOptions] = useState<TechStackData | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   // Add state for error and success messages
-  const [error, setError] = useState<string>("");
-  const [justification, setJustification] = useState<string>("");
+  const [error, setError] = useState<string>('');
+  const [justification, setJustification] = useState<string>('');
 
   // Add state for AI enhancement
   const [isEnhancing, setIsEnhancing] = useState<boolean>(false);
-  const [projectDescription, setProjectDescription] = useState<string>("");
+  const [projectDescription, setProjectDescription] = useState<string>('');
   const [projectRequirements, setProjectRequirements] = useState<string[]>([]);
 
   // Add state for AI instructions modal
   const [isAIModalOpen, setIsAIModalOpen] = useState<boolean>(false);
 
   const defaultValues: TechStackFormData = {
-    frontend: "",
-    frontend_language: "",
-    ui_library: "",
-    state_management: "",
-    backend_type: "",
-    backend_framework: "",
-    backend_language: "",
-    backend_service: "",
-    backend_realtime: "",
-    database_type: "",
-    database_system: "",
-    database_hosting: "",
-    database_orm: "",
-    auth_provider: "",
-    auth_methods: "",
+    frontend: '',
+    frontend_language: '',
+    ui_library: '',
+    state_management: '',
+    backend_type: '',
+    backend_framework: '',
+    backend_language: '',
+    backend_service: '',
+    backend_realtime: '',
+    database_type: '',
+    database_system: '',
+    database_hosting: '',
+    database_orm: '',
+    auth_provider: '',
+    auth_methods: '',
   };
 
   const {
@@ -131,7 +123,7 @@ const TechStackForm = ({
     return (
       Object.entries(frameworks)
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        .filter(([_, framework]) => framework.type === "frontend")
+        .filter(([_, framework]) => framework.type === 'frontend')
         .map(([name, framework]) => ({
           ...framework,
           id: name,
@@ -154,8 +146,7 @@ const TechStackForm = ({
 
   const getFrontendStateManagement = (): StateManagement[] => {
     // Get all state management and filter to only return frontend state management
-    const stateManagement =
-      techStackOptions?.technologies?.stateManagement || {};
+    const stateManagement = techStackOptions?.technologies?.stateManagement || {};
 
     return Object.entries(stateManagement)
       .map(([name, stateManagement]) => ({
@@ -172,7 +163,7 @@ const TechStackForm = ({
     return (
       Object.entries(frameworks)
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        .filter(([_, framework]) => framework.type === "backend")
+        .filter(([_, framework]) => framework.type === 'backend')
         .map(([name, framework]) => ({
           ...framework,
           id: name,
@@ -236,7 +227,7 @@ const TechStackForm = ({
     return (
       Object.entries(hosting)
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        .filter(([_, hosting]) => hosting.type === "database")
+        .filter(([_, hosting]) => hosting.type === 'database')
         .map(([name, hosting]) => ({
           ...hosting,
           id: name,
@@ -303,8 +294,7 @@ const TechStackForm = ({
   };
 
   const getAllDeploymentContainerization = (): string[] => {
-    const containerization =
-      techStackOptions?.categories?.deployment?.containerization || [];
+    const containerization = techStackOptions?.categories?.deployment?.containerization || [];
 
     return containerization.sort();
   };
@@ -324,12 +314,10 @@ const TechStackForm = ({
       const projectDetails = await projectsService.getProjectById(projectId);
 
       if (projectDetails) {
-        setProjectDescription(projectDetails.description || "");
+        setProjectDescription(projectDetails.description || '');
 
         // Fetch requirements as well
-        const requirementsData = await requirementsService.getRequirements(
-          projectId
-        );
+        const requirementsData = await requirementsService.getRequirements(projectId);
         if (requirementsData) {
           // Combine functional and non-functional requirements
           const allRequirements = [
@@ -340,7 +328,7 @@ const TechStackForm = ({
         }
       }
     } catch (error) {
-      console.error("Error fetching project details:", error);
+      console.error('Error fetching project details:', error);
     }
   };
 
@@ -348,9 +336,9 @@ const TechStackForm = ({
   const openAIModal = () => {
     if (!projectId) {
       showToast({
-        title: "Error",
-        description: "Project must be saved before tech stack can be enhanced",
-        type: "error",
+        title: 'Error',
+        description: 'Project must be saved before tech stack can be enhanced',
+        type: 'error',
       });
       return;
     }
@@ -358,9 +346,9 @@ const TechStackForm = ({
     // Check if user has remaining AI credits
     if (aiCreditsRemaining <= 0) {
       showToast({
-        title: "Insufficient AI Credits",
+        title: 'Insufficient AI Credits',
         description: "You've used all your AI credits for this billing period",
-        type: "warning",
+        type: 'warning',
       });
       return;
     }
@@ -368,29 +356,27 @@ const TechStackForm = ({
     // Check if user has access to AI features
     if (!hasAIFeatures) {
       showToast({
-        title: "Premium Feature",
+        title: 'Premium Feature',
         description:
-          "AI enhancement is only available on Premium and Open Source plans. Please upgrade to use this feature.",
-        type: "warning",
+          'AI enhancement is only available on Premium and Open Source plans. Please upgrade to use this feature.',
+        type: 'warning',
       });
       return;
     }
 
     if (!projectDescription) {
       showToast({
-        title: "Warning",
-        description:
-          "Project description is missing. Tech stack may not be properly enhanced.",
-        type: "warning",
+        title: 'Warning',
+        description: 'Project description is missing. Tech stack may not be properly enhanced.',
+        type: 'warning',
       });
     }
 
     if (projectRequirements.length === 0) {
       showToast({
-        title: "Warning",
-        description:
-          "No requirements found. Tech stack will be based only on project description.",
-        type: "warning",
+        title: 'Warning',
+        description: 'No requirements found. Tech stack will be based only on project description.',
+        type: 'warning',
       });
     }
 
@@ -400,13 +386,13 @@ const TechStackForm = ({
   // New function to enhance tech stack using AI (replace existing settings)
   const enhanceTechStack = async (additionalInstructions?: string) => {
     setIsEnhancing(true);
-    setJustification("");
+    setJustification('');
     try {
-      console.log("Enhancing tech stack with AI...");
+      console.log('Enhancing tech stack with AI...');
 
       // Get current form values as user preferences
       const formValues = control._formValues;
-      console.log("Current tech stack preferences:", formValues);
+      console.log('Current tech stack preferences:', formValues);
 
       const techStackRecommendations = await aiService.enhanceTechStack(
         projectDescription,
@@ -419,26 +405,17 @@ const TechStackForm = ({
         // Set form values based on AI recommendations
         if (techStackRecommendations.frontend) {
           if (techStackRecommendations.frontend.framework) {
-            setTechStackValue(
-              "frontend",
-              techStackRecommendations.frontend.framework
-            );
+            setTechStackValue('frontend', techStackRecommendations.frontend.framework);
           }
           if (techStackRecommendations.frontend.language) {
-            setTechStackValue(
-              "frontend_language",
-              techStackRecommendations.frontend.language
-            );
+            setTechStackValue('frontend_language', techStackRecommendations.frontend.language);
           }
           if (techStackRecommendations.frontend.uiLibrary) {
-            setTechStackValue(
-              "ui_library",
-              techStackRecommendations.frontend.uiLibrary
-            );
+            setTechStackValue('ui_library', techStackRecommendations.frontend.uiLibrary);
           }
           if (techStackRecommendations.frontend.stateManagement) {
             setTechStackValue(
-              "state_management",
+              'state_management',
               techStackRecommendations.frontend.stateManagement
             );
           }
@@ -448,102 +425,77 @@ const TechStackForm = ({
           if (techStackRecommendations.backend.type) {
             // Convert the backend type to a valid value for the form
             const backendType =
-              techStackRecommendations.backend.type === "traditional"
-                ? "framework"
+              techStackRecommendations.backend.type === 'traditional'
+                ? 'framework'
                 : techStackRecommendations.backend.type;
 
             // Only set if it's a valid value
-            if (["framework", "baas", "serverless"].includes(backendType)) {
-              setTechStackValue(
-                "backend_type",
-                backendType as "framework" | "baas" | "serverless"
-              );
+            if (['framework', 'baas', 'serverless'].includes(backendType)) {
+              setTechStackValue('backend_type', backendType as 'framework' | 'baas' | 'serverless');
             }
           }
           if (techStackRecommendations.backend.service) {
-            setTechStackValue(
-              "backend_service",
-              techStackRecommendations.backend.service
-            );
+            setTechStackValue('backend_service', techStackRecommendations.backend.service);
           }
           if (techStackRecommendations.backend.realtime) {
-            setTechStackValue(
-              "backend_realtime",
-              techStackRecommendations.backend.realtime
-            );
+            setTechStackValue('backend_realtime', techStackRecommendations.backend.realtime);
           }
         }
 
         if (techStackRecommendations.database) {
           if (techStackRecommendations.database.type) {
-            setTechStackValue(
-              "database_type",
-              techStackRecommendations.database.type
-            );
+            setTechStackValue('database_type', techStackRecommendations.database.type);
           }
           if (techStackRecommendations.database.system) {
-            setTechStackValue(
-              "database_system",
-              techStackRecommendations.database.system
-            );
+            setTechStackValue('database_system', techStackRecommendations.database.system);
           }
           if (techStackRecommendations.database.hosting) {
-            setTechStackValue(
-              "database_hosting",
-              techStackRecommendations.database.hosting
-            );
+            setTechStackValue('database_hosting', techStackRecommendations.database.hosting);
           }
           if (techStackRecommendations.database.orm) {
-            setTechStackValue(
-              "database_orm",
-              techStackRecommendations.database.orm
-            );
+            setTechStackValue('database_orm', techStackRecommendations.database.orm);
           }
         }
 
         if (techStackRecommendations.authentication) {
           if (techStackRecommendations.authentication.provider) {
-            setTechStackValue(
-              "auth_provider",
-              techStackRecommendations.authentication.provider
-            );
+            setTechStackValue('auth_provider', techStackRecommendations.authentication.provider);
           }
           if (
             techStackRecommendations.authentication.methods &&
             techStackRecommendations.authentication.methods.length > 0
           ) {
             setTechStackValue(
-              "auth_methods",
-              techStackRecommendations.authentication.methods.join(",")
+              'auth_methods',
+              techStackRecommendations.authentication.methods.join(',')
             );
           }
         }
 
         // Display success message with the overall justification
         const justification =
-          techStackRecommendations.overallJustification ||
-          "Tech stack enhanced successfully";
+          techStackRecommendations.overallJustification || 'Tech stack enhanced successfully';
         showToast({
-          title: "Success",
-          description: "Tech stack enhanced successfully",
-          type: "success",
+          title: 'Success',
+          description: 'Tech stack enhanced successfully',
+          type: 'success',
         });
 
         // Set justification
         setJustification(justification);
       } else {
         showToast({
-          title: "Warning",
-          description: "No tech stack recommendations returned",
-          type: "warning",
+          title: 'Warning',
+          description: 'No tech stack recommendations returned',
+          type: 'warning',
         });
       }
     } catch (error) {
-      console.error("Error enhancing tech stack:", error);
+      console.error('Error enhancing tech stack:', error);
       showToast({
-        title: "Error",
-        description: "Failed to enhance tech stack",
-        type: "error",
+        title: 'Error',
+        description: 'Failed to enhance tech stack',
+        type: 'error',
       });
     } finally {
       setIsEnhancing(false);
@@ -565,9 +517,9 @@ const TechStackForm = ({
   // Helper to get the appropriate message for the overlay
   const getEnhancementMessage = () => {
     if (isEnhancing) {
-      return "AI is analyzing your project requirements and recommending the optimal tech stack. Please wait...";
+      return 'AI is analyzing your project requirements and recommending the optimal tech stack. Please wait...';
     }
-    return "AI enhancement in progress...";
+    return 'AI enhancement in progress...';
   };
 
   if (isLoading || !techStackOptions) {
@@ -578,27 +530,27 @@ const TechStackForm = ({
     // If no project ID, can't save
     if (!projectId) {
       showToast({
-        title: "Error",
-        description: "Project must be saved before tech stack can be saved",
-        type: "error",
+        title: 'Error',
+        description: 'Project must be saved before tech stack can be saved',
+        type: 'error',
       });
-      setError("Project must be saved before tech stack can be saved");
-      setTimeout(() => setError(""), 5000);
+      setError('Project must be saved before tech stack can be saved');
+      setTimeout(() => setError(''), 5000);
       return;
     }
 
     setIsSubmitting(true);
     // Clear previous messages
-    setError("");
+    setError('');
 
     try {
       const result = await techStackService.saveTechStack(projectId, data);
 
       if (result) {
         showToast({
-          title: "Success",
-          description: "Tech stack saved successfully",
-          type: "success",
+          title: 'Success',
+          description: 'Tech stack saved successfully',
+          type: 'success',
         });
 
         if (onSuccess) {
@@ -606,33 +558,29 @@ const TechStackForm = ({
         }
       } else {
         showToast({
-          title: "Error",
-          description: "Failed to save tech stack",
-          type: "error",
+          title: 'Error',
+          description: 'Failed to save tech stack',
+          type: 'error',
         });
-        setError("Failed to save tech stack");
-        setTimeout(() => setError(""), 5000);
+        setError('Failed to save tech stack');
+        setTimeout(() => setError(''), 5000);
       }
     } catch (error) {
-      console.error("Error saving tech stack:", error);
+      console.error('Error saving tech stack:', error);
       showToast({
-        title: "Error",
-        description: "An unexpected error occurred",
-        type: "error",
+        title: 'Error',
+        description: 'An unexpected error occurred',
+        type: 'error',
       });
-      setError("An unexpected error occurred while saving tech stack");
-      setTimeout(() => setError(""), 5000);
+      setError('An unexpected error occurred while saving tech stack');
+      setTimeout(() => setError(''), 5000);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <form
-      id="tech-stack-form"
-      onSubmit={handleSubmit(onSubmit)}
-      className="space-y-8 relative"
-    >
+    <form id="tech-stack-form" onSubmit={handleSubmit(onSubmit)} className="relative space-y-8">
       {/* Processing Overlay */}
       <ProcessingOverlay
         isVisible={isAnyEnhancementInProgress()}
@@ -652,32 +600,32 @@ const TechStackForm = ({
 
       {/* Error Message */}
       {error && (
-        <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-md mb-4">
+        <div className="mb-4 rounded-md bg-red-50 p-3 text-red-600 dark:bg-red-900/20 dark:text-red-400">
           {error}
         </div>
       )}
 
       {justification && (
-        <div className="bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 p-3 rounded-md whitespace-pre-line mb-4">
+        <div className="mb-4 whitespace-pre-line rounded-md bg-blue-50 p-3 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400">
           {justification}
         </div>
       )}
 
       {/* AI Enhancement Button */}
-      <div className="flex justify-end items-center gap-3 mb-4">
+      <div className="mb-4 flex items-center justify-end gap-3">
         {!hasAIFeatures && <PremiumFeatureBadge />}
         <Button
           type="button"
           onClick={openAIModal}
           disabled={isEnhancing || !projectId || !hasAIFeatures}
-          variant={hasAIFeatures ? "outline" : "ghost"}
-          className={`flex items-center gap-2 relative ${
-            !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
+          variant={hasAIFeatures ? 'outline' : 'ghost'}
+          className={`relative flex items-center gap-2 ${
+            !hasAIFeatures ? 'cursor-not-allowed opacity-50' : ''
           }`}
           title={
             hasAIFeatures
-              ? "Replace tech stack with AI-generated recommendations"
-              : "Upgrade to Premium to use AI-powered features"
+              ? 'Replace tech stack with AI-generated recommendations'
+              : 'Upgrade to Premium to use AI-powered features'
           }
         >
           {isEnhancing ? (
@@ -687,11 +635,7 @@ const TechStackForm = ({
             </>
           ) : (
             <>
-              {hasAIFeatures ? (
-                <Sparkles className="h-4 w-4" />
-              ) : (
-                <Lock className="h-4 w-4" />
-              )}
+              {hasAIFeatures ? <Sparkles className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
               <span>AI Recommendations</span>
             </>
           )}
@@ -792,14 +736,10 @@ const TechStackForm = ({
         <Button
           type="submit"
           disabled={isSubmitting || !projectId}
-          variant={!projectId || isSubmitting ? "outline" : "default"}
-          className={
-            !projectId || isSubmitting
-              ? "bg-gray-400 text-white hover:bg-gray-400"
-              : ""
-          }
+          variant={!projectId || isSubmitting ? 'outline' : 'default'}
+          className={!projectId || isSubmitting ? 'bg-gray-400 text-white hover:bg-gray-400' : ''}
         >
-          {isSubmitting ? "Saving..." : "Save Tech Stack"}
+          {isSubmitting ? 'Saving...' : 'Save Tech Stack'}
         </Button>
       </div>
     </form>

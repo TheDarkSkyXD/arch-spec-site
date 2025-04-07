@@ -9,11 +9,7 @@
  * @param padChar The character to use for padding (default: space)
  * @returns The padded string
  */
-export function padString(
-  str: string,
-  length: number,
-  padChar: string = " "
-): string {
+export function padString(str: string, length: number, padChar: string = ' '): string {
   const padding = length - str.length;
   if (padding <= 0) return str;
   return str + padChar.repeat(padding);
@@ -41,9 +37,7 @@ export function formatMarkdownTable(
   separators?: string[]
 ): string {
   // Default separators if not provided
-  const defaultSeparators = headers.map((header) =>
-    "-".repeat(Math.max(4, header.length))
-  );
+  const defaultSeparators = headers.map((header) => '-'.repeat(Math.max(4, header.length)));
 
   const finalSeparators = separators || defaultSeparators;
 
@@ -65,38 +59,36 @@ export function formatMarkdownTable(
   });
 
   // Calculate column widths
-  const columnWidths = columnValues.map((column) =>
-    calculateColumnWidth(column)
-  );
+  const columnWidths = columnValues.map((column) => calculateColumnWidth(column));
 
   // Build the table
-  let table = "```\n";
+  let table = '```\n';
 
   // Header row
-  table += "| ";
+  table += '| ';
   headers.forEach((header, index) => {
-    table += padString(header, columnWidths[index]) + " | ";
+    table += padString(header, columnWidths[index]) + ' | ';
   });
-  table += "\n";
+  table += '\n';
 
   // Separator row
-  table += "| ";
+  table += '| ';
   finalSeparators.forEach((separator, index) => {
-    table += padString(separator, columnWidths[index], "-") + " | ";
+    table += padString(separator, columnWidths[index], '-') + ' | ';
   });
-  table += "\n";
+  table += '\n';
 
   // Data rows
   rows.forEach((row) => {
-    table += "| ";
+    table += '| ';
     row.forEach((cell, index) => {
       if (index < columnWidths.length) {
-        table += padString(cell, columnWidths[index]) + " | ";
+        table += padString(cell, columnWidths[index]) + ' | ';
       }
     });
-    table += "\n";
+    table += '\n';
   });
 
-  table += "```\n\n";
+  table += '```\n\n';
   return table;
 }

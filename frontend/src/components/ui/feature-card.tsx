@@ -1,48 +1,47 @@
-import * as React from "react"
-import { cn } from "../../lib/utils"
-import { Edit, Trash2, ToggleLeft, ToggleRight, Info } from "lucide-react"
+import * as React from 'react';
+import { cn } from '../../lib/utils';
+import { Edit, Trash2, ToggleLeft, ToggleRight, Info } from 'lucide-react';
 
 export interface FeatureCardProps extends React.HTMLAttributes<HTMLDivElement> {
-  title: string
-  description: string
-  isEnabled: boolean
-  isRequired?: boolean
-  onEdit?: () => void
-  onDelete?: () => void
-  onToggle?: () => void
-  children?: React.ReactNode
+  title: string;
+  description: string;
+  isEnabled: boolean;
+  isRequired?: boolean;
+  onEdit?: () => void;
+  onDelete?: () => void;
+  onToggle?: () => void;
+  children?: React.ReactNode;
 }
 
 const FeatureCard = React.forwardRef<HTMLDivElement, FeatureCardProps>(
-  ({ 
-    className, 
-    title, 
-    description, 
-    isEnabled, 
-    isRequired = false,
-    onEdit, 
-    onDelete, 
-    onToggle,
-    children,
-    ...props 
-  }, ref) => {
+  (
+    {
+      className,
+      title,
+      description,
+      isEnabled,
+      isRequired = false,
+      onEdit,
+      onDelete,
+      onToggle,
+      children,
+      ...props
+    },
+    ref
+  ) => {
     return (
       <div
         ref={ref}
         className={cn(
-          "p-4 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800",
+          'rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800',
           className
         )}
         {...props}
       >
-        <div className="flex justify-between items-start mb-2">
+        <div className="mb-2 flex items-start justify-between">
           <div>
-            <h3 className="font-medium text-slate-800 dark:text-slate-100">
-              {title}
-            </h3>
-            <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-              {description}
-            </p>
+            <h3 className="font-medium text-slate-800 dark:text-slate-100">{title}</h3>
+            <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">{description}</p>
           </div>
           <div className="flex space-x-2">
             {onEdit && (
@@ -72,20 +71,15 @@ const FeatureCard = React.forwardRef<HTMLDivElement, FeatureCardProps>(
                 disabled={!isRequired}
                 className={`p-1 ${
                   isRequired
-                    ? "cursor-not-allowed text-slate-400 dark:text-slate-600"
-                    : "cursor-pointer"
+                    ? 'cursor-not-allowed text-slate-400 dark:text-slate-600'
+                    : 'cursor-pointer'
                 }`}
-                title={
-                  isRequired ? "Toggle feature" : "This feature is required"
-                }
+                title={isRequired ? 'Toggle feature' : 'This feature is required'}
               >
                 {isEnabled ? (
                   <ToggleRight size={24} className="text-primary-600" />
                 ) : (
-                  <ToggleLeft
-                    size={24}
-                    className="text-slate-400 dark:text-slate-500"
-                  />
+                  <ToggleLeft size={24} className="text-slate-400 dark:text-slate-500" />
                 )}
               </button>
             )}
@@ -93,22 +87,22 @@ const FeatureCard = React.forwardRef<HTMLDivElement, FeatureCardProps>(
         </div>
 
         {!isRequired && (
-          <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mb-3">
+          <div className="mb-3 flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
             <Info size={12} />
             <span>This feature is required for implementation</span>
           </div>
         )}
 
         {children && (
-          <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700">
+          <div className="mt-3 border-t border-slate-100 pt-3 dark:border-slate-700">
             {children}
           </div>
         )}
       </div>
-    )
+    );
   }
-)
+);
 
-FeatureCard.displayName = "FeatureCard"
+FeatureCard.displayName = 'FeatureCard';
 
-export { FeatureCard }
+export { FeatureCard };

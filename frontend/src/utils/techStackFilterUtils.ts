@@ -1,9 +1,4 @@
-import {
-  Technology,
-  UILibrary,
-  StateManagement,
-  FrontendFramework,
-} from "../types/techStack";
+import { Technology, UILibrary, StateManagement, FrontendFramework } from '../types/techStack';
 
 /**
  * Filters language options based on selected technologies
@@ -17,7 +12,7 @@ export const filterLanguageOptions = (
   stateManagementOptions: StateManagement[]
 ): string[] => {
   // Default language options
-  const defaultLanguages = ["JavaScript", "TypeScript"];
+  const defaultLanguages = ['JavaScript', 'TypeScript'];
 
   if (!selectedFramework && !selectedUILibrary && !selectedStateManagement) {
     return defaultLanguages;
@@ -25,9 +20,7 @@ export const filterLanguageOptions = (
 
   // Get the selected framework object
   const selectedFrameworkObj = selectedFramework
-    ? (frontendFrameworks.find((f) => f.id === selectedFramework) as
-        | FrontendFramework
-        | undefined)
+    ? (frontendFrameworks.find((f) => f.id === selectedFramework) as FrontendFramework | undefined)
     : undefined;
 
   // If framework is selected, filter by its compatible languages
@@ -37,9 +30,7 @@ export const filterLanguageOptions = (
 
   // If UI library is selected, filter frameworks by compatibility
   if (selectedUILibrary) {
-    const compatibleLib = uiLibraryOptions.find(
-      (lib) => lib.id === selectedUILibrary
-    );
+    const compatibleLib = uiLibraryOptions.find((lib) => lib.id === selectedUILibrary);
     if (compatibleLib?.compatibleWith) {
       // Get compatible frameworks
       const frameworks = Array.isArray(compatibleLib.compatibleWith)
@@ -49,9 +40,7 @@ export const filterLanguageOptions = (
       // Get all languages supported by compatible frameworks
       const languages = new Set<string>();
       frameworks.forEach((fwId) => {
-        const fw = frontendFrameworks.find((f) => f.id === fwId) as
-          | FrontendFramework
-          | undefined;
+        const fw = frontendFrameworks.find((f) => f.id === fwId) as FrontendFramework | undefined;
         if (fw?.languages) {
           fw.languages.forEach((lang) => languages.add(lang));
         }
@@ -63,9 +52,7 @@ export const filterLanguageOptions = (
 
   // Similar for state management
   if (selectedStateManagement) {
-    const compatibleSM = stateManagementOptions.find(
-      (sm) => sm.id === selectedStateManagement
-    );
+    const compatibleSM = stateManagementOptions.find((sm) => sm.id === selectedStateManagement);
     if (compatibleSM?.compatibleWith) {
       // Get compatible frameworks
       const frameworks = Array.isArray(compatibleSM.compatibleWith)
@@ -75,9 +62,7 @@ export const filterLanguageOptions = (
       // Get all languages supported by compatible frameworks
       const languages = new Set<string>();
       frameworks.forEach((fwId) => {
-        const fw = frontendFrameworks.find((f) => f.id === fwId) as
-          | FrontendFramework
-          | undefined;
+        const fw = frontendFrameworks.find((f) => f.id === fwId) as FrontendFramework | undefined;
         if (fw?.languages) {
           fw.languages.forEach((lang) => languages.add(lang));
         }
@@ -119,33 +104,25 @@ export const filterFrameworkOptions = (
 
   // Filter by UI library if selected
   if (selectedUILibrary) {
-    const compatibleLib = uiLibraryOptions.find(
-      (lib) => lib.id === selectedUILibrary
-    );
+    const compatibleLib = uiLibraryOptions.find((lib) => lib.id === selectedUILibrary);
     if (compatibleLib?.compatibleWith) {
       const compatibleFrameworks = Array.isArray(compatibleLib.compatibleWith)
         ? compatibleLib.compatibleWith
         : Object.keys(compatibleLib.compatibleWith);
 
-      filtered = filtered.filter((fw) =>
-        compatibleFrameworks.includes(fw.id as string)
-      );
+      filtered = filtered.filter((fw) => compatibleFrameworks.includes(fw.id as string));
     }
   }
 
   // Filter by state management if selected
   if (selectedStateManagement) {
-    const compatibleSM = stateManagementOptions.find(
-      (sm) => sm.id === selectedStateManagement
-    );
+    const compatibleSM = stateManagementOptions.find((sm) => sm.id === selectedStateManagement);
     if (compatibleSM?.compatibleWith) {
       const compatibleFrameworks = Array.isArray(compatibleSM.compatibleWith)
         ? compatibleSM.compatibleWith
         : Object.keys(compatibleSM.compatibleWith);
 
-      filtered = filtered.filter((fw) =>
-        compatibleFrameworks.includes(fw.id as string)
-      );
+      filtered = filtered.filter((fw) => compatibleFrameworks.includes(fw.id as string));
     }
   }
 
@@ -200,16 +177,12 @@ export const filterUILibraryOptions = (
         ? lib.compatibleWith
         : Object.keys(lib.compatibleWith);
 
-      return langFrameworks.some((fw) =>
-        libCompatible.includes(fw.id as string)
-      );
+      return langFrameworks.some((fw) => libCompatible.includes(fw.id as string));
     }
 
     // Check if library is compatible with selected state management
     if (selectedStateManagement) {
-      const sm = stateManagementOptions.find(
-        (s) => s.id === selectedStateManagement
-      );
+      const sm = stateManagementOptions.find((s) => s.id === selectedStateManagement);
       if (!sm) return true;
 
       const smCompatible = Array.isArray(sm.compatibleWith)
@@ -222,9 +195,7 @@ export const filterUILibraryOptions = (
 
       // Check if there's at least one framework compatible with both
       return frontendFrameworks.some(
-        (fw) =>
-          smCompatible.includes(fw.id as string) &&
-          libCompatible.includes(fw.id as string)
+        (fw) => smCompatible.includes(fw.id as string) && libCompatible.includes(fw.id as string)
       );
     }
 
@@ -280,9 +251,7 @@ export const filterStateManagementOptions = (
         ? sm.compatibleWith
         : Object.keys(sm.compatibleWith);
 
-      return langFrameworks.some((fw) =>
-        smCompatible.includes(fw.id as string)
-      );
+      return langFrameworks.some((fw) => smCompatible.includes(fw.id as string));
     }
 
     // Check if state management is compatible with selected UI library
@@ -300,9 +269,7 @@ export const filterStateManagementOptions = (
 
       // Check if there's at least one framework compatible with both
       return frontendFrameworks.some(
-        (fw) =>
-          libCompatible.includes(fw.id as string) &&
-          smCompatible.includes(fw.id as string)
+        (fw) => libCompatible.includes(fw.id as string) && smCompatible.includes(fw.id as string)
       );
     }
 
@@ -318,7 +285,5 @@ export const getSelectedFrameworkObject = (
   frontendFrameworks: Technology[]
 ): FrontendFramework | null => {
   if (!selectedFramework) return null;
-  return frontendFrameworks.find(
-    (f) => f.id === selectedFramework
-  ) as FrontendFramework | null;
+  return frontendFrameworks.find((f) => f.id === selectedFramework) as FrontendFramework | null;
 };
