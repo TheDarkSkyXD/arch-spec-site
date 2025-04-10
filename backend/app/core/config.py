@@ -17,7 +17,7 @@ class MongoSettings(BaseSettings):
     """MongoDB configuration settings."""
 
     uri: str = os.getenv("MONGODB_URI", "mongodb://localhost:27017")
-    db_name: str = os.getenv("MONGODB_DB_NAME", "archspec")
+    db_name: str = os.getenv("MONGODB_DB_NAME", "arch-spec")
 
     model_config = {"env_prefix": "MONGODB_"}
 

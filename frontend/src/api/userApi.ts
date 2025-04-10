@@ -1,6 +1,6 @@
 import axios from 'axios';
-import { getAuthToken } from '../services/auth';
 import { SubscriptionPlan } from '../contexts/SubscriptionContext';
+import { getAuthToken } from '../services/auth';
 
 // Define API base URL
 const API_BASE_URL = import.meta.env.DEV
@@ -41,13 +41,17 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (error.response?.status === 401) {
-      // Token might be expired, try to get a fresh token
+    const originalRequest = error.config;
+
+    // Check if error is 401 and we haven't already tried retrying
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      // Mark this request as retried to prevent infinite loops
+      originalRequest._retry = true;
+
       try {
         const newToken = await getAuthToken();
         if (newToken) {
           // Retry the original request with the new token
-          const originalRequest = error.config;
           originalRequest.headers.Authorization = `Bearer ${newToken}`;
           return apiClient(originalRequest);
         }
