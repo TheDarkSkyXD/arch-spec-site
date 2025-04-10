@@ -21,7 +21,7 @@ This directory contains the seed data and management systems for the application
 
 ### Purpose
 
-The Tech Stack (`tech_stack_data.py`) serves as the central source of truth for all technology names and compatibility relationships used throughout the application. It provides a comprehensive mapping of technologies with bidirectional references to ensure:
+The Tech Stack (`tech_stack_data.json`) serves as the central source of truth for all technology names and compatibility relationships used throughout the application. It provides a comprehensive mapping of technologies with bidirectional references to ensure:
 
 1. No ambiguity or typos in technology names
 2. Proper categorization of technologies
@@ -81,7 +81,7 @@ The structure provides two key advantages:
 
 To add new technologies to the tech stack:
 
-1. Open `tech_stack_data.py`
+1. Open `tech_stack_data.json`
 2. Add the technology to the appropriate category and subcategory in the `categories` section
 3. Create a new entry in the `technologies` section with complete compatibility information
 4. Ensure bidirectional references are maintained by updating the compatibleWith sections of related technologies

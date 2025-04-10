@@ -17,10 +17,10 @@ from pathlib import Path
 # Add parent directory to path to allow imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from app.seed.tech_stack_data import TECH_STACK_DATA
 from app.seed.templates import PROJECT_TEMPLATES
 
 from app.utils.tech_stack_utils import TechStackUtils
+from app.seed.tech_stack import load_tech_stack_data
 
 logging.basicConfig(
     level=logging.INFO,
@@ -29,7 +29,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-utils = TechStackUtils(TECH_STACK_DATA)
+utils = TechStackUtils(load_tech_stack_data())
 
 
 def find_closest_match(tech_name: str, threshold: float = 0.8) -> Optional[str]:

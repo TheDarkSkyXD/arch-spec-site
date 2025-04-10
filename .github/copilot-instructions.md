@@ -59,7 +59,7 @@ ArchSpec is an AI-powered software specification system that creates comprehensi
 
 1. **Tech Stack Data**
 
-   - Maintained in `backend/app/seed/tech_stack_data.py`
+   - Maintained in `backend/app/seed/tech_stack_data.json`
    - Follows bidirectional compatibility structure
    - Categories: frontend, backend, database, authentication, deployment, testing
    - Update compatibility relationships when adding new technologies

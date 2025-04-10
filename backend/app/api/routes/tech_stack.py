@@ -3,9 +3,9 @@ API routes for tech stack compatibility.
 """
 
 import logging
+from app.seed.tech_stack import load_tech_stack_data
 from fastapi import APIRouter, HTTPException
 
-from app.seed import tech_stack_data
 from ...db.base import db
 from ...schemas.tech_stack import TechStackData
 
@@ -31,9 +31,9 @@ async def get_all_technology():
                 logger.info("Tech stack data retrieved from database")
                 return result["data"]
             else:
-                # return the tech stack data from tech_stack_data.py
+                # return the tech stack data from tech_stack_data.json
                 logger.info("Tech stack data not found in database, returning seed data")
-                return tech_stack_data
+                return load_tech_stack_data()
         else:
             logger.error("Database connection not available")
             raise HTTPException(status_code=500, detail="Database connection not available")
