@@ -23,6 +23,15 @@ export function getCompatibleTechnologies(
   const technology = technologies[selectedTechnology];
   if (!technology) return [];
 
+  // Special case for languages
+  if (
+    targetCategory === 'languages' &&
+    'languages' in technology &&
+    Array.isArray(technology.languages)
+  ) {
+    return technology.languages;
+  }
+
   // Access the compatibleWith property
   const compatibleWith = technology.compatibleWith;
   if (!compatibleWith) return [];
@@ -42,6 +51,43 @@ export function getCompatibleTechnologies(
   }
 
   return [];
+}
+
+/**
+ * Find technologies from targetCategory that list the selected technology in their compatibleWith property
+ */
+function findReverseDependencies(
+  techStackData: TechStackData,
+  selectedCategory: string,
+  selectedTechnology: string,
+  targetCategory: string
+): string[] {
+  const targetTechs = techStackData.technologies[targetCategory as keyof Technologies];
+  if (!targetTechs) return [];
+
+  return Object.keys(targetTechs).filter((techName) => {
+    const tech = targetTechs[techName];
+    if (!tech || !tech.compatibleWith) return false;
+
+    // Handle when compatibleWith is an array
+    if (Array.isArray(tech.compatibleWith)) {
+      return tech.compatibleWith.includes(selectedTechnology);
+    }
+
+    // Handle when compatibleWith is an object
+    if (
+      typeof tech.compatibleWith === 'object' &&
+      selectedCategory in tech.compatibleWith &&
+      Array.isArray(tech.compatibleWith[selectedCategory as keyof typeof tech.compatibleWith])
+    ) {
+      const compatList = tech.compatibleWith[
+        selectedCategory as keyof typeof tech.compatibleWith
+      ] as string[];
+      return compatList.includes(selectedTechnology);
+    }
+
+    return false;
+  });
 }
 
 /**
@@ -71,9 +117,29 @@ export function filterCompatibleTechnologies(
     return Object.keys(techStackData.technologies[targetCategory as keyof Technologies] || {});
   }
 
-  // For each selection, get compatible technologies
+  // For each selection, get compatible technologies (forward and reverse dependencies)
   const compatibleSets = selectionEntries.map(([category, technology]) => {
-    return new Set(getCompatibleTechnologies(techStackData, category, technology, targetCategory));
+    // Try forward dependencies (selection -> target)
+    const forwardDeps = getCompatibleTechnologies(
+      techStackData,
+      category,
+      technology,
+      targetCategory
+    );
+
+    // If results found, use them
+    if (forwardDeps.length > 0) {
+      return new Set(forwardDeps);
+    }
+
+    // Otherwise, try reverse dependencies (target -> selection)
+    const reverseDeps = findReverseDependencies(
+      techStackData,
+      category,
+      technology,
+      targetCategory
+    );
+    return new Set(reverseDeps);
   });
 
   // Find intersection of all sets
