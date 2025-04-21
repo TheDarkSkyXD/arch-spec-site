@@ -65,6 +65,39 @@ function findReverseDependencies(
   const targetTechs = techStackData.technologies[targetCategory as keyof Technologies];
   if (!targetTechs) return [];
 
+  // Special case for BaaS services looking for frontend frameworks
+  if (selectedCategory === 'frameworks' && targetCategory === 'baas') {
+    return Object.keys(targetTechs).filter((techName) => {
+      const tech = targetTechs[techName];
+      if (!tech || !tech.compatibleWith) return false;
+
+      if (
+        typeof tech.compatibleWith === 'object' &&
+        'frontendFrameworks' in tech.compatibleWith &&
+        Array.isArray(tech.compatibleWith.frontendFrameworks)
+      ) {
+        return tech.compatibleWith.frontendFrameworks.includes(selectedTechnology);
+      }
+
+      return false;
+    });
+  }
+
+  // Special case for frontend frameworks looking for BaaS services
+  if (selectedCategory === 'baas' && targetCategory === 'frameworks') {
+    const baas = techStackData.technologies.baas[selectedTechnology];
+    if (
+      baas &&
+      baas.compatibleWith &&
+      'frontendFrameworks' in baas.compatibleWith &&
+      Array.isArray(baas.compatibleWith.frontendFrameworks)
+    ) {
+      return baas.compatibleWith.frontendFrameworks;
+    }
+    return [];
+  }
+
+  // Standard case - find technologies that list the selected technology in their compatibleWith
   return Object.keys(targetTechs).filter((techName) => {
     const tech = targetTechs[techName];
     if (!tech || !tech.compatibleWith) return false;
@@ -115,6 +148,33 @@ export function filterCompatibleTechnologies(
       }
     }
     return Object.keys(techStackData.technologies[targetCategory as keyof Technologies] || {});
+  }
+
+  // Special case for multiple cross-domain selections
+  if (selectionEntries.length > 1 && targetCategory === 'baas') {
+    // For BaaS as target with framework and database selections
+    const frameworks = selections['frameworks'];
+    const databases = selections['databases'];
+
+    if (frameworks && databases) {
+      // Get BaaS services compatible with the selected framework
+      const baasByFramework = findReverseDependencies(
+        techStackData,
+        'frameworks',
+        frameworks,
+        'baas'
+      );
+
+      // Get BaaS services compatible with the selected database
+      const baasByDatabase = Object.keys(techStackData.technologies.baas).filter((baasName) => {
+        const baas = techStackData.technologies.baas[baasName];
+        if (!baas || !baas.compatibleWith || !baas.compatibleWith.databases) return false;
+        return baas.compatibleWith.databases.includes(databases);
+      });
+
+      // Find intersection
+      return baasByFramework.filter((baas) => baasByDatabase.includes(baas));
+    }
   }
 
   // For each selection, get compatible technologies (forward and reverse dependencies)

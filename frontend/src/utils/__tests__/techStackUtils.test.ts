@@ -289,5 +289,91 @@ describe('Tech Stack Utilities', () => {
         expect(result).toContain('React Router');
       });
     });
+
+    // Add a new describe block for cross-domain compatibility tests
+    describe('cross-domain compatibility', () => {
+      it('should filter BaaS options based on frontend framework selection', () => {
+        const result = filterCompatibleTechnologies(
+          testTechStackData as unknown as TechStackData,
+          { frameworks: 'React' },
+          'baas'
+        );
+
+        // Supabase, Firebase, AWS Amplify, and Appwrite should be compatible with React
+        expect(result).toContain('Supabase');
+        expect(result).toContain('Firebase');
+        expect(result).toContain('AWS Amplify');
+        expect(result).toContain('Appwrite');
+      });
+
+      it('should find compatible frontend frameworks when a BaaS is selected', () => {
+        const result = filterCompatibleTechnologies(
+          testTechStackData as unknown as TechStackData,
+          { baas: 'Supabase' },
+          'frameworks'
+        );
+
+        // Supabase is compatible with React, Vue.js, Angular, etc.
+        expect(result).toContain('React');
+        expect(result).toContain('Vue.js');
+        expect(result).toContain('Angular');
+        expect(result).toContain('Svelte');
+      });
+
+      it('should filter database options when a BaaS is selected', () => {
+        const result = filterCompatibleTechnologies(
+          testTechStackData as unknown as TechStackData,
+          { baas: 'Supabase' },
+          'databases'
+        );
+
+        // Supabase is built on PostgreSQL
+        expect(result).toContain('PostgreSQL');
+        expect(result.length).toBe(1);
+      });
+
+      it('should filter backend frameworks compatible with a selected database', () => {
+        const result = filterCompatibleTechnologies(
+          testTechStackData as unknown as TechStackData,
+          { databases: 'PostgreSQL' },
+          'frameworks'
+        );
+
+        // PostgreSQL is compatible with various backend frameworks
+        expect(result).toContain('Express.js');
+        expect(result).toContain('NestJS');
+        expect(result).toContain('Django');
+        expect(result).toContain('Ruby on Rails');
+      });
+
+      it('should filter testing tools compatible with a frontend framework', () => {
+        const result = filterCompatibleTechnologies(
+          testTechStackData as unknown as TechStackData,
+          { frameworks: 'React' },
+          'testing'
+        );
+
+        // Jest, Vitest, Cypress, etc. should be compatible with React
+        expect(result).toContain('Jest');
+        expect(result).toContain('Vitest');
+        expect(result).toContain('Cypress');
+        expect(result).toContain('Playwright');
+      });
+
+      it('should handle multiple cross-domain selections', () => {
+        const result = filterCompatibleTechnologies(
+          testTechStackData as unknown as TechStackData,
+          {
+            frameworks: 'React',
+            databases: 'PostgreSQL',
+          },
+          'baas'
+        );
+
+        // Supabase is compatible with both React and PostgreSQL
+        expect(result).toContain('Supabase');
+        expect(result.length).toBe(1); // Only Supabase should match both criteria
+      });
+    });
   });
 });
