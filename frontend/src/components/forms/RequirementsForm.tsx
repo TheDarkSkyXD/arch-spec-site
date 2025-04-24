@@ -1,26 +1,26 @@
-import { useState, useEffect } from 'react';
 import {
-  PlusCircle,
-  Trash2,
   AlertCircle,
-  Loader2,
-  Sparkles,
-  RefreshCw,
-  Lock,
   Edit,
+  Loader2,
+  Lock,
+  PlusCircle,
+  RefreshCw,
+  Sparkles,
+  Trash2,
 } from 'lucide-react';
-import { requirementsService } from '../../services/requirementsService';
-import { projectsService } from '../../services/projectsService';
-import { aiService } from '../../services/aiService';
-import { useToast } from '../../contexts/ToastContext';
+import { useEffect, useState } from 'react';
 import { useSubscription } from '../../contexts/SubscriptionContext';
+import { useToast } from '../../contexts/ToastContext';
+import { useUserProfile } from '../../hooks/useUserProfile';
+import { aiService } from '../../services/aiService';
+import { projectsService } from '../../services/projectsService';
+import { requirementsService } from '../../services/requirementsService';
 import { Requirements } from '../../types/templates';
+import AIInstructionsModal from '../ui/AIInstructionsModal';
 import Button from '../ui/Button';
-import Input from '../ui/Input';
 import Card from '../ui/Card';
 import { PremiumFeatureBadge, ProcessingOverlay } from '../ui/index';
-import AIInstructionsModal from '../ui/AIInstructionsModal';
-import { useUserProfile } from '../../hooks/useUserProfile';
+import Input from '../ui/Input';
 
 interface RequirementsFormProps {
   initialData?: Partial<Requirements>;
@@ -287,8 +287,6 @@ export default function RequirementsForm({
         const functionalRequirements: string[] = [];
         const nonFunctionalRequirements: string[] = [];
 
-        console.log('Enhanced requirements from AI:', enhancedRequirements);
-
         // Categorize requirements based on [Category] prefix first, then fall back to content keywords
         enhancedRequirements.forEach((req) => {
           const lowerCaseReq = req.toLowerCase();
@@ -320,9 +318,6 @@ export default function RequirementsForm({
             functionalRequirements.push(req);
           }
         });
-
-        console.log('Categorized functional requirements:', functionalRequirements);
-        console.log('Categorized non-functional requirements:', nonFunctionalRequirements);
 
         setFunctionalReqs(functionalRequirements);
         setNonFunctionalReqs(nonFunctionalRequirements);
@@ -369,8 +364,6 @@ export default function RequirementsForm({
         // Process enhanced requirements
         const newFunctionalRequirements: string[] = [];
         const newNonFunctionalRequirements: string[] = [];
-
-        console.log('New requirements from AI:', enhancedRequirements);
 
         // Categorize requirements based on [Category] prefix first, then fall back to content keywords
         enhancedRequirements.forEach((req) => {
