@@ -1,10 +1,10 @@
 import React from 'react';
 import { SectionId, ViewMode } from '../../hooks/useSectionState';
-import ProjectSection from './ProjectSection';
-import ApiEndpointsForm from '../forms/ApiEndpointsForm';
-import ApiEndpointsPreview from '../previews/ApiEndpointsPreview';
 import { markdownService } from '../../services/markdown';
 import { Api } from '../../types/templates';
+import ApiEndpointsForm from '../forms/ApiEndpointsForm';
+import ApiEndpointsPreview from '../previews/ApiEndpointsPreview';
+import ProjectSection from './ProjectSection';
 
 interface ApiEndpointsSectionProps {
   apiEndpoints: Api | null;

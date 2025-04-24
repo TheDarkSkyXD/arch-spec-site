@@ -1,40 +1,40 @@
-import MainLayout from '../layouts/MainLayout';
-import ProjectBasicsForm from '../components/forms/ProjectBasicsForm';
-import TechStackForm from '../components/forms/TechStackForm';
-import RequirementsForm from '../components/forms/RequirementsForm';
-import FeaturesForm from '../components/forms/FeaturesForm';
-import PagesForm from '../components/forms/PagesForm';
-import ApiEndpointsForm from '../components/forms/ApiEndpointsForm';
-import DataModelForm from '../components/forms/DataModelForm';
-import TestCasesForm from '../components/forms/TestCasesForm';
-import ImplementationPromptsForm from '../components/forms/ImplementationPromptsForm';
-import UIDesignForm from '../components/forms/UIDesignForm';
-import TemplateSelectionStep from '../components/project/TemplateSelectionStep';
-import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ChevronDown, ChevronUp } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { useProjectTemplateSection } from '../hooks/useProjectTemplateSection';
-import { useSubscription } from '../contexts/SubscriptionContext';
+import { useNavigate } from 'react-router-dom';
 import { userApi } from '../api/userApi';
+import ApiEndpointsForm from '../components/forms/ApiEndpointsForm';
+import DataModelForm from '../components/forms/DataModelForm';
+import FeaturesForm from '../components/forms/FeaturesForm';
+import ImplementationPromptsForm from '../components/forms/ImplementationPromptsForm';
+import PagesForm from '../components/forms/PagesForm';
+import ProjectBasicsForm from '../components/forms/ProjectBasicsForm';
+import RequirementsForm from '../components/forms/RequirementsForm';
+import TechStackForm from '../components/forms/TechStackForm';
+import TestCasesForm from '../components/forms/TestCasesForm';
+import UIDesignForm from '../components/forms/UIDesignForm';
+import TemplateSelectionStep from '../components/project/TemplateSelectionStep';
+import { useSubscription } from '../contexts/SubscriptionContext';
 import { useToast } from '../contexts/ToastContext';
+import { useProjectTemplateSection } from '../hooks/useProjectTemplateSection';
+import MainLayout from '../layouts/MainLayout';
 
 // Import services for saving template data
+import { apiEndpointsService } from '../services/apiEndpointsService';
+import { dataModelService } from '../services/dataModelService';
+import { featuresService } from '../services/featuresService';
+import { implementationPromptsService } from '../services/implementationPromptsService';
+import { pagesService } from '../services/pagesService';
 import { requirementsService } from '../services/requirementsService';
 import { techStackService } from '../services/techStackService';
-import { featuresService } from '../services/featuresService';
-import { pagesService } from '../services/pagesService';
-import { dataModelService } from '../services/dataModelService';
-import { apiEndpointsService } from '../services/apiEndpointsService';
 import { testCasesService } from '../services/testCasesService';
 import { uiDesignService } from '../services/uiDesignService';
-import { implementationPromptsService } from '../services/implementationPromptsService';
 
 // Import shadcn UI components
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 
 // Import template types
-import { FrameworkBackend, BaaSBackend, ServerlessBackend, SQLDatabase } from '../types/templates';
+import { BaaSBackend, FrameworkBackend, ServerlessBackend, SQLDatabase } from '../types/templates';
 
 // Import tech stack form data type
 import { TechStackFormData } from '../components/forms/tech-stack/techStackSchema';
