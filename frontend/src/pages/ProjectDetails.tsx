@@ -1,45 +1,65 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { projectsService } from '../services/projectsService';
-import { techStackService } from '../services/techStackService';
-import { ProjectBase } from '../types/project';
 import { ChevronLeft, Loader2 } from 'lucide-react';
-import MainLayout from '../layouts/MainLayout';
-import { ProjectTechStack, Requirements, Api, UIDesign } from '../types/templates';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import DownloadAllMarkdown from '../components/common/DownloadAllMarkdown';
 import {
-  useRequirements,
-  useFeatures,
-  usePages,
   useApiEndpoints,
   useDataModel,
+  useFeatures,
+  usePages,
+  useRequirements,
   useTestCases,
   useUIDesign,
 } from '../hooks/useDataQueries';
+import MainLayout from '../layouts/MainLayout';
 import { FeaturesData } from '../services/featuresService';
+import { projectsService } from '../services/projectsService';
+import { techStackService } from '../services/techStackService';
 import { TestCasesData } from '../services/testCasesService';
-import { Pages, DataModel } from '../types/templates';
-import DownloadAllMarkdown from '../components/common/DownloadAllMarkdown';
+import { ProjectBase } from '../types/project';
+import {
+  Api,
+  DataModel,
+  Pages,
+  ProjectTechStack,
+  Requirements,
+  UIDesign,
+} from '../types/templates';
 
 // Import shadcn UI components
+import { userApi } from '../api/userApi';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
-import { userApi } from '../api/userApi';
 import { useSubscription } from '../contexts/SubscriptionContext';
 import { implementationPromptsService } from '../services/implementationPromptsService';
 import { ImplementationPrompts } from '../types/templates';
 
 // Import custom hook and section components
-import { SectionId, useSectionState } from '../hooks/useSectionState';
-import ProjectBasicsSection from '../components/project/ProjectBasicsSection';
-import TechStackSection from '../components/project/TechStackSection';
-import RequirementsSection from '../components/project/RequirementsSection';
-import FeaturesSection from '../components/project/FeaturesSection';
-import PagesSection from '../components/project/PagesSection';
-import DataModelSection from '../components/project/DataModelSection';
 import ApiEndpointsSection from '../components/project/ApiEndpointsSection';
-import TestCasesSection from '../components/project/TestCasesSection';
+import DataModelSection from '../components/project/DataModelSection';
+import FeaturesSection from '../components/project/FeaturesSection';
 import ImplementationPromptsSection from '../components/project/ImplementationPromptsSection';
+import PagesSection from '../components/project/PagesSection';
+import ProjectBasicsSection from '../components/project/ProjectBasicsSection';
+import RequirementsSection from '../components/project/RequirementsSection';
+import TechStackSection from '../components/project/TechStackSection';
+import TestCasesSection from '../components/project/TestCasesSection';
 import UIDesignSection from '../components/project/UIDesignSection';
+import { SectionId, useSectionState } from '../hooks/useSectionState';
+
+// Map section IDs to display names
+const sectionDisplayNames: Record<SectionId, string> = {
+  [SectionId.BASICS]: 'Project Details',
+  [SectionId.TECH_STACK]: 'Technology Stack',
+  [SectionId.REQUIREMENTS]: 'Requirements',
+  [SectionId.FEATURES]: 'Features',
+  [SectionId.PAGES]: 'Pages',
+  [SectionId.DATA_MODEL]: 'Data Model',
+  [SectionId.API_ENDPOINTS]: 'API Endpoints',
+  [SectionId.TEST_CASES]: 'Test Cases',
+  [SectionId.UI_DESIGN]: 'UI Design',
+  [SectionId.IMPLEMENTATION_PROMPTS]: 'Implementation Prompts',
+};
 
 const ProjectDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -50,6 +70,8 @@ const ProjectDetails = () => {
   const [techStackLoading, setTechStackLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { refreshSubscriptionData } = useSubscription();
+  const [isHeaderSticky, setIsHeaderSticky] = useState(false);
+  const [currentSection, setCurrentSection] = useState<SectionId>(SectionId.BASICS);
 
   // Use our custom hook for section state
   const { expandedSections, sectionViewModes, toggleSection, changeViewMode } = useSectionState();
@@ -148,6 +170,58 @@ const ProjectDetails = () => {
     fetchImplementationPrompts();
   }, [id]);
 
+  // Add scroll handler to detect when to show sticky header
+  useEffect(() => {
+    const handleScroll = () => {
+      const headerHeight = 150; // Approximate height of the initial header area
+      setIsHeaderSticky(window.scrollY > headerHeight);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
+  // Add intersection observer to track which section is currently visible
+  useEffect(() => {
+    if (!project || loading) return;
+
+    const options = {
+      root: null,
+      rootMargin: '-100px 0px -80% 0px', // Consider element in view when it's 100px below viewport top and not more than 80% scrolled past
+      threshold: 0,
+    };
+
+    const sectionIds = Object.values(SectionId);
+    const observers: IntersectionObserver[] = [];
+
+    const handleIntersect = (entries: IntersectionObserverEntry[], sectionId: SectionId) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          setCurrentSection(sectionId);
+        }
+      });
+    };
+
+    sectionIds.forEach((sectionId) => {
+      const sectionElement = document.getElementById(`section-${sectionId}`);
+      if (sectionElement) {
+        const observer = new IntersectionObserver(
+          (entries) => handleIntersect(entries, sectionId as SectionId),
+          options
+        );
+        observer.observe(sectionElement);
+        observers.push(observer);
+      }
+    });
+
+    // Cleanup function
+    return () => {
+      observers.forEach((observer) => observer.disconnect());
+    };
+  }, [project, loading]);
+
   const handleProjectUpdate = (projectId: string) => {
     // Refresh project data after successful update
     projectsService.getProjectById(projectId).then((data) => {
@@ -214,6 +288,34 @@ const ProjectDetails = () => {
 
   return (
     <MainLayout>
+      {/* Sticky project header */}
+      {project && !loading && (
+        <div
+          className={`fixed left-0 right-0 top-0 z-50 bg-white shadow-md transition-transform duration-300 dark:bg-slate-900 ${
+            isHeaderSticky ? 'translate-y-0' : '-translate-y-full'
+          }`}
+        >
+          <div className="container mx-auto flex max-w-6xl items-center px-4 py-3">
+            <Button
+              onClick={() => navigate('/projects')}
+              variant="ghost"
+              className="mr-3 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
+            >
+              <ChevronLeft size={18} />
+            </Button>
+            <div className="flex flex-col sm:flex-row sm:items-center">
+              <h2 className="mr-2 truncate text-lg font-bold text-slate-900 dark:text-white">
+                {project?.name}
+              </h2>
+              <div className="flex items-center text-sm text-slate-500 dark:text-slate-400">
+                <span className="mx-1.5 hidden sm:inline-block">•</span>
+                <span className="font-medium">{sectionDisplayNames[currentSection]}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="container mx-auto max-w-6xl px-4 py-8">
         <div className="mb-6 flex items-center">
           <Button
@@ -287,142 +389,162 @@ const ProjectDetails = () => {
         ) : project ? (
           <div className="space-y-6">
             {/* Project Basics Section */}
-            <ProjectBasicsSection
-              project={project}
-              sectionId={SectionId.BASICS}
-              isExpanded={expandedSections[SectionId.BASICS]}
-              viewMode={sectionViewModes[SectionId.BASICS]}
-              isLoading={loading}
-              onToggle={toggleSection}
-              onViewModeChange={changeViewMode}
-              onSuccess={handleProjectUpdate}
-            />
+            <div id={`section-${SectionId.BASICS}`}>
+              <ProjectBasicsSection
+                project={project}
+                sectionId={SectionId.BASICS}
+                isExpanded={expandedSections[SectionId.BASICS]}
+                viewMode={sectionViewModes[SectionId.BASICS]}
+                isLoading={loading}
+                onToggle={toggleSection}
+                onViewModeChange={changeViewMode}
+                onSuccess={handleProjectUpdate}
+              />
+            </div>
 
             {/* Tech Stack Section */}
-            <TechStackSection
-              techStack={techStack}
-              projectId={id}
-              projectName={project.name}
-              sectionId={SectionId.TECH_STACK}
-              isExpanded={expandedSections[SectionId.TECH_STACK]}
-              viewMode={sectionViewModes[SectionId.TECH_STACK]}
-              isLoading={techStackLoading}
-              onToggle={toggleSection}
-              onViewModeChange={changeViewMode}
-              onSuccess={handleTechStackUpdate}
-            />
+            <div id={`section-${SectionId.TECH_STACK}`}>
+              <TechStackSection
+                techStack={techStack}
+                projectId={id}
+                projectName={project.name}
+                sectionId={SectionId.TECH_STACK}
+                isExpanded={expandedSections[SectionId.TECH_STACK]}
+                viewMode={sectionViewModes[SectionId.TECH_STACK]}
+                isLoading={techStackLoading}
+                onToggle={toggleSection}
+                onViewModeChange={changeViewMode}
+                onSuccess={handleTechStackUpdate}
+              />
+            </div>
 
             {/* Requirements Section */}
-            <RequirementsSection
-              requirements={requirements}
-              projectId={id}
-              projectName={project.name}
-              sectionId={SectionId.REQUIREMENTS}
-              isExpanded={expandedSections[SectionId.REQUIREMENTS]}
-              viewMode={sectionViewModes[SectionId.REQUIREMENTS]}
-              isLoading={requirementsLoading}
-              onToggle={toggleSection}
-              onViewModeChange={changeViewMode}
-              onSuccess={handleRequirementsUpdate}
-            />
+            <div id={`section-${SectionId.REQUIREMENTS}`}>
+              <RequirementsSection
+                requirements={requirements}
+                projectId={id}
+                projectName={project.name}
+                sectionId={SectionId.REQUIREMENTS}
+                isExpanded={expandedSections[SectionId.REQUIREMENTS]}
+                viewMode={sectionViewModes[SectionId.REQUIREMENTS]}
+                isLoading={requirementsLoading}
+                onToggle={toggleSection}
+                onViewModeChange={changeViewMode}
+                onSuccess={handleRequirementsUpdate}
+              />
+            </div>
 
             {/* Features Section */}
-            <FeaturesSection
-              features={features}
-              projectId={id}
-              projectName={project.name}
-              sectionId={SectionId.FEATURES}
-              isExpanded={expandedSections[SectionId.FEATURES]}
-              viewMode={sectionViewModes[SectionId.FEATURES]}
-              isLoading={featuresLoading}
-              onToggle={toggleSection}
-              onViewModeChange={changeViewMode}
-              onSuccess={handleFeaturesUpdate}
-            />
+            <div id={`section-${SectionId.FEATURES}`}>
+              <FeaturesSection
+                features={features}
+                projectId={id}
+                projectName={project.name}
+                sectionId={SectionId.FEATURES}
+                isExpanded={expandedSections[SectionId.FEATURES]}
+                viewMode={sectionViewModes[SectionId.FEATURES]}
+                isLoading={featuresLoading}
+                onToggle={toggleSection}
+                onViewModeChange={changeViewMode}
+                onSuccess={handleFeaturesUpdate}
+              />
+            </div>
 
             {/* UI Design Section */}
-            <UIDesignSection
-              uiDesign={uiDesign}
-              projectId={id}
-              projectName={project.name}
-              sectionId={SectionId.UI_DESIGN}
-              isExpanded={expandedSections[SectionId.UI_DESIGN]}
-              viewMode={sectionViewModes[SectionId.UI_DESIGN]}
-              isLoading={uiDesignLoading}
-              onToggle={toggleSection}
-              onViewModeChange={changeViewMode}
-              onSuccess={handleUIDesignUpdate}
-            />
+            <div id={`section-${SectionId.UI_DESIGN}`}>
+              <UIDesignSection
+                uiDesign={uiDesign}
+                projectId={id}
+                projectName={project.name}
+                sectionId={SectionId.UI_DESIGN}
+                isExpanded={expandedSections[SectionId.UI_DESIGN]}
+                viewMode={sectionViewModes[SectionId.UI_DESIGN]}
+                isLoading={uiDesignLoading}
+                onToggle={toggleSection}
+                onViewModeChange={changeViewMode}
+                onSuccess={handleUIDesignUpdate}
+              />
+            </div>
 
             {/* Pages Section */}
-            <PagesSection
-              pages={pages}
-              projectId={id}
-              projectName={project.name}
-              sectionId={SectionId.PAGES}
-              isExpanded={expandedSections[SectionId.PAGES]}
-              viewMode={sectionViewModes[SectionId.PAGES]}
-              isLoading={pagesLoading}
-              onToggle={toggleSection}
-              onViewModeChange={changeViewMode}
-              onSuccess={handlePagesUpdate}
-            />
+            <div id={`section-${SectionId.PAGES}`}>
+              <PagesSection
+                pages={pages}
+                projectId={id}
+                projectName={project.name}
+                sectionId={SectionId.PAGES}
+                isExpanded={expandedSections[SectionId.PAGES]}
+                viewMode={sectionViewModes[SectionId.PAGES]}
+                isLoading={pagesLoading}
+                onToggle={toggleSection}
+                onViewModeChange={changeViewMode}
+                onSuccess={handlePagesUpdate}
+              />
+            </div>
 
             {/* Data Model Section */}
-            <DataModelSection
-              dataModel={dataModel}
-              projectId={id}
-              projectName={project.name}
-              sectionId={SectionId.DATA_MODEL}
-              isExpanded={expandedSections[SectionId.DATA_MODEL]}
-              viewMode={sectionViewModes[SectionId.DATA_MODEL]}
-              isLoading={dataModelLoading}
-              onToggle={toggleSection}
-              onViewModeChange={changeViewMode}
-              onSuccess={handleDataModelUpdate}
-            />
+            <div id={`section-${SectionId.DATA_MODEL}`}>
+              <DataModelSection
+                dataModel={dataModel}
+                projectId={id}
+                projectName={project.name}
+                sectionId={SectionId.DATA_MODEL}
+                isExpanded={expandedSections[SectionId.DATA_MODEL]}
+                viewMode={sectionViewModes[SectionId.DATA_MODEL]}
+                isLoading={dataModelLoading}
+                onToggle={toggleSection}
+                onViewModeChange={changeViewMode}
+                onSuccess={handleDataModelUpdate}
+              />
+            </div>
 
             {/* API Endpoints Section */}
-            <ApiEndpointsSection
-              apiEndpoints={apiEndpoints}
-              projectId={id}
-              projectName={project.name}
-              sectionId={SectionId.API_ENDPOINTS}
-              isExpanded={expandedSections[SectionId.API_ENDPOINTS]}
-              viewMode={sectionViewModes[SectionId.API_ENDPOINTS]}
-              isLoading={apiEndpointsLoading}
-              onToggle={toggleSection}
-              onViewModeChange={changeViewMode}
-              onSuccess={handleApiEndpointsUpdate}
-            />
+            <div id={`section-${SectionId.API_ENDPOINTS}`}>
+              <ApiEndpointsSection
+                apiEndpoints={apiEndpoints}
+                projectId={id}
+                projectName={project.name}
+                sectionId={SectionId.API_ENDPOINTS}
+                isExpanded={expandedSections[SectionId.API_ENDPOINTS]}
+                viewMode={sectionViewModes[SectionId.API_ENDPOINTS]}
+                isLoading={apiEndpointsLoading}
+                onToggle={toggleSection}
+                onViewModeChange={changeViewMode}
+                onSuccess={handleApiEndpointsUpdate}
+              />
+            </div>
 
             {/* Test Cases Section */}
-            <TestCasesSection
-              testCases={testCases}
-              projectId={id}
-              projectName={project.name}
-              sectionId={SectionId.TEST_CASES}
-              isExpanded={expandedSections[SectionId.TEST_CASES]}
-              viewMode={sectionViewModes[SectionId.TEST_CASES]}
-              isLoading={testCasesLoading}
-              onToggle={toggleSection}
-              onViewModeChange={changeViewMode}
-              onSuccess={handleTestCasesUpdate}
-            />
+            <div id={`section-${SectionId.TEST_CASES}`}>
+              <TestCasesSection
+                testCases={testCases}
+                projectId={id}
+                projectName={project.name}
+                sectionId={SectionId.TEST_CASES}
+                isExpanded={expandedSections[SectionId.TEST_CASES]}
+                viewMode={sectionViewModes[SectionId.TEST_CASES]}
+                isLoading={testCasesLoading}
+                onToggle={toggleSection}
+                onViewModeChange={changeViewMode}
+                onSuccess={handleTestCasesUpdate}
+              />
+            </div>
 
             {/* Implementation Prompts Section */}
-            <ImplementationPromptsSection
-              implementationPrompts={implementationPrompts}
-              projectId={id}
-              projectName={project.name}
-              sectionId={SectionId.IMPLEMENTATION_PROMPTS}
-              isExpanded={expandedSections[SectionId.IMPLEMENTATION_PROMPTS]}
-              viewMode={sectionViewModes[SectionId.IMPLEMENTATION_PROMPTS]}
-              isLoading={implementationPromptsLoading}
-              onToggle={toggleSection}
-              onViewModeChange={changeViewMode}
-              onSuccess={handleImplementationPromptsUpdate}
-            />
+            <div id={`section-${SectionId.IMPLEMENTATION_PROMPTS}`}>
+              <ImplementationPromptsSection
+                implementationPrompts={implementationPrompts}
+                projectId={id}
+                projectName={project.name}
+                sectionId={SectionId.IMPLEMENTATION_PROMPTS}
+                isExpanded={expandedSections[SectionId.IMPLEMENTATION_PROMPTS]}
+                viewMode={sectionViewModes[SectionId.IMPLEMENTATION_PROMPTS]}
+                isLoading={implementationPromptsLoading}
+                onToggle={toggleSection}
+                onViewModeChange={changeViewMode}
+                onSuccess={handleImplementationPromptsUpdate}
+              />
+            </div>
           </div>
         ) : null}
       </div>
