@@ -1,35 +1,36 @@
-import { useState, useEffect } from 'react';
 import {
-  ToggleLeft,
-  ToggleRight,
+  Edit,
   Info,
   Loader2,
-  PlusCircle,
-  X,
-  Edit,
-  Trash2,
-  Sparkles,
-  RefreshCw,
   Lock,
+  PlusCircle,
+  RefreshCw,
+  Save,
+  Sparkles,
+  ToggleLeft,
+  ToggleRight,
+  Trash2,
+  X,
 } from 'lucide-react';
-import { FeatureModule, FeaturesData, featuresService } from '../../services/featuresService';
+import { useEffect, useState } from 'react';
+import { useSubscription } from '../../contexts/SubscriptionContext';
 import { useToast } from '../../contexts/ToastContext';
+import { aiService } from '../../services/aiService';
+import { FeatureModule, FeaturesData, featuresService } from '../../services/featuresService';
 import { projectsService } from '../../services/projectsService';
 import { requirementsService } from '../../services/requirementsService';
-import { aiService } from '../../services/aiService';
-import { useSubscription } from '../../contexts/SubscriptionContext';
-import { PremiumFeatureBadge, ProcessingOverlay } from '../ui/index';
 import AIInstructionsModal from '../ui/AIInstructionsModal';
+import { PremiumFeatureBadge, ProcessingOverlay } from '../ui/index';
 
 // Import shadcn UI components
-import Button from '../ui/Button';
-import Input from '../ui/Input';
-import { Textarea } from '../ui/textarea';
-import { Checkbox } from '../ui/checkbox';
-import { Select } from '../ui/select';
-import Card from '../ui/Card';
-import { Label } from '../ui/label';
 import { useUserProfile } from '../../hooks/useUserProfile';
+import Button from '../ui/Button';
+import Card from '../ui/Card';
+import { Checkbox } from '../ui/checkbox';
+import Input from '../ui/Input';
+import { Label } from '../ui/label';
+import { Select } from '../ui/select';
+import { Textarea } from '../ui/textarea';
 interface FeaturesFormProps {
   initialData?: FeaturesData;
   projectId?: string;
@@ -45,6 +46,10 @@ export default function FeaturesForm({ initialData, projectId, onSuccess }: Feat
   const [isLoading, setIsLoading] = useState<boolean>(false);
   // Add state for form-level error and success messages
   const [error, setError] = useState<string>('');
+
+  // Add state for tracking unsaved changes
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
+  const [initialCoreModules, setInitialCoreModules] = useState<FeatureModule[]>([]);
 
   // State for feature form - used for both adding and editing
   const [isAddingFeature, setIsAddingFeature] = useState(false);
@@ -82,6 +87,17 @@ export default function FeaturesForm({ initialData, projectId, onSuccess }: Feat
   //   console.log("FeaturesForm initialData:", initialData);
   // }, [initialData]);
 
+  // Track unsaved changes by comparing current features with initial features
+  useEffect(() => {
+    if (!initialData) return;
+    
+    // Compare current features with initial features
+    const currentFeaturesJson = JSON.stringify(coreModules);
+    const initialFeaturesJson = JSON.stringify(initialCoreModules);
+    
+    setHasUnsavedChanges(currentFeaturesJson !== initialFeaturesJson);
+  }, [coreModules, initialCoreModules, initialData]);
+
   // Effect to update local state when initial data changes
   useEffect(() => {
     if (initialData) {
@@ -89,7 +105,9 @@ export default function FeaturesForm({ initialData, projectId, onSuccess }: Feat
       //   "Setting core modules from initialData:",
       //   initialData.coreModules
       // );
-      setCoreModules(initialData.coreModules || []);
+      const initialFeatures = initialData.coreModules || [];
+      setCoreModules(initialFeatures);
+      setInitialCoreModules(JSON.parse(JSON.stringify(initialFeatures))); // Deep copy to avoid reference issues
     }
   }, [initialData]);
 
@@ -102,7 +120,9 @@ export default function FeaturesForm({ initialData, projectId, onSuccess }: Feat
           const featuresData = await featuresService.getFeatures(projectId);
           if (featuresData) {
             console.log('Fetched features data:', featuresData);
-            setCoreModules(featuresData.coreModules || []);
+            const fetchedFeatures = featuresData.coreModules || [];
+            setCoreModules(fetchedFeatures);
+            setInitialCoreModules(JSON.parse(JSON.stringify(fetchedFeatures))); // Deep copy
           }
         } catch (error) {
           console.error('Error fetching features:', error);
@@ -159,6 +179,9 @@ export default function FeaturesForm({ initialData, projectId, onSuccess }: Feat
       enabled: !updatedModules[index].enabled,
     };
     setCoreModules(updatedModules);
+    
+    // Indicate that changes need to be saved
+    setHasUnsavedChanges(true);
   };
 
   const handleProviderChange = (moduleIndex: number, provider: string) => {
@@ -168,6 +191,9 @@ export default function FeaturesForm({ initialData, projectId, onSuccess }: Feat
       providers: [provider], // Replace existing providers with the selected one
     };
     setCoreModules(updatedModules);
+    
+    // Indicate that changes need to be saved
+    setHasUnsavedChanges(true);
   };
 
   const handleFeatureFormChange = (field: string, value: string | boolean | string[]) => {
@@ -222,12 +248,8 @@ export default function FeaturesForm({ initialData, projectId, onSuccess }: Feat
     // Reset the form
     resetFeatureForm();
 
-    // Show success toast
-    showToast({
-      title: 'Success',
-      description: 'New feature added successfully',
-      type: 'success',
-    });
+    // Indicate that changes need to be saved instead of showing success toast
+    setHasUnsavedChanges(true);
   };
 
   const handleEditFeature = () => {
@@ -254,12 +276,8 @@ export default function FeaturesForm({ initialData, projectId, onSuccess }: Feat
     // Reset the form
     resetFeatureForm();
 
-    // Show success toast
-    showToast({
-      title: 'Success',
-      description: 'Feature updated successfully',
-      type: 'success',
-    });
+    // Indicate that changes need to be saved instead of showing success toast
+    setHasUnsavedChanges(true);
   };
 
   const handleDeleteFeature = (index: number) => {
@@ -267,12 +285,8 @@ export default function FeaturesForm({ initialData, projectId, onSuccess }: Feat
     const updatedModules = coreModules.filter((_, i) => i !== index);
     setCoreModules(updatedModules);
 
-    // Show success toast
-    showToast({
-      title: 'Success',
-      description: 'Feature removed successfully',
-      type: 'success',
-    });
+    // Indicate that changes need to be saved instead of showing success toast
+    setHasUnsavedChanges(true);
   };
 
   const handleStartEditFeature = (index: number) => {
@@ -521,6 +535,10 @@ export default function FeaturesForm({ initialData, projectId, onSuccess }: Feat
           description: 'Features saved successfully',
           type: 'success',
         });
+        
+        // Update initial features to match current features, resetting unsaved changes
+        setInitialCoreModules(JSON.parse(JSON.stringify(coreModules)));
+        setHasUnsavedChanges(false);
 
         if (onSuccess) {
           onSuccess(result);
@@ -607,6 +625,13 @@ export default function FeaturesForm({ initialData, projectId, onSuccess }: Feat
       {error && (
         <div className="mb-4 rounded-md bg-red-50 p-3 text-red-600 dark:bg-red-900/20 dark:text-red-400">
           {error}
+        </div>
+      )}
+      
+      {/* Unsaved Changes Indicator */}
+      {hasUnsavedChanges && (
+        <div className="mb-4 flex items-center justify-between rounded-md bg-amber-50 p-3 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400">
+          <span>You have unsaved changes. Don't forget to save your features.</span>
         </div>
       )}
 
@@ -1033,11 +1058,26 @@ export default function FeaturesForm({ initialData, projectId, onSuccess }: Feat
       <div className="mt-6 flex justify-end">
         <Button
           type="submit"
-          disabled={isSubmitting || !projectId}
-          variant={!projectId || isSubmitting ? 'outline' : 'default'}
-          className={!projectId || isSubmitting ? 'bg-gray-400 text-white hover:bg-gray-400' : ''}
+          disabled={isSubmitting || !projectId || !hasUnsavedChanges}
+          variant={!projectId || isSubmitting || !hasUnsavedChanges ? 'outline' : 'default'}
+          className={
+            !projectId || isSubmitting || !hasUnsavedChanges
+              ? 'cursor-not-allowed opacity-50'
+              : 'animate-pulse'
+          }
         >
-          {isSubmitting ? 'Saving...' : 'Save Features'}
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Saving...
+            </>
+          ) : (
+            <>
+              {hasUnsavedChanges && <Save className="mr-2 h-4 w-4" />}
+              Save Features
+              {hasUnsavedChanges && '*'}
+            </>
+          )}
         </Button>
       </div>
     </form>

@@ -1,6 +1,8 @@
-import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { useTechStack } from '../../hooks/useDataQueries';
+import { techStackService } from '../../services/techStackService';
 import {
   BaaS,
   BackendFramework,
@@ -15,8 +17,6 @@ import {
   Technology,
   UILibrary,
 } from '../../types/techStack';
-import { useTechStack } from '../../hooks/useDataQueries';
-import { techStackService } from '../../services/techStackService';
 // Import AI service for tech stack enhancement
 import { aiService } from '../../services/aiService';
 
@@ -24,28 +24,28 @@ import { aiService } from '../../services/aiService';
 import Button from '../ui/Button';
 import Card from '../ui/Card';
 // Import Lucide icons for AI enhancement buttons
-import { Loader2, Sparkles, Lock } from 'lucide-react';
+import { Loader2, Lock, Save, Sparkles } from 'lucide-react';
 import AIInstructionsModal from '../ui/AIInstructionsModal';
 
 // Import schema
-import { techStackSchema, TechStackFormData } from './tech-stack/techStackSchema';
+import { TechStackFormData, techStackSchema } from './tech-stack/techStackSchema';
 
 // Import section components
-import FrontendSection from './tech-stack/FrontendSection';
+import { useToast } from '../../contexts/ToastContext';
+import { ProjectTechStack } from '../../types/templates';
+import AuthenticationSection from './tech-stack/AuthenticationSection';
 import BackendSection from './tech-stack/BackendSection';
 import DatabaseSection from './tech-stack/DatabaseSection';
-import AuthenticationSection from './tech-stack/AuthenticationSection';
+import DeploymentSection from './tech-stack/DeploymentSection';
+import FrontendSection from './tech-stack/FrontendSection';
 import HostingSection from './tech-stack/HostingSection';
 import StorageSection from './tech-stack/StorageSection';
-import DeploymentSection from './tech-stack/DeploymentSection';
-import { ProjectTechStack } from '../../types/templates';
-import { useToast } from '../../contexts/ToastContext';
 // Import services to fetch project info for AI enhancement
+import { useSubscription } from '../../contexts/SubscriptionContext';
+import { useUserProfile } from '../../hooks/useUserProfile';
 import { projectsService } from '../../services/projectsService';
 import { requirementsService } from '../../services/requirementsService';
-import { useSubscription } from '../../contexts/SubscriptionContext';
 import { PremiumFeatureBadge, ProcessingOverlay } from '../ui/index';
-import { useUserProfile } from '../../hooks/useUserProfile';
 
 interface TechStackFormProps {
   initialData?: ProjectTechStack;
@@ -72,6 +72,10 @@ const TechStackForm = ({ initialData, projectId, onSuccess }: TechStackFormProps
 
   // Add state for AI instructions modal
   const [isAIModalOpen, setIsAIModalOpen] = useState<boolean>(false);
+  
+  // Add state for tracking unsaved changes
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
+  const [initialFormValues, setInitialFormValues] = useState<TechStackFormData | null>(null);
 
   const defaultValues: TechStackFormData = {
     frontend: '',
@@ -97,10 +101,28 @@ const TechStackForm = ({ initialData, projectId, onSuccess }: TechStackFormProps
     control,
     formState: { errors },
     setValue: setTechStackValue,
+    watch,
   } = useForm<TechStackFormData>({
     resolver: zodResolver(techStackSchema),
     defaultValues: defaultValues,
   });
+  
+  // Watch form values for changes
+  const currentFormValues = watch();
+
+  // Track unsaved changes by comparing form values with initial values
+  useEffect(() => {
+    if (!initialFormValues) return;
+    
+    // Compare current form values with initial values
+    const isChanged = Object.keys(currentFormValues).some(key => {
+      const currentValue = currentFormValues[key as keyof TechStackFormData];
+      const initialValue = initialFormValues[key as keyof TechStackFormData];
+      return currentValue !== initialValue;
+    });
+    
+    setHasUnsavedChanges(isChanged);
+  }, [currentFormValues, initialFormValues]);
 
   // Use the data query hook instead of direct service call
   const { data: techStackData, isLoading: isTechStackLoading } = useTechStack();
@@ -114,6 +136,65 @@ const TechStackForm = ({ initialData, projectId, onSuccess }: TechStackFormProps
       setIsLoading(isTechStackLoading);
     }
   }, [techStackData, isTechStackLoading]);
+
+  // Update form from initialData if available
+  useEffect(() => {
+    if (initialData) {
+      // Map initialData to form values with correct property names
+      const mappedValues: TechStackFormData = {
+        frontend: initialData.frontend?.framework || '',
+        frontend_language: initialData.frontend?.language || '',
+        ui_library: initialData.frontend?.uiLibrary || '',
+        state_management: initialData.frontend?.stateManagement || '',
+        backend_type: initialData.backend?.type || '',
+        backend_framework: '',  // Handle in the code below based on backend type
+        backend_language: '',   // Handle in the code below based on backend type
+        backend_service: '',    // Handle in the code below based on backend type
+        backend_realtime: '',   // Handle in the code below based on backend type
+        database_type: initialData.database?.type || '',
+        database_system: initialData.database?.system || '',
+        database_hosting: initialData.database?.hosting || '',
+        database_orm: '',      // Handle conditionally below
+        auth_provider: initialData.authentication?.provider || '',
+        auth_methods: Array.isArray(initialData.authentication?.methods) 
+          ? initialData.authentication.methods.join(',') 
+          : initialData.authentication?.methods || '',
+      };
+      
+      // Handle backend properties based on the backend type
+      if (initialData.backend) {
+        // Only set these values if they exist in the specific backend type
+        if ('framework' in initialData.backend && initialData.backend.framework) {
+          mappedValues.backend_framework = initialData.backend.framework;
+        }
+        if ('language' in initialData.backend && initialData.backend.language) {
+          mappedValues.backend_language = initialData.backend.language;
+        }
+        if ('service' in initialData.backend && initialData.backend.service) {
+          mappedValues.backend_service = initialData.backend.service;
+        }
+        if ('realtime' in initialData.backend && initialData.backend.realtime) {
+          mappedValues.backend_realtime = initialData.backend.realtime;
+        }
+      }
+      
+      // Handle database ORM conditionally (it's only available for SQL databases)
+      if (initialData.database && initialData.database.type === 'sql' && 
+          'orm' in initialData.database && initialData.database.orm) {
+        mappedValues.database_orm = initialData.database.orm;
+      }
+      
+      // Set initial values to detect changes later
+      setInitialFormValues(mappedValues);
+      
+      // Set form values
+      Object.entries(mappedValues).forEach(([key, value]) => {
+        if (value) {
+          setTechStackValue(key as keyof TechStackFormData, value);
+        }
+      });
+    }
+  }, [initialData, setTechStackValue]);
 
   // Helper functions to get tech options from the updated TechStackData structure
   const getFrontendFrameworks = (): Technology[] => {
@@ -553,6 +634,10 @@ const TechStackForm = ({ initialData, projectId, onSuccess }: TechStackFormProps
           type: 'success',
         });
 
+        // Update initial form values to current values to reset unsaved changes flag
+        setInitialFormValues(data);
+        setHasUnsavedChanges(false);
+
         if (onSuccess) {
           onSuccess(result);
         }
@@ -602,6 +687,13 @@ const TechStackForm = ({ initialData, projectId, onSuccess }: TechStackFormProps
       {error && (
         <div className="mb-4 rounded-md bg-red-50 p-3 text-red-600 dark:bg-red-900/20 dark:text-red-400">
           {error}
+        </div>
+      )}
+      
+      {/* Unsaved Changes Indicator */}
+      {hasUnsavedChanges && (
+        <div className="mb-4 flex items-center justify-between rounded-md bg-amber-50 p-3 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400">
+          <span>You have unsaved changes. Don't forget to save your tech stack.</span>
         </div>
       )}
 
@@ -735,11 +827,26 @@ const TechStackForm = ({ initialData, projectId, onSuccess }: TechStackFormProps
       <div className="mt-6 flex justify-end">
         <Button
           type="submit"
-          disabled={isSubmitting || !projectId}
-          variant={!projectId || isSubmitting ? 'outline' : 'default'}
-          className={!projectId || isSubmitting ? 'bg-gray-400 text-white hover:bg-gray-400' : ''}
+          disabled={isSubmitting || !projectId || !hasUnsavedChanges}
+          variant={!projectId || isSubmitting || !hasUnsavedChanges ? 'outline' : 'default'}
+          className={
+            !projectId || isSubmitting || !hasUnsavedChanges 
+              ? 'cursor-not-allowed opacity-50' 
+              : 'animate-pulse'
+          }
         >
-          {isSubmitting ? 'Saving...' : 'Save Tech Stack'}
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Saving...
+            </>
+          ) : (
+            <>
+              {hasUnsavedChanges && <Save className="mr-2 h-4 w-4" />}
+              Save Tech Stack
+              {hasUnsavedChanges && '*'}
+            </>
+          )}
         </Button>
       </div>
     </form>

@@ -5,6 +5,7 @@ import {
   Lock,
   PlusCircle,
   RefreshCw,
+  Save,
   Sparkles,
   Trash2,
 } from 'lucide-react';
@@ -61,12 +62,39 @@ export default function RequirementsForm({
   // Add state for AI instructions modals
   const [isEnhanceModalOpen, setIsEnhanceModalOpen] = useState<boolean>(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
+  
+  // Add state for tracking unsaved changes
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
+  const [initialFunctionalReqs, setInitialFunctionalReqs] = useState<string[]>([]);
+  const [initialNonFunctionalReqs, setInitialNonFunctionalReqs] = useState<string[]>([]);
+
+  // Track unsaved changes by comparing current requirements with initial values
+  useEffect(() => {
+    if (!initialData) return;
+    
+    // Compare functional requirements
+    const functionalChanged = functionalReqs.length !== initialFunctionalReqs.length ||
+      functionalReqs.some((req, index) => initialFunctionalReqs[index] !== req);
+    
+    // Compare non-functional requirements
+    const nonFunctionalChanged = nonFunctionalReqs.length !== initialNonFunctionalReqs.length ||
+      nonFunctionalReqs.some((req, index) => initialNonFunctionalReqs[index] !== req);
+    
+    setHasUnsavedChanges(functionalChanged || nonFunctionalChanged);
+  }, [functionalReqs, nonFunctionalReqs, initialFunctionalReqs, initialNonFunctionalReqs, initialData]);
 
   // Effect to update local state when initial data changes
   useEffect(() => {
     if (initialData) {
-      setFunctionalReqs(initialData.functional || []);
-      setNonFunctionalReqs(initialData.non_functional || []);
+      const functional = initialData.functional || [];
+      const nonFunctional = initialData.non_functional || [];
+      
+      setFunctionalReqs(functional);
+      setNonFunctionalReqs(nonFunctional);
+      
+      // Store initial values for change detection
+      setInitialFunctionalReqs(functional);
+      setInitialNonFunctionalReqs(nonFunctional);
     }
   }, [initialData]);
 
@@ -78,8 +106,15 @@ export default function RequirementsForm({
         try {
           const requirementsData = await requirementsService.getRequirements(projectId);
           if (requirementsData) {
-            setFunctionalReqs(requirementsData.functional || []);
-            setNonFunctionalReqs(requirementsData.non_functional || []);
+            const functional = requirementsData.functional || [];
+            const nonFunctional = requirementsData.non_functional || [];
+            
+            setFunctionalReqs(functional);
+            setNonFunctionalReqs(nonFunctional);
+            
+            // Store initial values for change detection
+            setInitialFunctionalReqs(functional);
+            setInitialNonFunctionalReqs(nonFunctional);
           }
         } catch (error) {
           console.error('Error fetching requirements:', error);
@@ -480,6 +515,11 @@ export default function RequirementsForm({
             description: 'Requirements saved successfully',
             type: 'success',
           });
+          
+          // Update initial values to match current values, resetting unsaved changes
+          setInitialFunctionalReqs([...functionalReqs]);
+          setInitialNonFunctionalReqs([...nonFunctionalReqs]);
+          setHasUnsavedChanges(false);
 
           if (onSuccess) {
             onSuccess(result);
@@ -601,6 +641,13 @@ export default function RequirementsForm({
       {error && (
         <div className="mb-4 rounded-md bg-red-50 p-3 text-red-600 dark:bg-red-900/20 dark:text-red-400">
           {error}
+        </div>
+      )}
+      
+      {/* Unsaved Changes Indicator */}
+      {hasUnsavedChanges && (
+        <div className="mb-4 flex items-center justify-between rounded-md bg-amber-50 p-3 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400">
+          <span>You have unsaved changes. Don't forget to save your requirements.</span>
         </div>
       )}
 
@@ -874,11 +921,26 @@ export default function RequirementsForm({
       <div className="mt-6 flex justify-end">
         <Button
           type="submit"
-          disabled={isSubmitting || !projectId}
-          variant={!projectId || isSubmitting ? 'outline' : 'default'}
-          className={!projectId || isSubmitting ? 'bg-gray-400 text-white hover:bg-gray-400' : ''}
+          disabled={isSubmitting || !projectId || !hasUnsavedChanges}
+          variant={!projectId || isSubmitting || !hasUnsavedChanges ? 'outline' : 'default'}
+          className={
+            !projectId || isSubmitting || !hasUnsavedChanges
+              ? 'cursor-not-allowed opacity-50'
+              : 'animate-pulse'
+          }
         >
-          {isSubmitting ? 'Saving...' : 'Save Requirements'}
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Saving...
+            </>
+          ) : (
+            <>
+              {hasUnsavedChanges && <Save className="mr-2 h-4 w-4" />}
+              Save Requirements
+              {hasUnsavedChanges && '*'}
+            </>
+          )}
         </Button>
       </div>
     </form>

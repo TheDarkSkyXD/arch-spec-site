@@ -1,23 +1,23 @@
-import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Loader2, Lock, PlusCircle, Save, Sparkles, Trash2, Users, Wand2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { useState, useEffect } from 'react';
-import { projectsService } from '../../services/projectsService';
-import { aiService } from '../../services/aiService';
-import { useToast } from '../../contexts/ToastContext';
-import { PlusCircle, Trash2, Sparkles, Wand2, Users, Lock, Loader2 } from 'lucide-react';
 import { useSubscription } from '../../contexts/SubscriptionContext';
+import { useToast } from '../../contexts/ToastContext';
 import { useUserProfile } from '../../hooks/useUserProfile';
+import { aiService } from '../../services/aiService';
+import { projectsService } from '../../services/projectsService';
 
 // Import shadcn UI components
-import { Label } from '../ui/label';
-import { Textarea } from '../ui/textarea';
+import AIInstructionsModal from '../ui/AIInstructionsModal';
 import Button from '../ui/Button';
-import Input from '../ui/Input';
 import Card from '../ui/Card';
+import Input from '../ui/Input';
 import PremiumFeatureBadge from '../ui/PremiumFeatureBadge';
 import { ProcessingOverlay } from '../ui/index';
-import AIInstructionsModal from '../ui/AIInstructionsModal';
+import { Label } from '../ui/label';
+import { Textarea } from '../ui/textarea';
 
 const projectBasicsSchema = z.object({
   name: z.string().min(3, 'Project name must be at least 3 characters'),
@@ -56,6 +56,10 @@ const ProjectBasicsForm = ({ initialData, onSuccess }: ProjectBasicsFormProps) =
   // State for business goals
   const [businessGoals, setBusinessGoals] = useState<string[]>(initialData?.business_goals || []);
   const [newBusinessGoal, setNewBusinessGoal] = useState<string>('');
+
+  // Add state for tracking unsaved changes
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
+  const [initialFormValues, setInitialFormValues] = useState<Partial<ProjectBasicsFormData> & { id?: string }>(initialData || {});
 
   // State for AI instructions modal
   const [activeModal, setActiveModal] = useState<ActiveModal>(null);
@@ -99,9 +103,30 @@ const ProjectBasicsForm = ({ initialData, onSuccess }: ProjectBasicsFormProps) =
     },
   });
 
-  // Get current field values for enhance buttons
-  const currentDescription = watch('description');
-  const currentTargetUsers = watch('target_users');
+  // Get current field values for enhance buttons and change detection
+  const currentFormValues = watch();
+  const currentDescription = currentFormValues.description;
+  const currentTargetUsers = currentFormValues.target_users;
+
+  // Track unsaved changes by comparing form values with initial values
+  useEffect(() => {
+    if (!initialFormValues) return;
+
+    // Check if business goals have changed
+    const initialGoals = initialFormValues.business_goals || [];
+    const goalsChanged = businessGoals.length !== initialGoals.length ||
+      businessGoals.some((goal, index) => goal !== initialGoals[index]);
+
+    // Check if form values have changed
+    const nameChanged = currentFormValues.name !== initialFormValues.name;
+    const descriptionChanged = currentFormValues.description !== initialFormValues.description;
+    const targetUsersChanged = currentFormValues.target_users !== initialFormValues.target_users;
+    const domainChanged = currentFormValues.domain !== initialFormValues.domain;
+
+    setHasUnsavedChanges(
+      nameChanged || descriptionChanged || targetUsersChanged || domainChanged || goalsChanged
+    );
+  }, [currentFormValues, businessGoals, initialFormValues]);
 
   // Update form values if initialData changes
   useEffect(() => {
@@ -115,6 +140,7 @@ const ProjectBasicsForm = ({ initialData, onSuccess }: ProjectBasicsFormProps) =
       });
 
       setBusinessGoals(initialData.business_goals || []);
+      setInitialFormValues(initialData);
 
       if (initialData.id) {
         setProjectId(initialData.id);
@@ -345,6 +371,15 @@ const ProjectBasicsForm = ({ initialData, onSuccess }: ProjectBasicsFormProps) =
           type: 'success',
         });
 
+        // Update initial form values to match current values
+        setInitialFormValues({
+          ...data,
+          id: project.id,
+        });
+        
+        // Reset unsaved changes flag
+        setHasUnsavedChanges(false);
+
         if (onSuccess) {
           onSuccess(project.id);
         }
@@ -448,6 +483,13 @@ const ProjectBasicsForm = ({ initialData, onSuccess }: ProjectBasicsFormProps) =
       {error && (
         <div className="mb-4 rounded-md bg-red-50 p-3 text-red-600 dark:bg-red-900/20 dark:text-red-400">
           {error}
+        </div>
+      )}
+
+      {/* Unsaved Changes Indicator */}
+      {hasUnsavedChanges && (
+        <div className="mb-4 flex items-center justify-between rounded-md bg-amber-50 p-3 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400">
+          <span>You have unsaved changes. Don't forget to save your project.</span>
         </div>
       )}
 
@@ -682,8 +724,23 @@ const ProjectBasicsForm = ({ initialData, onSuccess }: ProjectBasicsFormProps) =
       </div>
 
       <div className="flex justify-end">
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Saving...' : isEditMode ? 'Update Project' : 'Save Project'}
+        <Button 
+          type="submit" 
+          disabled={isSubmitting}
+          className={hasUnsavedChanges && !isSubmitting ? 'animate-pulse' : ''}
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Saving...
+            </>
+          ) : (
+            <>
+              {hasUnsavedChanges && <Save className="mr-2 h-4 w-4" />}
+              {isEditMode ? 'Update Project' : 'Save Project'}
+              {hasUnsavedChanges && '*'}
+            </>
+          )}
         </Button>
       </div>
     </form>
