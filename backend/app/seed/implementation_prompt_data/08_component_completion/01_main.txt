@@ -1,0 +1,23 @@
+I need to complete and refine the UI components for our application. Help me enhance these components to ensure they're production-ready.
+
+UI/Component Specifications:
+{ui_component_specs}
+
+Accessibility Requirements:
+{accessibility_requirements}
+
+Non-Functional Requirements (UI-related):
+{ui_nfr_requirements}
+
+Focus on:
+1. Completing components with all required variants and states
+2. Implementing responsive behavior for all screen sizes
+3. Adding proper accessibility attributes (ARIA roles, keyboard navigation)
+4. Implementing loading, error, and empty states
+5. Adding animations and transitions where appropriate
+6. Optimizing for performance (memoization, lazy loading)
+
+Create or refine these specific components:
+[List of high-priority components to implement/refine]
+
+Each component should be fully functional, well-documented, and include appropriate unit tests.

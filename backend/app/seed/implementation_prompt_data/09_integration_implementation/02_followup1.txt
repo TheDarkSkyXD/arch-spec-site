@@ -1,0 +1,8 @@
+Let's continue implementing our external integrations. We've completed [list completed integrations]. Now I need to implement:
+
+1. The remaining API client methods for [specific integration]
+2. Webhook handlers for [specific events]
+3. Data transformation utilities for [specific data types]
+4. Caching strategy for external API responses
+
+Ensure proper error handling and follow the same patterns established in our previous integration implementations.

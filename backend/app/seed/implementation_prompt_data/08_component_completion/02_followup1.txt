@@ -1,0 +1,8 @@
+Let's continue refining our UI components. So far, we've completed [list completed components]. Now I need to:
+
+1. Implement the remaining component variants for [specific components]
+2. Add responsive behaviors for mobile and tablet views
+3. Implement skeleton loading states for data-dependent components
+4. Add proper keyboard navigation between interactive elements
+
+Keep the same design patterns and component architecture we've established.

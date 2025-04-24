@@ -1,0 +1,25 @@
+I need to implement integrations with external systems and third-party services for our application. Help me create the necessary integration code.
+
+Integration Requirements:
+{integration_requirements}
+
+Security Requirements (Integration-related):
+{security_integration_requirements}
+
+Architecture (Integration Patterns):
+{architecture_integration_patterns}
+
+Create implementations for the following integrations:
+1. [First integration system] - [brief description]
+2. [Second integration system] - [brief description]
+3. [Third integration system] - [brief description]
+
+For each integration, develop:
+1. API client/service for communicating with the external system
+2. Authentication mechanism as specified
+3. Data transformation/mapping between our system and the external service
+4. Error handling and retry logic
+5. Appropriate logging and monitoring
+6. Unit and integration tests
+
+Follow our architectural patterns for external integrations and ensure all security requirements are met.
