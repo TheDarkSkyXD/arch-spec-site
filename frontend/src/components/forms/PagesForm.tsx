@@ -1,36 +1,36 @@
-import { useState, useEffect, useRef } from 'react';
 import {
-  Trash2,
-  ToggleLeft,
-  ToggleRight,
-  Layers,
-  Loader2,
-  Edit,
-  X,
   ChevronDown,
   ChevronUp,
-  Plus,
-  Sparkles,
-  RefreshCw,
+  Edit,
+  Layers,
+  Loader2,
   Lock,
+  Plus,
+  RefreshCw,
+  Sparkles,
+  ToggleLeft,
+  ToggleRight,
+  Trash2,
+  X
 } from 'lucide-react';
-import { Pages } from '../../types/templates';
-import { pagesService } from '../../services/pagesService';
-import { useToast } from '../../contexts/ToastContext';
-import { projectsService } from '../../services/projectsService';
-import { featuresService } from '../../services/featuresService';
-import { requirementsService } from '../../services/requirementsService';
-import { aiService } from '../../services/aiService';
-import { PageComponent } from '../../services/aiService';
+import { useEffect, useRef, useState } from 'react';
 import { useSubscription } from '../../contexts/SubscriptionContext';
-import AIInstructionsModal from '../ui/AIInstructionsModal';
+import { useToast } from '../../contexts/ToastContext';
 import { useUserProfile } from '../../hooks/useUserProfile';
+import { aiService, PageComponent } from '../../services/aiService';
+import { featuresService } from '../../services/featuresService';
+import { pagesService } from '../../services/pagesService';
+import { projectsService } from '../../services/projectsService';
+import { requirementsService } from '../../services/requirementsService';
+import { Pages } from '../../types/templates';
+import AIInstructionsModal from '../ui/AIInstructionsModal';
 // Import shadcn UI components
+import { Save } from 'lucide-react';
 import Button from '../ui/Button';
-import Input from '../ui/Input';
 import Card from '../ui/Card';
-import { Label } from '../ui/label';
 import { PremiumFeatureBadge, ProcessingOverlay } from '../ui/index';
+import Input from '../ui/Input';
+import { Label } from '../ui/label';
 
 interface PagesFormProps {
   initialData?: Pages;
@@ -55,6 +55,11 @@ export default function PagesForm({ initialData, projectId, onSuccess }: PagesFo
   const [errors, setErrors] = useState<Record<string, string>>({});
   // Add state for error and success messages
   const [error, setError] = useState<string>('');
+
+  // Add state for tracking unsaved changes
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
+  const [initialPages, setInitialPages] = useState<Pages | null>(null);
+  const [hasBeenSaved, setHasBeenSaved] = useState<boolean>(!!initialData);
 
   // Add state for AI enhancement
   const [isEnhancing, setIsEnhancing] = useState<boolean>(false);
@@ -93,8 +98,29 @@ export default function PagesForm({ initialData, projectId, onSuccess }: PagesFo
       setPublicPages(initialData.public || []);
       setAuthenticatedPages(initialData.authenticated || []);
       setAdminPages(initialData.admin || []);
+      
+      // Save initial data for tracking changes
+      setInitialPages(JSON.parse(JSON.stringify(initialData)));
+      setHasBeenSaved(true);
     }
   }, [initialData]);
+
+  // Effect to track unsaved changes
+  useEffect(() => {
+    if (!initialPages) return;
+    
+    const currentPages = {
+      public: publicPages,
+      authenticated: authenticatedPages,
+      admin: adminPages
+    };
+    
+    // Compare current pages with initial pages
+    const currentPagesJson = JSON.stringify(currentPages);
+    const initialPagesJson = JSON.stringify(initialPages);
+    
+    setHasUnsavedChanges(currentPagesJson !== initialPagesJson);
+  }, [publicPages, authenticatedPages, adminPages, initialPages]);
 
   // Focus maintenance effect - moved from ComponentsEditor
   useEffect(() => {
@@ -115,6 +141,10 @@ export default function PagesForm({ initialData, projectId, onSuccess }: PagesFo
             setPublicPages(pagesData.public || []);
             setAuthenticatedPages(pagesData.authenticated || []);
             setAdminPages(pagesData.admin || []);
+            
+            // Save initial data for tracking changes
+            setInitialPages(JSON.parse(JSON.stringify(pagesData)));
+            setHasBeenSaved(true);
           }
         } catch (error) {
           console.error('Error fetching pages:', error);
@@ -294,9 +324,12 @@ export default function PagesForm({ initialData, projectId, onSuccess }: PagesFo
         setAuthenticatedPages(enhancedPages.authenticated || []);
         setAdminPages(enhancedPages.admin || []);
 
+        // Mark changes as unsaved
+        setHasUnsavedChanges(true);
+
         showToast({
           title: 'Success',
-          description: 'Pages enhanced successfully',
+          description: 'Pages enhanced. Remember to save your changes.',
           type: 'success',
         });
       } else {
@@ -351,9 +384,14 @@ export default function PagesForm({ initialData, projectId, onSuccess }: PagesFo
 
         const totalNewPages = newPublicPages.length + newAuthPages.length + newAdminPages.length;
 
+        // Mark changes as unsaved
+        if (totalNewPages > 0) {
+          setHasUnsavedChanges(true);
+        }
+
         showToast({
           title: 'Success',
-          description: `Added ${totalNewPages} new pages`,
+          description: `Added ${totalNewPages} new pages. Remember to save your changes.`,
           type: 'success',
         });
       } else {
@@ -396,6 +434,9 @@ export default function PagesForm({ initialData, projectId, onSuccess }: PagesFo
     };
 
     setPages(pages);
+    
+    // Mark changes as unsaved
+    setHasUnsavedChanges(true);
   };
 
   const validatePageForm = () => {
@@ -435,11 +476,15 @@ export default function PagesForm({ initialData, projectId, onSuccess }: PagesFo
 
     resetPageForm();
 
+    // Show a more accurate toast message
     showToast({
-      title: 'Success',
-      description: 'New page added successfully',
+      title: 'Page Added',
+      description: 'New page added. Remember to save your changes.',
       type: 'success',
     });
+    
+    // Mark changes as unsaved
+    setHasUnsavedChanges(true);
   };
 
   const handleEditPage = () => {
@@ -482,11 +527,15 @@ export default function PagesForm({ initialData, projectId, onSuccess }: PagesFo
     // Reset form and editing state
     resetPageForm();
 
+    // Show a more accurate toast message
     showToast({
-      title: 'Success',
-      description: 'Page updated successfully',
+      title: 'Page Updated',
+      description: 'Page updated. Remember to save your changes.',
       type: 'success',
     });
+    
+    // Mark changes as unsaved
+    setHasUnsavedChanges(true);
   };
 
   const handleStartEditPage = (type: 'public' | 'authenticated' | 'admin', index: number) => {
@@ -541,11 +590,15 @@ export default function PagesForm({ initialData, projectId, onSuccess }: PagesFo
       setExpandedPageIndex(null);
     }
 
+    // Show a more accurate toast message
     showToast({
-      title: 'Success',
-      description: 'Page removed successfully',
+      title: 'Page Removed',
+      description: 'Page removed. Remember to save your changes.',
       type: 'success',
     });
+    
+    // Mark changes as unsaved
+    setHasUnsavedChanges(true);
   };
 
   // Component Management Functions
@@ -601,6 +654,9 @@ export default function PagesForm({ initialData, projectId, onSuccess }: PagesFo
       updatedPages[expandedPageIndex] = updatedPage;
       setAdminPages(updatedPages);
     }
+    
+    // Mark changes as unsaved
+    setHasUnsavedChanges(true);
   };
 
   const handleAddComponent = () => {
@@ -620,9 +676,10 @@ export default function PagesForm({ initialData, projectId, onSuccess }: PagesFo
     updatePageComponents(updatedComponents);
     setNewComponentName('');
 
+    // Show a more accurate toast message
     showToast({
-      title: 'Success',
-      description: 'Component added successfully',
+      title: 'Component Added',
+      description: 'Component added. Remember to save your changes.',
       type: 'success',
     });
   };
@@ -639,9 +696,10 @@ export default function PagesForm({ initialData, projectId, onSuccess }: PagesFo
     updatePageComponents(updatedComponents);
     setEditingComponentIndex(null);
 
+    // Show a more accurate toast message
     showToast({
-      title: 'Success',
-      description: 'Component updated successfully',
+      title: 'Component Updated',
+      description: 'Component updated. Remember to save your changes.',
       type: 'success',
     });
   };
@@ -653,9 +711,10 @@ export default function PagesForm({ initialData, projectId, onSuccess }: PagesFo
     const updatedComponents = expandedPage.components.filter((_, i) => i !== index);
     updatePageComponents(updatedComponents);
 
+    // Show a more accurate toast message
     showToast({
-      title: 'Success',
-      description: 'Component removed successfully',
+      title: 'Component Removed',
+      description: 'Component removed. Remember to save your changes.',
       type: 'success',
     });
   };
@@ -677,6 +736,12 @@ export default function PagesForm({ initialData, projectId, onSuccess }: PagesFo
       return;
     }
 
+    // Don't submit if there are no changes
+    if (!hasUnsavedChanges) {
+      console.log('No changes to save, skipping submission');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const data = {
@@ -693,6 +758,11 @@ export default function PagesForm({ initialData, projectId, onSuccess }: PagesFo
           description: 'Pages saved successfully',
           type: 'success',
         });
+
+        // Update initial pages to match current pages, resetting unsaved changes
+        setInitialPages(JSON.parse(JSON.stringify(data)));
+        setHasUnsavedChanges(false);
+        setHasBeenSaved(true);
 
         if (onSuccess) {
           onSuccess(result);
@@ -719,6 +789,22 @@ export default function PagesForm({ initialData, projectId, onSuccess }: PagesFo
       setTimeout(() => setError(''), 5000);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  // Function to discard all unsaved changes
+  const discardChanges = () => {
+    if (initialPages) {
+      setPublicPages(initialPages.public || []);
+      setAuthenticatedPages(initialPages.authenticated || []);
+      setAdminPages(initialPages.admin || []);
+      setHasUnsavedChanges(false);
+      
+      showToast({
+        title: 'Changes Discarded',
+        description: 'Your changes have been discarded',
+        type: 'info',
+      });
     }
   };
 
@@ -956,6 +1042,31 @@ export default function PagesForm({ initialData, projectId, onSuccess }: PagesFo
       {error && (
         <div className="mb-4 rounded-md bg-red-50 p-3 text-red-600 dark:bg-red-900/20 dark:text-red-400">
           {error}
+        </div>
+      )}
+
+      {/* Unsaved Changes Indicator */}
+      {hasUnsavedChanges && (
+        <div className="mb-4 flex items-center justify-between rounded-md bg-amber-50 p-3 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400">
+          <span>You have unsaved changes. Don't forget to save your pages configuration.</span>
+          <div className="flex gap-2">
+            <Button 
+              type="button" 
+              variant="ghost" 
+              size="sm"
+              onClick={discardChanges}
+            >
+              Discard
+            </Button>
+            <Button 
+              type="submit" 
+              variant="default" 
+              size="sm"
+              disabled={isSubmitting || !projectId}
+            >
+              {isSubmitting ? 'Saving...' : 'Save Now'}
+            </Button>
+          </div>
         </div>
       )}
 
@@ -1197,11 +1308,26 @@ export default function PagesForm({ initialData, projectId, onSuccess }: PagesFo
       <div className="mt-6 flex justify-end">
         <Button
           type="submit"
-          disabled={isSubmitting || !projectId}
-          variant={!projectId || isSubmitting ? 'outline' : 'default'}
-          className={!projectId || isSubmitting ? 'bg-gray-400 text-white hover:bg-gray-400' : ''}
+          disabled={isSubmitting || !projectId || !hasUnsavedChanges}
+          variant={!projectId || isSubmitting || !hasUnsavedChanges ? 'outline' : 'default'}
+          className={
+            !projectId || isSubmitting || !hasUnsavedChanges
+              ? 'cursor-not-allowed opacity-50'
+              : hasUnsavedChanges ? 'animate-pulse' : ''
+          }
         >
-          {isSubmitting ? 'Saving...' : 'Save Pages'}
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Saving...
+            </>
+          ) : (
+            <>
+              {hasUnsavedChanges && <Save className="mr-2 h-4 w-4" />}
+              {hasBeenSaved ? 'Save Changes' : 'Save Pages'}
+              {hasUnsavedChanges && '*'}
+            </>
+          )}
         </Button>
       </div>
     </form>
