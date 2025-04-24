@@ -1,125 +1,50 @@
-import { useState, useEffect } from 'react';
-import { Loader2, Palette, Type, Layout, Grid, Check, Copy, Sparkles, Lock } from 'lucide-react';
-import { UIDesign } from '../../types/templates';
-import { uiDesignService } from '../../services/uiDesignService';
-import { useToast } from '../../contexts/ToastContext';
+import { Check, Copy, Grid, Layout, Loader2, Lock, Palette, Save, Sparkles, Type } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { useSubscription } from '../../contexts/SubscriptionContext';
-import { aiService } from '../../services/aiService';
-import { requirementsService } from '../../services/requirementsService';
-import { projectsService } from '../../services/projectsService';
-import { featuresService } from '../../services/featuresService';
-import { PremiumFeatureBadge, ProcessingOverlay } from '../ui/index';
-import AIInstructionsModal from '../ui/AIInstructionsModal';
+import { useToast } from '../../contexts/ToastContext';
 import { useUserProfile } from '../../hooks/useUserProfile';
+import { aiService } from '../../services/aiService';
+import { FeatureModule, featuresService } from '../../services/featuresService';
+import { projectsService } from '../../services/projectsService';
+import { requirementsService } from '../../services/requirementsService';
+import { uiDesignService } from '../../services/uiDesignService';
+import { UIDesign } from '../../types/templates';
+import AIInstructionsModal from '../ui/AIInstructionsModal';
+import { PremiumFeatureBadge, ProcessingOverlay } from '../ui/index';
+
+// Import components for each tab
+import ColorSettings from './ui-design/ColorSettings';
+import ComponentSettings from './ui-design/ComponentSettings';
+import LayoutSettings from './ui-design/LayoutSettings';
+import TypographySettings from './ui-design/TypographySettings';
+
+// Import constants
+import {
+  buttonStyles,
+  cardStyles,
+  fontOptions,
+  initialDesign,
+  inputStyles,
+  navStyles,
+  tableStyles
+} from './ui-design/constants';
+
+// Import animations CSS
+import '../../styles/animations.css';
+
 // Import shadcn UI components
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from '../ui/alert-dialog';
 import Button from '../ui/Button';
-import Input from '../ui/Input';
-import Card from '../ui/Card';
-import { Label } from '../ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { Switch } from '../ui/switch';
-
-// Define initial UI design state
-const initialDesign: UIDesign = {
-  colors: {
-    primary: '#3b82f6',
-    secondary: '#6366f1',
-    accent: '#f59e0b',
-    background: '#ffffff',
-    textPrimary: '#1f2937',
-    textSecondary: '#4b5563',
-    success: '#10b981',
-    warning: '#f59e0b',
-    error: '#ef4444',
-    info: '#3b82f6',
-    surface: '#ffffff',
-    border: '#e5e7eb',
-  },
-  typography: {
-    fontFamily: 'Inter, sans-serif',
-    headingFont: 'Inter, sans-serif',
-    fontSize: '16px',
-    lineHeight: 1.5,
-    fontWeight: 400,
-    headingSizes: {
-      h1: '2.5rem',
-      h2: '2rem',
-      h3: '1.75rem',
-      h4: '1.5rem',
-      h5: '1.25rem',
-      h6: '1rem',
-    },
-  },
-  spacing: {
-    unit: '4px',
-    scale: [0, 1, 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24, 32, 40, 48, 64, 80, 96],
-  },
-  borderRadius: {
-    small: '2px',
-    medium: '4px',
-    large: '8px',
-    xl: '12px',
-    pill: '9999px',
-  },
-  shadows: {
-    small: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-    medium: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-    large: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-    xl: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-  },
-  layout: {
-    containerWidth: '1280px',
-    responsive: true,
-    sidebarWidth: '240px',
-    topbarHeight: '64px',
-    gridColumns: 12,
-    gutterWidth: '16px',
-  },
-  components: {
-    buttonStyle: 'rounded', // rounded, square, pill
-    inputStyle: 'outline', // outline, filled, underline
-    cardStyle: 'shadow', // shadow, outline, flat
-    tableStyle: 'bordered', // bordered, striped, minimal
-    navStyle: 'pills', // pills, tabs, links
-  },
-  darkMode: {
-    enabled: true,
-    colors: {
-      background: '#1f2937',
-      textPrimary: '#f9fafb',
-      textSecondary: '#e5e7eb',
-      surface: '#374151',
-      border: '#4b5563',
-    },
-  },
-  animations: {
-    transitionDuration: '150ms',
-    transitionTiming: 'ease-in-out',
-    hoverScale: 1.05,
-    enableAnimations: true,
-  },
-};
-
-// Font options
-const fontOptions = [
-  'Inter, sans-serif',
-  'Roboto, sans-serif',
-  'Open Sans, sans-serif',
-  'Montserrat, sans-serif',
-  'Poppins, sans-serif',
-  'Lato, sans-serif',
-  'Source Sans Pro, sans-serif',
-  'Raleway, sans-serif',
-  'Nunito, sans-serif',
-  'System UI, sans-serif',
-];
-
-// Component style options
-const buttonStyles = ['rounded', 'square', 'pill'];
-const inputStyles = ['outline', 'filled', 'underline'];
-const cardStyles = ['shadow', 'outline', 'flat'];
-const tableStyles = ['bordered', 'striped', 'minimal'];
-const navStyles = ['pills', 'tabs', 'links'];
 
 interface UIDesignFormProps {
   initialData?: UIDesign;
@@ -138,21 +63,46 @@ export default function UIDesignForm({ initialData, projectId, onSuccess }: UIDe
   const [copied, setCopied] = useState<boolean>(false);
   const { aiCreditsRemaining } = useUserProfile();
 
+  // Add state for unsaved changes tracking
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
+  const [initialUIDesign, setInitialUIDesign] = useState<UIDesign | null>(null);
+  const [activeTab, setActiveTab] = useState<string>('colors'); // Track active tab
+
+  // Add state for tab change confirmation dialog
+  const [isTabChangeDialogOpen, setIsTabChangeDialogOpen] = useState<boolean>(false);
+  const [pendingTabChange, setPendingTabChange] = useState<string | null>(null);
+
   // Add state for AI enhancement
   const [isEnhancing, setIsEnhancing] = useState<boolean>(false);
   const [projectDescription, setProjectDescription] = useState<string>('');
-  const [features, setFeatures] = useState<any[]>([]);
+  const [features, setFeatures] = useState<FeatureModule[]>([]);
   const [requirements, setRequirements] = useState<string[]>([]);
 
   // Add state for AI instructions modal
   const [isAIModalOpen, setIsAIModalOpen] = useState<boolean>(false);
+  
+  // Add state for tracking if the form has been saved at least once
+  const [hasBeenSaved, setHasBeenSaved] = useState<boolean>(!!initialData);
 
   // Effect to update local state when initial data changes
   useEffect(() => {
     if (initialData) {
       setUIDesign(initialData);
+      setInitialUIDesign(JSON.parse(JSON.stringify(initialData))); // Deep copy to avoid reference issues
+      setHasBeenSaved(true);
     }
   }, [initialData]);
+
+  // Effect to track unsaved changes
+  useEffect(() => {
+    if (!initialUIDesign) return;
+    
+    // Compare current design with initial design
+    const currentDesignJson = JSON.stringify(uiDesign);
+    const initialDesignJson = JSON.stringify(initialUIDesign);
+    
+    setHasUnsavedChanges(currentDesignJson !== initialDesignJson);
+  }, [uiDesign, initialUIDesign]);
 
   // Fetch UI design if projectId is provided but no initialData
   useEffect(() => {
@@ -164,6 +114,8 @@ export default function UIDesignForm({ initialData, projectId, onSuccess }: UIDe
           if (uiDesignData) {
             console.log('Fetched UI design data:', uiDesignData);
             setUIDesign(uiDesignData);
+            setInitialUIDesign(JSON.parse(JSON.stringify(uiDesignData))); // Deep copy
+            setHasBeenSaved(true);
           }
         } catch (error) {
           console.error('Error fetching UI design:', error);
@@ -215,6 +167,41 @@ export default function UIDesignForm({ initialData, projectId, onSuccess }: UIDe
       fetchProjectInfo();
     }
   }, [projectId]);
+
+  // Function to handle tab changes
+  const handleTabChange = (value: string) => {
+    // Don't do anything if trying to switch to the current tab
+    if (value === activeTab) return;
+    
+    // If there are unsaved changes, open the confirmation dialog
+    if (hasUnsavedChanges) {
+      setPendingTabChange(value);
+      setIsTabChangeDialogOpen(true);
+    } else {
+      // No unsaved changes, switch tab directly
+      setActiveTab(value);
+    }
+  };
+
+  // Function to confirm tab change
+  const confirmTabChange = () => {
+    if (pendingTabChange && initialUIDesign) {
+      // Reset the form to the initial data
+      setUIDesign(JSON.parse(JSON.stringify(initialUIDesign)));
+      setHasUnsavedChanges(false);
+      setActiveTab(pendingTabChange);
+    }
+    
+    // Close the dialog and reset pending tab
+    setIsTabChangeDialogOpen(false);
+    setPendingTabChange(null);
+  };
+  
+  // Function to cancel tab change
+  const cancelTabChange = () => {
+    setIsTabChangeDialogOpen(false);
+    setPendingTabChange(null);
+  };
 
   // Function to open the AI design enhancement modal
   const openAIModal = () => {
@@ -516,6 +503,16 @@ export default function UIDesignForm({ initialData, projectId, onSuccess }: UIDe
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Check if we're in the middle of a tab change operation
+    // This prevents form submissions triggered by tab changes
+    const activeElement = document.activeElement;
+    const isTabElement = activeElement?.closest('[role="tab"]') || 
+                          activeElement?.closest('.tab-container');
+    if (isTabElement) {
+      console.log('Preventing submit during tab interaction');
+      return;
+    }
+
     // Clear previous messages
     setError('');
 
@@ -530,6 +527,12 @@ export default function UIDesignForm({ initialData, projectId, onSuccess }: UIDe
       return;
     }
 
+    // Check if there are actual changes to save
+    if (!hasUnsavedChanges) {
+      console.log('No changes to save, skipping submission');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const result = await uiDesignService.saveUIDesign(projectId, uiDesign);
@@ -540,6 +543,11 @@ export default function UIDesignForm({ initialData, projectId, onSuccess }: UIDe
           description: 'UI design saved successfully',
           type: 'success',
         });
+        
+        // Update initial design to match current design, resetting unsaved changes
+        setInitialUIDesign(JSON.parse(JSON.stringify(uiDesign)));
+        setHasUnsavedChanges(false);
+        setHasBeenSaved(true);
 
         if (onSuccess) {
           onSuccess(result);
@@ -567,87 +575,6 @@ export default function UIDesignForm({ initialData, projectId, onSuccess }: UIDe
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  // Render color picker component
-  const renderColorPicker = (
-    section: 'colors' | 'darkMode.colors',
-    colorName: string,
-    label: string
-  ) => {
-    const colorValue =
-      section === 'colors'
-        ? uiDesign.colors[colorName as keyof typeof uiDesign.colors]
-        : uiDesign.darkMode.colors[colorName as keyof typeof uiDesign.darkMode.colors];
-
-    return (
-      <div className="mb-4">
-        <Label className="mb-1 block">{label}</Label>
-        <div className="flex space-x-2">
-          <Input
-            type="color"
-            value={colorValue}
-            onChange={(e) => handleColorChange(section, colorName, e.target.value)}
-            className="h-10 w-12 p-1"
-          />
-          <Input
-            type="text"
-            value={colorValue}
-            onChange={(e) => handleColorChange(section, colorName, e.target.value)}
-            className="flex-1"
-          />
-        </div>
-      </div>
-    );
-  };
-
-  // Render select component
-  const renderSelect = (
-    options: string[],
-    value: string,
-    onChange: (value: string) => void,
-    label: string
-  ) => {
-    return (
-      <div className="mb-4">
-        <Label className="mb-1 block">{label}</Label>
-        <select
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="w-full rounded-md border border-gray-300 bg-white p-2 dark:border-slate-600 dark:bg-slate-800"
-        >
-          {options.map((option) => (
-            <option key={option} value={option}>
-              {option}
-            </option>
-          ))}
-        </select>
-      </div>
-    );
-  };
-
-  // Render number input component
-  const renderNumberInput = (
-    value: number,
-    onChange: (value: number) => void,
-    label: string,
-    min: number,
-    max: number,
-    step: number = 1
-  ) => {
-    return (
-      <div className="mb-4">
-        <Label className="mb-1 block">{label}</Label>
-        <Input
-          type="number"
-          value={value}
-          onChange={(e) => onChange(parseFloat(e.target.value))}
-          min={min}
-          max={max}
-          step={step}
-        />
-      </div>
-    );
   };
 
   if (isLoading) {
@@ -678,10 +605,60 @@ export default function UIDesignForm({ initialData, projectId, onSuccess }: UIDe
         confirmText="Generate Recommendations"
       />
 
+      {/* Tab Change Confirmation Dialog */}
+      <AlertDialog>
+        <AlertDialogContent 
+          isOpen={isTabChangeDialogOpen} 
+          onClose={cancelTabChange}
+          className="max-w-md"
+        >
+          <AlertDialogHeader>
+            <AlertDialogTitle>Unsaved Changes</AlertDialogTitle>
+            <AlertDialogDescription>
+              You have unsaved changes in this tab. These changes will be lost if you navigate away. Do you want to continue?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={cancelTabChange}>Stay Here</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmTabChange}>Discard Changes</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Error Message */}
       {error && (
         <div className="mb-4 rounded-md bg-red-50 p-3 text-red-600 dark:bg-red-900/20 dark:text-red-400">
           {error}
+        </div>
+      )}
+      
+      {/* Unsaved Changes Indicator */}
+      {hasUnsavedChanges && (
+        <div className="mb-4 flex items-center justify-between rounded-md bg-amber-50 p-3 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400">
+          <span>You have unsaved changes. Don't forget to save your UI design.</span>
+          <div className="flex gap-2">
+            <Button 
+              type="button" 
+              variant="ghost" 
+              size="sm"
+              onClick={() => {
+                if (initialUIDesign) {
+                  setUIDesign(JSON.parse(JSON.stringify(initialUIDesign)));
+                  setHasUnsavedChanges(false);
+                }
+              }}
+            >
+              Discard
+            </Button>
+            <Button 
+              type="submit" 
+              variant="default" 
+              size="sm"
+              disabled={isSubmitting || !projectId}
+            >
+              {isSubmitting ? 'Saving...' : 'Save Now'}
+            </Button>
+          </div>
         </div>
       )}
 
@@ -736,488 +713,120 @@ export default function UIDesignForm({ initialData, projectId, onSuccess }: UIDe
           </div>
         </div>
 
-        <Tabs defaultValue="colors" className="w-full">
-          <TabsList className="mb-4 flex w-full justify-start overflow-x-auto overflow-y-hidden">
-            <TabsTrigger value="colors" className="flex items-center">
-              <Palette className="mr-2 h-4 w-4" />
-              Colors
-            </TabsTrigger>
-            <TabsTrigger value="typography" className="flex items-center">
-              <Type className="mr-2 h-4 w-4" />
-              Typography
-            </TabsTrigger>
-            <TabsTrigger value="layout" className="flex items-center">
-              <Layout className="mr-2 h-4 w-4" />
-              Layout
-            </TabsTrigger>
-            <TabsTrigger value="components" className="flex items-center">
-              <Grid className="mr-2 h-4 w-4" />
-              Components
-            </TabsTrigger>
-          </TabsList>
+        {/* Using a div to isolate tabs from form submission */}
+        <div 
+          className="tab-container" 
+          onClick={(e: React.MouseEvent) => {
+            // Stop propagation at the container level to prevent form events
+            e.stopPropagation();
+          }}
+          onKeyDown={(e: React.KeyboardEvent) => {
+            // Prevent Enter key from submitting the form
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              e.stopPropagation();
+            }
+          }}
+        >
+          <Tabs 
+            value={activeTab} 
+            onValueChange={(value) => {
+              // Use setTimeout to break the event chain
+              setTimeout(() => handleTabChange(value), 0);
+            }} 
+            className="w-full"
+          >
+            <TabsList className="mb-4 flex w-full justify-start overflow-x-auto overflow-y-hidden">
+              <TabsTrigger value="colors" className="flex items-center">
+                <Palette className="mr-2 h-4 w-4" />
+                Colors
+                {hasUnsavedChanges && activeTab === 'colors' && <span className="ml-1 text-amber-500">*</span>}
+              </TabsTrigger>
+              <TabsTrigger value="typography" className="flex items-center">
+                <Type className="mr-2 h-4 w-4" />
+                Typography
+                {hasUnsavedChanges && activeTab === 'typography' && <span className="ml-1 text-amber-500">*</span>}
+              </TabsTrigger>
+              <TabsTrigger value="layout" className="flex items-center">
+                <Layout className="mr-2 h-4 w-4" />
+                Layout
+                {hasUnsavedChanges && activeTab === 'layout' && <span className="ml-1 text-amber-500">*</span>}
+              </TabsTrigger>
+              <TabsTrigger value="components" className="flex items-center">
+                <Grid className="mr-2 h-4 w-4" />
+                Components
+                {hasUnsavedChanges && activeTab === 'components' && <span className="ml-1 text-amber-500">*</span>}
+              </TabsTrigger>
+            </TabsList>
 
-          {/* Colors Tab */}
-          <TabsContent value="colors" className="space-y-4">
-            <Card className="p-4">
-              <h3 className="mb-4 text-lg font-medium">Color Palette</h3>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {renderColorPicker('colors', 'primary', 'Primary')}
-                {renderColorPicker('colors', 'secondary', 'Secondary')}
-                {renderColorPicker('colors', 'accent', 'Accent')}
-                {renderColorPicker('colors', 'background', 'Background')}
-                {renderColorPicker('colors', 'textPrimary', 'Text Primary')}
-                {renderColorPicker('colors', 'textSecondary', 'Text Secondary')}
-                {renderColorPicker('colors', 'success', 'Success')}
-                {renderColorPicker('colors', 'warning', 'Warning')}
-                {renderColorPicker('colors', 'error', 'Error')}
-                {renderColorPicker('colors', 'info', 'Info')}
-                {renderColorPicker('colors', 'surface', 'Surface')}
-                {renderColorPicker('colors', 'border', 'Border')}
-              </div>
-            </Card>
+            {/* Colors Tab */}
+            <TabsContent value="colors" className="space-y-4">
+              <ColorSettings 
+                uiDesign={uiDesign}
+                handleColorChange={handleColorChange}
+                handleDarkModeToggle={handleDarkModeToggle}
+              />
+            </TabsContent>
 
-            <Card className="p-4">
-              <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-lg font-medium">Dark Mode</h3>
-                <div className="flex items-center space-x-2">
-                  <Label htmlFor="dark-mode-toggle">Enable Dark Mode</Label>
-                  <Switch
-                    id="dark-mode-toggle"
-                    checked={uiDesign.darkMode.enabled}
-                    onCheckedChange={(checked: boolean) => handleDarkModeToggle(checked)}
-                  />
-                </div>
-              </div>
+            {/* Typography Tab */}
+            <TabsContent value="typography" className="space-y-4">
+              <TypographySettings 
+                uiDesign={uiDesign}
+                fontOptions={fontOptions}
+                handleTypographyChange={handleTypographyChange}
+              />
+            </TabsContent>
 
-              {uiDesign.darkMode.enabled && (
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  {renderColorPicker('darkMode.colors', 'background', 'Background')}
-                  {renderColorPicker('darkMode.colors', 'textPrimary', 'Text Primary')}
-                  {renderColorPicker('darkMode.colors', 'textSecondary', 'Text Secondary')}
-                  {renderColorPicker('darkMode.colors', 'surface', 'Surface')}
-                  {renderColorPicker('darkMode.colors', 'border', 'Border')}
-                </div>
-              )}
-            </Card>
-          </TabsContent>
+            {/* Layout Tab */}
+            <TabsContent value="layout" className="space-y-4">
+              <LayoutSettings 
+                uiDesign={uiDesign}
+                handleLayoutChange={handleLayoutChange}
+                handleSpacingChange={handleSpacingChange}
+                handleBorderRadiusChange={handleBorderRadiusChange}
+                handleShadowsChange={handleShadowsChange}
+              />
+            </TabsContent>
 
-          {/* Typography Tab */}
-          <TabsContent value="typography" className="space-y-4">
-            <Card className="p-4">
-              <h3 className="mb-4 text-lg font-medium">Typography Settings</h3>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                {renderSelect(
-                  fontOptions,
-                  uiDesign.typography.fontFamily,
-                  (value) => handleTypographyChange('fontFamily', value),
-                  'Font Family'
-                )}
-
-                {renderSelect(
-                  fontOptions,
-                  uiDesign.typography.headingFont,
-                  (value) => handleTypographyChange('headingFont', value),
-                  'Heading Font'
-                )}
-
-                <div className="mb-4">
-                  <Label className="mb-1 block">Base Font Size</Label>
-                  <Input
-                    type="text"
-                    value={uiDesign.typography.fontSize}
-                    onChange={(e) => handleTypographyChange('fontSize', e.target.value)}
-                    placeholder="16px"
-                  />
-                </div>
-
-                {renderNumberInput(
-                  uiDesign.typography.lineHeight,
-                  (value) => handleTypographyChange('lineHeight', value),
-                  'Line Height',
-                  1,
-                  3,
-                  0.1
-                )}
-
-                {renderNumberInput(
-                  uiDesign.typography.fontWeight,
-                  (value) => handleTypographyChange('fontWeight', value),
-                  'Base Font Weight',
-                  300,
-                  900,
-                  100
-                )}
-              </div>
-            </Card>
-
-            <Card className="p-4">
-              <h3 className="mb-4 text-lg font-medium">Heading Sizes</h3>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                <div className="mb-4">
-                  <Label className="mb-1 block">H1 Size</Label>
-                  <Input
-                    type="text"
-                    value={uiDesign.typography.headingSizes.h1}
-                    onChange={(e) => handleTypographyChange('headingSizes.h1', e.target.value)}
-                    placeholder="2.5rem"
-                  />
-                </div>
-
-                <div className="mb-4">
-                  <Label className="mb-1 block">H2 Size</Label>
-                  <Input
-                    type="text"
-                    value={uiDesign.typography.headingSizes.h2}
-                    onChange={(e) => handleTypographyChange('headingSizes.h2', e.target.value)}
-                    placeholder="2rem"
-                  />
-                </div>
-
-                <div className="mb-4">
-                  <Label className="mb-1 block">H3 Size</Label>
-                  <Input
-                    type="text"
-                    value={uiDesign.typography.headingSizes.h3}
-                    onChange={(e) => handleTypographyChange('headingSizes.h3', e.target.value)}
-                    placeholder="1.75rem"
-                  />
-                </div>
-
-                <div className="mb-4">
-                  <Label className="mb-1 block">H4 Size</Label>
-                  <Input
-                    type="text"
-                    value={uiDesign.typography.headingSizes.h4}
-                    onChange={(e) => handleTypographyChange('headingSizes.h4', e.target.value)}
-                    placeholder="1.5rem"
-                  />
-                </div>
-
-                <div className="mb-4">
-                  <Label className="mb-1 block">H5 Size</Label>
-                  <Input
-                    type="text"
-                    value={uiDesign.typography.headingSizes.h5}
-                    onChange={(e) => handleTypographyChange('headingSizes.h5', e.target.value)}
-                    placeholder="1.25rem"
-                  />
-                </div>
-
-                <div className="mb-4">
-                  <Label className="mb-1 block">H6 Size</Label>
-                  <Input
-                    type="text"
-                    value={uiDesign.typography.headingSizes.h6}
-                    onChange={(e) => handleTypographyChange('headingSizes.h6', e.target.value)}
-                    placeholder="1rem"
-                  />
-                </div>
-              </div>
-            </Card>
-          </TabsContent>
-
-          {/* Layout Tab */}
-          <TabsContent value="layout" className="space-y-4">
-            <Card className="p-4">
-              <h3 className="mb-4 text-lg font-medium">Layout Settings</h3>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div className="mb-4">
-                  <Label className="mb-1 block">Container Width</Label>
-                  <Input
-                    type="text"
-                    value={uiDesign.layout.containerWidth}
-                    onChange={(e) => handleLayoutChange('containerWidth', e.target.value)}
-                    placeholder="1280px"
-                  />
-                </div>
-
-                <div className="mb-4">
-                  <Label className="mb-1 block">Sidebar Width</Label>
-                  <Input
-                    type="text"
-                    value={uiDesign.layout.sidebarWidth}
-                    onChange={(e) => handleLayoutChange('sidebarWidth', e.target.value)}
-                    placeholder="240px"
-                  />
-                </div>
-
-                <div className="mb-4">
-                  <Label className="mb-1 block">Topbar Height</Label>
-                  <Input
-                    type="text"
-                    value={uiDesign.layout.topbarHeight}
-                    onChange={(e) => handleLayoutChange('topbarHeight', e.target.value)}
-                    placeholder="64px"
-                  />
-                </div>
-
-                <div className="mb-4">
-                  <Label className="mb-1 block">Gutter Width</Label>
-                  <Input
-                    type="text"
-                    value={uiDesign.layout.gutterWidth}
-                    onChange={(e) => handleLayoutChange('gutterWidth', e.target.value)}
-                    placeholder="16px"
-                  />
-                </div>
-
-                {renderNumberInput(
-                  uiDesign.layout.gridColumns,
-                  (value) => handleLayoutChange('gridColumns', value),
-                  'Grid Columns',
-                  1,
-                  24,
-                  1
-                )}
-
-                <div className="mb-4 flex items-center space-x-2">
-                  <Switch
-                    id="responsive-toggle"
-                    checked={uiDesign.layout.responsive}
-                    onCheckedChange={(checked: boolean) =>
-                      handleLayoutChange('responsive', checked)
-                    }
-                  />
-                  <Label htmlFor="responsive-toggle">Responsive Layout</Label>
-                </div>
-              </div>
-            </Card>
-
-            <Card className="p-4">
-              <h3 className="mb-4 text-lg font-medium">Spacing</h3>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div className="mb-4">
-                  <Label className="mb-1 block">Base Unit</Label>
-                  <Input
-                    type="text"
-                    value={uiDesign.spacing.unit}
-                    onChange={(e) => handleSpacingChange('unit', e.target.value)}
-                    placeholder="4px"
-                  />
-                </div>
-
-                <div className="mb-4">
-                  <Label className="mb-1 block">Spacing Scale</Label>
-                  <Input
-                    type="text"
-                    value={uiDesign.spacing.scale.join(', ')}
-                    onChange={(e) => {
-                      const scaleValues = e.target.value
-                        .split(',')
-                        .map((val) => parseInt(val.trim()))
-                        .filter((val) => !isNaN(val));
-                      handleSpacingChange('scale', scaleValues);
-                    }}
-                    placeholder="0, 1, 2, 4, 8, 16, ..."
-                  />
-                  <span className="mt-1 block text-xs text-slate-500">Comma-separated values</span>
-                </div>
-              </div>
-            </Card>
-
-            <Card className="p-4">
-              <h3 className="mb-4 text-lg font-medium">Border Radius</h3>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                <div className="mb-4">
-                  <Label className="mb-1 block">Small Radius</Label>
-                  <Input
-                    type="text"
-                    value={uiDesign.borderRadius.small}
-                    onChange={(e) => handleBorderRadiusChange('small', e.target.value)}
-                    placeholder="2px"
-                  />
-                </div>
-
-                <div className="mb-4">
-                  <Label className="mb-1 block">Medium Radius</Label>
-                  <Input
-                    type="text"
-                    value={uiDesign.borderRadius.medium}
-                    onChange={(e) => handleBorderRadiusChange('medium', e.target.value)}
-                    placeholder="4px"
-                  />
-                </div>
-
-                <div className="mb-4">
-                  <Label className="mb-1 block">Large Radius</Label>
-                  <Input
-                    type="text"
-                    value={uiDesign.borderRadius.large}
-                    onChange={(e) => handleBorderRadiusChange('large', e.target.value)}
-                    placeholder="8px"
-                  />
-                </div>
-
-                <div className="mb-4">
-                  <Label className="mb-1 block">Extra Large Radius</Label>
-                  <Input
-                    type="text"
-                    value={uiDesign.borderRadius.xl}
-                    onChange={(e) => handleBorderRadiusChange('xl', e.target.value)}
-                    placeholder="12px"
-                  />
-                </div>
-
-                <div className="mb-4">
-                  <Label className="mb-1 block">Pill Radius</Label>
-                  <Input
-                    type="text"
-                    value={uiDesign.borderRadius.pill}
-                    onChange={(e) => handleBorderRadiusChange('pill', e.target.value)}
-                    placeholder="9999px"
-                  />
-                </div>
-              </div>
-            </Card>
-
-            <Card className="p-4">
-              <h3 className="mb-4 text-lg font-medium">Shadows</h3>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div className="mb-4">
-                  <Label className="mb-1 block">Small Shadow</Label>
-                  <Input
-                    type="text"
-                    value={uiDesign.shadows.small}
-                    onChange={(e) => handleShadowsChange('small', e.target.value)}
-                    placeholder="0 1px 2px 0 rgba(0, 0, 0, 0.05)"
-                  />
-                </div>
-
-                <div className="mb-4">
-                  <Label className="mb-1 block">Medium Shadow</Label>
-                  <Input
-                    type="text"
-                    value={uiDesign.shadows.medium}
-                    onChange={(e) => handleShadowsChange('medium', e.target.value)}
-                    placeholder="0 4px 6px -1px rgba(0, 0, 0, 0.1)"
-                  />
-                </div>
-
-                <div className="mb-4">
-                  <Label className="mb-1 block">Large Shadow</Label>
-                  <Input
-                    type="text"
-                    value={uiDesign.shadows.large}
-                    onChange={(e) => handleShadowsChange('large', e.target.value)}
-                    placeholder="0 10px 15px -3px rgba(0, 0, 0, 0.1)"
-                  />
-                </div>
-
-                <div className="mb-4">
-                  <Label className="mb-1 block">Extra Large Shadow</Label>
-                  <Input
-                    type="text"
-                    value={uiDesign.shadows.xl}
-                    onChange={(e) => handleShadowsChange('xl', e.target.value)}
-                    placeholder="0 20px 25px -5px rgba(0, 0, 0, 0.1)"
-                  />
-                </div>
-              </div>
-            </Card>
-          </TabsContent>
-
-          {/* Components Tab */}
-          <TabsContent value="components" className="space-y-4">
-            <Card className="p-4">
-              <h3 className="mb-4 text-lg font-medium">Component Styles</h3>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                {renderSelect(
-                  buttonStyles,
-                  uiDesign.components.buttonStyle,
-                  (value) => handleComponentStyleChange('buttonStyle', value),
-                  'Button Style'
-                )}
-
-                {renderSelect(
-                  inputStyles,
-                  uiDesign.components.inputStyle,
-                  (value) => handleComponentStyleChange('inputStyle', value),
-                  'Input Style'
-                )}
-
-                {renderSelect(
-                  cardStyles,
-                  uiDesign.components.cardStyle,
-                  (value) => handleComponentStyleChange('cardStyle', value),
-                  'Card Style'
-                )}
-
-                {renderSelect(
-                  tableStyles,
-                  uiDesign.components.tableStyle,
-                  (value) => handleComponentStyleChange('tableStyle', value),
-                  'Table Style'
-                )}
-
-                {renderSelect(
-                  navStyles,
-                  uiDesign.components.navStyle,
-                  (value) => handleComponentStyleChange('navStyle', value),
-                  'Navigation Style'
-                )}
-              </div>
-            </Card>
-
-            <Card className="p-4">
-              <h3 className="mb-4 text-lg font-medium">Animations</h3>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div className="mb-4">
-                  <Label className="mb-1 block">Transition Duration</Label>
-                  <Input
-                    type="text"
-                    value={uiDesign.animations.transitionDuration}
-                    onChange={(e) => handleAnimationsChange('transitionDuration', e.target.value)}
-                    placeholder="150ms"
-                  />
-                </div>
-
-                <div className="mb-4">
-                  <Label className="mb-1 block">Transition Timing</Label>
-                  <Input
-                    type="text"
-                    value={uiDesign.animations.transitionTiming}
-                    onChange={(e) => handleAnimationsChange('transitionTiming', e.target.value)}
-                    placeholder="ease-in-out"
-                  />
-                </div>
-
-                {renderNumberInput(
-                  uiDesign.animations.hoverScale,
-                  (value) => handleAnimationsChange('hoverScale', value),
-                  'Hover Scale',
-                  1,
-                  2,
-                  0.01
-                )}
-
-                <div className="mb-4 flex items-center space-x-2">
-                  <Switch
-                    id="animations-toggle"
-                    checked={uiDesign.animations.enableAnimations}
-                    onCheckedChange={(checked: boolean) =>
-                      handleAnimationsChange('enableAnimations', checked)
-                    }
-                  />
-                  <Label htmlFor="animations-toggle">Enable Animations</Label>
-                </div>
-              </div>
-            </Card>
-          </TabsContent>
-        </Tabs>
-
-        {/* Preview section */}
-        {/* TODO: This is where the preview of the actual UI Design will go. Not the previuew of the UI Design spec in Markdown format which is handled by UIDesignPreview.tsx */}
+            {/* Components Tab */}
+            <TabsContent value="components" className="space-y-4">
+              <ComponentSettings 
+                uiDesign={uiDesign}
+                buttonStyles={buttonStyles}
+                inputStyles={inputStyles}
+                cardStyles={cardStyles}
+                tableStyles={tableStyles}
+                navStyles={navStyles}
+                handleComponentStyleChange={handleComponentStyleChange}
+                handleAnimationsChange={handleAnimationsChange}
+              />
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
 
       <div className="mt-6 flex justify-end">
-        <Button type="submit" disabled={isSubmitting || !projectId} className="flex items-center">
+        <Button 
+          type="submit" 
+          disabled={isSubmitting || !projectId || !hasUnsavedChanges}
+          variant={!projectId || isSubmitting || !hasUnsavedChanges ? 'outline' : 'default'}
+          className={
+            !projectId || isSubmitting || !hasUnsavedChanges
+              ? 'cursor-not-allowed opacity-50'
+              : hasUnsavedChanges ? 'animate-pulse' : ''
+          }
+        >
           {isSubmitting ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Saving...
             </>
           ) : (
-            <>Save UI Design</>
+            <>
+              {hasUnsavedChanges && <Save className="mr-2 h-4 w-4" />}
+              {hasBeenSaved ? 'Save Changes' : 'Save UI Design'}
+              {hasUnsavedChanges && '*'}
+            </>
           )}
         </Button>
       </div>
