@@ -27,6 +27,7 @@ export function getCompatibleTechnologies(
   if (
     targetCategory === 'languages' &&
     'languages' in technology &&
+    technology.languages &&
     Array.isArray(technology.languages)
   ) {
     return technology.languages;
