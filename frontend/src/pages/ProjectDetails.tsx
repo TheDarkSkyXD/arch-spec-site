@@ -86,8 +86,10 @@ const ProjectDetails = () => {
   const { data: requirements, isLoading: requirementsLoading } = useRequirements(id);
   const { data: features, isLoading: featuresLoading } = useFeatures(id);
   const { data: pages, isLoading: pagesLoading } = usePages(id);
-  const { data: dataModel, isLoading: dataModelLoading } = useDataModel(id);
-  const { data: apiEndpoints, isLoading: apiEndpointsLoading } = useApiEndpoints(id);
+  const { data: fetchedDataModel, isLoading: dataModelLoading } = useDataModel(id);
+  const [localDataModel, setLocalDataModel] = useState<Partial<DataModel> | null>(null);
+  const { data: fetchedApiEndpoints, isLoading: apiEndpointsLoading } = useApiEndpoints(id);
+  const [localApiEndpoints, setLocalApiEndpoints] = useState<Api | null>(null);
   const { data: testCases, isLoading: testCasesLoading } = useTestCases(id);
 
   // Add UI Design hook
@@ -175,6 +177,20 @@ const ProjectDetails = () => {
 
     fetchImplementationPrompts();
   }, [id]);
+
+  // Effect to initialize localDataModel when fetchedDataModel loads
+  useEffect(() => {
+    if (fetchedDataModel) {
+      setLocalDataModel(fetchedDataModel);
+    }
+  }, [fetchedDataModel]);
+
+  // Effect to initialize localApiEndpoints when fetchedApiEndpoints loads
+  useEffect(() => {
+    if (fetchedApiEndpoints) {
+      setLocalApiEndpoints(fetchedApiEndpoints);
+    }
+  }, [fetchedApiEndpoints]);
 
   // Add scroll handler to detect when to show sticky header
   useEffect(() => {
@@ -266,14 +282,14 @@ const ProjectDetails = () => {
     console.log('Pages updated:', _updatedPages);
   };
 
-  const handleDataModelUpdate = (_updatedDataModel: Partial<DataModel>) => {
-    // Update is handled by refetching from the backend
-    console.log('Data Model updated:', _updatedDataModel);
+  const handleDataModelUpdate = (updatedDataModel: Partial<DataModel>) => {
+    setLocalDataModel(updatedDataModel);
+    console.log('Data Model updated locally:', updatedDataModel);
   };
 
-  const handleApiEndpointsUpdate = (_updatedApiEndpoints: Api) => {
-    // Update is handled by refetching from the backend
-    console.log('API Endpoints updated:', _updatedApiEndpoints);
+  const handleApiEndpointsUpdate = (updatedApiEndpoints: Api) => {
+    setLocalApiEndpoints(updatedApiEndpoints);
+    console.log('API Endpoints updated locally:', updatedApiEndpoints);
   };
 
   const handleTestCasesUpdate = (_updatedTestCases: TestCasesData) => {
@@ -389,8 +405,8 @@ const ProjectDetails = () => {
                 features={features || null}
                 uiDesign={uiDesign || null}
                 pages={pages || null}
-                dataModel={dataModel || null}
-                apiEndpoints={apiEndpoints || null}
+                dataModel={localDataModel || null}
+                apiEndpoints={localApiEndpoints || null}
                 testCases={testCases || null}
                 implementationPrompts={implementationPrompts || null}
               />
@@ -537,7 +553,7 @@ const ProjectDetails = () => {
             {/* Data Model Section */}
             <div id={`section-${SectionId.DATA_MODEL}`}>
               <DataModelSection
-                dataModel={dataModel}
+                dataModel={localDataModel}
                 projectId={id}
                 projectName={project.name}
                 sectionId={SectionId.DATA_MODEL}
@@ -553,7 +569,7 @@ const ProjectDetails = () => {
             {/* API Endpoints Section */}
             <div id={`section-${SectionId.API_ENDPOINTS}`}>
               <ApiEndpointsSection
-                apiEndpoints={apiEndpoints}
+                apiEndpoints={localApiEndpoints}
                 projectId={id}
                 projectName={project.name}
                 sectionId={SectionId.API_ENDPOINTS}
