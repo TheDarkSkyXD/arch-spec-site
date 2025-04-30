@@ -1,4 +1,4 @@
-import { ChevronLeft, Loader2 } from 'lucide-react';
+import { ChevronDown, ChevronLeft, Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import DownloadAllMarkdown from '../components/common/DownloadAllMarkdown';
@@ -27,9 +27,15 @@ import {
 } from '../types/templates';
 
 // Import shadcn UI components
+import Button from '@ui/Button';
+import Card from '@ui/Card';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@ui/dropdown-menu';
 import { userApi } from '../api/userApi';
-import Button from '../components/ui/Button';
-import Card from '../components/ui/Card';
 import { useSubscription } from '../contexts/SubscriptionContext';
 import { implementationPromptsService } from '../services/implementationPromptsService';
 import { ImplementationPrompts } from '../types/templates';
@@ -286,6 +292,23 @@ const ProjectDetails = () => {
     console.log('Implementation Prompts updated:', updatedPrompts);
   };
 
+  const scrollToSection = (sectionId: SectionId) => {
+    const element = document.getElementById(`section-${sectionId}`);
+    if (element) {
+      // Get the sticky header element
+      const headerElement = document.querySelector<HTMLElement>('.fixed.left-0.right-0.top-0.z-50');
+      const headerHeight = headerElement ? headerElement.offsetHeight : 0;
+      // Calculate position relative to the viewport, add current scroll offset, subtract header height and a small margin
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - headerHeight - 16; // 16px margin
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth',
+      });
+    }
+  };
+
   return (
     <MainLayout>
       {/* Sticky project header */}
@@ -299,18 +322,47 @@ const ProjectDetails = () => {
             <Button
               onClick={() => navigate('/projects')}
               variant="ghost"
-              className="mr-3 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
+              size="icon"
+              className="mr-2 h-8 w-8 shrink-0 text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
             >
               <ChevronLeft size={18} />
+              <span className="sr-only">Back to Projects</span>
             </Button>
-            <div className="flex flex-col sm:flex-row sm:items-center">
-              <h2 className="mr-2 truncate text-lg font-bold text-slate-900 dark:text-white">
+            <div className="flex min-w-0 flex-1 items-center">
+              <h2 className="mr-2 hidden truncate text-lg font-bold text-slate-900 dark:text-white sm:block">
                 {project?.name}
               </h2>
-              <div className="flex items-center text-sm text-slate-500 dark:text-slate-400">
-                <span className="mx-1.5 hidden sm:inline-block">•</span>
-                <span className="font-medium">{sectionDisplayNames[currentSection]}</span>
-              </div>
+              <h2 className="mr-2 block truncate text-lg font-bold text-slate-900 dark:text-white sm:hidden">
+                {project?.name.length > 15 ? `${project?.name.substring(0, 15)}...` : project?.name}
+              </h2>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="-ml-2 flex items-center px-2 py-1 text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+                  >
+                    <span className="mr-1 hidden sm:inline-block">•</span>
+                    <span className="truncate">{sectionDisplayNames[currentSection]}</span>
+                    <ChevronDown size={16} className="ml-1 shrink-0" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  {Object.entries(sectionDisplayNames).map(([id, name]) => (
+                    <DropdownMenuItem
+                      key={id}
+                      onSelect={() => scrollToSection(id as SectionId)}
+                      className={
+                        currentSection === id
+                          ? 'font-semibold text-primary-600 dark:text-primary-400'
+                          : ''
+                      }
+                    >
+                      {name}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </div>

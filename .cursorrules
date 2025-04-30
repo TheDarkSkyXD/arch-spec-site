@@ -9,6 +9,12 @@
 - Ensure centralized types and interfaces
 - This project is in active development, a green field project. So there's no need to worry about backward compatibility with old data or code. Update everything if needed.
 
+## Adding new shadcn components
+
+- Run `pnpm add @shadcn/ui` to install the component
+- Run `pnpm add @shadcn/ui-dev-utils` to install the dev utils
+- Run `pnpm dlx @shadcn/ui@latest add [component]` to add the component to the project
+
 ## Backend Testing
 
 - Run tests with `uv run pytest tests` after cd'ing to the backend directory
