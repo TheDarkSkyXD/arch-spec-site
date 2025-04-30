@@ -1,5 +1,15 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2, Lock, PlusCircle, Save, Sparkles, Trash2, Users, Wand2 } from 'lucide-react';
+import {
+  Edit,
+  Loader2,
+  Lock,
+  PlusCircle,
+  Save,
+  Sparkles,
+  Trash2,
+  Users,
+  Wand2,
+} from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -59,10 +69,16 @@ const ProjectBasicsForm = ({ initialData, onSuccess }: ProjectBasicsFormProps) =
 
   // Add state for tracking unsaved changes
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
-  const [initialFormValues, setInitialFormValues] = useState<Partial<ProjectBasicsFormData> & { id?: string }>(initialData || {});
+  const [initialFormValues, setInitialFormValues] = useState<
+    Partial<ProjectBasicsFormData> & { id?: string }
+  >(initialData || {});
 
   // State for AI instructions modal
   const [activeModal, setActiveModal] = useState<ActiveModal>(null);
+
+  // Add state for editing business goals
+  const [editingGoalIndex, setEditingGoalIndex] = useState<number | null>(null);
+  const [editingGoalValue, setEditingGoalValue] = useState<string>('');
 
   const isEditMode = Boolean(projectId);
 
@@ -108,13 +124,64 @@ const ProjectBasicsForm = ({ initialData, onSuccess }: ProjectBasicsFormProps) =
   const currentDescription = currentFormValues.description;
   const currentTargetUsers = currentFormValues.target_users;
 
+  // Update form values ONLY if initialData changes OR projectId changes
+  useEffect(() => {
+    // Only proceed if initialData is available
+    if (!initialData) return;
+
+    const isFirstLoad = !projectId;
+    const projectIdChanged = initialData.id && initialData.id !== projectId;
+
+    // If it's the first load or the project ID changed, reset the form and local state
+    if (isFirstLoad || projectIdChanged) {
+      reset({
+        // Full reset for new/different project
+        name: initialData.name || '',
+        description: initialData.description || '',
+        business_goals: initialData.business_goals || [], // Reset RHF state too
+        target_users: initialData.target_users || '',
+        domain: initialData.domain || '',
+      });
+      setBusinessGoals(initialData.business_goals || []); // Reset local state
+      // Update baseline only when resetting
+      setInitialFormValues({
+        name: initialData.name || '',
+        description: initialData.description || '',
+        business_goals: initialData.business_goals || [],
+        target_users: initialData.target_users || '',
+        domain: initialData.domain || '',
+        id: initialData.id,
+      });
+
+      // Only update projectId state if it's actually changing
+      if (projectIdChanged || isFirstLoad) {
+        setProjectId(initialData.id);
+      }
+      setHasUnsavedChanges(false); // Reset unsaved changes flag on full reset
+    }
+  }, [initialData, reset, projectId]); // Add projectId to dependencies
+
+  // This separate effect ensures RHF's state for business_goals tracks the local state
+  useEffect(() => {
+    // Only update if the value in RHF is different from local state
+    // This avoids potentially triggering unnecessary RHF state updates
+    const currentRHFGoals = watch('business_goals');
+    const goalsAreDifferent = JSON.stringify(currentRHFGoals) !== JSON.stringify(businessGoals);
+
+    if (goalsAreDifferent) {
+      // Mark the field as dirty when updating the value programmatically
+      setValue('business_goals', businessGoals, { shouldDirty: true, shouldTouch: true });
+    }
+  }, [businessGoals, setValue, watch]);
+
   // Track unsaved changes by comparing form values with initial values
   useEffect(() => {
     if (!initialFormValues) return;
 
     // Check if business goals have changed
     const initialGoals = initialFormValues.business_goals || [];
-    const goalsChanged = businessGoals.length !== initialGoals.length ||
+    const goalsChanged =
+      businessGoals.length !== initialGoals.length ||
       businessGoals.some((goal, index) => goal !== initialGoals[index]);
 
     // Check if form values have changed
@@ -127,31 +194,6 @@ const ProjectBasicsForm = ({ initialData, onSuccess }: ProjectBasicsFormProps) =
       nameChanged || descriptionChanged || targetUsersChanged || domainChanged || goalsChanged
     );
   }, [currentFormValues, businessGoals, initialFormValues]);
-
-  // Update form values if initialData changes
-  useEffect(() => {
-    if (initialData) {
-      reset({
-        name: initialData.name || '',
-        description: initialData.description || '',
-        business_goals: initialData.business_goals || [],
-        target_users: initialData.target_users || '',
-        domain: initialData.domain || '',
-      });
-
-      setBusinessGoals(initialData.business_goals || []);
-      setInitialFormValues(initialData);
-
-      if (initialData.id) {
-        setProjectId(initialData.id);
-      }
-    }
-  }, [initialData, reset]);
-
-  // Update hidden form field when business goals change
-  useEffect(() => {
-    setValue('business_goals', businessGoals);
-  }, [businessGoals, setValue]);
 
   const addBusinessGoal = () => {
     if (!newBusinessGoal.trim()) return;
@@ -376,7 +418,7 @@ const ProjectBasicsForm = ({ initialData, onSuccess }: ProjectBasicsFormProps) =
           ...data,
           id: project.id,
         });
-        
+
         // Reset unsaved changes flag
         setHasUnsavedChanges(false);
 
@@ -432,6 +474,27 @@ const ProjectBasicsForm = ({ initialData, onSuccess }: ProjectBasicsFormProps) =
         : 'AI is generating target users based on your description. Please wait...';
     }
     return 'AI enhancement in progress...';
+  };
+
+  // Add handlers for editing business goals
+  const handleStartEditGoal = (index: number, goal: string) => {
+    setEditingGoalIndex(index);
+    setEditingGoalValue(goal);
+  };
+
+  const handleSaveEditGoal = () => {
+    if (editingGoalIndex !== null && editingGoalValue.trim()) {
+      const updatedGoals = [...businessGoals];
+      updatedGoals[editingGoalIndex] = editingGoalValue.trim();
+      setBusinessGoals(updatedGoals);
+      setEditingGoalIndex(null);
+      setEditingGoalValue('');
+    }
+  };
+
+  const handleCancelEditGoal = () => {
+    setEditingGoalIndex(null);
+    setEditingGoalValue('');
   };
 
   return (
@@ -614,16 +677,51 @@ const ProjectBasicsForm = ({ initialData, onSuccess }: ProjectBasicsFormProps) =
               key={index}
               className="flex items-center justify-between border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800"
             >
-              <p className="dark:text-slate-300">{goal}</p>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => removeBusinessGoal(index)}
-                className="text-slate-400 hover:text-red-500 dark:text-slate-500 dark:hover:text-red-400"
-              >
-                <Trash2 size={18} />
-              </Button>
+              {editingGoalIndex === index ? (
+                <div className="flex w-full gap-2">
+                  <Input
+                    type="text"
+                    value={editingGoalValue}
+                    onChange={(e) => setEditingGoalValue(e.target.value)}
+                    className="flex-1"
+                    autoFocus
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleSaveEditGoal();
+                      if (e.key === 'Escape') handleCancelEditGoal();
+                    }}
+                  />
+                  <Button type="button" onClick={handleSaveEditGoal} variant="default" size="sm">
+                    Save
+                  </Button>
+                  <Button type="button" onClick={handleCancelEditGoal} variant="outline" size="sm">
+                    Cancel
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <p className="dark:text-slate-300">{goal}</p>
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleStartEditGoal(index, goal)}
+                      className="text-slate-400 hover:text-blue-500 dark:text-slate-500 dark:hover:text-blue-400"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeBusinessGoal(index)}
+                      className="text-slate-400 hover:text-red-500 dark:text-slate-500 dark:hover:text-red-400"
+                    >
+                      <Trash2 size={18} />
+                    </Button>
+                  </div>
+                </>
+              )}
             </Card>
           ))}
         </div>
@@ -724,8 +822,8 @@ const ProjectBasicsForm = ({ initialData, onSuccess }: ProjectBasicsFormProps) =
       </div>
 
       <div className="flex justify-end">
-        <Button 
-          type="submit" 
+        <Button
+          type="submit"
           disabled={isSubmitting}
           className={hasUnsavedChanges && !isSubmitting ? 'animate-pulse' : ''}
         >
