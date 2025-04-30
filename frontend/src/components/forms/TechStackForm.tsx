@@ -13,8 +13,8 @@ import {
   Serverless,
   StateManagement,
   Storage,
-  TechStackData,
   Technology,
+  TechStackData,
   UILibrary,
 } from '../../types/techStack';
 // Import AI service for tech stack enhancement
@@ -72,7 +72,7 @@ const TechStackForm = ({ initialData, projectId, onSuccess }: TechStackFormProps
 
   // Add state for AI instructions modal
   const [isAIModalOpen, setIsAIModalOpen] = useState<boolean>(false);
-  
+
   // Add state for tracking unsaved changes
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
   const [initialFormValues, setInitialFormValues] = useState<TechStackFormData | null>(null);
@@ -106,21 +106,20 @@ const TechStackForm = ({ initialData, projectId, onSuccess }: TechStackFormProps
     resolver: zodResolver(techStackSchema),
     defaultValues: defaultValues,
   });
-  
+
   // Watch form values for changes
   const currentFormValues = watch();
 
   // Track unsaved changes by comparing form values with initial values
   useEffect(() => {
     if (!initialFormValues) return;
-    
+
     // Compare current form values with initial values
-    const isChanged = Object.keys(currentFormValues).some(key => {
+    const isChanged = Object.keys(currentFormValues).some((key) => {
       const currentValue = currentFormValues[key as keyof TechStackFormData];
       const initialValue = initialFormValues[key as keyof TechStackFormData];
       return currentValue !== initialValue;
     });
-    
     setHasUnsavedChanges(isChanged);
   }, [currentFormValues, initialFormValues]);
 
@@ -147,20 +146,27 @@ const TechStackForm = ({ initialData, projectId, onSuccess }: TechStackFormProps
         ui_library: initialData.frontend?.uiLibrary || '',
         state_management: initialData.frontend?.stateManagement || '',
         backend_type: initialData.backend?.type || '',
-        backend_framework: '',  // Handle in the code below based on backend type
-        backend_language: '',   // Handle in the code below based on backend type
-        backend_service: '',    // Handle in the code below based on backend type
-        backend_realtime: '',   // Handle in the code below based on backend type
+        backend_framework: '', // Handle in the code below based on backend type
+        backend_functions: '', // Handle in the code below based on backend type
+        backend_language: '', // Handle in the code below based on backend type
+        backend_service: '', // Handle in the code below based on backend type
+        backend_realtime: '', // Handle in the code below based on backend type
         database_type: initialData.database?.type || '',
         database_system: initialData.database?.system || '',
         database_hosting: initialData.database?.hosting || '',
-        database_orm: '',      // Handle conditionally below
+        database_orm: '', // Handle conditionally below
+        deployment_ci_cd: initialData.deployment?.ci_cd || '',
+        deployment_containerization: initialData.deployment?.containerization || '',
         auth_provider: initialData.authentication?.provider || '',
-        auth_methods: Array.isArray(initialData.authentication?.methods) 
-          ? initialData.authentication.methods.join(',') 
+        auth_methods: Array.isArray(initialData.authentication?.methods)
+          ? initialData.authentication.methods.join(',')
           : initialData.authentication?.methods || '',
+        hosting_frontend: initialData.hosting?.frontend || '',
+        hosting_backend: initialData.hosting?.backend || '',
+        storage_type: initialData.storage?.type || '',
+        storage_service: initialData.storage?.service || '',
       };
-      
+
       // Handle backend properties based on the backend type
       if (initialData.backend) {
         // Only set these values if they exist in the specific backend type
@@ -177,16 +183,20 @@ const TechStackForm = ({ initialData, projectId, onSuccess }: TechStackFormProps
           mappedValues.backend_realtime = initialData.backend.realtime;
         }
       }
-      
+
       // Handle database ORM conditionally (it's only available for SQL databases)
-      if (initialData.database && initialData.database.type === 'sql' && 
-          'orm' in initialData.database && initialData.database.orm) {
+      if (
+        initialData.database &&
+        initialData.database.type === 'sql' &&
+        'orm' in initialData.database &&
+        initialData.database.orm
+      ) {
         mappedValues.database_orm = initialData.database.orm;
       }
-      
+
       // Set initial values to detect changes later
       setInitialFormValues(mappedValues);
-      
+
       // Set form values
       Object.entries(mappedValues).forEach(([key, value]) => {
         if (value) {
@@ -689,7 +699,7 @@ const TechStackForm = ({ initialData, projectId, onSuccess }: TechStackFormProps
           {error}
         </div>
       )}
-      
+
       {/* Unsaved Changes Indicator */}
       {hasUnsavedChanges && (
         <div className="mb-4 flex items-center justify-between rounded-md bg-amber-50 p-3 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400">
@@ -830,8 +840,8 @@ const TechStackForm = ({ initialData, projectId, onSuccess }: TechStackFormProps
           disabled={isSubmitting || !projectId || !hasUnsavedChanges}
           variant={!projectId || isSubmitting || !hasUnsavedChanges ? 'outline' : 'default'}
           className={
-            !projectId || isSubmitting || !hasUnsavedChanges 
-              ? 'cursor-not-allowed opacity-50' 
+            !projectId || isSubmitting || !hasUnsavedChanges
+              ? 'cursor-not-allowed opacity-50'
               : 'animate-pulse'
           }
         >
