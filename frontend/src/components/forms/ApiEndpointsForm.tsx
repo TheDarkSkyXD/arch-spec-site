@@ -313,22 +313,16 @@ export default function ApiEndpointsForm({
         onOpenEnhanceModal={openEnhanceModal}
       />
 
-      {/* Add/Edit Form */}
-      {(showNewEndpointForm || editingEndpointIndex !== null) && (
+      {/* Add New Form (only renders when adding, not editing) */}
+      {showNewEndpointForm && (
         <ApiEndpointForm
-          endpoint={editingEndpointIndex !== null ? endpoints[editingEndpointIndex] : undefined}
+          // No initial endpoint data for adding
           onSubmit={(formData) => {
-            if (editingEndpointIndex !== null) {
-              updateEndpoint(editingEndpointIndex, formData);
-              setEditingEndpointIndex(null);
-            } else {
-              addEndpoint(formData);
-              setShowNewEndpointForm(false);
-            }
+            addEndpoint(formData);
+            setShowNewEndpointForm(false);
           }}
           onCancel={() => {
             setShowNewEndpointForm(false);
-            setEditingEndpointIndex(null);
           }}
           validateEndpoint={validateEndpoint}
         />
@@ -343,7 +337,22 @@ export default function ApiEndpointsForm({
               (e) => e.path === endpoint.path && e.description === endpoint.description
             );
 
-            return (
+            return editingEndpointIndex === mainEndpointIndex ? (
+              // Render Edit Form inline
+              <ApiEndpointForm
+                key={`${endpoint.path}-edit-form`}
+                endpoint={endpoints[mainEndpointIndex]} // Pass the endpoint being edited
+                onSubmit={(formData) => {
+                  updateEndpoint(mainEndpointIndex, formData);
+                  setEditingEndpointIndex(null); // Close form on submit
+                }}
+                onCancel={() => {
+                  setEditingEndpointIndex(null); // Close form on cancel
+                }}
+                validateEndpoint={validateEndpoint}
+              />
+            ) : (
+              // Render Endpoint Card
               <ApiEndpointCard
                 key={`${endpoint.path}-${mainEndpointIndex}`}
                 endpoint={endpoint}
