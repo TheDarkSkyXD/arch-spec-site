@@ -11,9 +11,7 @@
 
 ## Adding new shadcn components
 
-- Run `pnpm add @shadcn/ui` to install the component
-- Run `pnpm add @shadcn/ui-dev-utils` to install the dev utils
-- Run `pnpm dlx @shadcn/ui@latest add [component]` to add the component to the project
+- Run `pnpm dlx shadcn@latest add [component]` to add the component to the project
 
 ## Backend Testing
 

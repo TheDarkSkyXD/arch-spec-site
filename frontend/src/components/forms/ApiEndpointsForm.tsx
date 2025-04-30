@@ -1,12 +1,19 @@
 import { Loader2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useSubscription } from '../../contexts/SubscriptionContext';
 import { useToast } from '../../contexts/ToastContext';
 import { useUserProfile } from '../../hooks/useUserProfile';
 import { ProcessingOverlay } from '../ui';
 import AIInstructionsModal from '../ui/AIInstructionsModal';
 import Button from '../ui/Button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '../ui/pagination';
 import { ApiEndpointAIActions } from './api-endpoints/components/ApiEndpointAIActions';
 import { ApiEndpointCard } from './api-endpoints/components/ApiEndpointCard';
 import { ApiEndpointForm } from './api-endpoints/components/ApiEndpointForm';
@@ -16,7 +23,13 @@ import { useApiEndpoints } from './api-endpoints/hooks/useApiEndpoints';
 import { useApiEndpointsAI } from './api-endpoints/hooks/useApiEndpointsAI';
 import { ApiEndpoint, ApiEndpointsFormProps } from './api-endpoints/types';
 
-export default function ApiEndpointsForm({ initialData, projectId, onSuccess }: ApiEndpointsFormProps) {
+const ITEMS_PER_PAGE = 10; // Number of endpoints per page
+
+export default function ApiEndpointsForm({
+  initialData,
+  projectId,
+  onSuccess,
+}: ApiEndpointsFormProps) {
   // State for search and filters
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedMethods, setSelectedMethods] = useState<string[]>([]);
@@ -25,6 +38,7 @@ export default function ApiEndpointsForm({ initialData, projectId, onSuccess }: 
   const [showNewEndpointForm, setShowNewEndpointForm] = useState(false);
   const [editingEndpointIndex, setEditingEndpointIndex] = useState<number | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
   // AI modal state
   const [isEnhanceModalOpen, setIsEnhanceModalOpen] = useState(false);
@@ -47,13 +61,8 @@ export default function ApiEndpointsForm({ initialData, projectId, onSuccess }: 
     saveEndpoints,
   } = useApiEndpoints(projectId, initialData);
 
-  const {
-    isEnhancing,
-    isAddingEndpoints,
-    projectDescription,
-    enhanceEndpoints,
-    addAIEndpoints,
-  } = useApiEndpointsAI(projectId);
+  const { isEnhancing, isAddingEndpoints, projectDescription, enhanceEndpoints, addAIEndpoints } =
+    useApiEndpointsAI(projectId);
 
   const { categories, filterEndpoints } = useApiEndpointCategories(endpoints);
 
@@ -63,13 +72,13 @@ export default function ApiEndpointsForm({ initialData, projectId, onSuccess }: 
     if (initialData && initialData.endpoints) {
       // Compare current endpoints with initial data
       const initialEndpoints = initialData.endpoints;
-      
+
       // Check if the number of endpoints has changed
       if (initialEndpoints.length !== endpoints.length) {
         setHasUnsavedChanges(true);
         return;
       }
-      
+
       // Check if any endpoint has been modified
       // This is a simple check - for a more thorough check you'd need a deep comparison
       const hasChanges = endpoints.some((endpoint, index) => {
@@ -82,7 +91,7 @@ export default function ApiEndpointsForm({ initialData, projectId, onSuccess }: 
           JSON.stringify(initialEndpoint.roles) !== JSON.stringify(endpoint.roles)
         );
       });
-      
+
       setHasUnsavedChanges(hasChanges);
     } else if (endpoints.length > 0) {
       // If we don't have initial data but have endpoints, there are unsaved changes
@@ -91,7 +100,32 @@ export default function ApiEndpointsForm({ initialData, projectId, onSuccess }: 
   }, [endpoints, initialData]);
 
   // Filter endpoints based on search and filters
-  const filteredCategories = filterEndpoints(categories, searchTerm, selectedMethods, showAuthOnly);
+  const filteredCategories = useMemo(
+    () => filterEndpoints(categories, searchTerm, selectedMethods, showAuthOnly),
+    [categories, searchTerm, selectedMethods, showAuthOnly, filterEndpoints]
+  );
+
+  // Flatten all endpoints from filtered categories for pagination
+  const allFilteredEndpoints = useMemo(
+    () => filteredCategories.flatMap((category) => category.endpoints),
+    [filteredCategories]
+  );
+
+  // Calculate pagination details
+  const totalEndpoints = allFilteredEndpoints.length;
+  const totalPages = Math.ceil(totalEndpoints / ITEMS_PER_PAGE);
+
+  // Get the endpoints for the current page
+  const paginatedEndpoints = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    return allFilteredEndpoints.slice(startIndex, endIndex);
+  }, [allFilteredEndpoints, currentPage]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedMethods, showAuthOnly]);
 
   // Handlers
   const handleMethodFilterToggle = (method: string) => {
@@ -249,7 +283,7 @@ export default function ApiEndpointsForm({ initialData, projectId, onSuccess }: 
           {error}
         </div>
       )}
-      
+
       {/* Unsaved Changes Indicator */}
       {hasUnsavedChanges && (
         <div className="mb-4 flex items-center justify-between rounded-md bg-amber-50 p-3 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400">
@@ -300,51 +334,89 @@ export default function ApiEndpointsForm({ initialData, projectId, onSuccess }: 
         />
       )}
 
-      {/* Endpoints List */}
-      {filteredCategories.length > 0 ? (
-        <Tabs defaultValue={filteredCategories[0].name} className="w-full">
-          <TabsList className="mb-4">
-            {filteredCategories.map((category) => (
-              <TabsTrigger
-                key={category.name}
-                value={category.name}
-                className="capitalize"
-              >
-                {category.name}
-              </TabsTrigger>
-            ))}
-          </TabsList>
+      {/* Paginated Endpoints List */}
+      {paginatedEndpoints.length > 0 ? (
+        <div className="space-y-4">
+          {paginatedEndpoints.map((endpoint: ApiEndpoint) => {
+            // Find the actual index in the main endpoints array
+            const mainEndpointIndex = endpoints.findIndex(
+              (e) => e.path === endpoint.path && e.description === endpoint.description
+            );
 
-          {filteredCategories.map((category) => (
-            <TabsContent key={category.name} value={category.name} className="space-y-4">
-              {category.endpoints.map((endpoint: ApiEndpoint) => {
-                // Find the actual index in the main endpoints array
-                const mainEndpointIndex = endpoints.findIndex(
-                  (e) => e.path === endpoint.path && e.description === endpoint.description
-                );
-                
-                return (
-                  <ApiEndpointCard
-                    key={`${endpoint.path}-${mainEndpointIndex}`}
-                    endpoint={endpoint}
-                    isExpanded={expandedEndpoint === mainEndpointIndex}
-                    onToggleExpand={() => setExpandedEndpoint(expandedEndpoint === mainEndpointIndex ? null : mainEndpointIndex)}
-                    onEdit={() => setEditingEndpointIndex(mainEndpointIndex)}
-                    onRemove={() => removeEndpoint(mainEndpointIndex)}
-                  />
-                );
-              })}
-            </TabsContent>
-          ))}
-        </Tabs>
+            return (
+              <ApiEndpointCard
+                key={`${endpoint.path}-${mainEndpointIndex}`}
+                endpoint={endpoint}
+                isExpanded={expandedEndpoint === mainEndpointIndex}
+                onToggleExpand={() =>
+                  setExpandedEndpoint(
+                    expandedEndpoint === mainEndpointIndex ? null : mainEndpointIndex
+                  )
+                }
+                onEdit={() => setEditingEndpointIndex(mainEndpointIndex)}
+                onRemove={() => removeEndpoint(mainEndpointIndex)}
+              />
+            );
+          })}
+        </div>
       ) : (
         <div className="rounded-lg border border-dashed border-slate-300 p-8 text-center dark:border-slate-600">
           <p className="text-slate-600 dark:text-slate-400">
-            {endpoints.length === 0
-              ? 'No API endpoints defined yet'
-              : 'No endpoints match your search criteria'}
+            {totalEndpoints === 0 && endpoints.length > 0
+              ? 'No endpoints match your search criteria'
+              : endpoints.length === 0
+                ? 'No API endpoints defined yet'
+                : 'No endpoints on this page'}{' '}
+            {/* Adjust message based on context */}
           </p>
         </div>
+      )}
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setCurrentPage((prev) => Math.max(prev - 1, 1));
+                }}
+                className={currentPage === 1 ? 'pointer-events-none opacity-50' : undefined}
+              />
+            </PaginationItem>
+            {/* Dynamically generate page links (simplified for brevity) */}
+            {/* Ideally, implement logic for ellipsis and showing a limited number of page numbers */}
+            {[...Array(totalPages)].map((_, index) => (
+              <PaginationItem key={index}>
+                <PaginationLink
+                  href="#"
+                  isActive={currentPage === index + 1}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setCurrentPage(index + 1);
+                  }}
+                >
+                  {index + 1}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+            {/* Add Ellipsis logic here if needed */}
+            <PaginationItem>
+              <PaginationNext
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+                }}
+                className={
+                  currentPage === totalPages ? 'pointer-events-none opacity-50' : undefined
+                }
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
       )}
 
       {/* Save Button */}
@@ -352,17 +424,27 @@ export default function ApiEndpointsForm({ initialData, projectId, onSuccess }: 
         <Button
           type="button"
           onClick={handleSubmit}
-          disabled={isSubmitting || !projectId || editingEndpointIndex !== null || !hasUnsavedChanges}
-          variant={!projectId || isSubmitting || editingEndpointIndex !== null || !hasUnsavedChanges ? 'outline' : 'default'}
+          disabled={
+            isSubmitting || !projectId || editingEndpointIndex !== null || !hasUnsavedChanges
+          }
+          variant={
+            !projectId || isSubmitting || editingEndpointIndex !== null || !hasUnsavedChanges
+              ? 'outline'
+              : 'default'
+          }
           className={
             !projectId || isSubmitting || editingEndpointIndex !== null || !hasUnsavedChanges
               ? 'cursor-not-allowed opacity-50'
               : 'animate-pulse'
           }
         >
-          {isSubmitting ? 'Saving...' : hasUnsavedChanges ? 'Save API Endpoints*' : 'Save API Endpoints'}
+          {isSubmitting
+            ? 'Saving...'
+            : hasUnsavedChanges
+              ? 'Save API Endpoints*'
+              : 'Save API Endpoints'}
         </Button>
       </div>
     </div>
   );
-} 
+}
