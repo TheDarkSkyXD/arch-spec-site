@@ -1,7 +1,7 @@
 /**
  * Service for API endpoints API interactions.
  */
-import apiClient from "../api/apiClient";
+import apiClient from '../api/apiClient';
 
 // Define API endpoint interface
 export interface ApiEndpoint {
@@ -31,7 +31,7 @@ interface ApiEndpointsSpec {
 }
 
 // Define the API base URL to be consistent with other services
-const API_BASE_URL = "/api";
+const API_BASE_URL = '/api';
 
 export const apiEndpointsService = {
   /**
@@ -47,7 +47,7 @@ export const apiEndpointsService = {
       );
 
       if (!response.data || !response.data.data) {
-        console.error("Invalid API endpoints response:", response.data);
+        console.error('Invalid API endpoints response:', response.data);
         return null;
       }
 
@@ -55,10 +55,7 @@ export const apiEndpointsService = {
         endpoints: response.data.data.endpoints || [],
       };
     } catch (error) {
-      console.error(
-        `Error fetching API endpoints for project ${projectId}:`,
-        error
-      );
+      console.error(`Error fetching API endpoints for project ${projectId}:`, error);
       return null;
     }
   },
@@ -87,7 +84,7 @@ export const apiEndpointsService = {
       );
 
       if (!response.data || !response.data.data) {
-        console.error("Invalid API endpoints response:", response.data);
+        console.error('Invalid API endpoints response:', response.data);
         return null;
       }
 
@@ -95,10 +92,7 @@ export const apiEndpointsService = {
         endpoints: response.data.data.endpoints || [],
       };
     } catch (error) {
-      console.error(
-        `Error saving API endpoints for project ${projectId}:`,
-        error
-      );
+      console.error(`Error saving API endpoints for project ${projectId}:`, error);
       return null;
     }
   },

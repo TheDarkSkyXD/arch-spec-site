@@ -1,6 +1,7 @@
 """
 API routes for API endpoints enhancement using AI.
 """
+
 import logging
 import json
 from fastapi import APIRouter, HTTPException, Depends
@@ -23,14 +24,14 @@ from app.db.base import db
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/ai-text", tags=["AI Text"])
 
+
 @router.post("/enhance-api-endpoints", response_model=ApiEndpointsEnhanceResponse)
 async def enhance_api_endpoints(
-    request: ApiEndpointsEnhanceRequest,
-    current_user: Dict[str, Any] = Depends(get_current_user)
+    request: ApiEndpointsEnhanceRequest, current_user: Dict[str, Any] = Depends(get_current_user)
 ):
     """
     Enhance API endpoints using AI with function calling.
-    
+
     This endpoint takes a project description, features, data models, requirements, and optionally
     existing API endpoints, and returns an improved, structured API endpoints specification.
     It uses Anthropic's tool use feature to ensure a structured response.
@@ -39,43 +40,43 @@ async def enhance_api_endpoints(
         # Create the service objects
         llm_logger = DefaultLLMLogger()
         usage_tracker = DatabaseUsageTracker(db.get_db())
-        
+
         # Initialize the AI client with the logger and usage tracker
         client = AIService(llm_logger, usage_tracker)
-        
+
         # Create the system message
         system_message = (
             "You are an API designer creating RESTful endpoints for a software project. "
             "Design a comprehensive API based on the project specifications."
         )
-        
+
         # Format the features, data models, and requirements as strings
         formatted_features = "None provided"
         if request.features and len(request.features) > 0:
             formatted_features = json.dumps(request.features, indent=2)
-            
+
         formatted_data_models = "None provided"
         if request.data_models and len(request.data_models) > 0:
             formatted_data_models = json.dumps(request.data_models, indent=2)
-            
+
         formatted_requirements = "\n".join([f"- {req}" for req in request.requirements])
-        
+
         # Create the user message
         user_prompt = get_api_endpoints_user_prompt(
-            request.project_description, 
-            formatted_features, 
-            formatted_data_models, 
+            request.project_description,
+            formatted_features,
+            formatted_data_models,
             formatted_requirements,
-            request.additional_user_instruction
+            request.additional_user_instruction,
         )
 
         # Generate the tool use response
         messages = [{"role": "user", "content": user_prompt}]
         tools = [print_api_endpoints_input_schema()]
         response = await client.get_tool_use_response(
-            system_message, 
-            tools, 
-            messages, 
+            system_message,
+            tools,
+            messages,
             model=INTELLIGENT_MODEL,
             log_metadata={
                 "project_id": request.project_id if hasattr(request, "project_id") else "unknown",
@@ -84,40 +85,34 @@ async def enhance_api_endpoints(
                 "features": request.features,
                 "data_models": request.data_models,
                 "requirements": request.requirements,
-                "additional_user_instruction": request.additional_user_instruction
+                "additional_user_instruction": request.additional_user_instruction,
             },
             response_type="enhance_api_endpoints",
             check_credits=True,
-            use_token_api_for_estimation=True
+            use_token_api_for_estimation=True,
         )
-        
+
         # Handle potential credit errors - check the response content if it's a dict
-        if isinstance(response, dict) and isinstance(response.get('content'), str) and response['content'].startswith("Insufficient credits"):
-            raise HTTPException(
-                status_code=402,
-                detail=response['content']
-            )
+        if (
+            isinstance(response, dict)
+            and isinstance(response.get("content"), str)
+            and response["content"].startswith("Insufficient credits")
+        ):
+            raise HTTPException(status_code=402, detail=response["content"])
         elif isinstance(response, str) and response.startswith("Insufficient credits"):
-            raise HTTPException(
-                status_code=402,
-                detail=response
-            )
-        
+            raise HTTPException(status_code=402, detail=response)
+
         if "error" in response:
             logger.error(f"Error in AI tool use: {response['error']}")
             raise HTTPException(
-                status_code=500,
-                detail=f"Failed to generate API endpoints: {response['error']}"
+                status_code=500, detail=f"Failed to generate API endpoints: {response['error']}"
             )
-            
+
         # Extract API endpoints data with fallback mechanisms
         api_endpoints_data = extract_data_from_response(response, ApiData, logger)
-            
+
         # Return the enhanced API endpoints
         return ApiEndpointsEnhanceResponse(data=api_endpoints_data)
     except Exception as e:
         logger.error(f"Error enhancing API endpoints: {str(e)}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to enhance API endpoints: {str(e)}"
-        ) 
+        raise HTTPException(status_code=500, detail=f"Failed to enhance API endpoints: {str(e)}")

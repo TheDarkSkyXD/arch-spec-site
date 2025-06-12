@@ -83,4 +83,4 @@ class LemonSqueezyWebhookSubscriptionCancelled(BaseModel):
 
 class LemonSqueezyWebhookOrderCreated(BaseModel):
     id: str
-    attributes: dict 
+    attributes: dict

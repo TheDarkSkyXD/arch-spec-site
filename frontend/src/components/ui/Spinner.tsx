@@ -13,15 +13,12 @@ const Spinner = ({ size = 'md', className, ...props }: SpinnerProps) => {
   };
 
   return (
-    <div
-      className={cn('animate-spin text-gray-500', sizeClasses[size], className)}
-      {...props}
-    >
+    <div className={cn('animate-spin text-gray-500', sizeClasses[size], className)} {...props}>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
         viewBox="0 0 24 24"
-        className="w-full h-full"
+        className="h-full w-full"
       >
         <circle
           className="opacity-25"

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 import {
   Loader2,
   PlusCircle,
@@ -10,31 +10,27 @@ import {
   Plus,
   Tag,
   Lock,
-} from "lucide-react";
-import {
-  GherkinTestCase,
-  TestCasesData,
-  testCasesService,
-} from "../../services/testCasesService";
-import { useToast } from "../../contexts/ToastContext";
-import { aiService } from "../../services/aiService";
-import { requirementsService } from "../../services/requirementsService";
-import { FeatureModule, featuresService } from "../../services/featuresService";
-import { useSubscription } from "../../contexts/SubscriptionContext";
-import AIInstructionsModal from "../ui/AIInstructionsModal";
-import { useUserProfile } from "../../hooks/useUserProfile";
+} from 'lucide-react';
+import { GherkinTestCase, TestCasesData, testCasesService } from '../../services/testCasesService';
+import { useToast } from '../../contexts/ToastContext';
+import { aiService } from '../../services/aiService';
+import { requirementsService } from '../../services/requirementsService';
+import { FeatureModule, featuresService } from '../../services/featuresService';
+import { useSubscription } from '../../contexts/SubscriptionContext';
+import AIInstructionsModal from '../ui/AIInstructionsModal';
+import { useUserProfile } from '../../hooks/useUserProfile';
 // Import shadcn UI components
-import Button from "../ui/Button";
-import Input from "../ui/Input";
-import { Textarea } from "../ui/textarea";
-import Card from "../ui/Card";
-import { Label } from "../ui/label";
-import { Select } from "../ui/select";
-import { Badge } from "../ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { projectsService } from "../../services/projectsService";
-import PremiumFeatureBadge from "../ui/PremiumFeatureBadge";
-import { ProcessingOverlay } from "../ui/index";
+import Button from '../ui/Button';
+import Input from '../ui/Input';
+import { Textarea } from '../ui/textarea';
+import Card from '../ui/Card';
+import { Label } from '../ui/label';
+import { Select } from '../ui/select';
+import { Badge } from '../ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import { projectsService } from '../../services/projectsService';
+import PremiumFeatureBadge from '../ui/PremiumFeatureBadge';
+import { ProcessingOverlay } from '../ui/index';
 
 interface TestCasesFormProps {
   initialData?: TestCasesData;
@@ -50,27 +46,19 @@ type ScenarioType = {
   }>;
 };
 
-export default function TestCasesForm({
-  initialData,
-  projectId,
-  onSuccess,
-}: TestCasesFormProps) {
+export default function TestCasesForm({ initialData, projectId, onSuccess }: TestCasesFormProps) {
   const { showToast } = useToast();
   const { hasAIFeatures } = useSubscription();
   const { aiCreditsRemaining } = useUserProfile();
-  const [testCases, setTestCases] = useState<GherkinTestCase[]>(
-    initialData?.testCases || []
-  );
+  const [testCases, setTestCases] = useState<GherkinTestCase[]>(initialData?.testCases || []);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string>("");
+  const [error, setError] = useState<string>('');
 
   // State for test case form
   const [isAddingTestCase, setIsAddingTestCase] = useState(false);
   const [isEditingTestCase, setIsEditingTestCase] = useState(false);
-  const [editingTestCaseIndex, setEditingTestCaseIndex] = useState<
-    number | null
-  >(null);
+  const [editingTestCaseIndex, setEditingTestCaseIndex] = useState<number | null>(null);
   const [testCaseForm, setTestCaseForm] = useState<{
     feature: string;
     title: string;
@@ -80,20 +68,20 @@ export default function TestCasesForm({
     scenarios: Array<{
       name: string;
       steps: Array<{
-        type: "given" | "when" | "then" | "and" | "but";
+        type: 'given' | 'when' | 'then' | 'and' | 'but';
         text: string;
       }>;
     }>;
   }>({
-    feature: "",
-    title: "",
-    description: "",
+    feature: '',
+    title: '',
+    description: '',
     tags: [],
-    newTag: "",
+    newTag: '',
     scenarios: [
       {
-        name: "",
-        steps: [{ type: "given", text: "" }],
+        name: '',
+        steps: [{ type: 'given', text: '' }],
       },
     ],
   });
@@ -101,16 +89,14 @@ export default function TestCasesForm({
 
   // State for AI enhancement
   const [isEnhancing, setIsEnhancing] = useState<boolean>(false);
-  const [projectDescription, setProjectDescription] = useState<string>("");
-  const [isGeneratingTestCases, setIsGeneratingTestCases] =
-    useState<boolean>(false);
+  const [projectDescription, setProjectDescription] = useState<string>('');
+  const [isGeneratingTestCases, setIsGeneratingTestCases] = useState<boolean>(false);
   const [projectRequirements, setProjectRequirements] = useState<string[]>([]);
   const [projectFeatures, setProjectFeatures] = useState<FeatureModule[]>([]);
 
   // Add state for AI instructions modals
   const [isEnhanceModalOpen, setIsEnhanceModalOpen] = useState<boolean>(false);
-  const [isGenerateModalOpen, setIsGenerateModalOpen] =
-    useState<boolean>(false);
+  const [isGenerateModalOpen, setIsGenerateModalOpen] = useState<boolean>(false);
 
   // Effect to update local state when initial data changes
   useEffect(() => {
@@ -130,7 +116,7 @@ export default function TestCasesForm({
             setTestCases(testCasesData.testCases || []);
           }
         } catch (error) {
-          console.error("Error fetching test cases:", error);
+          console.error('Error fetching test cases:', error);
         } finally {
           setIsLoading(false);
         }
@@ -149,13 +135,11 @@ export default function TestCasesForm({
         // Fetch project details including description
         const projectDetails = await projectsService.getProjectById(projectId);
         if (projectDetails) {
-          setProjectDescription(projectDetails.description || "");
+          setProjectDescription(projectDetails.description || '');
         }
 
         // Fetch requirements
-        const requirementsData = await requirementsService.getRequirements(
-          projectId
-        );
+        const requirementsData = await requirementsService.getRequirements(projectId);
         if (requirementsData) {
           const allRequirements = [
             ...(requirementsData.functional || []),
@@ -170,7 +154,7 @@ export default function TestCasesForm({
           setProjectFeatures(featuresData.coreModules || []);
         }
       } catch (error) {
-        console.error("Error fetching project information:", error);
+        console.error('Error fetching project information:', error);
       }
     };
 
@@ -190,7 +174,7 @@ export default function TestCasesForm({
     if (errors[field]) {
       setErrors({
         ...errors,
-        [field]: "",
+        [field]: '',
       });
     }
   };
@@ -201,34 +185,30 @@ export default function TestCasesForm({
     // Don't add duplicate tags
     if (testCaseForm.tags.includes(testCaseForm.newTag.trim())) {
       showToast({
-        title: "Warning",
-        description: "This tag already exists",
-        type: "warning",
+        title: 'Warning',
+        description: 'This tag already exists',
+        type: 'warning',
       });
       return;
     }
 
     const updatedTags = [...testCaseForm.tags, testCaseForm.newTag.trim()];
-    handleTestCaseFormChange("tags", updatedTags);
-    handleTestCaseFormChange("newTag", "");
+    handleTestCaseFormChange('tags', updatedTags);
+    handleTestCaseFormChange('newTag', '');
   };
 
   const removeTag = (tagToRemove: string) => {
     const updatedTags = testCaseForm.tags.filter((tag) => tag !== tagToRemove);
-    handleTestCaseFormChange("tags", updatedTags);
+    handleTestCaseFormChange('tags', updatedTags);
   };
 
-  const handleScenarioChange = (
-    scenarioIndex: number,
-    field: string,
-    value: string
-  ) => {
+  const handleScenarioChange = (scenarioIndex: number, field: string, value: string) => {
     const updatedScenarios = [...testCaseForm.scenarios];
     updatedScenarios[scenarioIndex] = {
       ...updatedScenarios[scenarioIndex],
       [field]: value,
     };
-    handleTestCaseFormChange("scenarios", updatedScenarios);
+    handleTestCaseFormChange('scenarios', updatedScenarios);
   };
 
   const handleStepChange = (
@@ -242,72 +222,71 @@ export default function TestCasesForm({
       ...updatedScenarios[scenarioIndex].steps[stepIndex],
       [field]: value,
     };
-    handleTestCaseFormChange("scenarios", updatedScenarios);
+    handleTestCaseFormChange('scenarios', updatedScenarios);
   };
 
   const addStep = (
     scenarioIndex: number,
-    type: "given" | "when" | "then" | "and" | "but" = "and"
+    type: 'given' | 'when' | 'then' | 'and' | 'but' = 'and'
   ) => {
     const updatedScenarios = [...testCaseForm.scenarios];
-    updatedScenarios[scenarioIndex].steps.push({ type, text: "" });
-    handleTestCaseFormChange("scenarios", updatedScenarios);
+    updatedScenarios[scenarioIndex].steps.push({ type, text: '' });
+    handleTestCaseFormChange('scenarios', updatedScenarios);
   };
 
   const removeStep = (scenarioIndex: number, stepIndex: number) => {
     const updatedScenarios = [...testCaseForm.scenarios];
     updatedScenarios[scenarioIndex].steps.splice(stepIndex, 1);
-    handleTestCaseFormChange("scenarios", updatedScenarios);
+    handleTestCaseFormChange('scenarios', updatedScenarios);
   };
 
   const addScenario = () => {
     const updatedScenarios = [
       ...testCaseForm.scenarios,
       {
-        name: "",
-        steps: [{ type: "given", text: "" }],
+        name: '',
+        steps: [{ type: 'given', text: '' }],
       },
     ];
-    handleTestCaseFormChange("scenarios", updatedScenarios);
+    handleTestCaseFormChange('scenarios', updatedScenarios);
   };
 
   const removeScenario = (scenarioIndex: number) => {
     if (testCaseForm.scenarios.length <= 1) {
       showToast({
-        title: "Warning",
-        description: "Test case must have at least one scenario",
-        type: "warning",
+        title: 'Warning',
+        description: 'Test case must have at least one scenario',
+        type: 'warning',
       });
       return;
     }
 
     const updatedScenarios = [...testCaseForm.scenarios];
     updatedScenarios.splice(scenarioIndex, 1);
-    handleTestCaseFormChange("scenarios", updatedScenarios);
+    handleTestCaseFormChange('scenarios', updatedScenarios);
   };
 
   const validateTestCaseForm = () => {
     const newErrors: Record<string, string> = {};
 
     if (!testCaseForm.feature.trim()) {
-      newErrors.feature = "Feature name is required";
+      newErrors.feature = 'Feature name is required';
     }
 
     if (!testCaseForm.title.trim()) {
-      newErrors.title = "Test case title is required";
+      newErrors.title = 'Test case title is required';
     }
 
     // Validate scenarios
     testCaseForm.scenarios.forEach((scenario, index) => {
       if (!scenario.name.trim()) {
-        newErrors[`scenario_${index}_name`] = "Scenario name is required";
+        newErrors[`scenario_${index}_name`] = 'Scenario name is required';
       }
 
       // Validate steps
       scenario.steps.forEach((step, stepIndex) => {
         if (!step.text.trim()) {
-          newErrors[`scenario_${index}_step_${stepIndex}`] =
-            "Step text is required";
+          newErrors[`scenario_${index}_step_${stepIndex}`] = 'Step text is required';
         }
       });
     });
@@ -342,9 +321,9 @@ export default function TestCasesForm({
 
     // Show success toast
     showToast({
-      title: "Success",
-      description: "New test case added successfully",
-      type: "success",
+      title: 'Success',
+      description: 'New test case added successfully',
+      type: 'success',
     });
   };
 
@@ -376,9 +355,9 @@ export default function TestCasesForm({
 
     // Show success toast
     showToast({
-      title: "Success",
-      description: "Test case updated successfully",
-      type: "success",
+      title: 'Success',
+      description: 'Test case updated successfully',
+      type: 'success',
     });
   };
 
@@ -389,9 +368,9 @@ export default function TestCasesForm({
 
     // Show success toast
     showToast({
-      title: "Success",
-      description: "Test case removed successfully",
-      type: "success",
+      title: 'Success',
+      description: 'Test case removed successfully',
+      type: 'success',
     });
   };
 
@@ -402,13 +381,13 @@ export default function TestCasesForm({
     setTestCaseForm({
       feature: testCase.feature,
       title: testCase.title,
-      description: testCase.description || "",
+      description: testCase.description || '',
       tags: testCase.tags || [],
-      newTag: "",
+      newTag: '',
       scenarios: testCase.scenarios || [
         {
-          name: "",
-          steps: [{ type: "given", text: "" }],
+          name: '',
+          steps: [{ type: 'given', text: '' }],
         },
       ],
     });
@@ -420,15 +399,15 @@ export default function TestCasesForm({
 
   const resetTestCaseForm = () => {
     setTestCaseForm({
-      feature: "",
-      title: "",
-      description: "",
+      feature: '',
+      title: '',
+      description: '',
       tags: [],
-      newTag: "",
+      newTag: '',
       scenarios: [
         {
-          name: "",
-          steps: [{ type: "given", text: "" }],
+          name: '',
+          steps: [{ type: 'given', text: '' }],
         },
       ],
     });
@@ -442,18 +421,18 @@ export default function TestCasesForm({
     // Check if user has remaining AI credits
     if (aiCreditsRemaining <= 0) {
       showToast({
-        title: "Insufficient AI Credits",
+        title: 'Insufficient AI Credits',
         description: "You've used all your AI credits for this billing period",
-        type: "warning",
+        type: 'warning',
       });
       return;
     }
 
     if (!projectId) {
       showToast({
-        title: "Error",
-        description: "Project must be saved before test cases can be generated",
-        type: "error",
+        title: 'Error',
+        description: 'Project must be saved before test cases can be generated',
+        type: 'error',
       });
       return;
     }
@@ -461,18 +440,18 @@ export default function TestCasesForm({
     // Check if user has access to AI features
     if (!hasAIFeatures) {
       showToast({
-        title: "Premium Feature",
-        description: "Upgrade to Premium to use AI-powered features",
-        type: "info",
+        title: 'Premium Feature',
+        description: 'Upgrade to Premium to use AI-powered features',
+        type: 'info',
       });
       return;
     }
 
     if (projectRequirements.length === 0 && projectFeatures.length === 0) {
       showToast({
-        title: "Warning",
-        description: "No requirements or features found to base test cases on",
-        type: "warning",
+        title: 'Warning',
+        description: 'No requirements or features found to base test cases on',
+        type: 'warning',
       });
       return;
     }
@@ -485,18 +464,18 @@ export default function TestCasesForm({
     // Check if user has remaining AI credits
     if (aiCreditsRemaining <= 0) {
       showToast({
-        title: "Insufficient AI Credits",
+        title: 'Insufficient AI Credits',
         description: "You've used all your AI credits for this billing period",
-        type: "warning",
+        type: 'warning',
       });
       return;
     }
 
     if (!projectId) {
       showToast({
-        title: "Error",
-        description: "Project must be saved before test cases can be enhanced",
-        type: "error",
+        title: 'Error',
+        description: 'Project must be saved before test cases can be enhanced',
+        type: 'error',
       });
       return;
     }
@@ -504,18 +483,18 @@ export default function TestCasesForm({
     // Check if user has access to AI features
     if (!hasAIFeatures) {
       showToast({
-        title: "Premium Feature",
-        description: "Upgrade to Premium to use AI-powered features",
-        type: "info",
+        title: 'Premium Feature',
+        description: 'Upgrade to Premium to use AI-powered features',
+        type: 'info',
       });
       return;
     }
 
     if (testCases.length === 0) {
       showToast({
-        title: "Warning",
-        description: "No test cases to enhance",
-        type: "warning",
+        title: 'Warning',
+        description: 'No test cases to enhance',
+        type: 'warning',
       });
       return;
     }
@@ -541,23 +520,23 @@ export default function TestCasesForm({
         setTestCases([...testCases, ...generatedTestCases.testCases]);
 
         showToast({
-          title: "Success",
+          title: 'Success',
           description: `Generated ${generatedTestCases.testCases.length} test cases`,
-          type: "success",
+          type: 'success',
         });
       } else {
         showToast({
-          title: "Warning",
-          description: "No test cases were generated",
-          type: "warning",
+          title: 'Warning',
+          description: 'No test cases were generated',
+          type: 'warning',
         });
       }
     } catch (error) {
-      console.error("Error generating test cases:", error);
+      console.error('Error generating test cases:', error);
       showToast({
-        title: "Error",
-        description: "Failed to generate test cases",
-        type: "error",
+        title: 'Error',
+        description: 'Failed to generate test cases',
+        type: 'error',
       });
     } finally {
       setIsGeneratingTestCases(false);
@@ -582,23 +561,23 @@ export default function TestCasesForm({
         setTestCases(enhancedTestCases.testCases);
 
         showToast({
-          title: "Success",
-          description: "Test cases enhanced successfully",
-          type: "success",
+          title: 'Success',
+          description: 'Test cases enhanced successfully',
+          type: 'success',
         });
       } else {
         showToast({
-          title: "Warning",
-          description: "No enhanced test cases returned",
-          type: "warning",
+          title: 'Warning',
+          description: 'No enhanced test cases returned',
+          type: 'warning',
         });
       }
     } catch (error) {
-      console.error("Error enhancing test cases:", error);
+      console.error('Error enhancing test cases:', error);
       showToast({
-        title: "Error",
-        description: "Failed to enhance test cases",
-        type: "error",
+        title: 'Error',
+        description: 'Failed to enhance test cases',
+        type: 'error',
       });
     } finally {
       setIsEnhancing(false);
@@ -609,15 +588,14 @@ export default function TestCasesForm({
     e.preventDefault();
 
     // Clear previous messages
-    setError("");
+    setError('');
 
     if (!projectId) {
-      const errorMessage =
-        "Project must be saved before test cases can be saved";
+      const errorMessage = 'Project must be saved before test cases can be saved';
       showToast({
-        title: "Error",
+        title: 'Error',
         description: errorMessage,
-        type: "error",
+        type: 'error',
       });
       setError(errorMessage);
       return;
@@ -633,34 +611,34 @@ export default function TestCasesForm({
 
       if (result) {
         showToast({
-          title: "Success",
-          description: "Test cases saved successfully",
-          type: "success",
+          title: 'Success',
+          description: 'Test cases saved successfully',
+          type: 'success',
         });
 
         if (onSuccess) {
           onSuccess(result);
         }
       } else {
-        const errorMessage = "Failed to save test cases";
+        const errorMessage = 'Failed to save test cases';
         showToast({
-          title: "Error",
+          title: 'Error',
           description: errorMessage,
-          type: "error",
+          type: 'error',
         });
         setError(errorMessage);
-        setTimeout(() => setError(""), 5000);
+        setTimeout(() => setError(''), 5000);
       }
     } catch (error) {
-      console.error("Error saving test cases:", error);
-      const errorMessage = "An unexpected error occurred";
+      console.error('Error saving test cases:', error);
+      const errorMessage = 'An unexpected error occurred';
       showToast({
-        title: "Error",
+        title: 'Error',
         description: errorMessage,
-        type: "error",
+        type: 'error',
       });
       setError(errorMessage);
-      setTimeout(() => setError(""), 5000);
+      setTimeout(() => setError(''), 5000);
     } finally {
       setIsSubmitting(false);
     }
@@ -674,31 +652,25 @@ export default function TestCasesForm({
   // Helper to get the appropriate message for the overlay
   const getEnhancementMessage = () => {
     if (isEnhancing) {
-      return "AI is enhancing your test cases based on project requirements. Please wait...";
+      return 'AI is enhancing your test cases based on project requirements. Please wait...';
     }
     if (isGeneratingTestCases) {
-      return "AI is generating test cases from your project requirements and features. Please wait...";
+      return 'AI is generating test cases from your project requirements and features. Please wait...';
     }
-    return "AI enhancement in progress...";
+    return 'AI enhancement in progress...';
   };
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <Loader2 className="h-6 w-6 text-primary-600 animate-spin mr-3" />
-        <span className="text-slate-600 dark:text-slate-300">
-          Loading test cases...
-        </span>
+        <Loader2 className="mr-3 h-6 w-6 animate-spin text-primary-600" />
+        <span className="text-slate-600 dark:text-slate-300">Loading test cases...</span>
       </div>
     );
   }
 
   return (
-    <form
-      id="test-cases-form"
-      onSubmit={handleSubmit}
-      className="space-y-8 relative"
-    >
+    <form id="test-cases-form" onSubmit={handleSubmit} className="relative space-y-8">
       {/* Processing Overlay */}
       <ProcessingOverlay
         isVisible={isAnyEnhancementInProgress()}
@@ -727,41 +699,36 @@ export default function TestCasesForm({
 
       {/* Error Message */}
       {error && (
-        <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-md mb-4">
+        <div className="mb-4 rounded-md bg-red-50 p-3 text-red-600 dark:bg-red-900/20 dark:text-red-400">
           {error}
         </div>
       )}
 
       <div className="space-y-6">
         <div>
-          <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-4">
+          <h2 className="mb-4 text-xl font-semibold text-slate-800 dark:text-slate-100">
             Test Cases
           </h2>
-          <p className="text-slate-600 dark:text-slate-400 mb-6">
+          <p className="mb-6 text-slate-600 dark:text-slate-400">
             Define test cases using Gherkin format to document expected behavior
           </p>
         </div>
 
         {/* AI Generation Buttons */}
-        <div className="flex justify-end items-center gap-3 mb-4">
+        <div className="mb-4 flex items-center justify-end gap-3">
           {!hasAIFeatures && <PremiumFeatureBadge />}
           <Button
             type="button"
             onClick={openGenerateModal}
-            disabled={
-              isGeneratingTestCases ||
-              isEnhancing ||
-              !projectId ||
-              !hasAIFeatures
-            }
-            variant={hasAIFeatures ? "outline" : "ghost"}
-            className={`flex items-center gap-2 relative ${
-              !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
+            disabled={isGeneratingTestCases || isEnhancing || !projectId || !hasAIFeatures}
+            variant={hasAIFeatures ? 'outline' : 'ghost'}
+            className={`relative flex items-center gap-2 ${
+              !hasAIFeatures ? 'cursor-not-allowed opacity-50' : ''
             }`}
             title={
               hasAIFeatures
-                ? "Generate new test cases based on requirements and features"
-                : "Upgrade to Premium to use AI-powered features"
+                ? 'Generate new test cases based on requirements and features'
+                : 'Upgrade to Premium to use AI-powered features'
             }
           >
             {isGeneratingTestCases ? (
@@ -771,11 +738,7 @@ export default function TestCasesForm({
               </>
             ) : (
               <>
-                {hasAIFeatures ? (
-                  <Sparkles className="h-4 w-4" />
-                ) : (
-                  <Lock className="h-4 w-4" />
-                )}
+                {hasAIFeatures ? <Sparkles className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
                 <span>Generate Test Cases</span>
               </>
             )}
@@ -790,14 +753,14 @@ export default function TestCasesForm({
               testCases.length === 0 ||
               !hasAIFeatures
             }
-            variant={hasAIFeatures ? "outline" : "ghost"}
-            className={`flex items-center gap-2 relative ${
-              !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
+            variant={hasAIFeatures ? 'outline' : 'ghost'}
+            className={`relative flex items-center gap-2 ${
+              !hasAIFeatures ? 'cursor-not-allowed opacity-50' : ''
             }`}
             title={
               hasAIFeatures
-                ? "Enhance existing test cases with AI"
-                : "Upgrade to Premium to use AI-powered features"
+                ? 'Enhance existing test cases with AI'
+                : 'Upgrade to Premium to use AI-powered features'
             }
           >
             {isEnhancing ? (
@@ -807,11 +770,7 @@ export default function TestCasesForm({
               </>
             ) : (
               <>
-                {hasAIFeatures ? (
-                  <RefreshCw className="h-4 w-4" />
-                ) : (
-                  <Lock className="h-4 w-4" />
-                )}
+                {hasAIFeatures ? <RefreshCw className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
                 <span>Enhance Test Cases</span>
               </>
             )}
@@ -835,10 +794,10 @@ export default function TestCasesForm({
 
         {/* Test case form for adding new test cases */}
         {(isAddingTestCase || isEditingTestCase) && (
-          <Card className="bg-slate-50 dark:bg-slate-700/30 p-4 mb-6">
-            <div className="flex justify-between items-center mb-4">
+          <Card className="mb-6 bg-slate-50 p-4 dark:bg-slate-700/30">
+            <div className="mb-4 flex items-center justify-between">
               <h3 className="font-medium text-slate-800 dark:text-slate-100">
-                {isEditingTestCase ? "Edit Test Case" : "Add New Test Case"}
+                {isEditingTestCase ? 'Edit Test Case' : 'Add New Test Case'}
               </h3>
               <button
                 type="button"
@@ -859,15 +818,11 @@ export default function TestCasesForm({
                   id="feature-name"
                   type="text"
                   value={testCaseForm.feature}
-                  onChange={(e) =>
-                    handleTestCaseFormChange("feature", e.target.value)
-                  }
+                  onChange={(e) => handleTestCaseFormChange('feature', e.target.value)}
                   placeholder="e.g., User Authentication"
-                  className={errors.feature ? "border-red-500" : ""}
+                  className={errors.feature ? 'border-red-500' : ''}
                 />
-                {errors.feature && (
-                  <p className="mt-1 text-sm text-red-500">{errors.feature}</p>
-                )}
+                {errors.feature && <p className="mt-1 text-sm text-red-500">{errors.feature}</p>}
               </div>
 
               {/* Test case title */}
@@ -879,15 +834,11 @@ export default function TestCasesForm({
                   id="test-case-title"
                   type="text"
                   value={testCaseForm.title}
-                  onChange={(e) =>
-                    handleTestCaseFormChange("title", e.target.value)
-                  }
+                  onChange={(e) => handleTestCaseFormChange('title', e.target.value)}
                   placeholder="e.g., Login with valid credentials"
-                  className={errors.title ? "border-red-500" : ""}
+                  className={errors.title ? 'border-red-500' : ''}
                 />
-                {errors.title && (
-                  <p className="mt-1 text-sm text-red-500">{errors.title}</p>
-                )}
+                {errors.title && <p className="mt-1 text-sm text-red-500">{errors.title}</p>}
               </div>
 
               {/* Test case description */}
@@ -896,9 +847,7 @@ export default function TestCasesForm({
                 <Textarea
                   id="test-case-description"
                   value={testCaseForm.description}
-                  onChange={(e) =>
-                    handleTestCaseFormChange("description", e.target.value)
-                  }
+                  onChange={(e) => handleTestCaseFormChange('description', e.target.value)}
                   rows={3}
                   placeholder="Describe the test case in more detail"
                 />
@@ -907,15 +856,11 @@ export default function TestCasesForm({
               {/* Tags */}
               <div>
                 <Label>Tags</Label>
-                <div className="flex flex-wrap gap-2 mb-2">
+                <div className="mb-2 flex flex-wrap gap-2">
                   {testCaseForm.tags.map((tag, index) => (
                     <Badge key={index} className="flex items-center gap-1">
                       @{tag}
-                      <button
-                        type="button"
-                        onClick={() => removeTag(tag)}
-                        className="text-xs"
-                      >
+                      <button type="button" onClick={() => removeTag(tag)} className="text-xs">
                         <X size={12} />
                       </button>
                     </Badge>
@@ -925,24 +870,17 @@ export default function TestCasesForm({
                   <Input
                     type="text"
                     value={testCaseForm.newTag}
-                    onChange={(e) =>
-                      handleTestCaseFormChange("newTag", e.target.value)
-                    }
+                    onChange={(e) => handleTestCaseFormChange('newTag', e.target.value)}
                     placeholder="Add a tag"
                     className="flex-1"
                     onKeyDown={(e) => {
-                      if (e.key === "Enter") {
+                      if (e.key === 'Enter') {
                         e.preventDefault();
                         addTag();
                       }
                     }}
                   />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={addTag}
-                    size="sm"
-                  >
+                  <Button type="button" variant="outline" onClick={addTag} size="sm">
                     <Tag size={16} />
                   </Button>
                 </div>
@@ -950,7 +888,7 @@ export default function TestCasesForm({
 
               {/* Scenarios */}
               <div>
-                <div className="flex justify-between items-center mb-2">
+                <div className="mb-2 flex items-center justify-between">
                   <Label>Scenarios</Label>
                   <Button
                     type="button"
@@ -964,11 +902,8 @@ export default function TestCasesForm({
                 </div>
 
                 {testCaseForm.scenarios.map((scenario, scenarioIndex) => (
-                  <Card
-                    key={scenarioIndex}
-                    className="mb-4 p-4 bg-white dark:bg-slate-800"
-                  >
-                    <div className="flex justify-between items-start mb-2">
+                  <Card key={scenarioIndex} className="mb-4 bg-white p-4 dark:bg-slate-800">
+                    <div className="mb-2 flex items-start justify-between">
                       <div className="w-full">
                         <Label htmlFor={`scenario-name-${scenarioIndex}`}>
                           Scenario Name <span className="text-red-500">*</span>
@@ -979,17 +914,11 @@ export default function TestCasesForm({
                             type="text"
                             value={scenario.name}
                             onChange={(e) =>
-                              handleScenarioChange(
-                                scenarioIndex,
-                                "name",
-                                e.target.value
-                              )
+                              handleScenarioChange(scenarioIndex, 'name', e.target.value)
                             }
                             placeholder="e.g., Successful login"
                             className={
-                              errors[`scenario_${scenarioIndex}_name`]
-                                ? "border-red-500"
-                                : ""
+                              errors[`scenario_${scenarioIndex}_name`] ? 'border-red-500' : ''
                             }
                           />
                           <Button
@@ -1015,23 +944,15 @@ export default function TestCasesForm({
                     <div className="mt-4">
                       <Label>Steps</Label>
                       {scenario.steps.map((step, stepIndex) => (
-                        <div
-                          key={stepIndex}
-                          className="flex gap-2 items-start mt-2"
-                        >
+                        <div key={stepIndex} className="mt-2 flex items-start gap-2">
                           <Select
                             value={step.type}
                             onChange={(e) =>
                               handleStepChange(
                                 scenarioIndex,
                                 stepIndex,
-                                "type",
-                                e.target.value as
-                                  | "given"
-                                  | "when"
-                                  | "then"
-                                  | "and"
-                                  | "but"
+                                'type',
+                                e.target.value as 'given' | 'when' | 'then' | 'and' | 'but'
                               )
                             }
                             className="w-24"
@@ -1046,20 +967,13 @@ export default function TestCasesForm({
                             type="text"
                             value={step.text}
                             onChange={(e) =>
-                              handleStepChange(
-                                scenarioIndex,
-                                stepIndex,
-                                "text",
-                                e.target.value
-                              )
+                              handleStepChange(scenarioIndex, stepIndex, 'text', e.target.value)
                             }
                             placeholder="e.g., the user enters valid credentials"
                             className={
-                              errors[
-                                `scenario_${scenarioIndex}_step_${stepIndex}`
-                              ]
-                                ? "border-red-500 flex-1"
-                                : "flex-1"
+                              errors[`scenario_${scenarioIndex}_step_${stepIndex}`]
+                                ? 'flex-1 border-red-500'
+                                : 'flex-1'
                             }
                           />
                           <Button
@@ -1094,22 +1008,16 @@ export default function TestCasesForm({
               </div>
 
               {/* Action buttons */}
-              <div className="flex justify-end space-x-2 mt-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={resetTestCaseForm}
-                >
+              <div className="mt-2 flex justify-end space-x-2">
+                <Button type="button" variant="outline" onClick={resetTestCaseForm}>
                   Cancel
                 </Button>
                 <Button
                   type="button"
                   variant="default"
-                  onClick={
-                    isEditingTestCase ? handleEditTestCase : handleAddTestCase
-                  }
+                  onClick={isEditingTestCase ? handleEditTestCase : handleAddTestCase}
                 >
-                  {isEditingTestCase ? "Save Changes" : "Add Test Case"}
+                  {isEditingTestCase ? 'Save Changes' : 'Add Test Case'}
                 </Button>
               </div>
             </div>
@@ -1118,7 +1026,7 @@ export default function TestCasesForm({
 
         {/* Test cases list */}
         {testCases.length === 0 && !isAddingTestCase && !isEditingTestCase ? (
-          <Card className="bg-slate-50 dark:bg-slate-800 text-center p-6">
+          <Card className="bg-slate-50 p-6 text-center dark:bg-slate-800">
             <p className="text-slate-600 dark:text-slate-400">
               No test cases available. Add your first test case to get started.
             </p>
@@ -1128,19 +1036,19 @@ export default function TestCasesForm({
           !isEditingTestCase && (
             <div className="space-y-4">
               {testCases.map((testCase, index) => (
-                <Card key={index} className="p-4 bg-white dark:bg-slate-800">
-                  <div className="flex justify-between items-start mb-2">
+                <Card key={index} className="bg-white p-4 dark:bg-slate-800">
+                  <div className="mb-2 flex items-start justify-between">
                     <div>
                       <h3 className="font-medium text-slate-800 dark:text-slate-100">
                         {testCase.feature}: {testCase.title}
                       </h3>
                       {testCase.description && (
-                        <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+                        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
                           {testCase.description}
                         </p>
                       )}
                       {testCase.tags && testCase.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-2">
+                        <div className="mt-2 flex flex-wrap gap-1">
                           {testCase.tags.map((tag, tagIndex) => (
                             <Badge key={tagIndex} variant="outline">
                               @{tag}
@@ -1170,36 +1078,26 @@ export default function TestCasesForm({
                   </div>
 
                   {/* Collapsible scenarios section */}
-                  <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700">
+                  <div className="mt-3 border-t border-slate-100 pt-3 dark:border-slate-700">
                     <Tabs defaultValue="scenario0">
                       <TabsList className="mb-2">
                         {testCase.scenarios.map((_scenario, scenarioIndex) => (
-                          <TabsTrigger
-                            key={scenarioIndex}
-                            value={`scenario${scenarioIndex}`}
-                          >
+                          <TabsTrigger key={scenarioIndex} value={`scenario${scenarioIndex}`}>
                             Scenario {scenarioIndex + 1}
                           </TabsTrigger>
                         ))}
                       </TabsList>
                       {testCase.scenarios.map((scenario, scenarioIndex) => (
-                        <TabsContent
-                          key={scenarioIndex}
-                          value={`scenario${scenarioIndex}`}
-                        >
-                          <div className="bg-slate-50 dark:bg-slate-700/30 p-3 rounded">
-                            <h4 className="font-medium mb-2">
-                              {scenario.name}
-                            </h4>
+                        <TabsContent key={scenarioIndex} value={`scenario${scenarioIndex}`}>
+                          <div className="rounded bg-slate-50 p-3 dark:bg-slate-700/30">
+                            <h4 className="mb-2 font-medium">{scenario.name}</h4>
                             <ul className="space-y-1">
                               {scenario.steps.map((step, stepIndex) => (
                                 <li
                                   key={stepIndex}
                                   className="text-sm text-slate-600 dark:text-slate-300"
                                 >
-                                  <span className="font-medium capitalize">
-                                    {step.type}
-                                  </span>{" "}
+                                  <span className="font-medium capitalize">{step.type}</span>{' '}
                                   {step.text}
                                 </li>
                               ))}
@@ -1220,14 +1118,10 @@ export default function TestCasesForm({
         <Button
           type="submit"
           disabled={isSubmitting || !projectId}
-          variant={!projectId || isSubmitting ? "outline" : "default"}
-          className={
-            !projectId || isSubmitting
-              ? "bg-gray-400 text-white hover:bg-gray-400"
-              : ""
-          }
+          variant={!projectId || isSubmitting ? 'outline' : 'default'}
+          className={!projectId || isSubmitting ? 'bg-gray-400 text-white hover:bg-gray-400' : ''}
         >
-          {isSubmitting ? "Saving..." : "Save Test Cases"}
+          {isSubmitting ? 'Saving...' : 'Save Test Cases'}
         </Button>
       </div>
     </form>

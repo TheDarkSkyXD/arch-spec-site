@@ -3,6 +3,7 @@ Implementation prompts meta prompts.
 
 This module provides functions to load and use implementation prompt meta prompts.
 """
+
 import os
 from pathlib import Path
 from typing import Dict, Optional
@@ -20,28 +21,30 @@ CATEGORY_TO_METAPROMPT = {
     "09_integration_implementation": "09_integration_implementation_gen_prompt.txt",
 }
 
+
 def get_implementation_prompt_template(category: str) -> Optional[str]:
     """
     Get the implementation prompt meta template for a specific category.
-    
+
     Args:
         category: The category to get the meta prompt for
-        
+
     Returns:
         The meta prompt template as a string, or None if not found
     """
     meta_prompt_file = CATEGORY_TO_METAPROMPT.get(category)
     if not meta_prompt_file:
         return None
-        
+
     meta_prompt_path = Path(__file__).parent / "implementation" / meta_prompt_file
-    
+
     try:
-        with open(meta_prompt_path, 'r', encoding='utf-8') as f:
+        with open(meta_prompt_path, "r", encoding="utf-8") as f:
             return f.read()
     except Exception as e:
         print(f"Error loading implementation prompt meta prompt: {str(e)}")
         return None
+
 
 def prepare_implementation_prompt(
     category: str,
@@ -59,7 +62,7 @@ def prepare_implementation_prompt(
 ) -> Optional[str]:
     """
     Prepare the implementation prompt for a specific category by filling in the template.
-    
+
     Args:
         category: The category to prepare the prompt for
         project_description: Project description
@@ -73,14 +76,14 @@ def prepare_implementation_prompt(
         fr_spec: Functional requirements specification
         nfr_spec: Non-functional requirements specification
         additional_user_instruction: Optional custom instructions from the user
-        
+
     Returns:
         The prepared implementation prompt, or None if the template couldn't be loaded
     """
     template = get_implementation_prompt_template(category)
     if not template:
         return None
-    
+
     # Create a dict of variables to replace in the template
     variables = {
         "project_description": project_description,
@@ -95,17 +98,17 @@ def prepare_implementation_prompt(
         "nfr_spec": nfr_spec,
         "additional_user_instruction": additional_user_instruction,
     }
-    
+
     # Replace variables in the template
     prompt = template
     for var_name, var_value in variables.items():
         placeholder = f"{{{var_name}}}"
         if placeholder in prompt:
             prompt = prompt.replace(placeholder, var_value)
-    
+
     # Add the additional user instruction if provided
     if additional_user_instruction:
         prompt += f"\n\nAdditional instructions from user:\n{additional_user_instruction}\n\n"
         prompt += "Note: While considering these additional instructions, still follow the core implementation requirements outlined above. Do not deviate from the primary objective of the implementation."
-    
-    return prompt 
+
+    return prompt

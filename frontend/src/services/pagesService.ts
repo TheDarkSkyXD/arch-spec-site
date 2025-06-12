@@ -1,6 +1,6 @@
-import { Pages } from "../types/templates";
-import apiClient from "../api/apiClient";
-const API_BASE_URL = "/api";
+import { Pages } from '../types/templates';
+import apiClient from '../api/apiClient';
+const API_BASE_URL = '/api';
 
 interface PagesResponse {
   id: string;
@@ -32,7 +32,7 @@ export class PagesService {
 
       return response.data.data;
     } catch (error) {
-      console.error("Error fetching pages:", error);
+      console.error('Error fetching pages:', error);
       throw error;
     }
   }
@@ -43,10 +43,7 @@ export class PagesService {
    * @param pagesData The pages data to save
    * @returns The saved pages data
    */
-  static async savePages(
-    projectId: string,
-    pagesData: Pages
-  ): Promise<Pages | null> {
+  static async savePages(projectId: string, pagesData: Pages): Promise<Pages | null> {
     try {
       const response = await apiClient.put<Pages>(
         `${API_BASE_URL}/project-specs/${projectId}/pages`,
@@ -61,7 +58,7 @@ export class PagesService {
 
       return response.data;
     } catch (error) {
-      console.error("Error saving pages:", error);
+      console.error('Error saving pages:', error);
       throw error;
     }
   }

@@ -1,13 +1,11 @@
-import { Api, ApiEndpoint } from "../../types/templates";
-import { formatMarkdownTable } from "./tableFormatter";
+import { Api, ApiEndpoint } from '../../types/templates';
+import { formatMarkdownTable } from './tableFormatter';
 
 /**
  * Generate markdown for API endpoints
  */
-export function generateApiEndpointsMarkdown(
-  data: Partial<Api> | null
-): string {
-  if (!data) return "";
+export function generateApiEndpointsMarkdown(data: Partial<Api> | null): string {
+  if (!data) return '';
 
   let markdown = `# API Endpoints\n\n`;
 
@@ -30,9 +28,7 @@ export function generateApiEndpointsMarkdown(
 /**
  * Group endpoints by their path for better organization
  */
-function groupEndpointsByPath(
-  endpoints: ApiEndpoint[]
-): Record<string, ApiEndpoint[]> {
+function groupEndpointsByPath(endpoints: ApiEndpoint[]): Record<string, ApiEndpoint[]> {
   const result: Record<string, ApiEndpoint[]> = {};
 
   endpoints.forEach((endpoint) => {
@@ -49,13 +45,11 @@ function groupEndpointsByPath(
 /**
  * Generate a table of contents for API endpoints
  */
-function generateTableOfContents(
-  endpointsByPath: Record<string, ApiEndpoint[]>
-): string {
+function generateTableOfContents(endpointsByPath: Record<string, ApiEndpoint[]>): string {
   const toc = `## API Overview\n\n`;
 
   // Define headers
-  const headers = ["Endpoint", "Methods", "Description", "Authentication"];
+  const headers = ['Endpoint', 'Methods', 'Description', 'Authentication'];
 
   // Create rows
   const rows = Object.entries(endpointsByPath).map(([path, endpoints]) => {
@@ -63,20 +57,15 @@ function generateTableOfContents(
       .map((e) => e.methods)
       .flat()
       .map((m) => `\`${m}\``)
-      .join(" ");
-    const desc = endpoints[0].description.split(".")[0]; // Just use the first sentence
-    const auth = endpoints.some((e) => e.auth) ? "Yes" : "No";
+      .join(' ');
+    const desc = endpoints[0].description.split('.')[0]; // Just use the first sentence
+    const auth = endpoints.some((e) => e.auth) ? 'Yes' : 'No';
 
     return [`\`${path}\``, methods, desc, auth];
   });
 
   // Custom separators for the table header
-  const separators = [
-    "----------",
-    "---------",
-    "-------------",
-    "---------------",
-  ];
+  const separators = ['----------', '---------', '-------------', '---------------'];
 
   return toc + formatMarkdownTable(headers, rows, separators);
 }
@@ -84,9 +73,7 @@ function generateTableOfContents(
 /**
  * Generate detailed endpoint documentation
  */
-function generateEndpointDetails(
-  endpointsByPath: Record<string, ApiEndpoint[]>
-): string {
+function generateEndpointDetails(endpointsByPath: Record<string, ApiEndpoint[]>): string {
   let details = `## API Details\n\n`;
 
   Object.entries(endpointsByPath).forEach(([path, endpoints]) => {
@@ -98,7 +85,7 @@ function generateEndpointDetails(
         .map((method) => {
           return `\`${method}\``;
         })
-        .join(" ");
+        .join(' ');
 
       details += `#### ${methodsText} \`${path}\`\n\n`;
       details += `${endpoint.description}\n\n`;
@@ -107,46 +94,38 @@ function generateEndpointDetails(
       if (endpoint.parameters && endpoint.parameters.length > 0) {
         details += `**Parameters**\n\n`;
 
-        const paramHeaders = ["Name", "Type", "Required", "Description"];
+        const paramHeaders = ['Name', 'Type', 'Required', 'Description'];
         const paramRows = endpoint.parameters.map((param) => [
           param.name,
           param.type,
-          param.required ? "Yes" : "No",
-          param.description || "",
+          param.required ? 'Yes' : 'No',
+          param.description || '',
         ]);
-        const paramSeparators = ["----", "----", "--------", "-----------"];
+        const paramSeparators = ['----', '----', '--------', '-----------'];
 
-        details += formatMarkdownTable(
-          paramHeaders,
-          paramRows,
-          paramSeparators
-        );
+        details += formatMarkdownTable(paramHeaders, paramRows, paramSeparators);
       }
 
       // Add response format if available
       if (endpoint.responses && endpoint.responses.length > 0) {
         details += `**Responses**\n\n`;
 
-        const responseHeaders = ["Status", "Description", "Schema"];
+        const responseHeaders = ['Status', 'Description', 'Schema'];
         const responseRows = endpoint.responses.map((resp) => [
           `${resp.status}`,
-          resp.description || "",
-          resp.schema ? `\`${resp.schema}\`` : "",
+          resp.description || '',
+          resp.schema ? `\`${resp.schema}\`` : '',
         ]);
-        const responseSeparators = ["------", "-----------", "------"];
+        const responseSeparators = ['------', '-----------', '------'];
 
-        details += formatMarkdownTable(
-          responseHeaders,
-          responseRows,
-          responseSeparators
-        );
+        details += formatMarkdownTable(responseHeaders, responseRows, responseSeparators);
       }
 
       if (endpoint.auth) {
         details += `**🔒 Authentication Required**\n\n`;
 
         if (endpoint.roles && endpoint.roles.length > 0) {
-          details += `**Required Roles**: ${endpoint.roles.join(", ")}\n\n`;
+          details += `**Required Roles**: ${endpoint.roles.join(', ')}\n\n`;
         }
       } else {
         details += `**🔓 Public Endpoint**\n\n`;

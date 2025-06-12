@@ -1,30 +1,22 @@
-import { useEffect, useState, useCallback } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "../contexts";
-import {
-  Customer,
-  SubscriptionPlan,
-  Subscription,
-  User,
-} from "../services/paymentService";
-import paymentService from "../services/paymentService";
-import { userApi } from "../api/userApi";
+import { useEffect, useState, useCallback } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../contexts';
+import { Customer, SubscriptionPlan, Subscription, User } from '../services/paymentService';
+import paymentService from '../services/paymentService';
+import { userApi } from '../api/userApi';
 
 // Mock DashboardLayout component until the real one is available
-const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => <div className="dashboard-layout">{children}</div>;
+const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <div className="dashboard-layout">{children}</div>
+);
 
 const SubscriptionPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
-  const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(
-    null
-  );
+  const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
   const [customer, setCustomer] = useState<Customer | null>(null);
-  const [currentSubscription, setCurrentSubscription] =
-    useState<Subscription | null>(null);
+  const [currentSubscription, setCurrentSubscription] = useState<Subscription | null>(null);
   const [isCreatingCheckout, setIsCreatingCheckout] = useState(false);
   const [isPostCheckout, setIsPostCheckout] = useState(false);
 
@@ -38,11 +30,11 @@ const SubscriptionPage = () => {
 
   // Check if we need to refresh subscription data (coming back from checkout)
   const searchParams = new URLSearchParams(location.search);
-  const shouldRefresh = searchParams.get("refresh") === "true";
+  const shouldRefresh = searchParams.get('refresh') === 'true';
 
   const getPricePerMonth = useCallback((plan: SubscriptionPlan): number => {
     let pricePerMonth = plan.price / plan.intervalCount;
-    if (plan.interval === "year") {
+    if (plan.interval === 'year') {
       pricePerMonth /= 12;
     }
     return pricePerMonth;
@@ -79,11 +71,11 @@ const SubscriptionPage = () => {
 
       // Only redirect if auth is finished loading and user is definitely null
       if (!user && !authLoading) {
-        console.log("User is not authenticated, redirecting to login");
-        navigate("/login", {
+        console.log('User is not authenticated, redirecting to login');
+        navigate('/login', {
           state: {
-            from: "/subscription",
-            message: "Please sign in to view subscription plans",
+            from: '/subscription',
+            message: 'Please sign in to view subscription plans',
           },
         });
         return;
@@ -99,21 +91,17 @@ const SubscriptionPage = () => {
 
         // If returning from checkout, clear all caches to ensure fresh data
         if (shouldRefresh) {
-          console.log(
-            "🔄 Returning from checkout - clearing all caches and forcing refresh"
-          );
+          console.log('🔄 Returning from checkout - clearing all caches and forcing refresh');
           paymentService.clearCaches();
           setIsPostCheckout(true);
           // Clear URL parameter after using it
-          navigate("/subscription", { replace: true });
+          navigate('/subscription', { replace: true });
         }
 
         // Check subscription status first
         // Only proceed with user-specific operations if we have a user
         if (user && user.email) {
-          console.log(
-            `🔍 First checking subscription status for ${user.email}`
-          );
+          console.log(`🔍 First checking subscription status for ${user.email}`);
 
           // Get current subscription with bypassing cache if needed
           const subscription = await paymentService.getCurrentSubscription(
@@ -122,45 +110,36 @@ const SubscriptionPage = () => {
           );
 
           if (!isMounted) return;
-          console.log("📊 Subscription data:", subscription);
+          console.log('📊 Subscription data:', subscription);
 
           if (subscription) {
-            console.log("✅ Active subscription found:", subscription.status);
+            console.log('✅ Active subscription found:', subscription.status);
             setCurrentSubscription(subscription);
 
             // Update user profile with subscription information if needed
             try {
-              console.log(
-                "Updating user profile with subscription information"
-              );
+              console.log('Updating user profile with subscription information');
               const userProfile = await userApi.getCurrentUserProfile();
 
               // Only update if subscription ID doesn't match or plan is not premium
               if (
                 userProfile.subscription_id !== subscription.id ||
-                userProfile.plan !== "premium"
+                userProfile.plan !== 'premium'
               ) {
                 await userApi.updateUserSubscription({
                   subscription_id: subscription.id,
-                  plan: "premium",
+                  plan: 'premium',
                   ai_credits: 300, // Default premium credits
                 });
-                console.log(
-                  "User profile updated with subscription information"
-                );
+                console.log('User profile updated with subscription information');
               } else {
-                console.log(
-                  "User profile already has correct subscription information"
-                );
+                console.log('User profile already has correct subscription information');
               }
 
               // Since user has an active subscription, we can skip loading plans
               // Just load customer data for manage subscription functionality
               if (user.uid) {
-                const customerData = await paymentService.getOrCreateCustomer(
-                  user,
-                  false
-                );
+                const customerData = await paymentService.getOrCreateCustomer(user, false);
                 if (!isMounted) return;
                 setCustomer(customerData);
               }
@@ -168,28 +147,24 @@ const SubscriptionPage = () => {
               setIsLoading(false);
               return; // Early return to skip loading plans
             } catch (profileError) {
-              console.error("Error updating user profile:", profileError);
+              console.error('Error updating user profile:', profileError);
               // Continue without failing - user will still have access to their subscription
             }
           } else {
-            console.log("❌ No active subscription found, loading plans");
+            console.log('❌ No active subscription found, loading plans');
             setCurrentSubscription(null);
 
             // If we're coming back from checkout but still have no subscription,
             // we might need to wait for webhook processing
             if (shouldRefresh) {
-              console.log(
-                "⚠️ No subscription after checkout - webhooks might still be processing"
-              );
+              console.log('⚠️ No subscription after checkout - webhooks might still be processing');
             }
           }
         }
 
         // Only load plans if user doesn't have a subscription
         // Fetch subscription plans
-        const availablePlans = await paymentService.getSubscriptionPlans(
-          shouldRefresh
-        );
+        const availablePlans = await paymentService.getSubscriptionPlans(shouldRefresh);
         if (!isMounted) return;
         setPlans(availablePlans);
 
@@ -199,10 +174,7 @@ const SubscriptionPage = () => {
 
         // Get or create customer only if user doesn't have a subscription
         if (user && user.uid) {
-          const customerData = await paymentService.getOrCreateCustomer(
-            user,
-            shouldRefresh
-          );
+          const customerData = await paymentService.getOrCreateCustomer(user, shouldRefresh);
           if (!isMounted) return;
           setCustomer(customerData);
         }
@@ -210,8 +182,8 @@ const SubscriptionPage = () => {
         setIsLoading(false);
       } catch (error) {
         if (!isMounted) return;
-        console.error("Error loading subscription data:", error);
-        setError("Unable to load subscription data. Please try again later.");
+        console.error('Error loading subscription data:', error);
+        setError('Unable to load subscription data. Please try again later.');
         setIsLoading(false);
       }
     };
@@ -230,24 +202,20 @@ const SubscriptionPage = () => {
 
   const handleSubscribe = async () => {
     if (!selectedPlan || !user || !user.email || !user.uid) {
-      setError("Unable to process subscription. Please sign in again.");
+      setError('Unable to process subscription. Please sign in again.');
       return;
     }
 
     try {
       setIsCreatingCheckout(true);
       setError(null);
-      const { url } = await paymentService.createCheckout(
-        selectedPlan.id,
-        user.email,
-        user.uid
-      );
+      const { url } = await paymentService.createCheckout(selectedPlan.id, user.email, user.uid);
 
       // Use LemonSqueezy checkout if available
       await paymentService.checkoutWithLemonSqueezy(url);
     } catch (error) {
-      console.error("Error creating checkout:", error);
-      setError("Failed to create checkout session. Please try again.");
+      console.error('Error creating checkout:', error);
+      setError('Failed to create checkout session. Please try again.');
     } finally {
       setIsCreatingCheckout(false);
     }
@@ -255,7 +223,7 @@ const SubscriptionPage = () => {
 
   const handleManageSubscription = async () => {
     if (!customer) {
-      setError("Customer information not available. Please try again.");
+      setError('Customer information not available. Please try again.');
       return;
     }
 
@@ -265,8 +233,8 @@ const SubscriptionPage = () => {
       const { url } = await paymentService.createCustomerPortalUrl(customer.id);
       window.location.href = url;
     } catch (error) {
-      console.error("Error creating customer portal URL:", error);
-      setError("Failed to open subscription management. Please try again.");
+      console.error('Error creating customer portal URL:', error);
+      setError('Failed to open subscription management. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -276,12 +244,10 @@ const SubscriptionPage = () => {
   if (authLoading) {
     return (
       <DashboardLayout>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="mt-12 flex justify-center flex-col items-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
-            <p className="mt-4 text-gray-500 dark:text-gray-300">
-              Verifying your account...
-            </p>
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          <div className="mt-12 flex flex-col items-center justify-center">
+            <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-t-2 border-primary-500"></div>
+            <p className="mt-4 text-gray-500 dark:text-gray-300">Verifying your account...</p>
           </div>
         </div>
       </DashboardLayout>
@@ -293,7 +259,7 @@ const SubscriptionPage = () => {
     if (!error) return null;
 
     return (
-      <div className="mt-6 max-w-3xl mx-auto bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-md p-4">
+      <div className="mx-auto mt-6 max-w-3xl rounded-md border border-red-200 bg-red-50 p-4 dark:border-red-700 dark:bg-red-900">
         <div className="flex">
           <div className="flex-shrink-0">
             <svg
@@ -310,9 +276,7 @@ const SubscriptionPage = () => {
             </svg>
           </div>
           <div className="ml-3">
-            <p className="text-sm font-medium text-red-800 dark:text-red-200">
-              {error}
-            </p>
+            <p className="text-sm font-medium text-red-800 dark:text-red-200">{error}</p>
           </div>
         </div>
       </div>
@@ -323,7 +287,7 @@ const SubscriptionPage = () => {
   const renderLoading = () => {
     return (
       <div className="mt-12 flex justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
+        <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-t-2 border-primary-500"></div>
       </div>
     );
   };
@@ -333,38 +297,30 @@ const SubscriptionPage = () => {
     if (!currentSubscription) return null;
 
     // Format the date safely, handling both Date objects and strings
-    let formattedDate = "Unknown";
+    let formattedDate = 'Unknown';
     try {
       if (currentSubscription.current_period_end instanceof Date) {
-        formattedDate =
-          currentSubscription.current_period_end.toLocaleDateString();
-      } else if (typeof currentSubscription.current_period_end === "string") {
-        formattedDate = new Date(
-          currentSubscription.current_period_end
-        ).toLocaleDateString();
+        formattedDate = currentSubscription.current_period_end.toLocaleDateString();
+      } else if (typeof currentSubscription.current_period_end === 'string') {
+        formattedDate = new Date(currentSubscription.current_period_end).toLocaleDateString();
       } else {
-        console.warn(
-          "Unexpected date format:",
-          currentSubscription.current_period_end
-        );
+        console.warn('Unexpected date format:', currentSubscription.current_period_end);
       }
     } catch (error) {
-      console.error("Error formatting date:", error);
+      console.error('Error formatting date:', error);
     }
 
     return (
-      <div className="mt-12 max-w-3xl mx-auto bg-green-50 dark:bg-green-900 border border-green-200 dark:border-green-700 rounded-lg overflow-hidden">
+      <div className="mx-auto mt-12 max-w-3xl overflow-hidden rounded-lg border border-green-200 bg-green-50 dark:border-green-700 dark:bg-green-900">
         <div className="bg-green-500 p-6 text-white">
           <h2 className="text-2xl font-bold">Active Subscription</h2>
           <p className="mt-1">You already have an active subscription</p>
         </div>
         <div className="p-6">
-          <p className="mb-4">
-            Your subscription is active until {formattedDate}
-          </p>
+          <p className="mb-4">Your subscription is active until {formattedDate}</p>
           <button
             onClick={handleManageSubscription}
-            className="px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+            className="rounded bg-primary-600 px-4 py-2 text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
           >
             Manage Subscription
           </button>
@@ -378,17 +334,15 @@ const SubscriptionPage = () => {
     if (!isPostCheckout) return null;
 
     return (
-      <div className="mt-12 max-w-3xl mx-auto bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded-lg overflow-hidden">
+      <div className="mx-auto mt-12 max-w-3xl overflow-hidden rounded-lg border border-blue-200 bg-blue-50 dark:border-blue-700 dark:bg-blue-900">
         <div className="bg-blue-500 p-6 text-white">
           <h2 className="text-2xl font-bold">Processing Your Subscription</h2>
-          <p className="mt-1">
-            Your payment was successful! We're setting up your subscription.
-          </p>
+          <p className="mt-1">Your payment was successful! We're setting up your subscription.</p>
         </div>
         <div className="p-6">
-          <div className="flex items-center mb-4">
+          <div className="mb-4 flex items-center">
             <svg
-              className="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-500"
+              className="-ml-1 mr-3 h-5 w-5 animate-spin text-blue-500"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
@@ -408,17 +362,16 @@ const SubscriptionPage = () => {
               ></path>
             </svg>
             <p>
-              Our systems are currently processing your subscription. This may
-              take a few moments.
+              Our systems are currently processing your subscription. This may take a few moments.
             </p>
           </div>
           <p className="mb-4 text-sm">
-            If your subscription doesn't appear within the next few minutes,
-            please refresh the page or contact support.
+            If your subscription doesn't appear within the next few minutes, please refresh the page
+            or contact support.
           </p>
           <button
             onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           >
             Refresh Page
           </button>
@@ -432,54 +385,49 @@ const SubscriptionPage = () => {
     const isSelected = selectedPlan && selectedPlan.id === plan.id;
     const cardClassName = `relative rounded-lg border ${
       isSelected
-        ? "border-primary-500 ring-2 ring-primary-500"
-        : "border-gray-300 dark:border-gray-700"
+        ? 'border-primary-500 ring-2 ring-primary-500'
+        : 'border-gray-300 dark:border-gray-700'
     } bg-white dark:bg-slate-800 shadow-sm flex flex-col overflow-hidden`;
 
     const buttonClassName = `w-full ${
       isSelected
-        ? "bg-primary-600 text-white hover:bg-primary-700"
-        : "bg-white text-primary-600 border border-primary-600 hover:bg-gray-50"
+        ? 'bg-primary-600 text-white hover:bg-primary-700'
+        : 'bg-white text-primary-600 border border-primary-600 hover:bg-gray-50'
     } py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500`;
 
     // Define common benefits for the premium plan based on SubscriptionPlan.tsx
     const commonBenefits = [
       {
-        title: "Generate project architecture",
-        description: "Create comprehensive project structure",
+        title: 'Generate project architecture',
+        description: 'Create comprehensive project structure',
       },
       {
-        title: "AI-powered enhancements",
-        description:
-          "Generate descriptions, features, and requirements with AI",
+        title: 'AI-powered enhancements',
+        description: 'Generate descriptions, features, and requirements with AI',
       },
       {
-        title: "Advanced tech stack recommendations",
-        description: "Get customized technology recommendations",
+        title: 'Advanced tech stack recommendations',
+        description: 'Get customized technology recommendations',
       },
       {
-        title: "300 AI credits per month",
-        description: "Credits reset on your billing renewal date each month",
+        title: '300 AI credits per month',
+        description: 'Credits reset on your billing renewal date each month',
       },
       {
-        title: "Priority support",
-        description: "Get faster responses to your questions",
+        title: 'Priority support',
+        description: 'Get faster responses to your questions',
       },
       {
-        title: "Unlimited projects",
-        description: "Create as many projects as you need",
+        title: 'Unlimited projects',
+        description: 'Create as many projects as you need',
       },
     ];
 
     return (
       <div key={plan.id} className={cardClassName}>
-        <div className="p-6 flex-grow">
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-            {plan.name}
-          </h3>
-          <p className="mt-2 text-gray-600 dark:text-gray-300">
-            {plan.description}
-          </p>
+        <div className="flex-grow p-6">
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white">{plan.name}</h3>
+          <p className="mt-2 text-gray-600 dark:text-gray-300">{plan.description}</p>
           <p className="mt-4 text-3xl font-bold text-gray-900 dark:text-white">
             ${(plan.price / 100).toFixed(0)}
             <span className="text-base font-medium text-gray-500 dark:text-gray-400">
@@ -510,10 +458,8 @@ const SubscriptionPage = () => {
                   </svg>
                 </div>
                 <div className="ml-3 text-sm">
-                  <p className="font-medium text-gray-700 dark:text-gray-300">
-                    {benefit.title}
-                  </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                  <p className="font-medium text-gray-700 dark:text-gray-300">{benefit.title}</p>
+                  <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
                     {benefit.description}
                   </p>
                 </div>
@@ -536,19 +482,14 @@ const SubscriptionPage = () => {
                     />
                   </svg>
                 </div>
-                <p className="ml-3 text-sm text-gray-700 dark:text-gray-300">
-                  {feature}
-                </p>
+                <p className="ml-3 text-sm text-gray-700 dark:text-gray-300">{feature}</p>
               </li>
             ))}
           </ul>
         </div>
-        <div className="p-6 bg-gray-50 dark:bg-slate-700">
-          <button
-            onClick={() => handleSelectPlan(plan)}
-            className={buttonClassName}
-          >
-            {isSelected ? "Selected" : "Select"}
+        <div className="bg-gray-50 p-6 dark:bg-slate-700">
+          <button onClick={() => handleSelectPlan(plan)} className={buttonClassName}>
+            {isSelected ? 'Selected' : 'Select'}
           </button>
         </div>
       </div>
@@ -559,25 +500,21 @@ const SubscriptionPage = () => {
   const renderPlans = () => {
     if (plans.length === 0) {
       return (
-        <div className="mt-12 max-w-3xl mx-auto bg-white dark:bg-slate-800 shadow rounded-lg overflow-hidden">
+        <div className="mx-auto mt-12 max-w-3xl overflow-hidden rounded-lg bg-white shadow dark:bg-slate-800">
           <div className="bg-primary-500 p-6 text-white">
             <h2 className="text-2xl font-bold">No Plans Available</h2>
             <p className="mt-1">We couldn't find any subscription plans.</p>
           </div>
           <div className="p-6">
-            <p>
-              Please try again later or contact support if the issue persists.
-            </p>
+            <p>Please try again later or contact support if the issue persists.</p>
           </div>
         </div>
       );
     }
 
     return (
-      <div className="mt-12 max-w-3xl mx-auto">
-        <div className="grid grid-cols-1 gap-8">
-          {plans.map(renderPlanCard)}
-        </div>
+      <div className="mx-auto mt-12 max-w-3xl">
+        <div className="grid grid-cols-1 gap-8">{plans.map(renderPlanCard)}</div>
       </div>
     );
   };
@@ -595,16 +532,16 @@ const SubscriptionPage = () => {
         <button
           onClick={handleSubscribe}
           disabled={isCreatingCheckout || !selectedPlan}
-          className={`px-6 py-3 rounded-md text-white ${
+          className={`rounded-md px-6 py-3 text-white ${
             isCreatingCheckout
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+              ? 'cursor-not-allowed bg-gray-400'
+              : 'bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2'
           }`}
         >
           {isCreatingCheckout ? (
             <span className="flex items-center">
               <svg
-                className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                className="-ml-1 mr-3 h-5 w-5 animate-spin text-white"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -626,7 +563,7 @@ const SubscriptionPage = () => {
               Processing...
             </span>
           ) : (
-            "Subscribe Now"
+            'Subscribe Now'
           )}
         </button>
       </div>
@@ -635,16 +572,16 @@ const SubscriptionPage = () => {
 
   return (
     <DashboardLayout>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Back to Dashboard button */}
         <div className="mb-6">
           <button
-            onClick={() => navigate("/dashboard")}
-            className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 dark:bg-slate-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-slate-600"
+            onClick={() => navigate('/dashboard')}
+            className="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:border-gray-600 dark:bg-slate-700 dark:text-gray-200 dark:hover:bg-slate-600"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 mr-2"
+              className="mr-2 h-5 w-5"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -704,10 +641,10 @@ const SubscriptionPage = () => {
         {isLoading
           ? renderLoading()
           : currentSubscription
-          ? renderCurrentSubscription()
-          : isPostCheckout
-          ? renderPendingSubscription()
-          : renderPlans()}
+            ? renderCurrentSubscription()
+            : isPostCheckout
+              ? renderPendingSubscription()
+              : renderPlans()}
 
         {!isPostCheckout && renderSubscribeButton()}
       </div>

@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState } from 'react';
 
-export type ToastType = "success" | "error" | "info" | "warning";
+export type ToastType = 'success' | 'error' | 'info' | 'warning';
 
 export interface Toast {
   id?: string;

@@ -1,8 +1,8 @@
 /**
  * Service for requirements API interactions.
  */
-import apiClient from "../api/apiClient";
-import { Requirements } from "../types/templates";
+import apiClient from '../api/apiClient';
+import { Requirements } from '../types/templates';
 
 // Interface to match the backend response format
 interface RequirementsSpec {
@@ -17,7 +17,7 @@ interface RequirementsSpec {
 }
 
 // Define the API base URL to be consistent with other services
-const API_BASE_URL = "/api";
+const API_BASE_URL = '/api';
 
 export const requirementsService = {
   /**
@@ -26,16 +26,14 @@ export const requirementsService = {
    * @param projectId - Project ID
    * @returns Promise containing the project requirements
    */
-  async getRequirements(
-    projectId: string
-  ): Promise<Partial<Requirements> | null> {
+  async getRequirements(projectId: string): Promise<Partial<Requirements> | null> {
     try {
       const response = await apiClient.get<RequirementsSpec>(
         `${API_BASE_URL}/project-specs/${projectId}/requirements`
       );
 
       if (!response.data) {
-        console.error("Invalid requirements response:", response.data);
+        console.error('Invalid requirements response:', response.data);
         return null;
       }
 
@@ -44,10 +42,7 @@ export const requirementsService = {
         non_functional: response.data.non_functional || [],
       };
     } catch (error) {
-      console.error(
-        `Error fetching requirements for project ${projectId}:`,
-        error
-      );
+      console.error(`Error fetching requirements for project ${projectId}:`, error);
       return null;
     }
   },
@@ -76,7 +71,7 @@ export const requirementsService = {
       );
 
       if (!response.data) {
-        console.error("Invalid requirements response:", response.data);
+        console.error('Invalid requirements response:', response.data);
         return null;
       }
 
@@ -85,10 +80,7 @@ export const requirementsService = {
         non_functional: response.data.non_functional || [],
       };
     } catch (error) {
-      console.error(
-        `Error saving requirements for project ${projectId}:`,
-        error
-      );
+      console.error(`Error saving requirements for project ${projectId}:`, error);
       return null;
     }
   },

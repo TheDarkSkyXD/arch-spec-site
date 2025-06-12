@@ -1,9 +1,9 @@
-import { useState } from "react";
-import { Download, Loader2, Wand2, Lock } from "lucide-react";
-import Button from "../ui/Button";
-import { useToast } from "../../contexts/ToastContext";
-import { generateMarkdownZip } from "../../services/markdown/markdownZip";
-import { ProjectBase } from "../../types/project";
+import { useState } from 'react';
+import { Download, Loader2, Wand2, Lock } from 'lucide-react';
+import Button from '../ui/Button';
+import { useToast } from '../../contexts/ToastContext';
+import { generateMarkdownZip } from '../../services/markdown/markdownZip';
+import { ProjectBase } from '../../types/project';
 import {
   ProjectTechStack,
   Requirements,
@@ -12,12 +12,12 @@ import {
   Api,
   ImplementationPrompts,
   UIDesign,
-} from "../../types/templates";
-import { FeaturesData } from "../../services/featuresService";
-import { TestCasesData } from "../../services/testCasesService";
-import { useSubscription } from "../../contexts/SubscriptionContext";
-import { useUserProfile } from "../../hooks/useUserProfile";
-import AIInstructionsModal from "../ui/AIInstructionsModal";
+} from '../../types/templates';
+import { FeaturesData } from '../../services/featuresService';
+import { TestCasesData } from '../../services/testCasesService';
+import { useSubscription } from '../../contexts/SubscriptionContext';
+import { useUserProfile } from '../../hooks/useUserProfile';
+import AIInstructionsModal from '../ui/AIInstructionsModal';
 
 interface DownloadAllMarkdownProps {
   project: ProjectBase;
@@ -31,8 +31,8 @@ interface DownloadAllMarkdownProps {
   implementationPrompts?: ImplementationPrompts | null;
   uiDesign?: UIDesign | null;
   className?: string;
-  variant?: "default" | "outline" | "ghost" | "link";
-  size?: "default" | "sm" | "lg";
+  variant?: 'default' | 'outline' | 'ghost' | 'link';
+  size?: 'default' | 'sm' | 'lg';
 }
 
 const DownloadAllMarkdown = ({
@@ -46,9 +46,9 @@ const DownloadAllMarkdown = ({
   testCases = null,
   implementationPrompts = null,
   uiDesign = null,
-  className = "",
-  variant = "default",
-  size = "default",
+  className = '',
+  variant = 'default',
+  size = 'default',
 }: DownloadAllMarkdownProps) => {
   const [isDownloading, setIsDownloading] = useState(false);
   const { showToast } = useToast();
@@ -71,11 +71,7 @@ const DownloadAllMarkdown = ({
   };
 
   const handleModalConfirm = async (additionalInstructions?: string) => {
-    await handleDownload(
-      additionalInstructions,
-      generateAIReadme,
-      generateAIRules
-    );
+    await handleDownload(additionalInstructions, generateAIReadme, generateAIRules);
   };
 
   const handleDownload = async (
@@ -86,7 +82,7 @@ const DownloadAllMarkdown = ({
     setIsDownloading(true);
 
     try {
-      console.log("Preparing to generate zip with data:", {
+      console.log('Preparing to generate zip with data:', {
         project,
         techStack,
         requirements,
@@ -118,20 +114,14 @@ const DownloadAllMarkdown = ({
         additionalInstructions
       );
 
-      console.log(
-        "Zip file created successfully, size:",
-        zipBlob.size,
-        "bytes"
-      );
+      console.log('Zip file created successfully, size:', zipBlob.size, 'bytes');
 
       const url = URL.createObjectURL(zipBlob);
-      const a = document.createElement("a");
+      const a = document.createElement('a');
       a.href = url;
 
       // Create a sanitized filename
-      const sanitizedName = project.name
-        .toLowerCase()
-        .replace(/[^a-z0-9]/g, "-");
+      const sanitizedName = project.name.toLowerCase().replace(/[^a-z0-9]/g, '-');
       a.download = `${sanitizedName}.zip`;
 
       document.body.appendChild(a);
@@ -142,17 +132,17 @@ const DownloadAllMarkdown = ({
       document.body.removeChild(a);
 
       showToast({
-        title: "Downloaded!",
+        title: 'Downloaded!',
         description: `Project specification downloaded as ${sanitizedName}.zip`,
-        type: "success",
+        type: 'success',
       });
     } catch (err) {
-      console.error("Failed to download specification: ", err);
+      console.error('Failed to download specification: ', err);
 
       showToast({
-        title: "Error",
-        description: "Failed to download project specification",
-        type: "error",
+        title: 'Error',
+        description: 'Failed to download project specification',
+        type: 'error',
       });
     } finally {
       setIsDownloading(false);
@@ -167,11 +157,13 @@ const DownloadAllMarkdown = ({
         onConfirm={handleModalConfirm}
         title="AI-Enhanced Documentation Options"
         description="Choose which AI-enhanced documentation to include in your download. This will use AI credits."
-        confirmText={generateAIReadme || generateAIRules ? "Download with AI Enhancements" : "Download"}
+        confirmText={
+          generateAIReadme || generateAIRules ? 'Download with AI Enhancements' : 'Download'
+        }
         defaultInstructions=""
         isAnyAIOptionEnabled={generateAIReadme || generateAIRules}
         additionalOptions={
-          <div className="space-y-4 mb-4">
+          <div className="mb-4 space-y-4">
             <div className="flex items-center gap-2">
               <input
                 type="checkbox"
@@ -193,11 +185,10 @@ const DownloadAllMarkdown = ({
                 className="rounded"
               />
               <label htmlFor="generate-ai-rules" className="text-sm">
-                Generate AI assistant rules files (.cursorrules, .windsurfrules,
-                and CLAUDE.md)
+                Generate AI assistant rules files (.cursorrules, .windsurfrules, and CLAUDE.md)
               </label>
             </div>
-            <div className="text-xs text-slate-500 mt-2">
+            <div className="mt-2 text-xs text-slate-500">
               Note: Each option will consume AI credits when enabled
             </div>
           </div>
@@ -220,10 +211,10 @@ const DownloadAllMarkdown = ({
         )}
         <span>
           {isDownloading
-            ? "Preparing download..."
+            ? 'Preparing download...'
             : hasAIFeatures && aiCreditsRemaining > 0
-            ? "Download with AI"
-            : "Download All"}
+              ? 'Download with AI'
+              : 'Download All'}
         </span>
         {!hasAIFeatures && (
           <span className="ml-1">

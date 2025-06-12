@@ -42,7 +42,7 @@ const FeaturesSection: React.FC<FeaturesSectionProps> = ({
       onViewModeChange={onViewModeChange}
       isLoading={isLoading}
       markdown={features ? markdownService.generateFeaturesMarkdown(features) : undefined}
-      markdownFileName={markdownService.generateFileName(projectName, "features")}
+      markdownFileName={markdownService.generateFileName(projectName, 'features')}
       editContent={
         <FeaturesForm
           initialData={features || undefined}
@@ -51,11 +51,7 @@ const FeaturesSection: React.FC<FeaturesSectionProps> = ({
         />
       }
       previewContent={
-        <FeaturesPreview 
-          data={features} 
-          projectName={projectName}
-          isLoading={isLoading} 
-        />
+        <FeaturesPreview data={features} projectName={projectName} isLoading={isLoading} />
       }
     />
   );

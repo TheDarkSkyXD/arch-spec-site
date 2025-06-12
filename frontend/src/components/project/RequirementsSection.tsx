@@ -41,8 +41,12 @@ const RequirementsSection: React.FC<RequirementsSectionProps> = ({
       viewMode={viewMode}
       onViewModeChange={onViewModeChange}
       isLoading={isLoading}
-      markdown={requirements ? markdownService.generateRequirementsMarkdown(requirements as Requirements) : undefined}
-      markdownFileName={markdownService.generateFileName(projectName, "requirements")}
+      markdown={
+        requirements
+          ? markdownService.generateRequirementsMarkdown(requirements as Requirements)
+          : undefined
+      }
+      markdownFileName={markdownService.generateFileName(projectName, 'requirements')}
       editContent={
         <RequirementsForm
           initialData={requirements || undefined}
@@ -51,10 +55,10 @@ const RequirementsSection: React.FC<RequirementsSectionProps> = ({
         />
       }
       previewContent={
-        <RequirementsPreview 
-          data={requirements as Requirements | null} 
+        <RequirementsPreview
+          data={requirements as Requirements | null}
           projectName={projectName}
-          isLoading={isLoading} 
+          isLoading={isLoading}
         />
       }
     />

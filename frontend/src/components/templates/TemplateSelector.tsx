@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { ProjectTemplate } from "../../types/templates";
-import { useTemplates } from "../../hooks/useDataQueries";
+import React, { useState, useEffect } from 'react';
+import { ProjectTemplate } from '../../types/templates';
+import { useTemplates } from '../../hooks/useDataQueries';
 // Create inline version of TemplateCard component as a temporary solution
 // Import will be fixed automatically when TypeScript environment is correctly set up
 
@@ -11,39 +11,35 @@ interface TemplateCardProps {
 }
 
 // Temporarily duplicate TemplateCard component here until module resolution is fixed
-const TemplateCard: React.FC<TemplateCardProps> = ({
-  template,
-  isSelected,
-  onSelect,
-}) => {
+const TemplateCard: React.FC<TemplateCardProps> = ({ template, isSelected, onSelect }) => {
   // Get icon based on template type
   const getTemplateIcon = () => {
     try {
       if (!template.techStack || !template.techStack.frontend) {
-        return "🧩";
+        return '🧩';
       }
 
       // Frontend is now a string rather than an object with framework property
       const frontend = String(template.techStack.frontend).toLowerCase();
-      if (frontend.includes("react")) {
-        return "⚛️";
-      } else if (frontend.includes("vue")) {
-        return "🟢";
-      } else if (frontend.includes("angular")) {
-        return "🔴";
+      if (frontend.includes('react')) {
+        return '⚛️';
+      } else if (frontend.includes('vue')) {
+        return '🟢';
+      } else if (frontend.includes('angular')) {
+        return '🔴';
       } else {
-        return "🧩";
+        return '🧩';
       }
     } catch (error) {
-      console.error("Error getting template icon:", error);
-      return "🧩";
+      console.error('Error getting template icon:', error);
+      return '🧩';
     }
   };
 
   const getFeaturesText = () => {
     // Add null checks to avoid accessing properties of undefined
     if (!template.features || !template.features.coreModules) {
-      return "No features available";
+      return 'No features available';
     }
 
     const enabledFeatures = template.features.coreModules
@@ -51,57 +47,53 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
       .map((feature) => feature.name);
 
     return enabledFeatures.length > 0
-      ? enabledFeatures.slice(0, 3).join(", ") +
-          (enabledFeatures.length > 3
-            ? `, +${enabledFeatures.length - 3} more`
-            : "")
-      : "No enabled features";
+      ? enabledFeatures.slice(0, 3).join(', ') +
+          (enabledFeatures.length > 3 ? `, +${enabledFeatures.length - 3} more` : '')
+      : 'No enabled features';
   };
 
   return (
     <div
-      className={`border rounded-lg p-5 cursor-pointer transition-all hover:shadow-md ${
+      className={`cursor-pointer rounded-lg border p-5 transition-all hover:shadow-md ${
         isSelected
-          ? "border-primary-500 ring-2 ring-primary-100 dark:ring-primary-900/30 bg-primary-50 dark:bg-primary-900/20"
-          : "border-slate-200 dark:border-slate-700 hover:border-primary-300 dark:hover:border-primary-600"
+          ? 'border-primary-500 bg-primary-50 ring-2 ring-primary-100 dark:bg-primary-900/20 dark:ring-primary-900/30'
+          : 'border-slate-200 hover:border-primary-300 dark:border-slate-700 dark:hover:border-primary-600'
       }`}
       onClick={onSelect}
     >
-      <div className="h-32 bg-slate-100 dark:bg-slate-800 rounded flex items-center justify-center mb-4 relative">
+      <div className="relative mb-4 flex h-32 items-center justify-center rounded bg-slate-100 dark:bg-slate-800">
         <span className="text-5xl">{getTemplateIcon()}</span>
         {isSelected && (
-          <div className="absolute top-2 right-2">
-            <div className="text-primary-600 dark:text-primary-400 w-5 h-5">
-              ✓
-            </div>
+          <div className="absolute right-2 top-2">
+            <div className="h-5 w-5 text-primary-600 dark:text-primary-400">✓</div>
           </div>
         )}
       </div>
 
       <h3 className="font-medium text-slate-800 dark:text-slate-100">
-        {template.name || "Unnamed Template"}
+        {template.name || 'Unnamed Template'}
       </h3>
-      <p className="text-sm text-slate-600 dark:text-slate-400 mt-1 line-clamp-2">
-        {template.description || "No description available"}
+      <p className="mt-1 line-clamp-2 text-sm text-slate-600 dark:text-slate-400">
+        {template.description || 'No description available'}
       </p>
 
       <div className="mt-3 flex flex-wrap gap-1">
         {template.techStack?.frontend.framework && (
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200">
+          <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-1 text-xs font-medium text-slate-800 dark:bg-slate-700 dark:text-slate-200">
             {String(template.techStack.frontend.framework)}
           </span>
         )}
         {template.techStack?.backend && (
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200">
+          <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-1 text-xs font-medium text-slate-800 dark:bg-slate-700 dark:text-slate-200">
             {String(
-              template.techStack.backend.type === "framework"
+              template.techStack.backend.type === 'framework'
                 ? template.techStack.backend.framework
                 : template.techStack.backend.service
             )}
           </span>
         )}
         {template.techStack?.database.system && (
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200">
+          <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-1 text-xs font-medium text-slate-800 dark:bg-slate-700 dark:text-slate-200">
             {String(template.techStack.database.system)}
           </span>
         )}
@@ -127,15 +119,16 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
 }) => {
   const { data: templates = [], isLoading, error: queryError } = useTemplates();
 
-  const [selectedTemplate, setSelectedTemplate] =
-    useState<ProjectTemplate | null>(initialSelectedTemplate);
+  const [selectedTemplate, setSelectedTemplate] = useState<ProjectTemplate | null>(
+    initialSelectedTemplate
+  );
   const [error, setError] = useState<string | null>(null);
 
   // Set error message if query fails
   useEffect(() => {
     if (queryError) {
-      console.error("Error fetching templates:", queryError);
-      setError("Failed to load templates. Please try again later.");
+      console.error('Error fetching templates:', queryError);
+      setError('Failed to load templates. Please try again later.');
     }
   }, [queryError]);
 
@@ -172,10 +165,8 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
   if (isLoading) {
     return (
       <div className="py-10 text-center">
-        <div className="animate-pulse inline-block h-8 w-8 rounded-full bg-primary-200 dark:bg-primary-900/50"></div>
-        <p className="mt-4 text-slate-600 dark:text-slate-400">
-          Loading templates...
-        </p>
+        <div className="inline-block h-8 w-8 animate-pulse rounded-full bg-primary-200 dark:bg-primary-900/50"></div>
+        <p className="mt-4 text-slate-600 dark:text-slate-400">Loading templates...</p>
       </div>
     );
   }
@@ -185,7 +176,7 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
       <div className="py-10 text-center text-red-600 dark:text-red-400">
         <p>{error}</p>
         <button
-          className="mt-4 px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700"
+          className="mt-4 rounded-md bg-primary-600 px-4 py-2 text-white hover:bg-primary-700"
           onClick={() => window.location.reload()}
         >
           Retry
@@ -198,23 +189,17 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
   if (!templates || templates.length === 0) {
     return (
       <div className="py-10 text-center">
-        <p className="text-slate-600 dark:text-slate-400">
-          No project templates available.
-        </p>
+        <p className="text-slate-600 dark:text-slate-400">No project templates available.</p>
         <div className="mt-6">
           <div
-            className="border border-slate-200 dark:border-slate-700 rounded-lg p-5 cursor-pointer transition-all hover:shadow-md mx-auto max-w-md"
+            className="mx-auto max-w-md cursor-pointer rounded-lg border border-slate-200 p-5 transition-all hover:shadow-md dark:border-slate-700"
             onClick={handleCustomProject}
           >
-            <div className="h-32 bg-slate-100 dark:bg-slate-800 rounded flex items-center justify-center mb-4">
-              <span className="text-5xl text-slate-400 dark:text-slate-500">
-                +
-              </span>
+            <div className="mb-4 flex h-32 items-center justify-center rounded bg-slate-100 dark:bg-slate-800">
+              <span className="text-5xl text-slate-400 dark:text-slate-500">+</span>
             </div>
-            <h3 className="font-medium text-slate-800 dark:text-slate-100">
-              Custom Project
-            </h3>
-            <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+            <h3 className="font-medium text-slate-800 dark:text-slate-100">Custom Project</h3>
+            <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
               Start from scratch with a blank project
             </p>
           </div>
@@ -234,7 +219,7 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {/* Template cards */}
         {templates.map((template) => (
           <TemplateCard

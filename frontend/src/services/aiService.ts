@@ -1,10 +1,10 @@
 /**
  * Service for interacting with AI endpoints.
  */
-import apiClient from "../api/apiClient";
-import { FeatureModule } from "./featuresService";
-import { DataModel, UIDesign } from "../types/templates";
-import { GherkinTestCase } from "./testCasesService";
+import apiClient from '../api/apiClient';
+import { FeatureModule } from './featuresService';
+import { DataModel, UIDesign } from '../types/templates';
+import { GherkinTestCase } from './testCasesService';
 
 interface BaseRequest {
   project_description: string;
@@ -222,7 +222,7 @@ class AIService {
   ): Promise<string | null> {
     try {
       const response = await apiClient.post<EnhanceDescriptionResponse>(
-        "/api/ai-text/enhance-description",
+        '/api/ai-text/enhance-description',
         {
           user_description: description,
           additional_user_instruction: additionalInstructions,
@@ -231,7 +231,7 @@ class AIService {
 
       return response.data.enhanced_description;
     } catch (error) {
-      console.error("Error enhancing description:", error);
+      console.error('Error enhancing description:', error);
       return null;
     }
   }
@@ -251,7 +251,7 @@ class AIService {
   ): Promise<string[] | null> {
     try {
       const response = await apiClient.post<EnhanceBusinessGoalsResponse>(
-        "/api/ai-text/enhance-business-goals",
+        '/api/ai-text/enhance-business-goals',
         {
           project_description: projectDescription,
           user_goals: businessGoals,
@@ -261,7 +261,7 @@ class AIService {
 
       return response.data.enhanced_goals;
     } catch (error) {
-      console.error("Error enhancing business goals:", error);
+      console.error('Error enhancing business goals:', error);
       return null;
     }
   }
@@ -281,7 +281,7 @@ class AIService {
   ): Promise<string | null> {
     try {
       const response = await apiClient.post<EnhanceTargetUsersResponse>(
-        "/api/ai-text/enhance-target-users",
+        '/api/ai-text/enhance-target-users',
         {
           project_description: projectDescription,
           target_users: targetUsers,
@@ -291,7 +291,7 @@ class AIService {
 
       return response.data.enhanced_target_users;
     } catch (error) {
-      console.error("Error enhancing target users:", error);
+      console.error('Error enhancing target users:', error);
       return null;
     }
   }
@@ -313,7 +313,7 @@ class AIService {
   ): Promise<string[] | null> {
     try {
       const response = await apiClient.post<EnhanceRequirementsResponse>(
-        "/api/ai-text/enhance-requirements",
+        '/api/ai-text/enhance-requirements',
         {
           project_description: projectDescription,
           business_goals: businessGoals,
@@ -324,7 +324,7 @@ class AIService {
 
       return response.data.enhanced_requirements;
     } catch (error) {
-      console.error("Error enhancing requirements:", error);
+      console.error('Error enhancing requirements:', error);
       return null;
     }
   }
@@ -348,7 +348,7 @@ class AIService {
   ): Promise<FeaturesData | null> {
     try {
       const response = await apiClient.post<EnhanceFeaturesResponse>(
-        "/api/ai-text/enhance-features",
+        '/api/ai-text/enhance-features',
         {
           project_description: projectDescription,
           business_goals: businessGoals,
@@ -360,7 +360,7 @@ class AIService {
 
       return response.data.data;
     } catch (error) {
-      console.error("Error enhancing features:", error);
+      console.error('Error enhancing features:', error);
       return null;
     }
   }
@@ -386,7 +386,7 @@ class AIService {
   ): Promise<ApiData | null> {
     try {
       const response = await apiClient.post<EnhanceApiEndpointsResponse>(
-        "/api/ai-text/enhance-api-endpoints",
+        '/api/ai-text/enhance-api-endpoints',
         {
           project_description: projectDescription,
           features: features,
@@ -399,7 +399,7 @@ class AIService {
 
       return response.data.data;
     } catch (error) {
-      console.error("Error enhancing API endpoints:", error);
+      console.error('Error enhancing API endpoints:', error);
       return null;
     }
   }
@@ -422,20 +422,17 @@ class AIService {
     additionalInstructions?: string
   ): Promise<PagesData | null> {
     try {
-      const response = await apiClient.post<EnhancePagesResponse>(
-        "/api/ai-text/enhance-pages",
-        {
-          project_description: projectDescription,
-          features: features,
-          requirements: requirements,
-          existing_pages: existingPages,
-          additional_user_instruction: additionalInstructions,
-        } as EnhancePagesRequest
-      );
+      const response = await apiClient.post<EnhancePagesResponse>('/api/ai-text/enhance-pages', {
+        project_description: projectDescription,
+        features: features,
+        requirements: requirements,
+        existing_pages: existingPages,
+        additional_user_instruction: additionalInstructions,
+      } as EnhancePagesRequest);
 
       return response.data.data;
     } catch (error) {
-      console.error("Error enhancing pages:", error);
+      console.error('Error enhancing pages:', error);
       return null;
     }
   }
@@ -461,7 +458,7 @@ class AIService {
   ): Promise<DataModel | null> {
     try {
       const response = await apiClient.post<EnhanceDataModelResponse>(
-        "/api/ai-text/enhance-data-model",
+        '/api/ai-text/enhance-data-model',
         {
           project_description: projectDescription,
           business_goals: businessGoals,
@@ -474,7 +471,7 @@ class AIService {
 
       return response.data.data;
     } catch (error) {
-      console.error("Error enhancing data model:", error);
+      console.error('Error enhancing data model:', error);
       return null;
     }
   }
@@ -496,7 +493,7 @@ class AIService {
   ): Promise<TechStackRecommendation | null> {
     try {
       const response = await apiClient.post<EnhanceTechStackResponse>(
-        "/api/ai-text/enhance-tech-stack",
+        '/api/ai-text/enhance-tech-stack',
         {
           project_description: projectDescription,
           project_requirements: projectRequirements,
@@ -507,7 +504,7 @@ class AIService {
 
       return response.data.data;
     } catch (error) {
-      console.error("Error enhancing tech stack:", error);
+      console.error('Error enhancing tech stack:', error);
       return null;
     }
   }
@@ -529,7 +526,7 @@ class AIService {
   ): Promise<TestCasesData | null> {
     try {
       const response = await apiClient.post<TestCasesEnhanceResponse>(
-        "/api/ai-text/generate-test-cases",
+        '/api/ai-text/generate-test-cases',
         {
           project_description: projectDescription,
           requirements,
@@ -545,7 +542,7 @@ class AIService {
       }
       return null;
     } catch (error) {
-      console.error("Error generating test cases:", error);
+      console.error('Error generating test cases:', error);
       return null;
     }
   }
@@ -569,7 +566,7 @@ class AIService {
   ): Promise<TestCasesData | null> {
     try {
       const response = await apiClient.post<TestCasesEnhanceResponse>(
-        "/api/ai-text/enhance-test-cases",
+        '/api/ai-text/enhance-test-cases',
         {
           project_description: projectDescription,
           existing_test_cases: existingTestCases,
@@ -586,7 +583,7 @@ class AIService {
       }
       return null;
     } catch (error) {
-      console.error("Error enhancing test cases:", error);
+      console.error('Error enhancing test cases:', error);
       return null;
     }
   }
@@ -608,18 +605,15 @@ class AIService {
     additionalInstructions?: string
   ): Promise<string | null> {
     try {
-      const response = await apiClient.post(
-        `/api/ai-text/${category}`,
-        {
-          project_name: projectName,
-          project_description: projectDescription,
-          business_goals: businessGoals,
-          requirements: requirements,
-          features: features,
-          tech_stack: techStack,
-          additional_user_instruction: additionalInstructions,
-        } as EnhanceReadmeRequest
-      );
+      const response = await apiClient.post(`/api/ai-text/${category}`, {
+        project_name: projectName,
+        project_description: projectDescription,
+        business_goals: businessGoals,
+        requirements: requirements,
+        features: features,
+        tech_stack: techStack,
+        additional_user_instruction: additionalInstructions,
+      } as EnhanceReadmeRequest);
 
       // Handle different response formats - enhanced_readme for README, ai_rules for AI rules
       if (response.data.enhanced_readme) {
@@ -627,7 +621,7 @@ class AIService {
       } else if (response.data.ai_rules) {
         return response.data.ai_rules;
       }
-      
+
       return null;
     } catch (error) {
       console.error(`Error in generateDocs (${category}):`, error);
@@ -663,7 +657,7 @@ class AIService {
     readMeAdditionalInstructions?: string
   ): Promise<string | null> {
     return this.generateDocs(
-      "enhance-readme",
+      'enhance-readme',
       projectName,
       projectDescription,
       businessGoals,
@@ -702,7 +696,7 @@ class AIService {
     aiRulesAdditionalInstructions?: string
   ): Promise<string | null> {
     return this.generateDocs(
-      "create-ai-rules",
+      'create-ai-rules',
       projectName,
       projectDescription,
       businessGoals,
@@ -732,7 +726,7 @@ class AIService {
   ): Promise<UIDesign | null> {
     try {
       const response = await apiClient.post<EnhanceUIDesignResponse>(
-        "/api/ai-text/enhance-ui-design",
+        '/api/ai-text/enhance-ui-design',
         {
           project_description: projectDescription,
           features: features,
@@ -744,7 +738,7 @@ class AIService {
 
       return response.data.data;
     } catch (error) {
-      console.error("Error enhancing UI design:", error);
+      console.error('Error enhancing UI design:', error);
       return null;
     }
   }

@@ -1,11 +1,11 @@
-import { BaaS, BackendFramework, Realtime, Serverless, Technology } from "../types/techStack";
+import { BaaS, BackendFramework, Realtime, Serverless, Technology } from '../types/techStack';
 
 /**
  * Filters backend framework options based on selected language
  */
 export const filterBackendFrameworkOptions = (
   selectedLanguage: string | undefined,
-  backendFrameworks: BackendFramework[],
+  backendFrameworks: BackendFramework[]
 ): Technology[] => {
   // If no language selected, show all frameworks
   if (!selectedLanguage) {
@@ -14,9 +14,7 @@ export const filterBackendFrameworkOptions = (
 
   // Filter frameworks that support the selected language
   return backendFrameworks.filter((framework) => {
-    return (
-      !framework.language || framework.language.includes(selectedLanguage)
-    );
+    return !framework.language || framework.language.includes(selectedLanguage);
   });
 };
 
@@ -36,14 +34,12 @@ export const filterBackendRealtimeOptions = (
   }
 
   // Filter realtime options based on backend type
-  if (backendType === "framework") {
+  if (backendType === 'framework') {
     // Return framework-compatible realtime options
     if (!selectedFramework) return backendRealtime;
 
     // Find compatible realtime options for this framework
-    const framework = backendFrameworks.find(
-      (fw) => fw.id === selectedFramework
-    );
+    const framework = backendFrameworks.find((fw) => fw.id === selectedFramework);
 
     if (!framework || !framework.compatibleWith?.realtime) {
       return backendRealtime; // If no specific compatibility, return all
@@ -53,14 +49,12 @@ export const filterBackendRealtimeOptions = (
     return backendRealtime.filter((rt) =>
       framework.compatibleWith?.realtime?.includes(rt.id as string)
     );
-  } else if (backendType === "baas") {
+  } else if (backendType === 'baas') {
     // Return BaaS-specific realtime options
     if (!selectedService) return backendRealtime;
 
     // Filter realtime options that match the selected BaaS
-    return backendRealtime.filter((rt) =>
-      rt.compatibleWith?.baas?.includes(selectedService)
-    );
+    return backendRealtime.filter((rt) => rt.compatibleWith?.baas?.includes(selectedService));
   }
 
   // For serverless, don't show realtime options
@@ -80,9 +74,7 @@ export const filterBackendFunctionsOptions = (
   }
 
   // Return functions compatible with selected BaaS
-  return backendFunctions.filter((func) =>
-    func.compatibleWith?.baas?.includes(selectedService)
-  );
+  return backendFunctions.filter((func) => func.compatibleWith?.baas?.includes(selectedService));
 };
 
 /**
@@ -102,17 +94,13 @@ export const filterBackendBaaSOptions = (
 
   // Filter by realtime capability if selected
   if (selectedRealtime) {
-    filtered = filtered.filter(
-      (baas) =>
-        baas.compatibleWith?.realtime?.includes(selectedRealtime)
-    );
+    filtered = filtered.filter((baas) => baas.compatibleWith?.realtime?.includes(selectedRealtime));
   }
 
   // Filter by functions capability if selected
   if (selectedFunctions) {
-    filtered = filtered.filter(
-      (baas) =>
-        baas.compatibleWith?.functions?.includes(selectedFunctions)
+    filtered = filtered.filter((baas) =>
+      baas.compatibleWith?.functions?.includes(selectedFunctions)
     );
   }
 
@@ -129,9 +117,9 @@ export const getBackendServiceOptions = (
 ): Technology[] => {
   if (!backendType) return [];
 
-  if (backendType === "baas") {
+  if (backendType === 'baas') {
     return backendBaaS;
-  } else if (backendType === "serverless") {
+  } else if (backendType === 'serverless') {
     return backendServerless;
   }
 

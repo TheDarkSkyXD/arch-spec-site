@@ -1,1 +1,1 @@
-"""ArchSpec backend application.""" 
+"""ArchSpec backend application."""

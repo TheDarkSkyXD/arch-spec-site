@@ -1,5 +1,5 @@
-import React from "react";
-import { Loader2 } from "lucide-react";
+import React from 'react';
+import { Loader2 } from 'lucide-react';
 
 interface ProcessingOverlayProps {
   isVisible: boolean;
@@ -15,7 +15,7 @@ interface ProcessingOverlayProps {
  */
 export const ProcessingOverlay: React.FC<ProcessingOverlayProps> = ({
   isVisible,
-  message = "Please wait...",
+  message = 'Please wait...',
   opacity = 0.7,
   spinnerSize = 24,
   zIndex = 50,
@@ -27,15 +27,13 @@ export const ProcessingOverlay: React.FC<ProcessingOverlayProps> = ({
       className="absolute inset-0 flex flex-col items-center justify-center"
       style={{
         backgroundColor: `rgba(15, 23, 42, ${opacity})`,
-        backdropFilter: "blur(2px)",
+        backdropFilter: 'blur(2px)',
         zIndex,
       }}
     >
-      <div className="bg-white dark:bg-slate-800 rounded-lg p-6 shadow-lg flex flex-col items-center max-w-md">
+      <div className="flex max-w-md flex-col items-center rounded-lg bg-white p-6 shadow-lg dark:bg-slate-800">
         <Loader2 className="animate-spin text-primary-600" size={spinnerSize} />
-        <p className="mt-3 text-slate-700 dark:text-slate-200 text-center">
-          {message}
-        </p>
+        <p className="mt-3 text-center text-slate-700 dark:text-slate-200">{message}</p>
       </div>
     </div>
   );

@@ -1,24 +1,19 @@
-import { useState } from "react";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "../components/ui/tabs";
-import MainLayout from "../layouts/MainLayout";
+import { useState } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import MainLayout from '../layouts/MainLayout';
 // import TemplateManagement from "../components/settings/TemplateManagement";
 
 const Settings = () => {
-  const [activeTab, setActiveTab] = useState("templates");
+  const [activeTab, setActiveTab] = useState('templates');
 
   return (
     <MainLayout>
       <div className="w-full py-6">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 font-heading">
+          <h1 className="font-heading text-2xl font-bold text-slate-800 dark:text-slate-100">
             Settings
           </h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-1">
+          <p className="mt-1 text-slate-500 dark:text-slate-400">
             Configure your application settings and manage templates
           </p>
         </div>
@@ -42,8 +37,8 @@ const Settings = () => {
           </TabsContent> */}
 
           <TabsContent value="general">
-            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-6">
-              <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-4">
+            <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+              <h2 className="mb-4 text-xl font-semibold text-slate-800 dark:text-slate-100">
                 General Settings
               </h2>
               <p className="text-slate-500 dark:text-slate-400">
@@ -53,8 +48,8 @@ const Settings = () => {
           </TabsContent>
 
           <TabsContent value="account">
-            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-6">
-              <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-4">
+            <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+              <h2 className="mb-4 text-xl font-semibold text-slate-800 dark:text-slate-100">
                 Account Settings
               </h2>
               <p className="text-slate-500 dark:text-slate-400">
@@ -64,8 +59,8 @@ const Settings = () => {
           </TabsContent>
 
           <TabsContent value="api">
-            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-6">
-              <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-4">
+            <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+              <h2 className="mb-4 text-xl font-semibold text-slate-800 dark:text-slate-100">
                 API Settings
               </h2>
               <p className="text-slate-500 dark:text-slate-400">

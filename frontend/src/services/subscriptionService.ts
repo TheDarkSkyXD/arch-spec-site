@@ -1,9 +1,9 @@
-import apiClient from "../api/apiClient";
+import apiClient from '../api/apiClient';
 
 interface Subscription {
   id: string;
   status: string;
-  plan_type: "free" | "premium" | "open_source";
+  plan_type: 'free' | 'premium' | 'open_source';
   current_period_end: string;
   ai_credits_current: number;
   ai_credits_reset_value: number;
@@ -20,7 +20,7 @@ interface SubscriptionPlan {
   trial_days: number;
   description: string;
   features: string[];
-  plan_type: "free" | "premium" | "open_source";
+  plan_type: 'free' | 'premium' | 'open_source';
   ai_credits: number;
 }
 
@@ -30,10 +30,10 @@ export const subscriptionService = {
    */
   async getCurrentSubscription(): Promise<Subscription | null> {
     try {
-      const response = await apiClient.get("/subscription/current");
+      const response = await apiClient.get('/subscription/current');
       return response.data;
     } catch (error) {
-      console.error("Error fetching current subscription:", error);
+      console.error('Error fetching current subscription:', error);
       return null;
     }
   },
@@ -47,12 +47,12 @@ export const subscriptionService = {
    */
   async createCheckoutSession(planId: string): Promise<{ url: string } | null> {
     try {
-      const response = await apiClient.post("/subscription/create-checkout", {
+      const response = await apiClient.post('/subscription/create-checkout', {
         plan_id: planId,
       });
       return response.data;
     } catch (error) {
-      console.error("Error creating checkout session:", error);
+      console.error('Error creating checkout session:', error);
       return null;
     }
   },
@@ -62,10 +62,10 @@ export const subscriptionService = {
    */
   async createCustomerPortalSession(): Promise<{ url: string } | null> {
     try {
-      const response = await apiClient.post("/subscription/customer-portal");
+      const response = await apiClient.post('/subscription/customer-portal');
       return response.data;
     } catch (error) {
-      console.error("Error creating customer portal session:", error);
+      console.error('Error creating customer portal session:', error);
       return null;
     }
   },
@@ -75,10 +75,10 @@ export const subscriptionService = {
    */
   async getPlans(): Promise<SubscriptionPlan[]> {
     try {
-      const response = await apiClient.get("/subscription/plans");
+      const response = await apiClient.get('/subscription/plans');
       return response.data;
     } catch (error) {
-      console.error("Error fetching subscription plans:", error);
+      console.error('Error fetching subscription plans:', error);
       return [];
     }
   },
@@ -88,11 +88,11 @@ export const subscriptionService = {
    */
   async checkAIEligibility(): Promise<{ eligible: boolean; reason?: string }> {
     try {
-      const response = await apiClient.get("/subscription/ai-eligibility");
+      const response = await apiClient.get('/subscription/ai-eligibility');
       return response.data;
     } catch (error) {
-      console.error("Error checking AI eligibility:", error);
-      return { eligible: false, reason: "Failed to verify eligibility" };
+      console.error('Error checking AI eligibility:', error);
+      return { eligible: false, reason: 'Failed to verify eligibility' };
     }
   },
 };

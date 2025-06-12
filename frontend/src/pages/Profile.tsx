@@ -1,12 +1,12 @@
-import { useState, useEffect } from "react";
-import { useAuth } from "../contexts";
-import { userApi, UserUpdateData } from "../api/userApi";
-import { toast } from "react-hot-toast";
-import Button from "../components/ui/Button";
-import Card from "../components/ui/Card";
-import Input from "../components/ui/Input";
-import Spinner from "../components/ui/Spinner";
-import ProfileLayout from "../layouts/ProfileLayout";
+import { useState, useEffect } from 'react';
+import { useAuth } from '../contexts';
+import { userApi, UserUpdateData } from '../api/userApi';
+import { toast } from 'react-hot-toast';
+import Button from '../components/ui/Button';
+import Card from '../components/ui/Card';
+import Input from '../components/ui/Input';
+import Spinner from '../components/ui/Spinner';
+import ProfileLayout from '../layouts/ProfileLayout';
 
 const Profile = () => {
   const { currentUser } = useAuth();
@@ -14,8 +14,8 @@ const Profile = () => {
   const [updating, setUpdating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<UserUpdateData>({
-    display_name: currentUser?.profile?.display_name || "",
-    photo_url: currentUser?.profile?.photo_url || "",
+    display_name: currentUser?.profile?.display_name || '',
+    photo_url: currentUser?.profile?.photo_url || '',
   });
 
   useEffect(() => {
@@ -31,20 +31,18 @@ const Profile = () => {
 
         // Update form data with fresh profile data
         setFormData({
-          display_name: profile.display_name || "",
-          photo_url: profile.photo_url || "",
+          display_name: profile.display_name || '',
+          photo_url: profile.photo_url || '',
         });
       } catch (err) {
-        console.error("Error loading profile:", err);
-        setError(
-          "Failed to load profile data. Using cached data if available."
-        );
+        console.error('Error loading profile:', err);
+        setError('Failed to load profile data. Using cached data if available.');
 
         // Fallback to cached data in currentUser if available
         if (currentUser?.profile) {
           setFormData({
-            display_name: currentUser.profile.display_name || "",
-            photo_url: currentUser.profile.photo_url || "",
+            display_name: currentUser.profile.display_name || '',
+            photo_url: currentUser.profile.photo_url || '',
           });
         }
       } finally {
@@ -70,11 +68,11 @@ const Profile = () => {
 
     try {
       await userApi.updateUserProfile(formData);
-      toast.success("Profile updated successfully");
+      toast.success('Profile updated successfully');
     } catch (error) {
-      console.error("Error updating profile:", error);
-      toast.error("Failed to update profile");
-      setError("Failed to update profile. Please try again later.");
+      console.error('Error updating profile:', error);
+      toast.error('Failed to update profile');
+      setError('Failed to update profile. Please try again later.');
     } finally {
       setUpdating(false);
     }
@@ -83,7 +81,7 @@ const Profile = () => {
   if (loading) {
     return (
       <ProfileLayout title="User Profile">
-        <div className="flex justify-center items-center h-full">
+        <div className="flex h-full items-center justify-center">
           <Spinner size="lg" />
         </div>
       </ProfileLayout>
@@ -93,10 +91,8 @@ const Profile = () => {
   if (!currentUser) {
     return (
       <ProfileLayout title="User Profile">
-        <div className="flex flex-col justify-center items-center h-full p-8">
-          <div className="text-red-500 mb-4">
-            You must be signed in to view your profile
-          </div>
+        <div className="flex h-full flex-col items-center justify-center p-8">
+          <div className="mb-4 text-red-500">You must be signed in to view your profile</div>
           <Button href="/login">Sign In</Button>
         </div>
       </ProfileLayout>
@@ -106,15 +102,15 @@ const Profile = () => {
   return (
     <ProfileLayout title="User Profile">
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold mb-6">User Profile</h1>
+        <h1 className="mb-6 text-2xl font-bold">User Profile</h1>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-100 text-red-600 rounded-md">
+          <div className="mb-6 rounded-md border border-red-100 bg-red-50 p-4 text-red-600">
             {error}
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {/* Profile Information Card */}
           <div className="md:col-span-2">
             <Card>
@@ -122,14 +118,14 @@ const Profile = () => {
                 <div>
                   <label
                     htmlFor="display_name"
-                    className="block text-sm font-medium text-gray-700 mb-1"
+                    className="mb-1 block text-sm font-medium text-gray-700"
                   >
                     Display Name
                   </label>
                   <Input
                     id="display_name"
                     name="display_name"
-                    value={formData.display_name || ""}
+                    value={formData.display_name || ''}
                     onChange={handleChange}
                     placeholder="Your display name"
                     className="w-full"
@@ -139,14 +135,14 @@ const Profile = () => {
                 <div>
                   <label
                     htmlFor="photo_url"
-                    className="block text-sm font-medium text-gray-700 mb-1"
+                    className="mb-1 block text-sm font-medium text-gray-700"
                   >
                     Profile Photo URL
                   </label>
                   <Input
                     id="photo_url"
                     name="photo_url"
-                    value={formData.photo_url || ""}
+                    value={formData.photo_url || ''}
                     onChange={handleChange}
                     placeholder="https://example.com/your-photo.jpg"
                     className="w-full"
@@ -154,21 +150,16 @@ const Profile = () => {
                 </div>
 
                 <div>
-                  <label
-                    htmlFor="email"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
+                  <label htmlFor="email" className="mb-1 block text-sm font-medium text-gray-700">
                     Email Address
                   </label>
                   <Input
                     id="email"
-                    value={currentUser.email || ""}
+                    value={currentUser.email || ''}
                     disabled
                     className="w-full bg-gray-100"
                   />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Email cannot be changed
-                  </p>
+                  <p className="mt-1 text-xs text-gray-500">Email cannot be changed</p>
                 </div>
 
                 <div className="flex justify-end">
@@ -185,12 +176,12 @@ const Profile = () => {
           <div>
             <Card>
               <div className="flex flex-col items-center">
-                <div className="w-32 h-32 rounded-full overflow-hidden mb-4 bg-gray-200">
+                <div className="mb-4 h-32 w-32 overflow-hidden rounded-full bg-gray-200">
                   {formData.photo_url ? (
                     <img
                       src={formData.photo_url}
                       alt="Profile"
-                      className="w-full h-full object-cover"
+                      className="h-full w-full object-cover"
                       onError={(e) => {
                         // Prevent infinite network requests by using an inline SVG
                         // instead of an external placeholder image
@@ -200,39 +191,31 @@ const Profile = () => {
                       }}
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500">
+                    <div className="flex h-full w-full items-center justify-center bg-gray-200 text-gray-500">
                       No Photo
                     </div>
                   )}
                 </div>
 
-                <h2 className="text-xl font-semibold">
-                  {formData.display_name || "User"}
-                </h2>
-                <p className="text-gray-500 text-sm mb-4">
-                  {currentUser.email}
-                </p>
+                <h2 className="text-xl font-semibold">{formData.display_name || 'User'}</h2>
+                <p className="mb-4 text-sm text-gray-500">{currentUser.email}</p>
 
-                <div className="w-full pt-4 border-t border-gray-200">
+                <div className="w-full border-t border-gray-200 pt-4">
                   <div className="text-sm">
                     <p className="text-gray-500">Account created:</p>
                     <p className="font-medium">
                       {currentUser.profile?.created_at
-                        ? new Date(
-                            currentUser.profile.created_at
-                          ).toLocaleDateString()
-                        : "N/A"}
+                        ? new Date(currentUser.profile.created_at).toLocaleDateString()
+                        : 'N/A'}
                     </p>
                   </div>
 
-                  <div className="text-sm mt-2">
+                  <div className="mt-2 text-sm">
                     <p className="text-gray-500">Last login:</p>
                     <p className="font-medium">
                       {currentUser.profile?.last_login
-                        ? new Date(
-                            currentUser.profile.last_login
-                          ).toLocaleDateString()
-                        : "N/A"}
+                        ? new Date(currentUser.profile.last_login).toLocaleDateString()
+                        : 'N/A'}
                     </p>
                   </div>
                 </div>

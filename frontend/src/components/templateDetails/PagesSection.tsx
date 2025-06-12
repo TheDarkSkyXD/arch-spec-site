@@ -1,6 +1,6 @@
-import React from "react";
-import { Pages } from "../../types/templates";
-import CollapsibleSection from "./CollapsibleSection";
+import React from 'react';
+import { Pages } from '../../types/templates';
+import CollapsibleSection from './CollapsibleSection';
 
 interface PagesSectionProps {
   pages: Pages;
@@ -8,20 +8,12 @@ interface PagesSectionProps {
   onToggle: () => void;
 }
 
-const PagesSection: React.FC<PagesSectionProps> = ({
-  pages,
-  isOpen,
-  onToggle,
-}) => {
+const PagesSection: React.FC<PagesSectionProps> = ({ pages, isOpen, onToggle }) => {
   return (
-    <CollapsibleSection
-      title="Application Pages"
-      isOpen={isOpen}
-      onToggle={onToggle}
-    >
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <CollapsibleSection title="Application Pages" isOpen={isOpen} onToggle={onToggle}>
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
         <div>
-          <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+          <h4 className="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
             Public Pages
           </h4>
           {pages.public && pages.public.length > 0 ? (
@@ -29,9 +21,7 @@ const PagesSection: React.FC<PagesSectionProps> = ({
               {pages.public.map((page, index) => (
                 <li key={index} className="text-sm">
                   <span className="font-medium">{page.name}</span>
-                  <span className="text-slate-500 text-xs ml-1">
-                    ({page.path})
-                  </span>
+                  <span className="ml-1 text-xs text-slate-500">({page.path})</span>
                 </li>
               ))}
             </ul>
@@ -41,7 +31,7 @@ const PagesSection: React.FC<PagesSectionProps> = ({
         </div>
 
         <div>
-          <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+          <h4 className="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
             Authenticated Pages
           </h4>
           {pages.authenticated && pages.authenticated.length > 0 ? (
@@ -49,9 +39,7 @@ const PagesSection: React.FC<PagesSectionProps> = ({
               {pages.authenticated.map((page, index) => (
                 <li key={index} className="text-sm">
                   <span className="font-medium">{page.name}</span>
-                  <span className="text-slate-500 text-xs ml-1">
-                    ({page.path})
-                  </span>
+                  <span className="ml-1 text-xs text-slate-500">({page.path})</span>
                 </li>
               ))}
             </ul>
@@ -61,7 +49,7 @@ const PagesSection: React.FC<PagesSectionProps> = ({
         </div>
 
         <div>
-          <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+          <h4 className="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
             Admin Pages
           </h4>
           {pages.admin && pages.admin.length > 0 ? (
@@ -69,9 +57,7 @@ const PagesSection: React.FC<PagesSectionProps> = ({
               {pages.admin.map((page, index) => (
                 <li key={index} className="text-sm">
                   <span className="font-medium">{page.name}</span>
-                  <span className="text-slate-500 text-xs ml-1">
-                    ({page.path})
-                  </span>
+                  <span className="ml-1 text-xs text-slate-500">({page.path})</span>
                 </li>
               ))}
             </ul>

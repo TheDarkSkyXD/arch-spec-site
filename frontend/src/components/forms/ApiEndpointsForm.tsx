@@ -1,620 +1,260 @@
-import { useState, useEffect } from "react";
+import { Loader2 } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { useSubscription } from '../../contexts/SubscriptionContext';
+import { useToast } from '../../contexts/ToastContext';
+import { useUserProfile } from '../../hooks/useUserProfile';
+import { ProcessingOverlay } from '../ui';
+import AIInstructionsModal from '../ui/AIInstructionsModal';
+import Button from '../ui/Button';
 import {
-  PlusCircle,
-  Trash2,
-  ChevronDown,
-  ChevronUp,
-  Lock,
-  Loader2,
-  Edit,
-  Sparkles,
-  RefreshCw,
-} from "lucide-react";
-import {
-  ApiEndpoint,
-  apiEndpointsService,
-} from "../../services/apiEndpointsService";
-import { useToast } from "../../contexts/ToastContext";
-import { Api } from "../../types/templates";
-import { aiService } from "../../services/aiService";
-import { projectsService } from "../../services/projectsService";
-import { featuresService } from "../../services/featuresService";
-import { dataModelService } from "../../services/dataModelService";
-import { requirementsService } from "../../services/requirementsService";
-import { useSubscription } from "../../contexts/SubscriptionContext";
-import AIInstructionsModal from "../ui/AIInstructionsModal";
-import { useUserProfile } from "../../hooks/useUserProfile";
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '../ui/pagination';
+import { ApiEndpointAIActions } from './api-endpoints/components/ApiEndpointAIActions';
+import { ApiEndpointCard } from './api-endpoints/components/ApiEndpointCard';
+import { ApiEndpointForm } from './api-endpoints/components/ApiEndpointForm';
+import { ApiEndpointHeader } from './api-endpoints/components/ApiEndpointHeader';
+import { useApiEndpointCategories } from './api-endpoints/hooks/useApiEndpointCategories';
+import { useApiEndpoints } from './api-endpoints/hooks/useApiEndpoints';
+import { useApiEndpointsAI } from './api-endpoints/hooks/useApiEndpointsAI';
+import { ApiEndpoint, ApiEndpointsFormProps } from './api-endpoints/types';
 
-// Import shadcn UI components
-import Button from "../ui/Button";
-import Input from "../ui/Input";
-import { Textarea } from "../ui/textarea";
-import { Checkbox } from "../ui/checkbox";
-import Card from "../ui/Card";
-import PremiumFeatureBadge from "../ui/PremiumFeatureBadge";
-import { ProcessingOverlay } from "../ui/index";
-
-interface ApiEndpointsFormProps {
-  initialData?: Api;
-  projectId?: string;
-  onSuccess?: (data: Api) => void;
-}
+const ITEMS_PER_PAGE = 10; // Number of endpoints per page
 
 export default function ApiEndpointsForm({
   initialData,
   projectId,
   onSuccess,
 }: ApiEndpointsFormProps) {
+  // State for search and filters
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedMethods, setSelectedMethods] = useState<string[]>([]);
+  const [showAuthOnly, setShowAuthOnly] = useState(false);
+  const [expandedEndpoint, setExpandedEndpoint] = useState<number | null>(null);
+  const [showNewEndpointForm, setShowNewEndpointForm] = useState(false);
+  const [editingEndpointIndex, setEditingEndpointIndex] = useState<number | null>(null);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // AI modal state
+  const [isEnhanceModalOpen, setIsEnhanceModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+  // Hooks
   const { showToast } = useToast();
   const { hasAIFeatures } = useSubscription();
   const { aiCreditsRemaining } = useUserProfile();
-  const [endpoints, setEndpoints] = useState<ApiEndpoint[]>(
-    initialData?.endpoints || []
+  const {
+    endpoints,
+    setEndpoints,
+    isLoading,
+    error,
+    isSubmitting,
+    validateEndpoint,
+    addEndpoint,
+    updateEndpoint,
+    removeEndpoint,
+    saveEndpoints,
+  } = useApiEndpoints(projectId, initialData);
+
+  const { isEnhancing, isAddingEndpoints, projectDescription, enhanceEndpoints, addAIEndpoints } =
+    useApiEndpointsAI(projectId);
+
+  const { categories, filterEndpoints } = useApiEndpointCategories(endpoints);
+
+  // Track unsaved changes
+  useEffect(() => {
+    // Only set hasUnsavedChanges to true if we have initial data to compare against
+    if (initialData && initialData.endpoints) {
+      // Compare current endpoints with initial data
+      const initialEndpoints = initialData.endpoints;
+
+      // Check if the number of endpoints has changed
+      if (initialEndpoints.length !== endpoints.length) {
+        setHasUnsavedChanges(true);
+        return;
+      }
+
+      // Check if any endpoint has been modified
+      // This is a simple check - for a more thorough check you'd need a deep comparison
+      const hasChanges = endpoints.some((endpoint, index) => {
+        const initialEndpoint = initialEndpoints[index];
+        return (
+          initialEndpoint.path !== endpoint.path ||
+          initialEndpoint.description !== endpoint.description ||
+          initialEndpoint.auth !== endpoint.auth ||
+          JSON.stringify(initialEndpoint.methods) !== JSON.stringify(endpoint.methods) ||
+          JSON.stringify(initialEndpoint.roles) !== JSON.stringify(endpoint.roles)
+        );
+      });
+
+      setHasUnsavedChanges(hasChanges);
+    } else if (endpoints.length > 0) {
+      // If we don't have initial data but have endpoints, there are unsaved changes
+      setHasUnsavedChanges(true);
+    }
+  }, [endpoints, initialData]);
+
+  // Filter endpoints based on search and filters
+  const filteredCategories = useMemo(
+    () => filterEndpoints(categories, searchTerm, selectedMethods, showAuthOnly),
+    [categories, searchTerm, selectedMethods, showAuthOnly, filterEndpoints]
   );
-  const [expandedEndpoint, setExpandedEndpoint] = useState<number | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [editingEndpointIndex, setEditingEndpointIndex] = useState<
-    number | null
-  >(null);
-  const [error, setError] = useState<string>("");
 
-  // AI enhancement state
-  const [isEnhancing, setIsEnhancing] = useState<boolean>(false);
-  const [isAddingEndpoints, setIsAddingEndpoints] = useState<boolean>(false);
-  const [projectDescription, setProjectDescription] = useState<string>("");
-  const [features, setFeatures] = useState<any[]>([]);
-  const [dataModels, setDataModels] = useState<any>({});
-  const [requirements, setRequirements] = useState<string[]>([]);
+  // Flatten all endpoints from filtered categories for pagination
+  const allFilteredEndpoints = useMemo(
+    () => filteredCategories.flatMap((category) => category.endpoints),
+    [filteredCategories]
+  );
 
-  // New endpoint form state
-  const [newEndpoint, setNewEndpoint] = useState<ApiEndpoint>({
-    path: "",
-    description: "",
-    methods: ["GET"],
-    auth: false,
-    roles: [],
-  });
-  const [showNewEndpointForm, setShowNewEndpointForm] = useState(false);
-  const [newRole, setNewRole] = useState("");
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  // Calculate pagination details
+  const totalEndpoints = allFilteredEndpoints.length;
+  const totalPages = Math.ceil(totalEndpoints / ITEMS_PER_PAGE);
 
-  // Add state for AI instructions modals
-  const [isEnhanceModalOpen, setIsEnhanceModalOpen] = useState<boolean>(false);
-  const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
+  // Get the endpoints for the current page
+  const paginatedEndpoints = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    return allFilteredEndpoints.slice(startIndex, endIndex);
+  }, [allFilteredEndpoints, currentPage]);
 
-  // Function to open enhance endpoints modal
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedMethods, showAuthOnly]);
+
+  // Handlers
+  const handleMethodFilterToggle = (method: string) => {
+    setSelectedMethods((prev) =>
+      prev.includes(method) ? prev.filter((m) => m !== method) : [...prev, method]
+    );
+  };
+
+  const handleSubmit = async () => {
+    const result = await saveEndpoints();
+    if (result && onSuccess) {
+      onSuccess(result);
+      setHasUnsavedChanges(false);
+    }
+  };
+
+  const handleEnhanceEndpoints = async (additionalInstructions?: string) => {
+    const enhancedEndpoints = await enhanceEndpoints(endpoints, additionalInstructions);
+    if (enhancedEndpoints) {
+      setEndpoints(enhancedEndpoints);
+    }
+    setIsEnhanceModalOpen(false);
+  };
+
+  const handleAddAIEndpoints = async (additionalInstructions?: string) => {
+    const newEndpoints = await addAIEndpoints(additionalInstructions);
+    if (newEndpoints) {
+      setEndpoints([...endpoints, ...newEndpoints]);
+    }
+    setIsAddModalOpen(false);
+  };
+
   const openEnhanceModal = () => {
-    // Check if user has remaining AI credits
     if (aiCreditsRemaining <= 0) {
       showToast({
-        title: "Insufficient AI Credits",
+        title: 'Insufficient AI Credits',
         description: "You've used all your AI credits for this billing period",
-        type: "warning",
+        type: 'warning',
       });
       return;
     }
 
     if (!projectId) {
       showToast({
-        title: "Error",
-        description: "Project must be saved before endpoints can be enhanced",
-        type: "error",
+        title: 'Error',
+        description: 'Project must be saved before endpoints can be enhanced',
+        type: 'error',
       });
       return;
     }
 
-    // Check if user has access to AI features
     if (!hasAIFeatures) {
       showToast({
-        title: "Premium Feature",
-        description: "Upgrade to Premium to use AI-powered features",
-        type: "info",
+        title: 'Premium Feature',
+        description: 'Upgrade to Premium to use AI-powered features',
+        type: 'info',
       });
       return;
     }
 
     if (!projectDescription) {
       showToast({
-        title: "Warning",
-        description:
-          "Project description is missing. Endpoints may not be properly enhanced.",
-        type: "warning",
-      });
-    }
-
-    if (features.length === 0) {
-      showToast({
-        title: "Warning",
-        description:
-          "No features found. Endpoints will be based only on project description.",
-        type: "warning",
+        title: 'Warning',
+        description: 'Project description is missing. Endpoints may not be properly enhanced.',
+        type: 'warning',
       });
     }
 
     setIsEnhanceModalOpen(true);
   };
 
-  // Function to open add endpoints modal
   const openAddModal = () => {
-    // Check if user has remaining AI credits
     if (aiCreditsRemaining <= 0) {
       showToast({
-        title: "Insufficient AI Credits",
+        title: 'Insufficient AI Credits',
         description: "You've used all your AI credits for this billing period",
-        type: "warning",
+        type: 'warning',
       });
       return;
     }
 
     if (!projectId) {
       showToast({
-        title: "Error",
-        description: "Project must be saved before endpoints can be enhanced",
-        type: "error",
+        title: 'Error',
+        description: 'Project must be saved before endpoints can be enhanced',
+        type: 'error',
       });
       return;
     }
 
-    // Check if user has access to AI features
     if (!hasAIFeatures) {
       showToast({
-        title: "Premium Feature",
-        description: "Upgrade to Premium to use AI-powered features",
-        type: "info",
+        title: 'Premium Feature',
+        description: 'Upgrade to Premium to use AI-powered features',
+        type: 'info',
       });
       return;
     }
 
     if (!projectDescription) {
       showToast({
-        title: "Warning",
-        description:
-          "Project description is missing. Endpoints may not be properly generated.",
-        type: "warning",
+        title: 'Warning',
+        description: 'Project description is missing. Endpoints may not be properly generated.',
+        type: 'warning',
       });
     }
 
     setIsAddModalOpen(true);
   };
 
-  // Modified function to enhance endpoints using AI (replace existing endpoints)
-  const enhanceEndpoints = async (additionalInstructions?: string) => {
-    setIsEnhancing(true);
-    try {
-      const enhancedEndpoints = await aiService.enhanceApiEndpoints(
-        projectDescription,
-        features,
-        dataModels,
-        requirements,
-        endpoints.length > 0 ? { endpoints } : undefined,
-        additionalInstructions
-      );
-
-      if (enhancedEndpoints) {
-        // Replace existing endpoints with enhanced ones
-        setEndpoints(enhancedEndpoints.endpoints || []);
-
-        showToast({
-          title: "Success",
-          description: "API endpoints enhanced successfully",
-          type: "success",
-        });
-      } else {
-        showToast({
-          title: "Warning",
-          description: "No enhanced endpoints returned",
-          type: "warning",
-        });
-      }
-    } catch (error) {
-      console.error("Error enhancing endpoints:", error);
-      showToast({
-        title: "Error",
-        description: "Failed to enhance endpoints",
-        type: "error",
-      });
-    } finally {
-      setIsEnhancing(false);
-    }
-  };
-
-  // Modified function to add AI-generated endpoints without replacing existing ones
-  const addAIEndpoints = async (additionalInstructions?: string) => {
-    setIsAddingEndpoints(true);
-    try {
-      const enhancedEndpoints = await aiService.enhanceApiEndpoints(
-        projectDescription,
-        features,
-        dataModels,
-        requirements,
-        undefined,
-        additionalInstructions
-      );
-
-      if (enhancedEndpoints && enhancedEndpoints.endpoints.length > 0) {
-        // Add new endpoints to existing ones
-        setEndpoints([...endpoints, ...enhancedEndpoints.endpoints]);
-
-        showToast({
-          title: "Success",
-          description: `Added ${enhancedEndpoints.endpoints.length} new endpoints`,
-          type: "success",
-        });
-      } else {
-        showToast({
-          title: "Warning",
-          description: "No new endpoints generated",
-          type: "warning",
-        });
-      }
-    } catch (error) {
-      console.error("Error adding AI endpoints:", error);
-      showToast({
-        title: "Error",
-        description: "Failed to generate new endpoints",
-        type: "error",
-      });
-    } finally {
-      setIsAddingEndpoints(false);
-    }
-  };
-
-  // Effect to update local state when initialData changes
-  useEffect(() => {
-    if (initialData) {
-      setEndpoints(initialData.endpoints || []);
-    }
-  }, [initialData]);
-
-  // Fetch API endpoints if projectId is provided but no initialData
-  useEffect(() => {
-    const fetchApiEndpoints = async () => {
-      if (projectId && !initialData) {
-        setIsLoading(true);
-        try {
-          const apiEndpointsData = await apiEndpointsService.getApiEndpoints(
-            projectId
-          );
-          if (apiEndpointsData) {
-            setEndpoints(apiEndpointsData.endpoints || []);
-          }
-        } catch (error) {
-          console.error("Error fetching API endpoints:", error);
-        } finally {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    fetchApiEndpoints();
-  }, [projectId, initialData]);
-
-  // New function to fetch project info for AI enhancement
-  const fetchProjectInfo = async () => {
-    if (!projectId) return;
-
-    try {
-      // Fetch project details including description
-      const projectDetails = await projectsService.getProjectById(projectId);
-
-      if (projectDetails) {
-        setProjectDescription(projectDetails.description || "");
-
-        // Fetch features
-        const featuresData = await featuresService.getFeatures(projectId);
-        if (featuresData?.coreModules) {
-          setFeatures(featuresData.coreModules);
-        }
-
-        // Fetch data models
-        const dataModelData = await dataModelService.getDataModel(projectId);
-        if (dataModelData) {
-          setDataModels(dataModelData);
-        }
-
-        // Fetch requirements
-        const requirementsData = await requirementsService.getRequirements(
-          projectId
-        );
-        if (requirementsData) {
-          // Combine functional and non-functional requirements
-          const allRequirements = [
-            ...(requirementsData.functional || []),
-            ...(requirementsData.non_functional || []),
-          ];
-          setRequirements(allRequirements);
-        }
-      }
-    } catch (error) {
-      console.error("Error fetching project details:", error);
-    }
-  };
-
-  // Add effect to fetch project info
-  useEffect(() => {
-    if (projectId) {
-      fetchProjectInfo();
-    }
-  }, [projectId]);
-
-  const toggleEndpointExpand = (index: number) => {
-    setExpandedEndpoint(expandedEndpoint === index ? null : index);
-  };
-
-  const validateEndpointForm = () => {
-    const newErrors: Record<string, string> = {};
-
-    if (!newEndpoint.path.trim()) {
-      newErrors.path = "Endpoint path is required";
-    }
-
-    if (!newEndpoint.description.trim()) {
-      newErrors.description = "Endpoint description is required";
-    }
-
-    if (newEndpoint.methods.length === 0) {
-      newErrors.methods = "At least one HTTP method must be selected";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleAddEndpoint = () => {
-    if (!validateEndpointForm()) return;
-
-    setEndpoints([...endpoints, { ...newEndpoint }]);
-
-    // Reset the form
-    setNewEndpoint({
-      path: "",
-      description: "",
-      methods: ["GET"],
-      auth: false,
-      roles: [],
-    });
-    setShowNewEndpointForm(false);
-    setNewRole("");
-
-    // Show success toast
-    showToast({
-      title: "Success",
-      description: "New API endpoint added successfully",
-      type: "success",
-    });
-  };
-
-  const handleEditEndpoint = (index: number) => {
-    // Close any expanded view
-    setExpandedEndpoint(null);
-
-    // Set the editing index
-    setEditingEndpointIndex(index);
-
-    // Populate the form with the endpoint data
-    setNewEndpoint({ ...endpoints[index] });
-
-    // If editing an endpoint that uses auth, make sure the roles are properly initialized
-    if (endpoints[index].auth && !endpoints[index].roles) {
-      setNewEndpoint({
-        ...endpoints[index],
-        roles: [],
-      });
-    }
-  };
-
-  const handleCancelEdit = () => {
-    // Reset the editing state
-    setEditingEndpointIndex(null);
-
-    // Reset the form data
-    setNewEndpoint({
-      path: "",
-      description: "",
-      methods: ["GET"],
-      auth: false,
-      roles: [],
-    });
-
-    setNewRole("");
-    setErrors({});
-  };
-
-  const handleSaveEdit = () => {
-    if (!validateEndpointForm()) return;
-
-    if (editingEndpointIndex !== null) {
-      const updatedEndpoints = [...endpoints];
-      updatedEndpoints[editingEndpointIndex] = { ...newEndpoint };
-      setEndpoints(updatedEndpoints);
-
-      // Reset the editing state
-      setEditingEndpointIndex(null);
-
-      // Reset the form
-      setNewEndpoint({
-        path: "",
-        description: "",
-        methods: ["GET"],
-        auth: false,
-        roles: [],
-      });
-
-      setNewRole("");
-
-      // Show success toast
-      showToast({
-        title: "Success",
-        description: "API endpoint updated successfully",
-        type: "success",
-      });
-    }
-  };
-
-  const handleRemoveEndpoint = (index: number) => {
-    setEndpoints(endpoints.filter((_, i) => i !== index));
-    if (expandedEndpoint === index) {
-      setExpandedEndpoint(null);
-    }
-
-    // Show success toast
-    showToast({
-      title: "Success",
-      description: "API endpoint removed successfully",
-      type: "success",
-    });
-  };
-
-  const handleMethodToggle = (method: string) => {
-    const methods = [...newEndpoint.methods];
-    if (methods.includes(method)) {
-      setNewEndpoint({
-        ...newEndpoint,
-        methods: methods.filter((m) => m !== method),
-      });
-    } else {
-      setNewEndpoint({
-        ...newEndpoint,
-        methods: [...methods, method],
-      });
-    }
-
-    // Clear any method-related error when methods change
-    if (errors.methods) {
-      setErrors({
-        ...errors,
-        methods: "",
-      });
-    }
-  };
-
-  const handleAuthToggle = () => {
-    setNewEndpoint({
-      ...newEndpoint,
-      auth: !newEndpoint.auth,
-      roles: !newEndpoint.auth ? newEndpoint.roles : [],
-    });
-  };
-
-  const handleAddRole = () => {
-    if (!newRole.trim() || newEndpoint.roles?.includes(newRole.trim())) return;
-
-    setNewEndpoint({
-      ...newEndpoint,
-      roles: [...(newEndpoint.roles || []), newRole.trim()],
-    });
-    setNewRole("");
-  };
-
-  const handleRemoveRole = (role: string) => {
-    setNewEndpoint({
-      ...newEndpoint,
-      roles: newEndpoint.roles?.filter((r) => r !== role) || [],
-    });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // Clear previous messages
-    setError("");
-
-    if (!projectId) {
-      const errorMessage =
-        "Project must be saved before API endpoints can be saved";
-      showToast({
-        title: "Error",
-        description: errorMessage,
-        type: "error",
-      });
-      setError(errorMessage);
-      return;
-    }
-
-    setIsSubmitting(true);
-    try {
-      const data = {
-        endpoints: endpoints,
-      };
-
-      const result = await apiEndpointsService.saveApiEndpoints(
-        projectId,
-        data
-      );
-
-      if (result) {
-        showToast({
-          title: "Success",
-          description: "API endpoints saved successfully",
-          type: "success",
-        });
-
-        if (onSuccess) {
-          onSuccess(result);
-        }
-      } else {
-        const errorMessage = "Failed to save API endpoints";
-        showToast({
-          title: "Error",
-          description: errorMessage,
-          type: "error",
-        });
-        setError(errorMessage);
-        setTimeout(() => setError(""), 5000);
-      }
-    } catch (error) {
-      console.error("Error saving API endpoints:", error);
-      const errorMessage = "An unexpected error occurred";
-      showToast({
-        title: "Error",
-        description: errorMessage,
-        type: "error",
-      });
-      setError(errorMessage);
-      setTimeout(() => setError(""), 5000);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // Helper function to check if any AI operation is in progress
-  const isAnyEnhancementInProgress = () => {
-    return isEnhancing || isAddingEndpoints;
-  };
-
-  // Helper to get the appropriate message for the overlay
-  const getEnhancementMessage = () => {
-    if (isEnhancing) {
-      return "AI is analyzing your project to create optimal API endpoints. Please wait...";
-    }
-    if (isAddingEndpoints) {
-      return "AI is generating additional API endpoints based on your project requirements. Please wait...";
-    }
-    return "AI enhancement in progress...";
-  };
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <Loader2 className="h-6 w-6 text-primary-600 animate-spin mr-3" />
-        <span className="text-slate-600 dark:text-slate-300">
-          Loading API endpoints...
-        </span>
+        <Loader2 className="mr-3 h-6 w-6 animate-spin text-primary-600" />
+        <span className="text-slate-600 dark:text-slate-300">Loading API endpoints...</span>
       </div>
     );
   }
 
   return (
-    <form
-      id="api-endpoints-form"
-      onSubmit={handleSubmit}
-      className="space-y-8 relative"
-    >
+    <div className="relative space-y-8">
       {/* Processing Overlay */}
       <ProcessingOverlay
-        isVisible={isAnyEnhancementInProgress()}
-        message={getEnhancementMessage()}
+        isVisible={isEnhancing || isAddingEndpoints}
+        message={
+          isEnhancing
+            ? 'AI is analyzing your project to create optimal API endpoints. Please wait...'
+            : 'AI is generating additional API endpoints based on your project requirements. Please wait...'
+        }
         opacity={0.6}
       />
 
@@ -622,7 +262,7 @@ export default function ApiEndpointsForm({
       <AIInstructionsModal
         isOpen={isEnhanceModalOpen}
         onClose={() => setIsEnhanceModalOpen(false)}
-        onConfirm={(instructions) => enhanceEndpoints(instructions)}
+        onConfirm={handleEnhanceEndpoints}
         title="Enhance All Endpoints"
         description="The AI will replace your current API endpoints with an optimized structure based on your project requirements and features."
         confirmText="Replace Endpoints"
@@ -631,7 +271,7 @@ export default function ApiEndpointsForm({
       <AIInstructionsModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
-        onConfirm={(instructions) => addAIEndpoints(instructions)}
+        onConfirm={handleAddAIEndpoints}
         title="Generate Additional Endpoints"
         description="The AI will generate new API endpoints to complement your existing ones based on your project data models, requirements and features."
         confirmText="Add Endpoints"
@@ -639,445 +279,181 @@ export default function ApiEndpointsForm({
 
       {/* Error Message */}
       {error && (
-        <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-md mb-4">
+        <div className="mb-4 rounded-md bg-red-50 p-3 text-red-600 dark:bg-red-900/20 dark:text-red-400">
           {error}
         </div>
       )}
 
-      <div className="space-y-6">
-        <div>
-          <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-4">
-            API Endpoints
-          </h2>
-          <p className="text-slate-600 dark:text-slate-400 mb-6">
-            Define the API endpoints for your application.
+      {/* Unsaved Changes Indicator */}
+      {hasUnsavedChanges && (
+        <div className="mb-4 flex items-center justify-between rounded-md bg-amber-50 p-3 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400">
+          <span>You have unsaved changes. Click "Save API Endpoints" to persist your changes.</span>
+        </div>
+      )}
+
+      {/* Header with Search and Filters */}
+      <ApiEndpointHeader
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        selectedMethods={selectedMethods}
+        onMethodFilterChange={handleMethodFilterToggle}
+        showAuthOnly={showAuthOnly}
+        onAuthFilterChange={setShowAuthOnly}
+        onAddNewClick={() => setShowNewEndpointForm(true)}
+      />
+
+      {/* AI Actions */}
+      <ApiEndpointAIActions
+        hasAIFeatures={hasAIFeatures}
+        isAddingEndpoints={isAddingEndpoints}
+        isEnhancing={isEnhancing}
+        endpointsCount={endpoints.length}
+        projectId={projectId}
+        onOpenAddModal={openAddModal}
+        onOpenEnhanceModal={openEnhanceModal}
+      />
+
+      {/* Add New Form (only renders when adding, not editing) */}
+      {showNewEndpointForm && (
+        <ApiEndpointForm
+          // No initial endpoint data for adding
+          onSubmit={(formData) => {
+            addEndpoint(formData);
+            setShowNewEndpointForm(false);
+          }}
+          onCancel={() => {
+            setShowNewEndpointForm(false);
+          }}
+          validateEndpoint={validateEndpoint}
+        />
+      )}
+
+      {/* Paginated Endpoints List */}
+      {paginatedEndpoints.length > 0 ? (
+        <div className="space-y-4">
+          {paginatedEndpoints.map((endpoint: ApiEndpoint) => {
+            // Find the actual index in the main endpoints array
+            const mainEndpointIndex = endpoints.findIndex(
+              (e) => e.path === endpoint.path && e.description === endpoint.description
+            );
+
+            return editingEndpointIndex === mainEndpointIndex ? (
+              // Render Edit Form inline
+              <ApiEndpointForm
+                key={`${endpoint.path}-edit-form`}
+                endpoint={endpoints[mainEndpointIndex]} // Pass the endpoint being edited
+                onSubmit={(formData) => {
+                  updateEndpoint(mainEndpointIndex, formData);
+                  setEditingEndpointIndex(null); // Close form on submit
+                }}
+                onCancel={() => {
+                  setEditingEndpointIndex(null); // Close form on cancel
+                }}
+                validateEndpoint={validateEndpoint}
+              />
+            ) : (
+              // Render Endpoint Card
+              <ApiEndpointCard
+                key={`${endpoint.path}-${mainEndpointIndex}`}
+                endpoint={endpoint}
+                isExpanded={expandedEndpoint === mainEndpointIndex}
+                onToggleExpand={() =>
+                  setExpandedEndpoint(
+                    expandedEndpoint === mainEndpointIndex ? null : mainEndpointIndex
+                  )
+                }
+                onEdit={() => setEditingEndpointIndex(mainEndpointIndex)}
+                onRemove={() => removeEndpoint(mainEndpointIndex)}
+              />
+            );
+          })}
+        </div>
+      ) : (
+        <div className="rounded-lg border border-dashed border-slate-300 p-8 text-center dark:border-slate-600">
+          <p className="text-slate-600 dark:text-slate-400">
+            {totalEndpoints === 0 && endpoints.length > 0
+              ? 'No endpoints match your search criteria'
+              : endpoints.length === 0
+                ? 'No API endpoints defined yet'
+                : 'No endpoints on this page'}{' '}
+            {/* Adjust message based on context */}
           </p>
         </div>
+      )}
 
-        {/* AI Enhancement Buttons */}
-        <div className="flex justify-end items-center gap-3 mb-4">
-          {!hasAIFeatures && <PremiumFeatureBadge />}
-          <Button
-            type="button"
-            onClick={openAddModal}
-            disabled={
-              isAddingEndpoints || isEnhancing || !projectId || !hasAIFeatures
-            }
-            variant={hasAIFeatures ? "outline" : "ghost"}
-            className={`flex items-center gap-2 relative ${
-              !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
-            }`}
-            title={
-              hasAIFeatures
-                ? "Generate new endpoints to complement existing ones"
-                : "Upgrade to Premium to use AI-powered features"
-            }
-          >
-            {isAddingEndpoints ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                <span>Adding...</span>
-              </>
-            ) : (
-              <>
-                {hasAIFeatures ? (
-                  <Sparkles className="h-4 w-4" />
-                ) : (
-                  <Lock className="h-4 w-4" />
-                )}
-                <span>Add AI Endpoints</span>
-              </>
-            )}
-          </Button>
-          <Button
-            type="button"
-            onClick={openEnhanceModal}
-            disabled={
-              isEnhancing ||
-              isAddingEndpoints ||
-              !projectId ||
-              !hasAIFeatures ||
-              endpoints.length === 0
-            }
-            variant={hasAIFeatures ? "outline" : "ghost"}
-            className={`flex items-center gap-2 relative ${
-              !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
-            }`}
-            title={
-              hasAIFeatures
-                ? "Replace all endpoints with AI-generated ones"
-                : "Upgrade to Premium to use AI-powered features"
-            }
-          >
-            {isEnhancing ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                <span>Enhancing...</span>
-              </>
-            ) : (
-              <>
-                {hasAIFeatures ? (
-                  <RefreshCw className="h-4 w-4" />
-                ) : (
-                  <Lock className="h-4 w-4" />
-                )}
-                <span>Replace All</span>
-              </>
-            )}
-          </Button>
-        </div>
-
-        {/* Add new endpoint button */}
-        {!showNewEndpointForm && editingEndpointIndex === null && (
-          <div className="mb-6">
-            <Button
-              type="button"
-              onClick={() => setShowNewEndpointForm(true)}
-              className="flex items-center"
-            >
-              <PlusCircle size={16} className="mr-2" />
-              Add New Endpoint
-            </Button>
-          </div>
-        )}
-
-        {/* New/Edit Endpoint Form */}
-        {(showNewEndpointForm || editingEndpointIndex !== null) && (
-          <Card className="p-4 border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
-            <h3 className="text-lg font-medium text-slate-800 dark:text-slate-200 mb-4">
-              {editingEndpointIndex !== null
-                ? "Edit Endpoint"
-                : "Add New Endpoint"}
-            </h3>
-
-            <div className="space-y-4">
-              <div>
-                <label
-                  htmlFor="path"
-                  className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1"
-                >
-                  Path <span className="text-red-500">*</span>
-                </label>
-                <Input
-                  id="path"
-                  type="text"
-                  value={newEndpoint.path}
-                  onChange={(e) =>
-                    setNewEndpoint({ ...newEndpoint, path: e.target.value })
-                  }
-                  placeholder="/api/users"
-                  error={errors.path}
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="description"
-                  className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1"
-                >
-                  Description <span className="text-red-500">*</span>
-                </label>
-                <Textarea
-                  id="description"
-                  value={newEndpoint.description}
-                  onChange={(e) =>
-                    setNewEndpoint({
-                      ...newEndpoint,
-                      description: e.target.value,
-                    })
-                  }
-                  placeholder="What this endpoint does..."
-                  error={errors.description}
-                  rows={2}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                  HTTP Methods <span className="text-red-500">*</span>
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {["GET", "POST", "PUT", "DELETE", "PATCH"].map((method) => (
-                    <button
-                      key={method}
-                      type="button"
-                      onClick={() => handleMethodToggle(method)}
-                      className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        newEndpoint.methods.includes(method)
-                          ? method === "GET"
-                            ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 border-2 border-green-300 dark:border-green-700"
-                            : method === "POST"
-                            ? "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 border-2 border-blue-300 dark:border-blue-700"
-                            : method === "PUT"
-                            ? "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 border-2 border-yellow-300 dark:border-yellow-700"
-                            : method === "DELETE"
-                            ? "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 border-2 border-red-300 dark:border-red-700"
-                            : "bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 border-2 border-purple-300 dark:border-purple-700"
-                          : "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600"
-                      }`}
-                    >
-                      {method}
-                    </button>
-                  ))}
-                </div>
-                {errors.methods && (
-                  <p className="mt-1 text-sm text-red-500">{errors.methods}</p>
-                )}
-              </div>
-
-              <div className="mt-3">
-                <div className="flex items-center mb-2">
-                  <Checkbox
-                    id="auth"
-                    checked={newEndpoint.auth}
-                    onCheckedChange={handleAuthToggle}
-                  />
-                  <label
-                    htmlFor="auth"
-                    className="ml-2 block text-sm text-slate-700 dark:text-slate-300"
-                  >
-                    Requires Authentication
-                  </label>
-                </div>
-
-                {newEndpoint.auth && (
-                  <div className="mt-3 pl-6">
-                    <div className="mb-2">
-                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                        Required Roles
-                      </label>
-                      <div className="flex flex-wrap gap-1 mb-2">
-                        {newEndpoint.roles?.map((role) => (
-                          <span
-                            key={role}
-                            className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300"
-                          >
-                            {role}
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveRole(role)}
-                              className="ml-1 text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-200"
-                            >
-                              &times;
-                            </button>
-                          </span>
-                        ))}
-                      </div>
-                      <div className="flex gap-2">
-                        <Input
-                          type="text"
-                          value={newRole}
-                          onChange={(e) => setNewRole(e.target.value)}
-                          placeholder="Add a role (e.g. admin)"
-                          className="flex-1 text-sm"
-                        />
-                        <Button
-                          type="button"
-                          onClick={handleAddRole}
-                          disabled={!newRole.trim()}
-                          variant={!newRole.trim() ? "outline" : "default"}
-                          className={
-                            !newRole.trim()
-                              ? "cursor-not-allowed"
-                              : "bg-purple-600 text-white hover:bg-purple-700 dark:hover:bg-purple-500"
-                          }
-                        >
-                          <PlusCircle size={16} />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div className="flex justify-end gap-2 mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    if (showNewEndpointForm) {
-                      setShowNewEndpointForm(false);
-                    } else {
-                      handleCancelEdit();
-                    }
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setCurrentPage((prev) => Math.max(prev - 1, 1));
+                }}
+                className={currentPage === 1 ? 'pointer-events-none opacity-50' : undefined}
+              />
+            </PaginationItem>
+            {/* Dynamically generate page links (simplified for brevity) */}
+            {/* Ideally, implement logic for ellipsis and showing a limited number of page numbers */}
+            {[...Array(totalPages)].map((_, index) => (
+              <PaginationItem key={index}>
+                <PaginationLink
+                  href="#"
+                  isActive={currentPage === index + 1}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setCurrentPage(index + 1);
                   }}
                 >
-                  Cancel
-                </Button>
-                <Button
-                  type="button"
-                  onClick={
-                    editingEndpointIndex !== null
-                      ? handleSaveEdit
-                      : handleAddEndpoint
-                  }
-                  disabled={
-                    !newEndpoint.path.trim() ||
-                    !newEndpoint.description.trim() ||
-                    newEndpoint.methods.length === 0
-                  }
-                  variant="default"
-                  className={
-                    !newEndpoint.path.trim() ||
-                    !newEndpoint.description.trim() ||
-                    newEndpoint.methods.length === 0
-                      ? "cursor-not-allowed opacity-50"
-                      : ""
-                  }
-                >
-                  {editingEndpointIndex !== null
-                    ? "Save Changes"
-                    : "Add Endpoint"}
-                </Button>
-              </div>
-            </div>
-          </Card>
-        )}
+                  {index + 1}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+            {/* Add Ellipsis logic here if needed */}
+            <PaginationItem>
+              <PaginationNext
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+                }}
+                className={
+                  currentPage === totalPages ? 'pointer-events-none opacity-50' : undefined
+                }
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      )}
 
-        {/* Endpoints List - Only show when not editing or adding new endpoint */}
-        {!showNewEndpointForm &&
-          editingEndpointIndex === null &&
-          (endpoints.length === 0 ? (
-            <Card className="p-6 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-center">
-              <p className="text-slate-600 dark:text-slate-400">
-                No API endpoints defined yet
-              </p>
-            </Card>
-          ) : (
-            <div className="space-y-4">
-              {endpoints.map((endpoint, index) => (
-                <Card
-                  key={index}
-                  className="border border-slate-200 dark:border-slate-700 overflow-hidden"
-                >
-                  <div
-                    className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700"
-                    onClick={() => toggleEndpointExpand(index)}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center space-x-1">
-                        {endpoint.methods.map((method) => (
-                          <span
-                            key={method}
-                            className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                              method === "GET"
-                                ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300"
-                                : method === "POST"
-                                ? "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300"
-                                : method === "PUT"
-                                ? "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300"
-                                : method === "DELETE"
-                                ? "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300"
-                                : "bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-300"
-                            }`}
-                          >
-                            {method}
-                          </span>
-                        ))}
-                      </div>
-                      <span className="font-medium text-slate-800 dark:text-slate-200">
-                        {endpoint.path}
-                      </span>
-                      {endpoint.auth && (
-                        <span className="flex items-center text-xs text-slate-500 dark:text-slate-400">
-                          <Lock size={12} className="mr-1" />
-                          Protected
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleEditEndpoint(index);
-                        }}
-                        className="text-slate-400 dark:text-slate-500 hover:text-blue-500 dark:hover:text-blue-400"
-                      >
-                        <Edit size={16} />
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleRemoveEndpoint(index);
-                        }}
-                        className="text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400"
-                      >
-                        <Trash2 size={16} />
-                      </Button>
-                      {expandedEndpoint === index ? (
-                        <ChevronUp
-                          size={16}
-                          className="text-slate-500 dark:text-slate-400"
-                        />
-                      ) : (
-                        <ChevronDown
-                          size={16}
-                          className="text-slate-500 dark:text-slate-400"
-                        />
-                      )}
-                    </div>
-                  </div>
-
-                  {expandedEndpoint === index && (
-                    <div className="p-3 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
-                      <div className="mb-3">
-                        <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1">
-                          Description
-                        </label>
-                        <p className="text-sm text-slate-700 dark:text-slate-300">
-                          {endpoint.description}
-                        </p>
-                      </div>
-
-                      {endpoint.roles && endpoint.roles.length > 0 && (
-                        <div>
-                          <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1">
-                            Required Roles
-                          </label>
-                          <div className="flex flex-wrap gap-1 mt-1">
-                            {endpoint.roles.map((role) => (
-                              <span
-                                key={role}
-                                className="inline-flex px-2 py-1 text-xs rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300"
-                              >
-                                {role}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </Card>
-              ))}
-            </div>
-          ))}
-      </div>
-
-      <div className="mt-6 flex justify-end">
+      {/* Save Button */}
+      <div className="sticky bottom-0 mt-6 flex justify-end bg-white p-4 dark:bg-slate-900">
         <Button
-          type="submit"
-          disabled={isSubmitting || !projectId || editingEndpointIndex !== null}
+          type="button"
+          onClick={handleSubmit}
+          disabled={
+            isSubmitting || !projectId || editingEndpointIndex !== null || !hasUnsavedChanges
+          }
           variant={
-            !projectId || isSubmitting || editingEndpointIndex !== null
-              ? "outline"
-              : "default"
+            !projectId || isSubmitting || editingEndpointIndex !== null || !hasUnsavedChanges
+              ? 'outline'
+              : 'default'
           }
           className={
-            !projectId || isSubmitting || editingEndpointIndex !== null
-              ? "bg-gray-400 text-white hover:bg-gray-400"
-              : ""
+            !projectId || isSubmitting || editingEndpointIndex !== null || !hasUnsavedChanges
+              ? 'cursor-not-allowed opacity-50'
+              : 'animate-pulse'
           }
         >
-          {isSubmitting ? "Saving..." : "Save API Endpoints"}
+          {isSubmitting
+            ? 'Saving...'
+            : hasUnsavedChanges
+              ? 'Save API Endpoints*'
+              : 'Save API Endpoints'}
         </Button>
       </div>
-    </form>
+    </div>
   );
 }

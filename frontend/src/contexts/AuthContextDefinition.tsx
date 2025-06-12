@@ -1,5 +1,5 @@
-import { createContext, useContext } from "react";
-import { AuthContextType } from "./AuthTypes";
+import { createContext, useContext } from 'react';
+import { AuthContextType } from './AuthTypes';
 
 // Create the context with default values
 export const AuthContext = createContext<AuthContextType>({

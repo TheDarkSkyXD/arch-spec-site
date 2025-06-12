@@ -1,50 +1,71 @@
-import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { projectsService } from "../services/projectsService";
-import { techStackService } from "../services/techStackService";
-import { ProjectBase } from "../types/project";
-import { ChevronLeft, Loader2 } from "lucide-react";
-import MainLayout from "../layouts/MainLayout";
+import { ChevronDown, ChevronLeft, Loader2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import DownloadAllMarkdown from '../components/common/DownloadAllMarkdown';
 import {
-  ProjectTechStack,
-  Requirements,
-  Api,
-  UIDesign,
-} from "../types/templates";
-import {
-  useRequirements,
-  useFeatures,
-  usePages,
   useApiEndpoints,
   useDataModel,
+  useFeatures,
+  usePages,
+  useRequirements,
   useTestCases,
   useUIDesign,
-} from "../hooks/useDataQueries";
-import { FeaturesData } from "../services/featuresService";
-import { TestCasesData } from "../services/testCasesService";
-import { Pages, DataModel } from "../types/templates";
-import DownloadAllMarkdown from "../components/common/DownloadAllMarkdown";
+} from '../hooks/useDataQueries';
+import MainLayout from '../layouts/MainLayout';
+import { FeaturesData } from '../services/featuresService';
+import { projectsService } from '../services/projectsService';
+import { techStackService } from '../services/techStackService';
+import { TestCasesData } from '../services/testCasesService';
+import { ProjectBase } from '../types/project';
+import {
+  Api,
+  DataModel,
+  Pages,
+  ProjectTechStack,
+  Requirements,
+  UIDesign,
+} from '../types/templates';
 
 // Import shadcn UI components
-import Button from "../components/ui/Button";
-import Card from "../components/ui/Card";
-import { userApi } from "../api/userApi";
-import { useSubscription } from "../contexts/SubscriptionContext";
-import { implementationPromptsService } from "../services/implementationPromptsService";
-import { ImplementationPrompts } from "../types/templates";
+import Button from '@ui/Button';
+import Card from '@ui/Card';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@ui/dropdown-menu';
+import { userApi } from '../api/userApi';
+import { useSubscription } from '../contexts/SubscriptionContext';
+import { implementationPromptsService } from '../services/implementationPromptsService';
+import { ImplementationPrompts } from '../types/templates';
 
 // Import custom hook and section components
-import { SectionId, useSectionState } from "../hooks/useSectionState";
-import ProjectBasicsSection from "../components/project/ProjectBasicsSection";
-import TechStackSection from "../components/project/TechStackSection";
-import RequirementsSection from "../components/project/RequirementsSection";
-import FeaturesSection from "../components/project/FeaturesSection";
-import PagesSection from "../components/project/PagesSection";
-import DataModelSection from "../components/project/DataModelSection";
-import ApiEndpointsSection from "../components/project/ApiEndpointsSection";
-import TestCasesSection from "../components/project/TestCasesSection";
-import ImplementationPromptsSection from "../components/project/ImplementationPromptsSection";
-import UIDesignSection from "../components/project/UIDesignSection";
+import ApiEndpointsSection from '../components/project/ApiEndpointsSection';
+import DataModelSection from '../components/project/DataModelSection';
+import FeaturesSection from '../components/project/FeaturesSection';
+import ImplementationPromptsSection from '../components/project/ImplementationPromptsSection';
+import PagesSection from '../components/project/PagesSection';
+import ProjectBasicsSection from '../components/project/ProjectBasicsSection';
+import RequirementsSection from '../components/project/RequirementsSection';
+import TechStackSection from '../components/project/TechStackSection';
+import TestCasesSection from '../components/project/TestCasesSection';
+import UIDesignSection from '../components/project/UIDesignSection';
+import { SectionId, useSectionState } from '../hooks/useSectionState';
+
+// Map section IDs to display names
+const sectionDisplayNames: Record<SectionId, string> = {
+  [SectionId.BASICS]: 'Project Details',
+  [SectionId.TECH_STACK]: 'Technology Stack',
+  [SectionId.REQUIREMENTS]: 'Requirements',
+  [SectionId.FEATURES]: 'Features',
+  [SectionId.PAGES]: 'Pages',
+  [SectionId.DATA_MODEL]: 'Data Model',
+  [SectionId.API_ENDPOINTS]: 'API Endpoints',
+  [SectionId.TEST_CASES]: 'Test Cases',
+  [SectionId.UI_DESIGN]: 'UI Design',
+  [SectionId.IMPLEMENTATION_PROMPTS]: 'Implementation Prompts',
+};
 
 const ProjectDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -55,29 +76,30 @@ const ProjectDetails = () => {
   const [techStackLoading, setTechStackLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { refreshSubscriptionData } = useSubscription();
+  const [isHeaderSticky, setIsHeaderSticky] = useState(false);
+  const [currentSection, setCurrentSection] = useState<SectionId>(SectionId.BASICS);
 
   // Use our custom hook for section state
-  const { expandedSections, sectionViewModes, toggleSection, changeViewMode } =
-    useSectionState();
+  const { expandedSections, sectionViewModes, toggleSection, changeViewMode } = useSectionState();
 
   // Use the hooks
-  const { data: requirements, isLoading: requirementsLoading } =
-    useRequirements(id);
+  const { data: requirements, isLoading: requirementsLoading } = useRequirements(id);
   const { data: features, isLoading: featuresLoading } = useFeatures(id);
   const { data: pages, isLoading: pagesLoading } = usePages(id);
-  const { data: dataModel, isLoading: dataModelLoading } = useDataModel(id);
-  const { data: apiEndpoints, isLoading: apiEndpointsLoading } =
-    useApiEndpoints(id);
+  const { data: fetchedDataModel, isLoading: dataModelLoading } = useDataModel(id);
+  const [localDataModel, setLocalDataModel] = useState<Partial<DataModel> | null>(null);
+  const { data: fetchedApiEndpoints, isLoading: apiEndpointsLoading } = useApiEndpoints(id);
+  const [localApiEndpoints, setLocalApiEndpoints] = useState<Api | null>(null);
   const { data: testCases, isLoading: testCasesLoading } = useTestCases(id);
 
   // Add UI Design hook
   const { data: uiDesign, isLoading: uiDesignLoading } = useUIDesign(id);
 
   // Add implementation prompts state
-  const [implementationPrompts, setImplementationPrompts] =
-    useState<ImplementationPrompts | null>(null);
-  const [implementationPromptsLoading, setImplementationPromptsLoading] =
-    useState(true);
+  const [implementationPrompts, setImplementationPrompts] = useState<ImplementationPrompts | null>(
+    null
+  );
+  const [implementationPromptsLoading, setImplementationPromptsLoading] = useState(true);
 
   useEffect(() => {
     const loadUserProfile = async () => {
@@ -93,7 +115,7 @@ const ProjectDetails = () => {
       setError(null);
 
       if (!id) {
-        setError("Project ID is missing");
+        setError('Project ID is missing');
         setLoading(false);
         return;
       }
@@ -103,11 +125,11 @@ const ProjectDetails = () => {
         if (projectData) {
           setProject(projectData);
         } else {
-          setError("Project not found");
+          setError('Project not found');
         }
       } catch (err) {
-        console.error("Error fetching project:", err);
-        setError("Failed to load project details");
+        console.error('Error fetching project:', err);
+        setError('Failed to load project details');
       } finally {
         setLoading(false);
       }
@@ -126,7 +148,7 @@ const ProjectDetails = () => {
         const techStackData = await techStackService.getTechStack(id);
         setTechStack(techStackData);
       } catch (err) {
-        console.error("Error fetching tech stack:", err);
+        console.error('Error fetching tech stack:', err);
         // Not setting an error state here as the project should still display
         // even if tech stack data fails to load
       } finally {
@@ -144,11 +166,10 @@ const ProjectDetails = () => {
 
       setImplementationPromptsLoading(true);
       try {
-        const data =
-          await implementationPromptsService.getImplementationPrompts(id);
+        const data = await implementationPromptsService.getImplementationPrompts(id);
         setImplementationPrompts(data);
       } catch (err) {
-        console.error("Error fetching implementation prompts:", err);
+        console.error('Error fetching implementation prompts:', err);
       } finally {
         setImplementationPromptsLoading(false);
       }
@@ -156,6 +177,72 @@ const ProjectDetails = () => {
 
     fetchImplementationPrompts();
   }, [id]);
+
+  // Effect to initialize localDataModel when fetchedDataModel loads
+  useEffect(() => {
+    if (fetchedDataModel) {
+      setLocalDataModel(fetchedDataModel);
+    }
+  }, [fetchedDataModel]);
+
+  // Effect to initialize localApiEndpoints when fetchedApiEndpoints loads
+  useEffect(() => {
+    if (fetchedApiEndpoints) {
+      setLocalApiEndpoints(fetchedApiEndpoints);
+    }
+  }, [fetchedApiEndpoints]);
+
+  // Add scroll handler to detect when to show sticky header
+  useEffect(() => {
+    const handleScroll = () => {
+      const headerHeight = 150; // Approximate height of the initial header area
+      setIsHeaderSticky(window.scrollY > headerHeight);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
+  // Add intersection observer to track which section is currently visible
+  useEffect(() => {
+    if (!project || loading) return;
+
+    const options = {
+      root: null,
+      rootMargin: '-100px 0px -80% 0px', // Consider element in view when it's 100px below viewport top and not more than 80% scrolled past
+      threshold: 0,
+    };
+
+    const sectionIds = Object.values(SectionId);
+    const observers: IntersectionObserver[] = [];
+
+    const handleIntersect = (entries: IntersectionObserverEntry[], sectionId: SectionId) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          setCurrentSection(sectionId);
+        }
+      });
+    };
+
+    sectionIds.forEach((sectionId) => {
+      const sectionElement = document.getElementById(`section-${sectionId}`);
+      if (sectionElement) {
+        const observer = new IntersectionObserver(
+          (entries) => handleIntersect(entries, sectionId as SectionId),
+          options
+        );
+        observer.observe(sectionElement);
+        observers.push(observer);
+      }
+    });
+
+    // Cleanup function
+    return () => {
+      observers.forEach((observer) => observer.disconnect());
+    };
+  }, [project, loading]);
 
   const handleProjectUpdate = (projectId: string) => {
     // Refresh project data after successful update
@@ -180,66 +267,134 @@ const ProjectDetails = () => {
     }
   };
 
-  const handleRequirementsUpdate = (
-    _updatedRequirements: Partial<Requirements>
-  ) => {
+  const handleRequirementsUpdate = (_updatedRequirements: Partial<Requirements>) => {
     // Update is handled by refetching from the backend
-    console.log("Requirements updated:", _updatedRequirements);
+    console.log('Requirements updated:', _updatedRequirements);
   };
 
   const handleFeaturesUpdate = (_updatedFeatures: FeaturesData) => {
     // Update is handled by refetching from the backend
-    console.log("Features updated:", _updatedFeatures);
+    console.log('Features updated:', _updatedFeatures);
   };
 
   const handlePagesUpdate = (_updatedPages: Pages) => {
     // Update is handled by refetching from the backend
-    console.log("Pages updated:", _updatedPages);
+    console.log('Pages updated:', _updatedPages);
   };
 
-  const handleDataModelUpdate = (_updatedDataModel: Partial<DataModel>) => {
-    // Update is handled by refetching from the backend
-    console.log("Data Model updated:", _updatedDataModel);
+  const handleDataModelUpdate = (updatedDataModel: Partial<DataModel>) => {
+    setLocalDataModel(updatedDataModel);
+    console.log('Data Model updated locally:', updatedDataModel);
   };
 
-  const handleApiEndpointsUpdate = (_updatedApiEndpoints: Api) => {
-    // Update is handled by refetching from the backend
-    console.log("API Endpoints updated:", _updatedApiEndpoints);
+  const handleApiEndpointsUpdate = (updatedApiEndpoints: Api) => {
+    setLocalApiEndpoints(updatedApiEndpoints);
+    console.log('API Endpoints updated locally:', updatedApiEndpoints);
   };
 
   const handleTestCasesUpdate = (_updatedTestCases: TestCasesData) => {
     // Update is handled by refetching from the backend
-    console.log("Test Cases updated:", _updatedTestCases);
+    console.log('Test Cases updated:', _updatedTestCases);
   };
 
   const handleUIDesignUpdate = (_updatedUIDesign: UIDesign) => {
     // Update is handled by refetching from the backend
-    console.log("UI Design updated:", _updatedUIDesign);
+    console.log('UI Design updated:', _updatedUIDesign);
   };
 
-  const handleImplementationPromptsUpdate = (
-    updatedPrompts: Partial<ImplementationPrompts>
-  ) => {
+  const handleImplementationPromptsUpdate = (updatedPrompts: Partial<ImplementationPrompts>) => {
     // Update local state immediately so the preview shows the latest changes
     setImplementationPrompts(updatedPrompts as ImplementationPrompts);
-    console.log("Implementation Prompts updated:", updatedPrompts);
+    console.log('Implementation Prompts updated:', updatedPrompts);
+  };
+
+  const scrollToSection = (sectionId: SectionId) => {
+    const element = document.getElementById(`section-${sectionId}`);
+    if (element) {
+      // Get the sticky header element
+      const headerElement = document.querySelector<HTMLElement>('.fixed.left-0.right-0.top-0.z-50');
+      const headerHeight = headerElement ? headerElement.offsetHeight : 0;
+      // Calculate position relative to the viewport, add current scroll offset, subtract header height and a small margin
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - headerHeight - 16; // 16px margin
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth',
+      });
+    }
   };
 
   return (
     <MainLayout>
-      <div className="container max-w-6xl mx-auto px-4 py-8">
-        <div className="flex items-center mb-6">
+      {/* Sticky project header */}
+      {project && !loading && (
+        <div
+          className={`fixed left-0 right-0 top-0 z-50 bg-white shadow-md transition-transform duration-300 dark:bg-slate-900 ${
+            isHeaderSticky ? 'translate-y-0' : '-translate-y-full'
+          }`}
+        >
+          <div className="container mx-auto flex max-w-6xl items-center px-4 py-3">
+            <Button
+              onClick={() => navigate('/projects')}
+              variant="ghost"
+              size="icon"
+              className="mr-2 h-8 w-8 shrink-0 text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+            >
+              <ChevronLeft size={18} />
+              <span className="sr-only">Back to Projects</span>
+            </Button>
+            <div className="flex min-w-0 flex-1 items-center">
+              <h2 className="mr-2 hidden truncate text-lg font-bold text-slate-900 dark:text-white sm:block">
+                {project?.name}
+              </h2>
+              <h2 className="mr-2 block truncate text-lg font-bold text-slate-900 dark:text-white sm:hidden">
+                {project?.name.length > 15 ? `${project?.name.substring(0, 15)}...` : project?.name}
+              </h2>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="-ml-2 flex items-center px-2 py-1 text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+                  >
+                    <span className="mr-1 hidden sm:inline-block">•</span>
+                    <span className="truncate">{sectionDisplayNames[currentSection]}</span>
+                    <ChevronDown size={16} className="ml-1 shrink-0" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  {Object.entries(sectionDisplayNames).map(([id, name]) => (
+                    <DropdownMenuItem
+                      key={id}
+                      onSelect={() => scrollToSection(id as SectionId)}
+                      className={
+                        currentSection === id
+                          ? 'font-semibold text-primary-600 dark:text-primary-400'
+                          : ''
+                      }
+                    >
+                      {name}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="container mx-auto max-w-6xl px-4 py-8">
+        <div className="mb-6 flex items-center">
           <Button
-            onClick={() => navigate("/projects")}
+            onClick={() => navigate('/projects')}
             variant="ghost"
-            className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 mr-3"
+            className="mr-3 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
           >
             <ChevronLeft size={20} />
           </Button>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-            {loading
-              ? "Loading Project..."
-              : project?.name || "Project Details"}
+            {loading ? 'Loading Project...' : project?.name || 'Project Details'}
           </h1>
           {project && !loading && (
             <div className="ml-auto">
@@ -250,8 +405,8 @@ const ProjectDetails = () => {
                 features={features || null}
                 uiDesign={uiDesign || null}
                 pages={pages || null}
-                dataModel={dataModel || null}
-                apiEndpoints={apiEndpoints || null}
+                dataModel={localDataModel || null}
+                apiEndpoints={localApiEndpoints || null}
                 testCases={testCases || null}
                 implementationPrompts={implementationPrompts || null}
               />
@@ -260,19 +415,19 @@ const ProjectDetails = () => {
         </div>
 
         {loading ? (
-          <Card className="flex justify-center items-center py-16">
-            <Loader2 className="h-8 w-8 text-primary-600 animate-spin mr-3" />
-            <span className="text-slate-600 dark:text-slate-300 font-medium">
+          <Card className="flex items-center justify-center py-16">
+            <Loader2 className="mr-3 h-8 w-8 animate-spin text-primary-600" />
+            <span className="font-medium text-slate-600 dark:text-slate-300">
               Loading project details...
             </span>
           </Card>
         ) : error ? (
-          <Card className="flex justify-center items-center py-16">
+          <Card className="flex items-center justify-center py-16">
             <div className="text-center">
-              <div className="text-red-500 mb-4">
+              <div className="mb-4 text-red-500">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-16 w-16 mx-auto"
+                  className="mx-auto h-16 w-16"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -285,15 +440,15 @@ const ProjectDetails = () => {
                   />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-2">
+              <h3 className="mb-2 text-xl font-semibold text-slate-800 dark:text-slate-100">
                 {error}
               </h3>
-              <p className="text-slate-500 dark:text-slate-400 mb-6">
+              <p className="mb-6 text-slate-500 dark:text-slate-400">
                 There was a problem loading the project details.
               </p>
               <Button
-                onClick={() => navigate("/projects")}
-                className="px-5 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg shadow-sm"
+                onClick={() => navigate('/projects')}
+                className="rounded-lg bg-primary-600 px-5 py-2 text-white shadow-sm hover:bg-primary-700"
               >
                 Return to Projects
               </Button>
@@ -302,142 +457,162 @@ const ProjectDetails = () => {
         ) : project ? (
           <div className="space-y-6">
             {/* Project Basics Section */}
-            <ProjectBasicsSection
-              project={project}
-              sectionId={SectionId.BASICS}
-              isExpanded={expandedSections[SectionId.BASICS]}
-              viewMode={sectionViewModes[SectionId.BASICS]}
-              isLoading={loading}
-              onToggle={toggleSection}
-              onViewModeChange={changeViewMode}
-              onSuccess={handleProjectUpdate}
-            />
+            <div id={`section-${SectionId.BASICS}`}>
+              <ProjectBasicsSection
+                project={project}
+                sectionId={SectionId.BASICS}
+                isExpanded={expandedSections[SectionId.BASICS]}
+                viewMode={sectionViewModes[SectionId.BASICS]}
+                isLoading={loading}
+                onToggle={toggleSection}
+                onViewModeChange={changeViewMode}
+                onSuccess={handleProjectUpdate}
+              />
+            </div>
 
             {/* Tech Stack Section */}
-            <TechStackSection
-              techStack={techStack}
-              projectId={id}
-              projectName={project.name}
-              sectionId={SectionId.TECH_STACK}
-              isExpanded={expandedSections[SectionId.TECH_STACK]}
-              viewMode={sectionViewModes[SectionId.TECH_STACK]}
-              isLoading={techStackLoading}
-              onToggle={toggleSection}
-              onViewModeChange={changeViewMode}
-              onSuccess={handleTechStackUpdate}
-            />
+            <div id={`section-${SectionId.TECH_STACK}`}>
+              <TechStackSection
+                techStack={techStack}
+                projectId={id}
+                projectName={project.name}
+                sectionId={SectionId.TECH_STACK}
+                isExpanded={expandedSections[SectionId.TECH_STACK]}
+                viewMode={sectionViewModes[SectionId.TECH_STACK]}
+                isLoading={techStackLoading}
+                onToggle={toggleSection}
+                onViewModeChange={changeViewMode}
+                onSuccess={handleTechStackUpdate}
+              />
+            </div>
 
             {/* Requirements Section */}
-            <RequirementsSection
-              requirements={requirements}
-              projectId={id}
-              projectName={project.name}
-              sectionId={SectionId.REQUIREMENTS}
-              isExpanded={expandedSections[SectionId.REQUIREMENTS]}
-              viewMode={sectionViewModes[SectionId.REQUIREMENTS]}
-              isLoading={requirementsLoading}
-              onToggle={toggleSection}
-              onViewModeChange={changeViewMode}
-              onSuccess={handleRequirementsUpdate}
-            />
+            <div id={`section-${SectionId.REQUIREMENTS}`}>
+              <RequirementsSection
+                requirements={requirements}
+                projectId={id}
+                projectName={project.name}
+                sectionId={SectionId.REQUIREMENTS}
+                isExpanded={expandedSections[SectionId.REQUIREMENTS]}
+                viewMode={sectionViewModes[SectionId.REQUIREMENTS]}
+                isLoading={requirementsLoading}
+                onToggle={toggleSection}
+                onViewModeChange={changeViewMode}
+                onSuccess={handleRequirementsUpdate}
+              />
+            </div>
 
             {/* Features Section */}
-            <FeaturesSection
-              features={features}
-              projectId={id}
-              projectName={project.name}
-              sectionId={SectionId.FEATURES}
-              isExpanded={expandedSections[SectionId.FEATURES]}
-              viewMode={sectionViewModes[SectionId.FEATURES]}
-              isLoading={featuresLoading}
-              onToggle={toggleSection}
-              onViewModeChange={changeViewMode}
-              onSuccess={handleFeaturesUpdate}
-            />
+            <div id={`section-${SectionId.FEATURES}`}>
+              <FeaturesSection
+                features={features}
+                projectId={id}
+                projectName={project.name}
+                sectionId={SectionId.FEATURES}
+                isExpanded={expandedSections[SectionId.FEATURES]}
+                viewMode={sectionViewModes[SectionId.FEATURES]}
+                isLoading={featuresLoading}
+                onToggle={toggleSection}
+                onViewModeChange={changeViewMode}
+                onSuccess={handleFeaturesUpdate}
+              />
+            </div>
 
             {/* UI Design Section */}
-            <UIDesignSection
-              uiDesign={uiDesign}
-              projectId={id}
-              projectName={project.name}
-              sectionId={SectionId.UI_DESIGN}
-              isExpanded={expandedSections[SectionId.UI_DESIGN]}
-              viewMode={sectionViewModes[SectionId.UI_DESIGN]}
-              isLoading={uiDesignLoading}
-              onToggle={toggleSection}
-              onViewModeChange={changeViewMode}
-              onSuccess={handleUIDesignUpdate}
-            />
+            <div id={`section-${SectionId.UI_DESIGN}`}>
+              <UIDesignSection
+                uiDesign={uiDesign}
+                projectId={id}
+                projectName={project.name}
+                sectionId={SectionId.UI_DESIGN}
+                isExpanded={expandedSections[SectionId.UI_DESIGN]}
+                viewMode={sectionViewModes[SectionId.UI_DESIGN]}
+                isLoading={uiDesignLoading}
+                onToggle={toggleSection}
+                onViewModeChange={changeViewMode}
+                onSuccess={handleUIDesignUpdate}
+              />
+            </div>
 
             {/* Pages Section */}
-            <PagesSection
-              pages={pages}
-              projectId={id}
-              projectName={project.name}
-              sectionId={SectionId.PAGES}
-              isExpanded={expandedSections[SectionId.PAGES]}
-              viewMode={sectionViewModes[SectionId.PAGES]}
-              isLoading={pagesLoading}
-              onToggle={toggleSection}
-              onViewModeChange={changeViewMode}
-              onSuccess={handlePagesUpdate}
-            />
+            <div id={`section-${SectionId.PAGES}`}>
+              <PagesSection
+                pages={pages}
+                projectId={id}
+                projectName={project.name}
+                sectionId={SectionId.PAGES}
+                isExpanded={expandedSections[SectionId.PAGES]}
+                viewMode={sectionViewModes[SectionId.PAGES]}
+                isLoading={pagesLoading}
+                onToggle={toggleSection}
+                onViewModeChange={changeViewMode}
+                onSuccess={handlePagesUpdate}
+              />
+            </div>
 
             {/* Data Model Section */}
-            <DataModelSection
-              dataModel={dataModel}
-              projectId={id}
-              projectName={project.name}
-              sectionId={SectionId.DATA_MODEL}
-              isExpanded={expandedSections[SectionId.DATA_MODEL]}
-              viewMode={sectionViewModes[SectionId.DATA_MODEL]}
-              isLoading={dataModelLoading}
-              onToggle={toggleSection}
-              onViewModeChange={changeViewMode}
-              onSuccess={handleDataModelUpdate}
-            />
+            <div id={`section-${SectionId.DATA_MODEL}`}>
+              <DataModelSection
+                dataModel={localDataModel}
+                projectId={id}
+                projectName={project.name}
+                sectionId={SectionId.DATA_MODEL}
+                isExpanded={expandedSections[SectionId.DATA_MODEL]}
+                viewMode={sectionViewModes[SectionId.DATA_MODEL]}
+                isLoading={dataModelLoading}
+                onToggle={toggleSection}
+                onViewModeChange={changeViewMode}
+                onSuccess={handleDataModelUpdate}
+              />
+            </div>
 
             {/* API Endpoints Section */}
-            <ApiEndpointsSection
-              apiEndpoints={apiEndpoints}
-              projectId={id}
-              projectName={project.name}
-              sectionId={SectionId.API_ENDPOINTS}
-              isExpanded={expandedSections[SectionId.API_ENDPOINTS]}
-              viewMode={sectionViewModes[SectionId.API_ENDPOINTS]}
-              isLoading={apiEndpointsLoading}
-              onToggle={toggleSection}
-              onViewModeChange={changeViewMode}
-              onSuccess={handleApiEndpointsUpdate}
-            />
+            <div id={`section-${SectionId.API_ENDPOINTS}`}>
+              <ApiEndpointsSection
+                apiEndpoints={localApiEndpoints}
+                projectId={id}
+                projectName={project.name}
+                sectionId={SectionId.API_ENDPOINTS}
+                isExpanded={expandedSections[SectionId.API_ENDPOINTS]}
+                viewMode={sectionViewModes[SectionId.API_ENDPOINTS]}
+                isLoading={apiEndpointsLoading}
+                onToggle={toggleSection}
+                onViewModeChange={changeViewMode}
+                onSuccess={handleApiEndpointsUpdate}
+              />
+            </div>
 
             {/* Test Cases Section */}
-            <TestCasesSection
-              testCases={testCases}
-              projectId={id}
-              projectName={project.name}
-              sectionId={SectionId.TEST_CASES}
-              isExpanded={expandedSections[SectionId.TEST_CASES]}
-              viewMode={sectionViewModes[SectionId.TEST_CASES]}
-              isLoading={testCasesLoading}
-              onToggle={toggleSection}
-              onViewModeChange={changeViewMode}
-              onSuccess={handleTestCasesUpdate}
-            />
+            <div id={`section-${SectionId.TEST_CASES}`}>
+              <TestCasesSection
+                testCases={testCases}
+                projectId={id}
+                projectName={project.name}
+                sectionId={SectionId.TEST_CASES}
+                isExpanded={expandedSections[SectionId.TEST_CASES]}
+                viewMode={sectionViewModes[SectionId.TEST_CASES]}
+                isLoading={testCasesLoading}
+                onToggle={toggleSection}
+                onViewModeChange={changeViewMode}
+                onSuccess={handleTestCasesUpdate}
+              />
+            </div>
 
             {/* Implementation Prompts Section */}
-            <ImplementationPromptsSection
-              implementationPrompts={implementationPrompts}
-              projectId={id}
-              projectName={project.name}
-              sectionId={SectionId.IMPLEMENTATION_PROMPTS}
-              isExpanded={expandedSections[SectionId.IMPLEMENTATION_PROMPTS]}
-              viewMode={sectionViewModes[SectionId.IMPLEMENTATION_PROMPTS]}
-              isLoading={implementationPromptsLoading}
-              onToggle={toggleSection}
-              onViewModeChange={changeViewMode}
-              onSuccess={handleImplementationPromptsUpdate}
-            />
+            <div id={`section-${SectionId.IMPLEMENTATION_PROMPTS}`}>
+              <ImplementationPromptsSection
+                implementationPrompts={implementationPrompts}
+                projectId={id}
+                projectName={project.name}
+                sectionId={SectionId.IMPLEMENTATION_PROMPTS}
+                isExpanded={expandedSections[SectionId.IMPLEMENTATION_PROMPTS]}
+                viewMode={sectionViewModes[SectionId.IMPLEMENTATION_PROMPTS]}
+                isLoading={implementationPromptsLoading}
+                onToggle={toggleSection}
+                onViewModeChange={changeViewMode}
+                onSuccess={handleImplementationPromptsUpdate}
+              />
+            </div>
           </div>
         ) : null}
       </div>

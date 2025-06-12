@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import { Toast as ToastType } from "../../hooks/useToast";
+import { useEffect } from 'react';
+import { Toast as ToastType } from '../../hooks/useToast';
 
 interface ToastProps {
   toast: ToastType;
@@ -19,16 +19,16 @@ const Toast = ({ toast, onDismiss }: ToastProps) => {
 
   const getToastClasses = () => {
     const baseClasses =
-      "flex items-center p-4 rounded-md shadow-md transition-all duration-300 w-full";
+      'flex items-center p-4 rounded-md shadow-md transition-all duration-300 w-full';
 
     switch (toast.type) {
-      case "success":
+      case 'success':
         return `${baseClasses} bg-green-500 text-white`;
-      case "error":
+      case 'error':
         return `${baseClasses} bg-red-500 text-white`;
-      case "warning":
+      case 'warning':
         return `${baseClasses} bg-yellow-500 text-white`;
-      case "info":
+      case 'info':
       default:
         return `${baseClasses} bg-blue-500 text-white`;
     }
@@ -45,7 +45,7 @@ const Toast = ({ toast, onDismiss }: ToastProps) => {
         className="ml-4 text-white hover:text-gray-200"
       >
         <svg
-          className="w-5 h-5"
+          className="h-5 w-5"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"

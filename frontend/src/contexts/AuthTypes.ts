@@ -1,4 +1,4 @@
-import { UserProfile } from "../api/userApi";
+import { UserProfile } from '../api/userApi';
 
 // Define the User type
 export interface User {

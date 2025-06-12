@@ -1,15 +1,9 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  ReactNode,
-} from "react";
-import { useAuth } from "./index";
-import { subscriptionService } from "../services/subscriptionService";
-import { userApi } from "../api/userApi";
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useAuth } from './index';
+import { subscriptionService } from '../services/subscriptionService';
+import { userApi } from '../api/userApi';
 
-export type SubscriptionPlan = "free" | "premium" | "open_source";
+export type SubscriptionPlan = 'free' | 'premium' | 'open_source';
 
 interface SubscriptionContextType {
   // Plan information
@@ -30,7 +24,7 @@ interface SubscriptionContextType {
 }
 
 const defaultContextValue: SubscriptionContextType = {
-  currentPlan: "free",
+  currentPlan: 'free',
   subscriptionId: null,
   isLoading: true,
   aiCreditsAvailable: 0,
@@ -41,8 +35,7 @@ const defaultContextValue: SubscriptionContextType = {
   refreshSubscriptionData: async () => {},
 };
 
-const SubscriptionContext =
-  createContext<SubscriptionContextType>(defaultContextValue);
+const SubscriptionContext = createContext<SubscriptionContextType>(defaultContextValue);
 
 export const useSubscription = () => useContext(SubscriptionContext);
 
@@ -50,12 +43,10 @@ interface SubscriptionProviderProps {
   children: ReactNode;
 }
 
-export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
-  children,
-}) => {
+export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({ children }) => {
   const { currentUser, loading: authLoading } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
-  const [currentPlan, setCurrentPlan] = useState<SubscriptionPlan>("free");
+  const [currentPlan, setCurrentPlan] = useState<SubscriptionPlan>('free');
   const [subscriptionId, setSubscriptionId] = useState<string | null>(null);
   const [aiCreditsAvailable, setAiCreditsAvailable] = useState(0);
   const [aiCreditsUsed, setAiCreditsUsed] = useState(0);
@@ -81,15 +72,12 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
         setAiCreditsUsed(currentUser.profile.ai_credits_used || 0);
 
         // Update feature flags based on plan type
-        setHasAIFeatures(planType === "premium" || planType === "open_source");
-        setHasPremiumTemplates(planType === "premium");
-        setHasUnlimitedProjects(
-          planType === "premium" || planType === "open_source"
-        );
+        setHasAIFeatures(planType === 'premium' || planType === 'open_source');
+        setHasPremiumTemplates(planType === 'premium');
+        setHasUnlimitedProjects(planType === 'premium' || planType === 'open_source');
       } else {
         // Alternatively fetch from subscription endpoint if implemented
-        const subscriptionData =
-          await subscriptionService.getCurrentSubscription();
+        const subscriptionData = await subscriptionService.getCurrentSubscription();
         if (subscriptionData) {
           const planType = subscriptionData.plan_type as SubscriptionPlan;
           setCurrentPlan(planType);
@@ -97,19 +85,15 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
           setAiCreditsAvailable(subscriptionData.ai_credits_current);
 
           // Update feature flags based on plan type
-          setHasAIFeatures(
-            planType === "premium" || planType === "open_source"
-          );
-          setHasPremiumTemplates(planType === "premium");
-          setHasUnlimitedProjects(
-            planType === "premium" || planType === "open_source"
-          );
+          setHasAIFeatures(planType === 'premium' || planType === 'open_source');
+          setHasPremiumTemplates(planType === 'premium');
+          setHasUnlimitedProjects(planType === 'premium' || planType === 'open_source');
         }
       }
     } catch (error) {
-      console.error("Failed to fetch subscription data", error);
+      console.error('Failed to fetch subscription data', error);
       // Fallback to free plan on error
-      setCurrentPlan("free");
+      setCurrentPlan('free');
       // Reset feature flags
       setHasAIFeatures(false);
       setHasPremiumTemplates(false);
@@ -126,24 +110,18 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
 
   // Update feature flags whenever the plan changes
   useEffect(() => {
-    setHasAIFeatures(
-      currentPlan === "premium" || currentPlan === "open_source"
-    );
-    setHasPremiumTemplates(currentPlan === "premium");
-    setHasUnlimitedProjects(
-      currentPlan === "premium" || currentPlan === "open_source"
-    );
+    setHasAIFeatures(currentPlan === 'premium' || currentPlan === 'open_source');
+    setHasPremiumTemplates(currentPlan === 'premium');
+    setHasUnlimitedProjects(currentPlan === 'premium' || currentPlan === 'open_source');
   }, [currentPlan]);
 
   // Function to refresh subscription data
   const refreshSubscriptionData = async (): Promise<void> => {
     const user = await userApi.getCurrentUserProfile();
     if (user) {
-      setHasAIFeatures(user.plan === "premium" || user.plan === "open_source");
-      setHasPremiumTemplates(user.plan === "premium");
-      setHasUnlimitedProjects(
-        user.plan === "premium" || user.plan === "open_source"
-      );
+      setHasAIFeatures(user.plan === 'premium' || user.plan === 'open_source');
+      setHasPremiumTemplates(user.plan === 'premium');
+      setHasUnlimitedProjects(user.plan === 'premium' || user.plan === 'open_source');
     }
   };
 
@@ -159,9 +137,5 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
     refreshSubscriptionData,
   };
 
-  return (
-    <SubscriptionContext.Provider value={value}>
-      {children}
-    </SubscriptionContext.Provider>
-  );
+  return <SubscriptionContext.Provider value={value}>{children}</SubscriptionContext.Provider>;
 };

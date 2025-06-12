@@ -1,8 +1,8 @@
 /**
  * Service for data model API interactions.
  */
-import apiClient from "../api/apiClient";
-import { DataModel } from "../types/templates";
+import apiClient from '../api/apiClient';
+import { DataModel } from '../types/templates';
 
 // Interface to match the backend response format
 interface DataModelSpec {
@@ -16,7 +16,7 @@ interface DataModelSpec {
 }
 
 // Define the API base URL to be consistent with other services
-const API_BASE_URL = "/api";
+const API_BASE_URL = '/api';
 
 export const dataModelService = {
   /**
@@ -32,16 +32,13 @@ export const dataModelService = {
       );
 
       if (!response.data || !response.data.data) {
-        console.error("Invalid data model response:", response.data);
+        console.error('Invalid data model response:', response.data);
         return null;
       }
 
       return response.data.data;
     } catch (error) {
-      console.error(
-        `Error fetching data model for project ${projectId}:`,
-        error
-      );
+      console.error(`Error fetching data model for project ${projectId}:`, error);
       return null;
     }
   },
@@ -53,10 +50,7 @@ export const dataModelService = {
    * @param data - Data model data
    * @returns Promise containing the updated data model
    */
-  async saveDataModel(
-    projectId: string,
-    data: DataModel
-  ): Promise<DataModel | null> {
+  async saveDataModel(projectId: string, data: DataModel): Promise<DataModel | null> {
     try {
       const payload = {
         data: data,
@@ -68,7 +62,7 @@ export const dataModelService = {
       );
 
       if (!response.data || !response.data.data) {
-        console.error("Invalid data model response:", response.data);
+        console.error('Invalid data model response:', response.data);
         return null;
       }
 

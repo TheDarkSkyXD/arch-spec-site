@@ -41,30 +41,18 @@ const Toggle = ({
       <div className="flex items-center">
         {label && (
           <div className="mr-4">
-            <Switch.Label className="text-sm font-medium text-gray-700">
-              {label}
-            </Switch.Label>
-            {description && (
-              <p className="text-xs text-gray-500">{description}</p>
-            )}
+            <Switch.Label className="text-sm font-medium text-gray-700">{label}</Switch.Label>
+            {description && <p className="text-xs text-gray-500">{description}</p>}
           </div>
         )}
         <Switch
           checked={enabled}
           onChange={onChange}
           disabled={disabled}
-          className={`${enabled ? 'bg-blue-600' : 'bg-gray-200'}
-            ${sizeClasses[size]}
-            ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-            relative inline-flex shrink-0 border-2 border-transparent rounded-full
-            transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2
-            focus:ring-offset-2 focus:ring-blue-500`}
+          className={`${enabled ? 'bg-blue-600' : 'bg-gray-200'} ${sizeClasses[size]} ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'} relative inline-flex shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`}
         >
           <span
-            className={`${enabled ? translateClasses[size] : 'translate-x-0'}
-              ${thumbSizeClasses[size]}
-              pointer-events-none inline-block rounded-full bg-white shadow
-              transform ring-0 transition ease-in-out duration-200`}
+            className={`${enabled ? translateClasses[size] : 'translate-x-0'} ${thumbSizeClasses[size]} pointer-events-none inline-block transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
           />
         </Switch>
       </div>

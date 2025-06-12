@@ -62,6 +62,7 @@ python -m app.scripts.seed_database [options]
 - `--clean-all`: Delete all existing records before seeding
 - `--tech-stack-only`: Only seed tech stack data
 - `--templates-only`: Only seed template data
+- `--implementation-prompts-only`: Only seed implementation prompts data
 
 ##### Examples
 
@@ -77,6 +78,9 @@ python -m app.scripts.seed_database --tech-stack-only --clean-all
 
 # Only refresh templates, keeping other data unchanged
 python -m app.scripts.seed_database --templates-only --clean-all
+
+# Only refresh implementation prompts, keepint other data unchanged
+python -m app.scripts.seed_database --implementation-prompts-only --clean-all
 
 ```
 

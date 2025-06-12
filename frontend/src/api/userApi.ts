@@ -1,17 +1,17 @@
-import axios from "axios";
-import { getAuthToken } from "../services/auth";
-import { SubscriptionPlan } from "../contexts/SubscriptionContext";
+import axios from 'axios';
+import { SubscriptionPlan } from '../contexts/SubscriptionContext';
+import { getAuthToken } from '../services/auth';
 
 // Define API base URL
 const API_BASE_URL = import.meta.env.DEV
-  ? "http://localhost:8000" // Development
-  : import.meta.env.VITE_API_URL || "https://api.archspec.dev"; // Use env variable with fallback
+  ? 'http://localhost:8000' // Development
+  : import.meta.env.VITE_API_URL || 'https://api.archspec.dev'; // Use env variable with fallback
 
 // Create axios instance with auth header
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
-    "Content-Type": "application/json",
+    'Content-Type': 'application/json',
   },
 });
 
@@ -27,7 +27,7 @@ apiClient.interceptors.request.use(
         delete config.headers.Authorization;
       }
     } catch (error) {
-      console.error("Error getting auth token:", error);
+      console.error('Error getting auth token:', error);
       // Remove any existing auth header if we can't get a new token
       delete config.headers.Authorization;
     }
@@ -41,18 +41,22 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (error.response?.status === 401) {
-      // Token might be expired, try to get a fresh token
+    const originalRequest = error.config;
+
+    // Check if error is 401 and we haven't already tried retrying
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      // Mark this request as retried to prevent infinite loops
+      originalRequest._retry = true;
+
       try {
         const newToken = await getAuthToken();
         if (newToken) {
           // Retry the original request with the new token
-          const originalRequest = error.config;
           originalRequest.headers.Authorization = `Bearer ${newToken}`;
           return apiClient(originalRequest);
         }
       } catch (refreshError) {
-        console.error("Error refreshing token:", refreshError);
+        console.error('Error refreshing token:', refreshError);
       }
     }
     return Promise.reject(error);
@@ -82,7 +86,7 @@ export interface UserUpdateData {
   display_name?: string;
   photo_url?: string;
   settings?: Record<string, unknown>;
-  plan?: "free" | "premium" | "open_source";
+  plan?: 'free' | 'premium' | 'open_source';
   subscription_id?: string | null;
   ai_credits?: number;
   ai_credits_used?: number;
@@ -93,10 +97,10 @@ export const userApi = {
   // Get current user profile
   getCurrentUserProfile: async (): Promise<UserProfile> => {
     try {
-      const response = await apiClient.get("/api/users/me");
+      const response = await apiClient.get('/api/users/me');
       return response.data;
     } catch (error) {
-      console.error("Error fetching user profile:", error);
+      console.error('Error fetching user profile:', error);
       throw error;
     }
   },
@@ -104,42 +108,37 @@ export const userApi = {
   // Update user profile
   updateUserProfile: async (userData: UserUpdateData): Promise<UserProfile> => {
     try {
-      const response = await apiClient.put("/api/users/me", userData);
+      const response = await apiClient.put('/api/users/me', userData);
       return response.data;
     } catch (error) {
-      console.error("Error updating user profile:", error);
+      console.error('Error updating user profile:', error);
       throw error;
     }
   },
 
   // Update user subscription
   updateUserSubscription: async (subscriptionData: {
-    plan?: "free" | "premium" | "open_source";
+    plan?: 'free' | 'premium' | 'open_source';
     subscription_id?: string | null;
     ai_credits?: number;
     ai_credits_used?: number;
   }): Promise<UserProfile> => {
     try {
-      const response = await apiClient.put(
-        "/api/users/me/subscription",
-        subscriptionData
-      );
+      const response = await apiClient.put('/api/users/me/subscription', subscriptionData);
       return response.data;
     } catch (error) {
-      console.error("Error updating user subscription:", error);
+      console.error('Error updating user subscription:', error);
       throw error;
     }
   },
 
   // Update user settings
-  updateUserSettings: async (
-    settings: Record<string, unknown>
-  ): Promise<UserProfile> => {
+  updateUserSettings: async (settings: Record<string, unknown>): Promise<UserProfile> => {
     try {
-      const response = await apiClient.put("/api/users/me/settings", settings);
+      const response = await apiClient.put('/api/users/me/settings', settings);
       return response.data;
     } catch (error) {
-      console.error("Error updating user settings:", error);
+      console.error('Error updating user settings:', error);
       throw error;
     }
   },

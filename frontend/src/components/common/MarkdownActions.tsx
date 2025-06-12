@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { Copy, Download, Check } from "lucide-react";
-import Button from "../ui/Button";
-import { useToast } from "../../contexts/ToastContext";
+import { useState } from 'react';
+import { Copy, Download, Check } from 'lucide-react';
+import Button from '../ui/Button';
+import { useToast } from '../../contexts/ToastContext';
 
 interface MarkdownActionsProps {
   markdown: string;
@@ -11,8 +11,8 @@ interface MarkdownActionsProps {
 
 const MarkdownActions = ({
   markdown,
-  fileName = "document.md",
-  className = "",
+  fileName = 'document.md',
+  className = '',
 }: MarkdownActionsProps) => {
   const [copied, setCopied] = useState(false);
   const { showToast } = useToast();
@@ -24,20 +24,20 @@ const MarkdownActions = ({
       setCopied(true);
 
       showToast({
-        title: "Copied!",
-        description: "Markdown copied to clipboard",
-        type: "success",
+        title: 'Copied!',
+        description: 'Markdown copied to clipboard',
+        type: 'success',
       });
 
       // Reset copied state after 2 seconds
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      console.error("Failed to copy text: ", err);
+      console.error('Failed to copy text: ', err);
 
       showToast({
-        title: "Error",
-        description: "Failed to copy to clipboard",
-        type: "error",
+        title: 'Error',
+        description: 'Failed to copy to clipboard',
+        type: 'error',
       });
     }
   };
@@ -45,9 +45,9 @@ const MarkdownActions = ({
   // Download markdown as a file
   const downloadMarkdown = () => {
     try {
-      const blob = new Blob([markdown], { type: "text/markdown" });
+      const blob = new Blob([markdown], { type: 'text/markdown' });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
+      const a = document.createElement('a');
       a.href = url;
       a.download = fileName;
       document.body.appendChild(a);
@@ -58,17 +58,17 @@ const MarkdownActions = ({
       document.body.removeChild(a);
 
       showToast({
-        title: "Downloaded!",
+        title: 'Downloaded!',
         description: `File saved as ${fileName}`,
-        type: "success",
+        type: 'success',
       });
     } catch (err) {
-      console.error("Failed to download file: ", err);
+      console.error('Failed to download file: ', err);
 
       showToast({
-        title: "Error",
-        description: "Failed to download file",
-        type: "error",
+        title: 'Error',
+        description: 'Failed to download file',
+        type: 'error',
       });
     }
   };
@@ -82,7 +82,7 @@ const MarkdownActions = ({
         className="flex items-center gap-1"
       >
         {copied ? <Check size={16} /> : <Copy size={16} />}
-        <span>{copied ? "Copied" : "Copy"}</span>
+        <span>{copied ? 'Copied' : 'Copy'}</span>
       </Button>
 
       <Button

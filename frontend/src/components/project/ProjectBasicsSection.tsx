@@ -33,8 +33,8 @@ const ProjectBasicsSection: React.FC<ProjectBasicsSectionProps> = ({
       ...project,
       // Convert arrays to comma-separated strings for the form
       business_goals: project.business_goals || [],
-      target_users: project.target_users || "",
-      domain: project.domain || "",
+      target_users: project.target_users || '',
+      domain: project.domain || '',
     };
   };
 
@@ -49,16 +49,11 @@ const ProjectBasicsSection: React.FC<ProjectBasicsSectionProps> = ({
       onViewModeChange={onViewModeChange}
       isLoading={isLoading}
       markdown={markdownService.generateProjectBasicsMarkdown(project)}
-      markdownFileName={markdownService.generateFileName(project.name, "basics")}
+      markdownFileName={markdownService.generateFileName(project.name, 'basics')}
       editContent={
-        <ProjectBasicsForm
-          initialData={processProjectData(project)}
-          onSuccess={onSuccess}
-        />
+        <ProjectBasicsForm initialData={processProjectData(project)} onSuccess={onSuccess} />
       }
-      previewContent={
-        <ProjectBasicsPreview data={project} isLoading={isLoading} />
-      }
+      previewContent={<ProjectBasicsPreview data={project} isLoading={isLoading} />}
     />
   );
 };

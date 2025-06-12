@@ -1,5 +1,5 @@
-import { ChevronDownIcon, ChevronRightIcon } from "lucide-react";
-import React from "react";
+import { ChevronDownIcon, ChevronRightIcon } from 'lucide-react';
+import React from 'react';
 
 interface CollapsibleSectionProps {
   title: string;
@@ -15,19 +15,14 @@ const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
   isOpen,
   onToggle,
   children,
-  className = "",
+  className = '',
 }) => {
   return (
     <div
-      className={`bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 ${className}`}
+      className={`rounded-lg border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800 ${className}`}
     >
-      <button
-        className="w-full flex items-center justify-between p-5 text-left"
-        onClick={onToggle}
-      >
-        <h3 className="font-medium text-slate-800 dark:text-slate-100">
-          {title}
-        </h3>
+      <button className="flex w-full items-center justify-between p-5 text-left" onClick={onToggle}>
+        <h3 className="font-medium text-slate-800 dark:text-slate-100">{title}</h3>
         <span>
           {isOpen ? (
             <ChevronDownIcon className="h-5 w-5 text-slate-400" />

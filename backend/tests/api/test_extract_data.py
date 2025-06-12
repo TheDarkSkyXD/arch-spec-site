@@ -66,23 +66,23 @@ class TestExtractDataFromResponse:
                     "steps": [
                         {"type": "given", "text": "User is on login page"},
                         {"type": "when", "text": "User enters valid credentials"},
-                        {"type": "then", "text": "User is logged in"}
-                    ]
+                        {"type": "then", "text": "User is logged in"},
+                    ],
                 }
-            ]
+            ],
         }
-        
+
         # Test extraction from data field
         response = {"data": {"testCases": [test_case]}}
         result = extract_data_from_response(response, TestCasesData, test_logger)
         assert len(result.testCases) == 1
         assert result.testCases[0].feature == "Login"
-        
+
         # Test extraction from whole response
         response = {"testCases": [test_case]}
         result = extract_data_from_response(response, TestCasesData, test_logger)
         assert len(result.testCases) == 1
-        
+
         # Test extraction from content field with JSON
         response = {"content": json.dumps({"testCases": [test_case]})}
         result = extract_data_from_response(response, TestCasesData, test_logger)
@@ -95,7 +95,7 @@ class TestExtractDataFromResponse:
         result = extract_data_from_response(response, TestCasesData, test_logger)
         assert isinstance(result, TestCasesData)
         assert len(result.testCases) == 0
-        
+
     def test_handles_empty_dict_in_data(self, test_logger):
         """Test handling of empty dict in data field for TestCasesData."""
         response = {"data": {}}
@@ -103,7 +103,7 @@ class TestExtractDataFromResponse:
         result = extract_data_from_response(response, TestCasesData, test_logger)
         assert isinstance(result, TestCasesData)
         assert len(result.testCases) == 0
-            
+
     def test_handles_malformed_response(self, test_logger):
         """Test handling of malformed response."""
         # Response with invalid JSON in content
@@ -111,10 +111,10 @@ class TestExtractDataFromResponse:
         with pytest.raises(HTTPException) as excinfo:
             extract_data_from_response(response, TestCasesData, test_logger)
         assert excinfo.value.status_code == 500
-        
+
     def test_handles_empty_response_for_other_schemas(self, test_logger):
         """Test that empty responses still raise exceptions for non-TestCasesData schemas."""
         response = {}
         with pytest.raises(HTTPException) as excinfo:
             extract_data_from_response(response, SimpleTestModel, test_logger)
-        assert excinfo.value.status_code == 500 
+        assert excinfo.value.status_code == 500

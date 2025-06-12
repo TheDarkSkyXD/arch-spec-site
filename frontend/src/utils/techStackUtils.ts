@@ -1,8 +1,4 @@
-import {
-  Categories,
-  Technologies,
-  TechStackData,
-} from "../types/techStack";
+import { Categories, Technologies, TechStackData } from '../types/techStack';
 
 /**
  * Find all compatible technologies from one category based on a selected technology
@@ -20,15 +16,25 @@ export function getCompatibleTechnologies(
   targetCategory: string
 ): string[] {
   // Get the technology object
-  const category = selectedCategory as keyof TechStackData["technologies"];
+  const category = selectedCategory as keyof TechStackData['technologies'];
   const technologies = techStackData.technologies[category];
   if (!technologies) return [];
 
   const technology = technologies[selectedTechnology];
   if (!technology) return [];
 
+  // Special case for languages
+  if (
+    targetCategory === 'languages' &&
+    'languages' in technology &&
+    technology.languages &&
+    Array.isArray(technology.languages)
+  ) {
+    return technology.languages;
+  }
+
   // Access the compatibleWith property
-  const compatibleWith = (technology).compatibleWith;
+  const compatibleWith = technology.compatibleWith;
   if (!compatibleWith) return [];
 
   // If compatibleWith is an array, return it directly
@@ -49,6 +55,76 @@ export function getCompatibleTechnologies(
 }
 
 /**
+ * Find technologies from targetCategory that list the selected technology in their compatibleWith property
+ */
+function findReverseDependencies(
+  techStackData: TechStackData,
+  selectedCategory: string,
+  selectedTechnology: string,
+  targetCategory: string
+): string[] {
+  const targetTechs = techStackData.technologies[targetCategory as keyof Technologies];
+  if (!targetTechs) return [];
+
+  // Special case for BaaS services looking for frontend frameworks
+  if (selectedCategory === 'frameworks' && targetCategory === 'baas') {
+    return Object.keys(targetTechs).filter((techName) => {
+      const tech = targetTechs[techName];
+      if (!tech || !tech.compatibleWith) return false;
+
+      if (
+        typeof tech.compatibleWith === 'object' &&
+        'frontendFrameworks' in tech.compatibleWith &&
+        Array.isArray(tech.compatibleWith.frontendFrameworks)
+      ) {
+        return tech.compatibleWith.frontendFrameworks.includes(selectedTechnology);
+      }
+
+      return false;
+    });
+  }
+
+  // Special case for frontend frameworks looking for BaaS services
+  if (selectedCategory === 'baas' && targetCategory === 'frameworks') {
+    const baas = techStackData.technologies.baas[selectedTechnology];
+    if (
+      baas &&
+      baas.compatibleWith &&
+      'frontendFrameworks' in baas.compatibleWith &&
+      Array.isArray(baas.compatibleWith.frontendFrameworks)
+    ) {
+      return baas.compatibleWith.frontendFrameworks;
+    }
+    return [];
+  }
+
+  // Standard case - find technologies that list the selected technology in their compatibleWith
+  return Object.keys(targetTechs).filter((techName) => {
+    const tech = targetTechs[techName];
+    if (!tech || !tech.compatibleWith) return false;
+
+    // Handle when compatibleWith is an array
+    if (Array.isArray(tech.compatibleWith)) {
+      return tech.compatibleWith.includes(selectedTechnology);
+    }
+
+    // Handle when compatibleWith is an object
+    if (
+      typeof tech.compatibleWith === 'object' &&
+      selectedCategory in tech.compatibleWith &&
+      Array.isArray(tech.compatibleWith[selectedCategory as keyof typeof tech.compatibleWith])
+    ) {
+      const compatList = tech.compatibleWith[
+        selectedCategory as keyof typeof tech.compatibleWith
+      ] as string[];
+      return compatList.includes(selectedTechnology);
+    }
+
+    return false;
+  });
+}
+
+/**
  * Filter all available technologies in a specific category based on multiple selections
  *
  * @param techStackData The complete tech stack data
@@ -64,35 +140,67 @@ export function filterCompatibleTechnologies(
   // If no selections have been made, return all technologies in the target category
   const selectionEntries = Object.entries(selections);
   if (selectionEntries.length === 0) {
-    const categoryKey = findCategoryKeyForSubcategory(
-      techStackData,
-      targetCategory
-    );
+    const categoryKey = findCategoryKeyForSubcategory(techStackData, targetCategory);
     if (categoryKey) {
-      const categoryObj =
-        techStackData.categories[categoryKey as keyof Categories];
+      const categoryObj = techStackData.categories[categoryKey as keyof Categories];
       if (categoryObj && targetCategory in categoryObj) {
         // Use a safer type assertion by first converting to unknown
-        return (categoryObj as unknown as Record<string, string[]>)[
-          targetCategory
-        ];
+        return (categoryObj as unknown as Record<string, string[]>)[targetCategory];
       }
     }
-    return Object.keys(
-      techStackData.technologies[targetCategory as keyof Technologies] || {}
-    );
+    return Object.keys(techStackData.technologies[targetCategory as keyof Technologies] || {});
   }
 
-  // For each selection, get compatible technologies
-  const compatibleSets = selectionEntries.map(([category, technology]) => {
-    return new Set(
-      getCompatibleTechnologies(
+  // Special case for multiple cross-domain selections
+  if (selectionEntries.length > 1 && targetCategory === 'baas') {
+    // For BaaS as target with framework and database selections
+    const frameworks = selections['frameworks'];
+    const databases = selections['databases'];
+
+    if (frameworks && databases) {
+      // Get BaaS services compatible with the selected framework
+      const baasByFramework = findReverseDependencies(
         techStackData,
-        category,
-        technology,
-        targetCategory
-      )
+        'frameworks',
+        frameworks,
+        'baas'
+      );
+
+      // Get BaaS services compatible with the selected database
+      const baasByDatabase = Object.keys(techStackData.technologies.baas).filter((baasName) => {
+        const baas = techStackData.technologies.baas[baasName];
+        if (!baas || !baas.compatibleWith || !baas.compatibleWith.databases) return false;
+        return baas.compatibleWith.databases.includes(databases);
+      });
+
+      // Find intersection
+      return baasByFramework.filter((baas) => baasByDatabase.includes(baas));
+    }
+  }
+
+  // For each selection, get compatible technologies (forward and reverse dependencies)
+  const compatibleSets = selectionEntries.map(([category, technology]) => {
+    // Try forward dependencies (selection -> target)
+    const forwardDeps = getCompatibleTechnologies(
+      techStackData,
+      category,
+      technology,
+      targetCategory
     );
+
+    // If results found, use them
+    if (forwardDeps.length > 0) {
+      return new Set(forwardDeps);
+    }
+
+    // Otherwise, try reverse dependencies (target -> selection)
+    const reverseDeps = findReverseDependencies(
+      techStackData,
+      category,
+      technology,
+      targetCategory
+    );
+    return new Set(reverseDeps);
   });
 
   // Find intersection of all sets
@@ -124,7 +232,7 @@ function findCategoryKeyForSubcategory(
   const categories = techStackData.categories;
 
   for (const [key, value] of Object.entries(categories)) {
-    if (value && typeof value === "object" && subcategory in value) {
+    if (value && typeof value === 'object' && subcategory in value) {
       return key;
     }
   }

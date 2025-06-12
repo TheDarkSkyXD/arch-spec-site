@@ -1,16 +1,15 @@
-import { useState, useEffect } from "react";
-import { templatesService } from "../services/templatesService";
-import { ProjectTemplate } from "../types/templates";
-import { useSearchParams } from "react-router-dom";
+import { useState, useEffect } from 'react';
+import { templatesService } from '../services/templatesService';
+import { ProjectTemplate } from '../types/templates';
+import { useSearchParams } from 'react-router-dom';
 
 export function useProjectTemplateSection() {
   const [searchParams] = useSearchParams();
-  const templateId = searchParams.get("template");
+  const templateId = searchParams.get('template');
 
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [selectedTemplate, setSelectedTemplate] =
-    useState<ProjectTemplate | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<ProjectTemplate | null>(null);
 
   // Load template from API if templateId is provided
   useEffect(() => {
@@ -24,23 +23,17 @@ export function useProjectTemplateSection() {
           const template = await templatesService.getTemplateById(templateId);
 
           if (template) {
-            console.log(
-              `Successfully loaded template: ${template.name} (${template.version})`
-            );
+            console.log(`Successfully loaded template: ${template.name} (${template.version})`);
             setSelectedTemplate(template);
           } else {
-            console.error(
-              `Template with ID ${templateId} not found in API response`
-            );
+            console.error(`Template with ID ${templateId} not found in API response`);
             setError(
               `Template with ID ${templateId} not found. Please try browsing all templates.`
             );
           }
         } catch (err) {
-          console.error("Error loading template:", err);
-          setError(
-            "Failed to load the selected template. Please try again later."
-          );
+          console.error('Error loading template:', err);
+          setError('Failed to load the selected template. Please try again later.');
         } finally {
           setLoading(false);
         }

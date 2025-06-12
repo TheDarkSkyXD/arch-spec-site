@@ -64,7 +64,7 @@ export interface RealtimeCompatibility {
 // Technology interfaces for different types
 export interface FrontendFramework {
   id?: string;
-  type: "frontend";
+  type: 'frontend';
   description: string;
   languages?: string[];
   compatibleWith: FrameworkCompatibility;
@@ -72,7 +72,7 @@ export interface FrontendFramework {
 
 export interface BackendFramework {
   id?: string;
-  type: "backend";
+  type: 'backend';
   description: string;
   language?: string;
   compatibleWith: BackendFrameworkCompatibility;
@@ -80,7 +80,7 @@ export interface BackendFramework {
 
 export interface BaaS {
   id?: string;
-  type: "backend";
+  type: 'backend';
   description: string;
   compatibleWith: BaaSCompatibility;
 }

@@ -1,12 +1,10 @@
-import { Requirements } from "../../types/templates";
+import { Requirements } from '../../types/templates';
 
 /**
  * Generate markdown for requirements
  */
-export function generateRequirementsMarkdown(
-  data: Partial<Requirements> | null
-): string {
-  if (!data) return "";
+export function generateRequirementsMarkdown(data: Partial<Requirements> | null): string {
+  if (!data) return '';
 
   let markdown = `# Project Requirements\n\n`;
 

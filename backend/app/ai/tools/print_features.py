@@ -1,4 +1,3 @@
-
 def print_features_input_schema():
     return {
         "name": "print_features",
@@ -18,30 +17,28 @@ def print_features_input_schema():
                                 "properties": {
                                     "name": {
                                         "type": "string",
-                                        "description": "Name of the module (e.g., Authentication, User Management)"
+                                        "description": "Name of the module (e.g., Authentication, User Management)",
                                     },
                                     "description": {
                                         "type": "string",
-                                        "description": "Brief description of the module's purpose"
+                                        "description": "Brief description of the module's purpose",
                                     },
                                     "enabled": {
                                         "type": "boolean",
-                                        "description": "Whether this module is enabled by default"
+                                        "description": "Whether this module is enabled by default",
                                     },
                                     "optional": {
                                         "type": "boolean",
-                                        "description": "Whether this module is optional or required"
+                                        "description": "Whether this module is optional or required",
                                     },
                                     "providers": {
                                         "type": "array",
                                         "description": "List of service providers associated with this module, if any",
-                                        "items": {
-                                            "type": "string"
-                                        }
-                                    }
+                                        "items": {"type": "string"},
+                                    },
                                 },
-                                "required": ["name", "description", "enabled", "optional"]
-                            }
+                                "required": ["name", "description", "enabled", "optional"],
+                            },
                         },
                         "optionalModules": {
                             "type": "array",
@@ -51,36 +48,34 @@ def print_features_input_schema():
                                 "properties": {
                                     "name": {
                                         "type": "string",
-                                        "description": "Name of the optional module"
+                                        "description": "Name of the optional module",
                                     },
                                     "description": {
                                         "type": "string",
-                                        "description": "Brief description of the optional module's purpose"
+                                        "description": "Brief description of the optional module's purpose",
                                     },
                                     "enabled": {
                                         "type": "boolean",
-                                        "description": "Whether this optional module is enabled by default"
+                                        "description": "Whether this optional module is enabled by default",
                                     },
                                     "optional": {
                                         "type": "boolean",
-                                        "description": "Always true for optional modules"
+                                        "description": "Always true for optional modules",
                                     },
                                     "providers": {
                                         "type": "array",
                                         "description": "List of service providers associated with this module, if any",
-                                        "items": {
-                                            "type": "string"
-                                        }
-                                    }
+                                        "items": {"type": "string"},
+                                    },
                                 },
-                                "required": ["name", "description", "enabled", "optional"]
-                            }
-                        }
+                                "required": ["name", "description", "enabled", "optional"],
+                            },
+                        },
                     },
-                    "required": ["coreModules"]
+                    "required": ["coreModules"],
                 }
             },
-            "required": ["data"]
+            "required": ["data"],
         },
-        "cache_control": {"type": "ephemeral"}
+        "cache_control": {"type": "ephemeral"},
     }

@@ -1,4 +1,4 @@
-import * as React from "react";
+import * as React from 'react';
 
 interface TabsProps {
   defaultValue?: string;
@@ -12,10 +12,10 @@ export const Tabs: React.FC<TabsProps> = ({
   defaultValue,
   value,
   onValueChange,
-  className = "",
+  className = '',
   children,
 }) => {
-  const [activeTab, setActiveTab] = React.useState(defaultValue || "");
+  const [activeTab, setActiveTab] = React.useState(defaultValue || '');
 
   React.useEffect(() => {
     if (value !== undefined) {
@@ -54,7 +54,7 @@ interface TabsListProps {
 }
 
 export const TabsList: React.FC<TabsListProps> = ({
-  className = "",
+  className = '',
   children,
   activeTab,
   onTabChange,
@@ -84,7 +84,7 @@ interface TabsTriggerProps {
 
 export const TabsTrigger: React.FC<TabsTriggerProps> = ({
   value,
-  className = "",
+  className = '',
   children,
   activeTab,
   onTabChange,
@@ -99,10 +99,10 @@ export const TabsTrigger: React.FC<TabsTriggerProps> = ({
 
   return (
     <button
-      className={`px-4 py-2 text-sm font-medium transition-all border-b-2 -mb-px ${
+      className={`-mb-px border-b-2 px-4 py-2 text-sm font-medium transition-all ${
         isActive
-          ? "border-primary-600 text-primary-600"
-          : "border-transparent text-slate-600 hover:text-primary-500 hover:border-primary-300 dark:hover:text-primary-400 dark:hover:border-primary-400"
+          ? 'border-primary-600 text-primary-600'
+          : 'border-transparent text-slate-600 hover:border-primary-300 hover:text-primary-500 dark:hover:border-primary-400 dark:hover:text-primary-400'
       } ${className}`}
       onClick={handleClick}
     >
@@ -120,7 +120,7 @@ interface TabsContentProps {
 
 export const TabsContent: React.FC<TabsContentProps> = ({
   value,
-  className = "",
+  className = '',
   children,
   activeTab,
 }) => {

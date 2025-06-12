@@ -9,12 +9,13 @@
     "domain": "",
     "techStack": {
       "frontend": {
-        "framework": "SvelteKit",
+        "framework": "Svelte",
         "language": "TypeScript",
         "stateManagement": "Svelte Store",
         "uiLibrary": "Tailwind CSS",
         "formHandling": "Svelte Forms",
-        "routing": "SvelteKit Routing"
+        "routing": "SvelteKit Routing",
+        "metaFramework": "SvelteKit"
       },
       "backend": {
         "type": "framework",

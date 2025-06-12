@@ -1,67 +1,60 @@
-import { useState, useEffect } from "react";
 import {
-  ToggleLeft,
-  ToggleRight,
+  Edit,
   Info,
   Loader2,
-  PlusCircle,
-  X,
-  Edit,
-  Trash2,
-  Sparkles,
-  RefreshCw,
   Lock,
-} from "lucide-react";
-import {
-  FeatureModule,
-  FeaturesData,
-  featuresService,
-} from "../../services/featuresService";
-import { useToast } from "../../contexts/ToastContext";
-import { projectsService } from "../../services/projectsService";
-import { requirementsService } from "../../services/requirementsService";
-import { aiService } from "../../services/aiService";
-import { useSubscription } from "../../contexts/SubscriptionContext";
-import { PremiumFeatureBadge, ProcessingOverlay } from "../ui/index";
-import AIInstructionsModal from "../ui/AIInstructionsModal";
+  PlusCircle,
+  RefreshCw,
+  Save,
+  Sparkles,
+  ToggleLeft,
+  ToggleRight,
+  Trash2,
+  X,
+} from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useSubscription } from '../../contexts/SubscriptionContext';
+import { useToast } from '../../contexts/ToastContext';
+import { aiService } from '../../services/aiService';
+import { FeatureModule, FeaturesData, featuresService } from '../../services/featuresService';
+import { projectsService } from '../../services/projectsService';
+import { requirementsService } from '../../services/requirementsService';
+import AIInstructionsModal from '../ui/AIInstructionsModal';
+import { PremiumFeatureBadge, ProcessingOverlay } from '../ui/index';
 
 // Import shadcn UI components
-import Button from "../ui/Button";
-import Input from "../ui/Input";
-import { Textarea } from "../ui/textarea";
-import { Checkbox } from "../ui/checkbox";
-import { Select } from "../ui/select";
-import Card from "../ui/Card";
-import { Label } from "../ui/label";
-import { useUserProfile } from "../../hooks/useUserProfile";
+import { useUserProfile } from '../../hooks/useUserProfile';
+import Button from '../ui/Button';
+import Card from '../ui/Card';
+import { Checkbox } from '../ui/checkbox';
+import Input from '../ui/Input';
+import { Label } from '../ui/label';
+import { Select } from '../ui/select';
+import { Textarea } from '../ui/textarea';
 interface FeaturesFormProps {
   initialData?: FeaturesData;
   projectId?: string;
   onSuccess?: (featuresData: FeaturesData) => void;
 }
 
-export default function FeaturesForm({
-  initialData,
-  projectId,
-  onSuccess,
-}: FeaturesFormProps) {
+export default function FeaturesForm({ initialData, projectId, onSuccess }: FeaturesFormProps) {
   const { showToast } = useToast();
   const { hasAIFeatures } = useSubscription();
   const { aiCreditsRemaining } = useUserProfile();
-  const [coreModules, setCoreModules] = useState<FeatureModule[]>(
-    initialData?.coreModules || []
-  );
+  const [coreModules, setCoreModules] = useState<FeatureModule[]>(initialData?.coreModules || []);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   // Add state for form-level error and success messages
-  const [error, setError] = useState<string>("");
+  const [error, setError] = useState<string>('');
+
+  // Add state for tracking unsaved changes
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
+  const [initialCoreModules, setInitialCoreModules] = useState<FeatureModule[]>([]);
 
   // State for feature form - used for both adding and editing
   const [isAddingFeature, setIsAddingFeature] = useState(false);
   const [isEditingFeature, setIsEditingFeature] = useState(false);
-  const [editingFeatureIndex, setEditingFeatureIndex] = useState<number | null>(
-    null
-  );
+  const [editingFeatureIndex, setEditingFeatureIndex] = useState<number | null>(null);
   const [featureForm, setFeatureForm] = useState<{
     name: string;
     description: string;
@@ -69,8 +62,8 @@ export default function FeaturesForm({
     optional?: boolean;
     providers?: string[];
   }>({
-    name: "",
-    description: "",
+    name: '',
+    description: '',
     enabled: true,
     optional: true,
     providers: [],
@@ -81,7 +74,7 @@ export default function FeaturesForm({
   // Add state for AI enhancement
   const [isEnhancing, setIsEnhancing] = useState<boolean>(false);
   const [isAddingFeatures, setIsAddingFeatures] = useState<boolean>(false);
-  const [projectDescription, setProjectDescription] = useState<string>("");
+  const [projectDescription, setProjectDescription] = useState<string>('');
   const [businessGoals, setBusinessGoals] = useState<string[]>([]);
   const [requirements, setRequirements] = useState<string[]>([]);
 
@@ -94,6 +87,17 @@ export default function FeaturesForm({
   //   console.log("FeaturesForm initialData:", initialData);
   // }, [initialData]);
 
+  // Track unsaved changes by comparing current features with initial features
+  useEffect(() => {
+    if (!initialData) return;
+    
+    // Compare current features with initial features
+    const currentFeaturesJson = JSON.stringify(coreModules);
+    const initialFeaturesJson = JSON.stringify(initialCoreModules);
+    
+    setHasUnsavedChanges(currentFeaturesJson !== initialFeaturesJson);
+  }, [coreModules, initialCoreModules, initialData]);
+
   // Effect to update local state when initial data changes
   useEffect(() => {
     if (initialData) {
@@ -101,7 +105,9 @@ export default function FeaturesForm({
       //   "Setting core modules from initialData:",
       //   initialData.coreModules
       // );
-      setCoreModules(initialData.coreModules || []);
+      const initialFeatures = initialData.coreModules || [];
+      setCoreModules(initialFeatures);
+      setInitialCoreModules(JSON.parse(JSON.stringify(initialFeatures))); // Deep copy to avoid reference issues
     }
   }, [initialData]);
 
@@ -113,11 +119,13 @@ export default function FeaturesForm({
         try {
           const featuresData = await featuresService.getFeatures(projectId);
           if (featuresData) {
-            console.log("Fetched features data:", featuresData);
-            setCoreModules(featuresData.coreModules || []);
+            console.log('Fetched features data:', featuresData);
+            const fetchedFeatures = featuresData.coreModules || [];
+            setCoreModules(fetchedFeatures);
+            setInitialCoreModules(JSON.parse(JSON.stringify(fetchedFeatures))); // Deep copy
           }
         } catch (error) {
-          console.error("Error fetching features:", error);
+          console.error('Error fetching features:', error);
         } finally {
           setIsLoading(false);
         }
@@ -136,13 +144,11 @@ export default function FeaturesForm({
       const projectDetails = await projectsService.getProjectById(projectId);
 
       if (projectDetails) {
-        setProjectDescription(projectDetails.description || "");
+        setProjectDescription(projectDetails.description || '');
         setBusinessGoals(projectDetails.business_goals || []);
 
         // Fetch requirements as well
-        const requirementsData = await requirementsService.getRequirements(
-          projectId
-        );
+        const requirementsData = await requirementsService.getRequirements(projectId);
         if (requirementsData) {
           // Combine functional and non-functional requirements
           const allRequirements = [
@@ -153,7 +159,7 @@ export default function FeaturesForm({
         }
       }
     } catch (error) {
-      console.error("Error fetching project details:", error);
+      console.error('Error fetching project details:', error);
     }
   };
 
@@ -173,6 +179,9 @@ export default function FeaturesForm({
       enabled: !updatedModules[index].enabled,
     };
     setCoreModules(updatedModules);
+    
+    // Indicate that changes need to be saved
+    setHasUnsavedChanges(true);
   };
 
   const handleProviderChange = (moduleIndex: number, provider: string) => {
@@ -182,12 +191,12 @@ export default function FeaturesForm({
       providers: [provider], // Replace existing providers with the selected one
     };
     setCoreModules(updatedModules);
+    
+    // Indicate that changes need to be saved
+    setHasUnsavedChanges(true);
   };
 
-  const handleFeatureFormChange = (
-    field: string,
-    value: string | boolean | string[]
-  ) => {
+  const handleFeatureFormChange = (field: string, value: string | boolean | string[]) => {
     setFeatureForm({
       ...featureForm,
       [field]: value,
@@ -197,7 +206,7 @@ export default function FeaturesForm({
     if (errors[field]) {
       setErrors({
         ...errors,
-        [field]: "",
+        [field]: '',
       });
     }
   };
@@ -206,11 +215,11 @@ export default function FeaturesForm({
     const newErrors: Record<string, string> = {};
 
     if (!featureForm.name.trim()) {
-      newErrors.name = "Feature name is required";
+      newErrors.name = 'Feature name is required';
     }
 
     if (!featureForm.description.trim()) {
-      newErrors.description = "Feature description is required";
+      newErrors.description = 'Feature description is required';
     }
 
     setErrors(newErrors);
@@ -229,11 +238,7 @@ export default function FeaturesForm({
     };
 
     // Only add providers if they're being used
-    if (
-      showProviders &&
-      featureForm.providers &&
-      featureForm.providers.length > 0
-    ) {
+    if (showProviders && featureForm.providers && featureForm.providers.length > 0) {
       featureToAdd.providers = featureForm.providers;
     }
 
@@ -243,12 +248,8 @@ export default function FeaturesForm({
     // Reset the form
     resetFeatureForm();
 
-    // Show success toast
-    showToast({
-      title: "Success",
-      description: "New feature added successfully",
-      type: "success",
-    });
+    // Indicate that changes need to be saved instead of showing success toast
+    setHasUnsavedChanges(true);
   };
 
   const handleEditFeature = () => {
@@ -263,11 +264,7 @@ export default function FeaturesForm({
     };
 
     // Only add providers if they're being used
-    if (
-      showProviders &&
-      featureForm.providers &&
-      featureForm.providers.length > 0
-    ) {
+    if (showProviders && featureForm.providers && featureForm.providers.length > 0) {
       updatedFeature.providers = featureForm.providers;
     }
 
@@ -279,12 +276,8 @@ export default function FeaturesForm({
     // Reset the form
     resetFeatureForm();
 
-    // Show success toast
-    showToast({
-      title: "Success",
-      description: "Feature updated successfully",
-      type: "success",
-    });
+    // Indicate that changes need to be saved instead of showing success toast
+    setHasUnsavedChanges(true);
   };
 
   const handleDeleteFeature = (index: number) => {
@@ -292,12 +285,8 @@ export default function FeaturesForm({
     const updatedModules = coreModules.filter((_, i) => i !== index);
     setCoreModules(updatedModules);
 
-    // Show success toast
-    showToast({
-      title: "Success",
-      description: "Feature removed successfully",
-      type: "success",
-    });
+    // Indicate that changes need to be saved instead of showing success toast
+    setHasUnsavedChanges(true);
   };
 
   const handleStartEditFeature = (index: number) => {
@@ -320,8 +309,8 @@ export default function FeaturesForm({
 
   const resetFeatureForm = () => {
     setFeatureForm({
-      name: "",
-      description: "",
+      name: '',
+      description: '',
       enabled: true,
       optional: true,
       providers: [],
@@ -337,46 +326,44 @@ export default function FeaturesForm({
     // Check if user has remaining AI credits
     if (aiCreditsRemaining <= 0) {
       showToast({
-        title: "Insufficient AI Credits",
+        title: 'Insufficient AI Credits',
         description: "You've used all your AI credits for this billing period",
-        type: "warning",
+        type: 'warning',
       });
       return;
     }
 
     if (!hasAIFeatures) {
       showToast({
-        title: "Premium Feature",
-        description: "Upgrade to Premium to use AI-powered features",
-        type: "info",
+        title: 'Premium Feature',
+        description: 'Upgrade to Premium to use AI-powered features',
+        type: 'info',
       });
       return;
     }
 
     if (!projectId) {
       showToast({
-        title: "Error",
-        description: "Project must be saved before features can be enhanced",
-        type: "error",
+        title: 'Error',
+        description: 'Project must be saved before features can be enhanced',
+        type: 'error',
       });
       return;
     }
 
     if (!projectDescription) {
       showToast({
-        title: "Warning",
-        description:
-          "Project description is missing. Features may not be properly enhanced.",
-        type: "warning",
+        title: 'Warning',
+        description: 'Project description is missing. Features may not be properly enhanced.',
+        type: 'warning',
       });
     }
 
     if (requirements.length === 0) {
       showToast({
-        title: "Warning",
-        description:
-          "No requirements found. Features will be based only on project description.",
-        type: "warning",
+        title: 'Warning',
+        description: 'No requirements found. Features will be based only on project description.',
+        type: 'warning',
       });
     }
 
@@ -388,37 +375,36 @@ export default function FeaturesForm({
     // Check if user has remaining AI credits
     if (aiCreditsRemaining <= 0) {
       showToast({
-        title: "Insufficient AI Credits",
+        title: 'Insufficient AI Credits',
         description: "You've used all your AI credits for this billing period",
-        type: "warning",
+        type: 'warning',
       });
       return;
     }
 
     if (!hasAIFeatures) {
       showToast({
-        title: "Premium Feature",
-        description: "Upgrade to Premium to use AI-powered features",
-        type: "info",
+        title: 'Premium Feature',
+        description: 'Upgrade to Premium to use AI-powered features',
+        type: 'info',
       });
       return;
     }
 
     if (!projectId) {
       showToast({
-        title: "Error",
-        description: "Project must be saved before features can be enhanced",
-        type: "error",
+        title: 'Error',
+        description: 'Project must be saved before features can be enhanced',
+        type: 'error',
       });
       return;
     }
 
     if (!projectDescription) {
       showToast({
-        title: "Warning",
-        description:
-          "Project description is missing. Features may not be properly generated.",
-        type: "warning",
+        title: 'Warning',
+        description: 'Project description is missing. Features may not be properly generated.',
+        type: 'warning',
       });
     }
 
@@ -428,12 +414,12 @@ export default function FeaturesForm({
   // Modified function to enhance features using AI (replace existing features)
   const enhanceFeatures = async (additionalInstructions?: string) => {
     setIsEnhancing(true);
-    setError("");
+    setError('');
 
     try {
       // Continue with the rest of the function...
-      console.log("Enhancing features with AI...");
-      console.log("Core modules:", coreModules);
+      console.log('Enhancing features with AI...');
+      console.log('Core modules:', coreModules);
       const enhancedFeatures = await aiService.enhanceFeatures(
         projectDescription,
         businessGoals,
@@ -450,23 +436,23 @@ export default function FeaturesForm({
         // For now, we'll focus on core modules
 
         showToast({
-          title: "Success",
-          description: "Features enhanced successfully",
-          type: "success",
+          title: 'Success',
+          description: 'Features enhanced successfully',
+          type: 'success',
         });
       } else {
         showToast({
-          title: "Warning",
-          description: "No enhanced features returned",
-          type: "warning",
+          title: 'Warning',
+          description: 'No enhanced features returned',
+          type: 'warning',
         });
       }
     } catch (error) {
-      console.error("Error enhancing features:", error);
+      console.error('Error enhancing features:', error);
       showToast({
-        title: "Error",
-        description: "Failed to enhance features",
-        type: "error",
+        title: 'Error',
+        description: 'Failed to enhance features',
+        type: 'error',
       });
     } finally {
       setIsEnhancing(false);
@@ -476,12 +462,12 @@ export default function FeaturesForm({
   // Modified function to add AI-generated features without replacing existing ones
   const addAIFeatures = async (additionalInstructions?: string) => {
     setIsAddingFeatures(true);
-    setError("");
+    setError('');
 
     try {
       // Continue with the rest of the function...
-      console.log("Adding AI features...");
-      console.log("Core modules:", coreModules);
+      console.log('Adding AI features...');
+      console.log('Core modules:', coreModules);
       const enhancedFeatures = await aiService.enhanceFeatures(
         projectDescription,
         businessGoals,
@@ -495,23 +481,23 @@ export default function FeaturesForm({
         setCoreModules([...coreModules, ...enhancedFeatures.coreModules]);
 
         showToast({
-          title: "Success",
+          title: 'Success',
           description: `Added ${enhancedFeatures.coreModules.length} new features`,
-          type: "success",
+          type: 'success',
         });
       } else {
         showToast({
-          title: "Warning",
-          description: "No new features generated",
-          type: "warning",
+          title: 'Warning',
+          description: 'No new features generated',
+          type: 'warning',
         });
       }
     } catch (error) {
-      console.error("Error adding AI features:", error);
+      console.error('Error adding AI features:', error);
       showToast({
-        title: "Error",
-        description: "Failed to generate new features",
-        type: "error",
+        title: 'Error',
+        description: 'Failed to generate new features',
+        type: 'error',
       });
     } finally {
       setIsAddingFeatures(false);
@@ -522,14 +508,14 @@ export default function FeaturesForm({
     e.preventDefault();
 
     // Clear previous messages
-    setError("");
+    setError('');
 
     if (!projectId) {
-      const errorMessage = "Project must be saved before features can be saved";
+      const errorMessage = 'Project must be saved before features can be saved';
       showToast({
-        title: "Error",
+        title: 'Error',
         description: errorMessage,
-        type: "error",
+        type: 'error',
       });
       setError(errorMessage);
       return;
@@ -545,34 +531,38 @@ export default function FeaturesForm({
 
       if (result) {
         showToast({
-          title: "Success",
-          description: "Features saved successfully",
-          type: "success",
+          title: 'Success',
+          description: 'Features saved successfully',
+          type: 'success',
         });
+        
+        // Update initial features to match current features, resetting unsaved changes
+        setInitialCoreModules(JSON.parse(JSON.stringify(coreModules)));
+        setHasUnsavedChanges(false);
 
         if (onSuccess) {
           onSuccess(result);
         }
       } else {
-        const errorMessage = "Failed to save features";
+        const errorMessage = 'Failed to save features';
         showToast({
-          title: "Error",
+          title: 'Error',
           description: errorMessage,
-          type: "error",
+          type: 'error',
         });
         setError(errorMessage);
-        setTimeout(() => setError(""), 5000);
+        setTimeout(() => setError(''), 5000);
       }
     } catch (error) {
-      console.error("Error saving features:", error);
-      const errorMessage = "An unexpected error occurred";
+      console.error('Error saving features:', error);
+      const errorMessage = 'An unexpected error occurred';
       showToast({
-        title: "Error",
+        title: 'Error',
         description: errorMessage,
-        type: "error",
+        type: 'error',
       });
       setError(errorMessage);
-      setTimeout(() => setError(""), 5000);
+      setTimeout(() => setError(''), 5000);
     } finally {
       setIsSubmitting(false);
     }
@@ -586,31 +576,25 @@ export default function FeaturesForm({
   // Helper to get the appropriate message for the overlay
   const getEnhancementMessage = () => {
     if (isEnhancing) {
-      return "AI is analyzing your project to enhance all features. Please wait...";
+      return 'AI is analyzing your project to enhance all features. Please wait...';
     }
     if (isAddingFeatures) {
-      return "AI is generating new features based on your project requirements. Please wait...";
+      return 'AI is generating new features based on your project requirements. Please wait...';
     }
-    return "AI enhancement in progress...";
+    return 'AI enhancement in progress...';
   };
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <Loader2 className="h-6 w-6 text-primary-600 animate-spin mr-3" />
-        <span className="text-slate-600 dark:text-slate-300">
-          Loading features...
-        </span>
+        <Loader2 className="mr-3 h-6 w-6 animate-spin text-primary-600" />
+        <span className="text-slate-600 dark:text-slate-300">Loading features...</span>
       </div>
     );
   }
 
   return (
-    <form
-      id="features-form"
-      onSubmit={handleSubmit}
-      className="space-y-8 relative"
-    >
+    <form id="features-form" onSubmit={handleSubmit} className="relative space-y-8">
       {/* Processing Overlay */}
       <ProcessingOverlay
         isVisible={isAnyEnhancementInProgress()}
@@ -639,39 +623,44 @@ export default function FeaturesForm({
 
       {/* Error Message */}
       {error && (
-        <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-md mb-4">
+        <div className="mb-4 rounded-md bg-red-50 p-3 text-red-600 dark:bg-red-900/20 dark:text-red-400">
           {error}
+        </div>
+      )}
+      
+      {/* Unsaved Changes Indicator */}
+      {hasUnsavedChanges && (
+        <div className="mb-4 flex items-center justify-between rounded-md bg-amber-50 p-3 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400">
+          <span>You have unsaved changes. Don't forget to save your features.</span>
         </div>
       )}
 
       <div className="space-y-6">
         <div>
-          <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-4">
+          <h2 className="mb-4 text-xl font-semibold text-slate-800 dark:text-slate-100">
             Features & Modules
           </h2>
-          <p className="text-slate-600 dark:text-slate-400 mb-6">
+          <p className="mb-6 text-slate-600 dark:text-slate-400">
             Define the features and modules to include in your project.
           </p>
         </div>
 
         {/* AI Enhancement Buttons */}
-        <div className="flex justify-end mb-4">
-          <div className="flex justify-end items-center gap-3 mb-4">
+        <div className="mb-4 flex justify-end">
+          <div className="mb-4 flex items-center justify-end gap-3">
             {!hasAIFeatures && <PremiumFeatureBadge />}
             <Button
               type="button"
               onClick={openAddModal}
-              disabled={
-                isAddingFeatures || isEnhancing || !projectId || !hasAIFeatures
-              }
-              variant={hasAIFeatures ? "outline" : "ghost"}
-              className={`flex items-center gap-2 relative ${
-                !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
+              disabled={isAddingFeatures || isEnhancing || !projectId || !hasAIFeatures}
+              variant={hasAIFeatures ? 'outline' : 'ghost'}
+              className={`relative flex items-center gap-2 ${
+                !hasAIFeatures ? 'cursor-not-allowed opacity-50' : ''
               }`}
               title={
                 hasAIFeatures
-                  ? "Generate new features to complement existing ones"
-                  : "Upgrade to Premium to use AI-powered features"
+                  ? 'Generate new features to complement existing ones'
+                  : 'Upgrade to Premium to use AI-powered features'
               }
             >
               {isAddingFeatures ? (
@@ -681,11 +670,7 @@ export default function FeaturesForm({
                 </>
               ) : (
                 <>
-                  {hasAIFeatures ? (
-                    <Sparkles className="h-4 w-4" />
-                  ) : (
-                    <Lock className="h-4 w-4" />
-                  )}
+                  {hasAIFeatures ? <Sparkles className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
                   <span>Add AI Features</span>
                 </>
               )}
@@ -700,14 +685,14 @@ export default function FeaturesForm({
                 !hasAIFeatures ||
                 coreModules.length === 0
               }
-              variant={hasAIFeatures ? "outline" : "ghost"}
-              className={`flex items-center gap-2 relative ${
-                !hasAIFeatures ? "opacity-50 cursor-not-allowed" : ""
+              variant={hasAIFeatures ? 'outline' : 'ghost'}
+              className={`relative flex items-center gap-2 ${
+                !hasAIFeatures ? 'cursor-not-allowed opacity-50' : ''
               }`}
               title={
                 hasAIFeatures
-                  ? "Replace all features with enhanced versions"
-                  : "Upgrade to Premium to use AI-powered features"
+                  ? 'Replace all features with enhanced versions'
+                  : 'Upgrade to Premium to use AI-powered features'
               }
             >
               {isEnhancing ? (
@@ -717,11 +702,7 @@ export default function FeaturesForm({
                 </>
               ) : (
                 <>
-                  {hasAIFeatures ? (
-                    <RefreshCw className="h-4 w-4" />
-                  ) : (
-                    <Lock className="h-4 w-4" />
-                  )}
+                  {hasAIFeatures ? <RefreshCw className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
                   <span>Replace All</span>
                 </>
               )}
@@ -746,11 +727,9 @@ export default function FeaturesForm({
 
         {/* Feature form for adding new features only */}
         {isAddingFeature && (
-          <Card className="bg-slate-50 dark:bg-slate-700/30 p-4 mb-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="font-medium text-slate-800 dark:text-slate-100">
-                Add New Feature
-              </h3>
+          <Card className="mb-6 bg-slate-50 p-4 dark:bg-slate-700/30">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="font-medium text-slate-800 dark:text-slate-100">Add New Feature</h3>
               <button
                 type="button"
                 onClick={resetFeatureForm}
@@ -770,15 +749,11 @@ export default function FeaturesForm({
                   id="feature-name"
                   type="text"
                   value={featureForm.name}
-                  onChange={(e) =>
-                    handleFeatureFormChange("name", e.target.value)
-                  }
+                  onChange={(e) => handleFeatureFormChange('name', e.target.value)}
                   placeholder="e.g., User Authentication"
-                  className={errors.name ? "border-red-500" : ""}
+                  className={errors.name ? 'border-red-500' : ''}
                 />
-                {errors.name && (
-                  <p className="mt-1 text-sm text-red-500">{errors.name}</p>
-                )}
+                {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name}</p>}
               </div>
 
               {/* Feature description */}
@@ -789,29 +764,23 @@ export default function FeaturesForm({
                 <Textarea
                   id="feature-description"
                   value={featureForm.description}
-                  onChange={(e) =>
-                    handleFeatureFormChange("description", e.target.value)
-                  }
+                  onChange={(e) => handleFeatureFormChange('description', e.target.value)}
                   rows={3}
                   placeholder="Describe what this feature does"
-                  className={errors.description ? "border-red-500" : ""}
+                  className={errors.description ? 'border-red-500' : ''}
                 />
                 {errors.description && (
-                  <p className="mt-1 text-sm text-red-500">
-                    {errors.description}
-                  </p>
+                  <p className="mt-1 text-sm text-red-500">{errors.description}</p>
                 )}
               </div>
 
               {/* Feature options */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
                   <Checkbox
                     id="feature-enabled"
                     checked={featureForm.enabled}
-                    onCheckedChange={(checked) =>
-                      handleFeatureFormChange("enabled", checked)
-                    }
+                    onCheckedChange={(checked) => handleFeatureFormChange('enabled', checked)}
                     label="Enabled by default"
                   />
                 </div>
@@ -820,9 +789,7 @@ export default function FeaturesForm({
                   <Checkbox
                     id="feature-optional"
                     checked={featureForm.optional}
-                    onCheckedChange={(checked) =>
-                      handleFeatureFormChange("optional", checked)
-                    }
+                    onCheckedChange={(checked) => handleFeatureFormChange('optional', checked)}
                     label="Optional (not required for implementation)"
                   />
                 </div>
@@ -843,15 +810,9 @@ export default function FeaturesForm({
                   <div className="mt-2">
                     <Select
                       label="Available Providers"
-                      value={
-                        (featureForm.providers && featureForm.providers[0]) ||
-                        ""
-                      }
+                      value={(featureForm.providers && featureForm.providers[0]) || ''}
                       onChange={(e) =>
-                        handleFeatureFormChange(
-                          "providers",
-                          e.target.value ? [e.target.value] : []
-                        )
+                        handleFeatureFormChange('providers', e.target.value ? [e.target.value] : [])
                       }
                     >
                       <option value="">Select provider...</option>
@@ -868,19 +829,11 @@ export default function FeaturesForm({
               </div>
 
               {/* Action buttons */}
-              <div className="flex justify-end space-x-2 mt-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={resetFeatureForm}
-                >
+              <div className="mt-2 flex justify-end space-x-2">
+                <Button type="button" variant="outline" onClick={resetFeatureForm}>
                   Cancel
                 </Button>
-                <Button
-                  type="button"
-                  variant="default"
-                  onClick={handleAddFeature}
-                >
+                <Button type="button" variant="default" onClick={handleAddFeature}>
                   Add Feature
                 </Button>
               </div>
@@ -889,7 +842,7 @@ export default function FeaturesForm({
         )}
 
         {coreModules.length === 0 && !isAddingFeature && !isEditingFeature ? (
-          <Card className="bg-slate-50 dark:bg-slate-800 text-center">
+          <Card className="bg-slate-50 text-center dark:bg-slate-800">
             <p className="text-slate-600 dark:text-slate-400">
               No features available. Add your first feature to get started.
             </p>
@@ -898,13 +851,13 @@ export default function FeaturesForm({
           <div className="space-y-4">
             {coreModules.map((module, index) => (
               <div key={index}>
-                <Card className="p-4 bg-white dark:bg-slate-800">
-                  <div className="flex justify-between items-start mb-2">
+                <Card className="bg-white p-4 dark:bg-slate-800">
+                  <div className="mb-2 flex items-start justify-between">
                     <div>
                       <h3 className="font-medium text-slate-800 dark:text-slate-100">
                         {module.name}
                       </h3>
-                      <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+                      <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
                         {module.description}
                       </p>
                     </div>
@@ -931,62 +884,51 @@ export default function FeaturesForm({
                         disabled={!module.optional}
                         className={`p-1 ${
                           !module.optional
-                            ? "cursor-not-allowed text-slate-400 dark:text-slate-600"
-                            : "cursor-pointer"
+                            ? 'cursor-not-allowed text-slate-400 dark:text-slate-600'
+                            : 'cursor-pointer'
                         }`}
-                        title={
-                          module.optional
-                            ? "Toggle feature"
-                            : "This feature is required"
-                        }
+                        title={module.optional ? 'Toggle feature' : 'This feature is required'}
                       >
                         {module.enabled ? (
                           <ToggleRight size={24} className="text-primary-600" />
                         ) : (
-                          <ToggleLeft
-                            size={24}
-                            className="text-slate-400 dark:text-slate-500"
-                          />
+                          <ToggleLeft size={24} className="text-slate-400 dark:text-slate-500" />
                         )}
                       </button>
                     </div>
                   </div>
 
                   {!module.optional && (
-                    <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mb-3">
+                    <div className="mb-3 flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
                       <Info size={12} />
                       <span>This feature is required for implementation</span>
                     </div>
                   )}
 
-                  {module.enabled &&
-                    module.providers &&
-                    module.providers.length > 0 && (
-                      <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700">
-                        <Select
-                          label="Provider"
-                          value={module.providers[0] || ""}
-                          onChange={(e) =>
-                            handleProviderChange(index, e.target.value)
-                          }
-                        >
-                          <option value="">Select provider...</option>
-                          <option value="Stripe">Stripe</option>
-                          <option value="PayPal">PayPal</option>
-                          <option value="AWS">AWS</option>
-                          <option value="Azure">Azure</option>
-                          <option value="GCP">Google Cloud</option>
-                          <option value="Firebase">Firebase</option>
-                          <option value="Custom">Custom Implementation</option>
-                        </Select>
-                      </div>
-                    )}
+                  {module.enabled && module.providers && module.providers.length > 0 && (
+                    <div className="mt-3 border-t border-slate-100 pt-3 dark:border-slate-700">
+                      <Select
+                        label="Provider"
+                        value={module.providers[0] || ''}
+                        onChange={(e) => handleProviderChange(index, e.target.value)}
+                      >
+                        <option value="">Select provider...</option>
+                        <option value="Stripe">Stripe</option>
+                        <option value="PayPal">PayPal</option>
+                        <option value="AWS">AWS</option>
+                        <option value="Azure">Azure</option>
+                        <option value="GCP">Google Cloud</option>
+                        <option value="Firebase">Firebase</option>
+                        <option value="Custom">Custom Implementation</option>
+                      </Select>
+                    </div>
+                  )}
                 </Card>
 
                 {/* Inline edit form */}
                 {isEditingFeature && editingFeatureIndex === index && (
-                  <Card className="bg-slate-50 dark:bg-slate-700/30 p-4 mt-2 mb-4 border-l-4 border-primary-500">
-                    <div className="flex justify-between items-center mb-4">
+                  <Card className="mb-4 mt-2 border-l-4 border-primary-500 bg-slate-50 p-4 dark:bg-slate-700/30">
+                    <div className="mb-4 flex items-center justify-between">
                       <h3 className="font-medium text-slate-800 dark:text-slate-100">
                         Edit Feature
                       </h3>
@@ -1009,17 +951,11 @@ export default function FeaturesForm({
                           id={`feature-name-${index}`}
                           type="text"
                           value={featureForm.name}
-                          onChange={(e) =>
-                            handleFeatureFormChange("name", e.target.value)
-                          }
+                          onChange={(e) => handleFeatureFormChange('name', e.target.value)}
                           placeholder="e.g., User Authentication"
-                          className={errors.name ? "border-red-500" : ""}
+                          className={errors.name ? 'border-red-500' : ''}
                         />
-                        {errors.name && (
-                          <p className="mt-1 text-sm text-red-500">
-                            {errors.name}
-                          </p>
-                        )}
+                        {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name}</p>}
                       </div>
 
                       {/* Feature description */}
@@ -1030,31 +966,24 @@ export default function FeaturesForm({
                         <Textarea
                           id={`feature-description-${index}`}
                           value={featureForm.description}
-                          onChange={(e) =>
-                            handleFeatureFormChange(
-                              "description",
-                              e.target.value
-                            )
-                          }
+                          onChange={(e) => handleFeatureFormChange('description', e.target.value)}
                           rows={3}
                           placeholder="Describe what this feature does"
-                          className={errors.description ? "border-red-500" : ""}
+                          className={errors.description ? 'border-red-500' : ''}
                         />
                         {errors.description && (
-                          <p className="mt-1 text-sm text-red-500">
-                            {errors.description}
-                          </p>
+                          <p className="mt-1 text-sm text-red-500">{errors.description}</p>
                         )}
                       </div>
 
                       {/* Feature options */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                         <div>
                           <Checkbox
                             id={`feature-enabled-${index}`}
                             checked={featureForm.enabled}
                             onCheckedChange={(checked) =>
-                              handleFeatureFormChange("enabled", checked)
+                              handleFeatureFormChange('enabled', checked)
                             }
                             label="Enabled by default"
                           />
@@ -1065,7 +994,7 @@ export default function FeaturesForm({
                             id={`feature-optional-${index}`}
                             checked={featureForm.optional}
                             onCheckedChange={(checked) =>
-                              handleFeatureFormChange("optional", checked)
+                              handleFeatureFormChange('optional', checked)
                             }
                             label="Optional (not required for implementation)"
                           />
@@ -1078,9 +1007,7 @@ export default function FeaturesForm({
                           <Checkbox
                             id={`has-providers-${index}`}
                             checked={showProviders}
-                            onCheckedChange={(checked) =>
-                              setShowProviders(checked)
-                            }
+                            onCheckedChange={(checked) => setShowProviders(checked)}
                             label="This feature uses external providers"
                           />
                         </div>
@@ -1089,14 +1016,10 @@ export default function FeaturesForm({
                           <div className="mt-2">
                             <Select
                               label="Available Providers"
-                              value={
-                                (featureForm.providers &&
-                                  featureForm.providers[0]) ||
-                                ""
-                              }
+                              value={(featureForm.providers && featureForm.providers[0]) || ''}
                               onChange={(e) =>
                                 handleFeatureFormChange(
-                                  "providers",
+                                  'providers',
                                   e.target.value ? [e.target.value] : []
                                 )
                               }
@@ -1108,28 +1031,18 @@ export default function FeaturesForm({
                               <option value="Azure">Azure</option>
                               <option value="GCP">Google Cloud</option>
                               <option value="Firebase">Firebase</option>
-                              <option value="Custom">
-                                Custom Implementation
-                              </option>
+                              <option value="Custom">Custom Implementation</option>
                             </Select>
                           </div>
                         )}
                       </div>
 
                       {/* Action buttons */}
-                      <div className="flex justify-end space-x-2 mt-2">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={resetFeatureForm}
-                        >
+                      <div className="mt-2 flex justify-end space-x-2">
+                        <Button type="button" variant="outline" onClick={resetFeatureForm}>
                           Cancel
                         </Button>
-                        <Button
-                          type="button"
-                          variant="default"
-                          onClick={handleEditFeature}
-                        >
+                        <Button type="button" variant="default" onClick={handleEditFeature}>
                           Save Changes
                         </Button>
                       </div>
@@ -1145,15 +1058,26 @@ export default function FeaturesForm({
       <div className="mt-6 flex justify-end">
         <Button
           type="submit"
-          disabled={isSubmitting || !projectId}
-          variant={!projectId || isSubmitting ? "outline" : "default"}
+          disabled={isSubmitting || !projectId || !hasUnsavedChanges}
+          variant={!projectId || isSubmitting || !hasUnsavedChanges ? 'outline' : 'default'}
           className={
-            !projectId || isSubmitting
-              ? "bg-gray-400 text-white hover:bg-gray-400"
-              : ""
+            !projectId || isSubmitting || !hasUnsavedChanges
+              ? 'cursor-not-allowed opacity-50'
+              : 'animate-pulse'
           }
         >
-          {isSubmitting ? "Saving..." : "Save Features"}
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Saving...
+            </>
+          ) : (
+            <>
+              {hasUnsavedChanges && <Save className="mr-2 h-4 w-4" />}
+              Save Features
+              {hasUnsavedChanges && '*'}
+            </>
+          )}
         </Button>
       </div>
     </form>

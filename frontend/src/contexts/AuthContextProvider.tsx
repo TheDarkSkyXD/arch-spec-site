@@ -1,8 +1,8 @@
-import { ReactNode, useState, useEffect } from "react";
-import * as authService from "../services/auth";
-import { userApi } from "../api/userApi";
-import { AuthContext } from "./AuthContextDefinition";
-import { User } from "./AuthTypes";
+import { ReactNode, useState, useEffect } from 'react';
+import * as authService from '../services/auth';
+import { userApi } from '../api/userApi';
+import { AuthContext } from './AuthContextDefinition';
+import { User } from './AuthTypes';
 
 // Props for the AuthProvider component
 interface AuthProviderProps {
@@ -33,9 +33,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       return { ...user, profile };
     } catch (error) {
       logMessage(
-        `Error loading user profile: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`,
+        `Error loading user profile: ${error instanceof Error ? error.message : 'Unknown error'}`,
         true
       );
       return user;
@@ -60,9 +58,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         }
       } catch (error) {
         logMessage(
-          `Auth state change error: ${
-            error instanceof Error ? error.message : "Unknown error"
-          }`,
+          `Auth state change error: ${error instanceof Error ? error.message : 'Unknown error'}`,
           true
         );
         if (mounted) {
@@ -102,7 +98,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       } catch (error) {
         logMessage(
           `Error loading profile after sign in: ${
-            error instanceof Error ? error.message : "Unknown error"
+            error instanceof Error ? error.message : 'Unknown error'
           }`,
           true
         );
@@ -110,9 +106,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       }
     } catch (error) {
       logMessage(
-        `Sign in error: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`,
+        `Sign in error: ${error instanceof Error ? error.message : 'Unknown error'}`,
         true
       );
       throw error;
@@ -137,7 +131,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       } catch (error) {
         logMessage(
           `Error loading profile after Google sign-in: ${
-            error instanceof Error ? error.message : "Unknown error"
+            error instanceof Error ? error.message : 'Unknown error'
           }`,
           true
         );
@@ -145,9 +139,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       }
     } catch (error) {
       logMessage(
-        `Google sign in error: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`,
+        `Google sign in error: ${error instanceof Error ? error.message : 'Unknown error'}`,
         true
       );
       throw error;
@@ -172,7 +164,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       } catch (error) {
         logMessage(
           `Error loading profile after GitHub sign-in: ${
-            error instanceof Error ? error.message : "Unknown error"
+            error instanceof Error ? error.message : 'Unknown error'
           }`,
           true
         );
@@ -180,9 +172,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       }
     } catch (error) {
       logMessage(
-        `GitHub sign in error: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`,
+        `GitHub sign in error: ${error instanceof Error ? error.message : 'Unknown error'}`,
         true
       );
       throw error;
@@ -207,7 +197,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       } catch (error) {
         logMessage(
           `Error loading profile after sign up: ${
-            error instanceof Error ? error.message : "Unknown error"
+            error instanceof Error ? error.message : 'Unknown error'
           }`,
           true
         );
@@ -215,9 +205,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       }
     } catch (error) {
       logMessage(
-        `Sign up error: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`,
+        `Sign up error: ${error instanceof Error ? error.message : 'Unknown error'}`,
         true
       );
       throw error;
@@ -236,9 +224,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setCurrentUser(null);
     } catch (error) {
       logMessage(
-        `Sign out error: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`,
+        `Sign out error: ${error instanceof Error ? error.message : 'Unknown error'}`,
         true
       );
       throw error;
