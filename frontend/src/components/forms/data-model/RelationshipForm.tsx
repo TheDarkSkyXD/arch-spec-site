@@ -22,7 +22,7 @@ interface RelationshipFormProps {
   editingRelationshipIndex: number | null;
   entities: Entity[];
   relationshipTypes: string[];
-  error: string | null; // eslint-disable-line @typescript-eslint/no-unused-vars
+  // error: string | null; // Commented out unused parameter
 }
 
 const RelationshipForm: React.FC<RelationshipFormProps> = ({
@@ -35,7 +35,7 @@ const RelationshipForm: React.FC<RelationshipFormProps> = ({
   editingRelationshipIndex,
   entities,
   relationshipTypes,
-  error, // eslint-disable-line @typescript-eslint/no-unused-vars
+  // error, // Commented out unused parameter
 }) => {
   if (!isEditingRelationship) return null;
 

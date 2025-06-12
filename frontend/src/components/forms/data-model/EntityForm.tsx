@@ -16,7 +16,7 @@ interface EntityFormProps {
   handleEditEntity: () => void;
   resetEntityForm: () => void;
   editingEntityIndex: number | null;
-  error: string | null; // eslint-disable-line @typescript-eslint/no-unused-vars
+  // error: string | null; // Commented out unused parameter
   // Field related props
   isAddingField: boolean;
   setIsAddingField: React.Dispatch<React.SetStateAction<boolean>>;
@@ -39,7 +39,7 @@ const EntityForm: React.FC<EntityFormProps> = ({
   handleEditEntity,
   resetEntityForm,
   editingEntityIndex,
-  error, // eslint-disable-line @typescript-eslint/no-unused-vars
+  // error, // Commented out unused parameter
   isAddingField,
   setIsAddingField,
   fieldForm,

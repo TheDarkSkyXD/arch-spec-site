@@ -863,7 +863,6 @@ export default function DataModelForm({ initialData, projectId, onSuccess }: Dat
                   handleEditEntity={handleEditEntity}
                   resetEntityForm={resetEntityForm}
                   editingEntityIndex={editingEntityIndex}
-                  error={error}
                   isAddingField={isAddingField}
                   setIsAddingField={setIsAddingField}
                   fieldForm={fieldForm}
@@ -921,7 +920,6 @@ export default function DataModelForm({ initialData, projectId, onSuccess }: Dat
                   editingRelationshipIndex={editingRelationshipIndex}
                   entities={dataModel.entities}
                   relationshipTypes={relationshipTypes}
-                  error={error}
                 />
 
                 {/* List of Relationships */}
